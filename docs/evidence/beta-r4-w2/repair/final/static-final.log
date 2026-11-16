@@ -1,0 +1,33 @@
+# static checks on the committed files: clean checkout of 889e2fe8cdcf6714cfd82c0fd58f439e09e288f5 (status 0 lines), 2026-11-16T17:35:20Z
+## 1. runtime files changed since 7097ac2 (empty = unchanged)
+(end)
+## 2. accepted deploy files changed since #43's head 46f7ff0 (empty = unchanged)
+ deploy/render/render.yaml | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+(end)
+## 3. everything changed since the reviewed candidate b38c892
+ docs/PROGRESS.md                                   |   29 +
+ docs/beta/render-w2.md                             |   54 +-
+ docs/evidence/beta-r4-w2/README.md                 |   28 +-
+ ...o-before-rooms-1-w2-20261116T164948-5f37a5.json | 3928 +++++++++
+ .../beta-r4-w2/repair/dev/repro-before-rooms-1.log |   33 +
+ .../dev/trial-1-w2-20261116T165752-83350c.json     | 8979 ++++++++++++++++++++
+ docs/evidence/beta-r4-w2/repair/dev/trial-1.log    |   35 +
+ .../beta-r4-w2/repair/dev/w2-selftest-dev1.log     |  261 +
+ scripts/beta/render-like-proxy.mjs                 |   25 +-
+ scripts/beta/w2-disk-check.mjs                     |   54 +-
+ scripts/beta/w2-load.mjs                           |  277 +-
+ scripts/beta/w2-selftest.sh                        |   79 +-
+ scripts/beta/w2-verdict-selftest.mjs               |  185 +
+ scripts/beta/w2-verdict.mjs                        |  180 +
+ 14 files changed, 13984 insertions(+), 163 deletions(-)
+## 4. lint and shell syntax
+eslint scripts/beta: exit 0
+shell syntax: ok
+## 5. the repository's vitest suite does not collect the W2 verdict tests
+vitest tests under scripts/beta: 0
+## 6. relative links in the changed documents
+links: 22 missing: 0
+## 7. secret scan of the changes since 46f7ff0 (private keys, age secret keys, access-code assignments, cookie values, Drive links)
+(end of secret scan)
+exit 0

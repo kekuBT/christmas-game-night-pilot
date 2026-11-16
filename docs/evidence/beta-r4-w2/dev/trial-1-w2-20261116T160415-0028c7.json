@@ -1,0 +1,107 @@
+{
+ "tool": "scripts/beta/w2-load.mjs",
+ "toolSha256": "2c6bc1409bf07ef070e15983d2d8cc7271790e38fb775fd84a5371e6f2c0df1e",
+ "node": "v22.23.4",
+ "runId": "20261116T160415-0028c7",
+ "origin": "https://localhost:18443",
+ "startedAt": "2026-11-16T16:04:15.937Z",
+ "params": {
+  "rooms": 2,
+  "players": 10,
+  "notes": 5,
+  "maxMinutes": 20,
+  "ackTimeoutS": 30,
+  "plantLeak": false
+ },
+ "operatorLabels": {
+  "fixture": "local-trial"
+ },
+ "target": {
+  "health": {
+   "status": 502,
+   "body": ""
+  },
+  "revision": null
+ },
+ "rooms": [],
+ "actions": [],
+ "sockets": [],
+ "isolation": {
+  "passiveHits": [],
+  "probes": []
+ },
+ "checks": [],
+ "failures": [
+  "run aborted: preflight: /health answered 502 with revision undefined, not 7097ac2bb062925bb296a129f4771f1e68fd522d"
+ ],
+ "notes": [],
+ "cleanup": "No supported room-deletion path exists in the app (7097ac2): this run deleted nothing. Its rooms stay in the target's throwaway data folder; nothing else was touched.",
+ "finishedAt": "2026-11-16T16:04:16.009Z",
+ "durationS": 0,
+ "summary": {
+  "ready": {
+   "sent": 0,
+   "acknowledged": 0,
+   "rejected": 0,
+   "unacknowledged": 0,
+   "retried": 0,
+   "persisted": null,
+   "ackMedianMs": null,
+   "ackP95Ms": null,
+   "ackMaxMs": null
+  },
+  "answer": {
+   "sent": 0,
+   "acknowledged": 0,
+   "rejected": 0,
+   "unacknowledged": 0,
+   "retried": 0,
+   "persisted": 0,
+   "ackMedianMs": null,
+   "ackP95Ms": null,
+   "ackMaxMs": null
+  },
+  "stroke": {
+   "sent": 0,
+   "acknowledged": 0,
+   "rejected": 0,
+   "unacknowledged": 0,
+   "retried": 0,
+   "persisted": 0,
+   "ackMedianMs": null,
+   "ackP95Ms": null,
+   "ackMaxMs": null
+  },
+  "guess": {
+   "sent": 0,
+   "acknowledged": 0,
+   "rejected": 0,
+   "unacknowledged": 0,
+   "retried": 0,
+   "persisted": 0,
+   "ackMedianMs": null,
+   "ackP95Ms": null,
+   "ackMaxMs": null
+  },
+  "note": {
+   "sent": 0,
+   "acknowledged": 0,
+   "rejected": 0,
+   "unacknowledged": 0,
+   "retried": 0,
+   "persisted": 0,
+   "ackMedianMs": null,
+   "ackP95Ms": null,
+   "ackMaxMs": null
+  },
+  "sockets": {
+   "total": 0,
+   "openAtEnd": 0,
+   "unexpectedCloses": 0,
+   "reconnects": 0,
+   "errors": 0,
+   "messages": 0
+  }
+ },
+ "verdict": "FAILED"
+}

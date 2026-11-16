@@ -15,7 +15,11 @@
 - **Nobody runs two operators at once**, and nobody creates a second service.
 
 ## Before W1 (each must hold, or W1 doesn't start)
-1. **The account:** connected; a **new Hobby workspace** holding nothing else; a payment method; the build pipeline spend limit at its lowest.
+1. **The account:**
+   - connected (done 2026-11-16);
+   - the owner's **existing** workspace, which must still hold nothing else and must be **verified to be on the Hobby plan** (not yet done);
+   - a payment method;
+   - the build pipeline spend limit at its lowest.
 2. **The deploy repository:** private, assembled as in the package README. `artifact/mchezo-7097ac2.tgz` has SHA-256 `a693c5433d8dd8c17368e9c02fd8092b316d67b6e62ac9c0070a60b99c3a5131`.
 3. **The service:** created exactly as in "The exact Render configuration":
    - Starter, 1 instance, the 1 GB disk at `/var/data`, health check `/health`, auto-deploy off, Docker command empty;
@@ -104,12 +108,12 @@ Record every value tried and both results. The local self-test shows why both te
 - **Any failure:** what, when, the raw output, and the decision taken (stop, or the count change).
 
 **W1 passes when** every step above passed with the final proxy count, and the count is recorded with both tests' results.
-- **Only then does W2 start.** W2–W8 need their own windows.
+- **Only then does W2 start** ([render-w2.md](render-w2.md)). W2–W8 need their own windows.
 - **Real family data needs W1–W8 and the go/no-go.**
 
 ## Still pending, and not part of W1
 - **Backups:**
-  - the backup destination (Google Drive is proposed for the encrypted archives; not selected, and no upload authorized);
+  - **the backup destination:** selected by the owner (a private, off-provider folder), with access and owner-only sharing verified by ChatGPT. **No archive has been transferred yet.** The transfer, the receipt and the restore with throwaway data are W5 and W6.
   - the owner's `age` key pair, made and kept by the owner, with `CGN_BACKUP_RECIPIENT` set after that;
   - W5 (backup and receipt) and W6 (restore).
 - **Real devices and networks:** W3 (Wi-Fi to mobile data) and W8 (iPhone and Android over the public URL).

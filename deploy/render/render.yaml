@@ -1,6 +1,7 @@
 # CANDIDATE Render Blueprint for the approved setup (Beta R4, handoff 6919813048). NOT APPLIED. It states, field by field,
 # the configuration in README.md ("The exact Render configuration"); the dashboard route in that table is equivalent.
-# If it is used: in the NEW dedicated Hobby workspace only, with auto-sync OFF, from the private deploy repository whose
+# If it is used: in the owner's existing, otherwise-empty workspace once its plan is verified as Hobby (it must hold
+# nothing else), with auto-sync OFF, from the private deploy repository whose
 # root is this folder plus artifact/mchezo-7097ac2.tgz. Field names are from render.com/docs/blueprint-spec, read
 # 2026-11-16 (see docs/evidence/beta-r4-render-package/render-fetch-log.txt).
 # Never put a secret here: the access code and the origin are "sync: false" (entered in the dashboard by the owner).

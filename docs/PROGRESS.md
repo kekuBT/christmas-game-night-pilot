@@ -3434,3 +3434,118 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
   - the real proxy count;
   - Render's build-host architecture (the age pin assumes `amd64`);
   - Docker Hub pulls during Render's build.
+
+## Beta R4: the package accepted; W2 preparation and the operator documents (review 6921505856; #44)
+- **Review 6921505856:** accepted #43's Render package within its scope. It is not a target-host or launch clearance.
+  - ChatGPT independently ran the production-pin gate on the ORIGINAL audited archive (`a693c543…`) and passed it.
+  - It also ran the W1 boundary and reconnect checks locally, and a private Firefox journey.
+  - **The same comment's handoff:** W2 preparation and document reconciliation, as one stacked PR. Acknowledged in 6921534073, at 10:58 a.m. ET, with a 3-hour estimate. The PR is **#44**, on #43 at `46f7ff0`.
+- **Done:**
+  - **The documents (`be5be26`):** the package README, `render.yaml`'s header, `render-w1.md` and the proposal's current status now say:
+    - the owner's **existing**, otherwise-empty workspace, with its Hobby plan still to verify;
+    - the **selected** private off-provider destination, with access verified;
+    - transfer, receipt, restore and the owner's `age` key still pending.
+
+    Revision 5's text is kept as history.
+  - **`scripts/beta/w2-load.mjs`:** the W2 workload against an operator-supplied `https://` target.
+    - **The load:** 2 rooms × 10 players + a TV each. Trivia, then Draw & Guess with paced strokes, plus Memory Book notes.
+    - **The measurements:** counts sent, acknowledged, rejected, unacknowledged, retried and persisted (read back); acknowledgement median, p95 and max.
+    - **Room isolation:** canary and name scans, and cross-room token probes.
+    - **Also:** socket counts, the target's identifiers, and redacted evidence.
+    - **The run fails** on a missing acknowledgement, a missing read-back, a leak, or a target failure.
+    - **Nothing is deleted:** the app has no supported room-deletion path.
+  - **`scripts/beta/w2-disk-check.mjs`:** local only.
+  - **`scripts/beta/w2-selftest.sh`:** V1–V4.
+  - **The proxy's fault options:** off by default.
+  - **`docs/beta/render-w2.md`:** the steps, the checks, and the gap analysis.
+- **Evidence:** `docs/evidence/beta-r4-w2/`.
+  - **Trials:** 4. Trial 1 correctly failed when the local target was down. Trials 2 and 3 failed on my own read-back bugs: the Trivia answers' location, and per-room player ids. Trial 4 passed.
+  - **Self-test 1:** 6/6.
+- **Not done:** no runtime change (`7097ac2`), no deploy-script change, no account operation, no target-host run, no Render metrics, no full gate rerun.
+- **Final runs** on a clean checkout of the tested commit `b460c15c6e63ca928394b504dfeaafca6c2a2ad8`: the W2 self-test **PASSED, 6/6**; the W1 self-test **PASSED, 18/18**; the static checks passed (no runtime or deploy-file change).
+- **Next:** ChatGPT's review of #44. W2 on Render follows W1, with ChatGPT.
+- **Risk:**
+  - Render's latency and limits are unknown.
+  - The run's rooms stay in the throwaway folder (no deletion path).
+  - Persisted means read back from the running server; a restart is W4.
+
+## Beta R4: the W2 checker repaired (review 6922818863; #44)
+- **Review 6922818863:** the W2 runner needs repair before acceptance. Three blocking findings, all in the checker, none in the app:
+  1. **Transport errors counted as refusals.** A probe that got 503/502/timeout or 500/503/error counted as "refused".
+  2. **The workload wasn't enforced.** `--rooms 1` printed `W2 PASSED`, with both isolation checks passing on zero pairs.
+  3. **The drawing was compared by count only.** Substituted or repeated pieces of the same count passed.
+- **Acknowledged** in 6922848709, at 11:46 a.m. ET, with a 1 h 45 min estimate.
+- **Reproduced first,** on the unchanged `b38c892` tool: `--rooms 1` exited 0 with `W2 PASSED`.
+- **Done:**
+  - **`scripts/beta/w2-verdict.mjs` (new):** the verdict as pure functions, shared by the run, the disk check and the tests.
+    - A probe leg counts as refused only on the app's own denial: 401 `{"error":"Session token required"}`, and the socket closed 1008 with that reason before any message. Anything else is inconclusive, and the run fails.
+    - The workload is fixed and enforced per room: 2 × (10 + TV), 10 questions, 6 turns, and exactly 20/100/48/54/5 Ready taps, answers, stroke messages, guesses and notes. Every socket must see its own room's projection, and both probe directions must be present.
+    - A malformed success response isn't an acknowledgement.
+    - The drawing is matched batch by batch: stroke ids in order, the digest of the normalized pieces, no duplicates, nothing nobody sent.
+  - **`scripts/beta/w2-verdict-selftest.mjs` (new):** 37 focused `node:test` cases. It is not named `*.test.mjs`, so vitest doesn't collect it.
+  - **`scripts/beta/w2-load.mjs`:**
+    - `--rooms`, `--players`, `--notes`, `--expect-revision` and unknown options are refused (exit 2).
+    - The pieces are distinct per room, turn and message.
+    - The probes never abort the run and record each leg exactly.
+    - Self-test options never print `W2 PASSED` (at best exit 3).
+  - **`scripts/beta/w2-disk-check.mjs`:** item by item, with the same batch matcher.
+  - **`scripts/beta/render-like-proxy.mjs`:** `--mutate-every` and `--empty-ack-every` (both off by default). A body it rewrites gets the right content length.
+  - **`scripts/beta/w2-selftest.sh`:** adds U and V5–V9:
+    - V5: the right count with the wrong pieces (run and disk);
+    - V6 and V7: faulted probes (503, then a closed port);
+    - V8: a reduced or unknown option;
+    - V9: an empty 200 `{}` as the acknowledgement.
+  - **`docs/beta/render-w2.md`:** the checks and the wording now match what is checked.
+- **A second commit (`889e2fe`)**, after the first final run on `e312fab` (W2 12/12, W1 18/18, static passed): that run's V2 showed proxy 502s counted as "malformed replies 189". "Malformed" now counts only a success status without a well-formed acknowledgement, with `--empty-ack-every` in the proxy and V9 in the self-test.
+- **Final runs** on a clean checkout of the tested commit `889e2fe8cdcf6714cfd82c0fd58f439e09e288f5`:
+  - the W2 self-test **PASSED, 13/13**;
+  - the W1 self-test **PASSED, 18/18**;
+  - the static checks passed: no runtime change; no deploy-file change except `render.yaml`'s already-reviewed comment line from `be5be26`; 0 vitest tests under `scripts/beta`; links and the secret scan clean.
+- **Evidence:** `docs/evidence/beta-r4-w2/README.md` (the repair section) and `docs/evidence/beta-r4-w2/repair/`.
+- **Not done:** no runtime change (`7097ac2`), no deploy-file change (`46f7ff0`), no account operation, no target-host run, no Render metrics.
+- **Next:** ChatGPT's confirmation of the repair. W2 on Render follows W1, with ChatGPT.
+- **Risk:**
+  - The expected counts and the denial text are those of `7097ac2`. A new release that changes them makes W2 fail closed until `W2_SHAPE` or `APP_DENIAL` is updated.
+  - Everything here is local and synthetic, not Render.
+
+## Beta R4: the W2 runner stays on its one origin (review 6924352924; #44)
+- **Review 6924352924:** the three earlier findings are resolved on the local evidence. One blocking finding remained: the runner's test-only options could send the authenticated probes to another origin (`--self-test-probe-origin`), or make it write an extra note (`--plant-leak`), before the final guard.
+- **Acknowledged** in 6924388254, at 12:49 p.m. ET, with a 1 h 15 min estimate.
+- **Done:**
+  - **`scripts/beta/w2-load.mjs`: no fault options.**
+    - It talks only to `--origin`.
+    - `redirect: "manual"` is on every fetch, preflight included, and `followRedirects: false` on every socket.
+    - The whole option check runs before the code file is read and before any network activity: an `http://` or invalid origin and a non-positive limit also exit 2.
+  - **`scripts/beta/render-like-proxy.mjs`:** `--fault-cross-room 503|reset` (the proxy learns each token's room and faults any cross-room request or handshake) and `--plant-leak` (the proxy itself saves one note carrying the other room's canary). Both are off by default.
+  - **`scripts/beta/w2-args-selftest.mjs` (new; `node:test`, no Docker):**
+    - 11 refused-option cases: each exits 2, reads no code file, writes no evidence, and causes 0 connections at the origin and at a second listener;
+    - a control;
+    - HTTP and socket redirects to a second origin are not followed (0 connections there).
+  - **What it shows on the old runner (`403b53e`):** 4 of the 14 tests fail.
+  - **`scripts/beta/w2-selftest.sh`:** V4, V6 and V7 now use the proxy's faults; V8 is the new regression.
+- **My own bug, caught by the dev run:** rewriting the proxy's response handler dropped the status-and-headers line, so every run aborted at preflight. Restored and rerun.
+- **Final 1, on `8a39295` (superseded):** W2 13/13, W1 18/18 and static passed. But its secret scan flagged the fake fixture cookie in the new test. I made the fixtures dotted values (`bb3040d`) and reran.
+- **Final runs** on a clean checkout of the tested commit `bb3040d038eda8778ae0ea24efb603d1fdda94c6`:
+  - the W2 self-test **PASSED, 13/13** (V8 14/14);
+  - the W1 self-test **PASSED, 18/18**;
+  - the static checks passed, with the secret scan empty.
+- **Evidence:** `docs/evidence/beta-r4-w2/README.md` (Repair 2) and `docs/evidence/beta-r4-w2/repair2/`.
+- **Not done:** no runtime change (`7097ac2`), no deploy-file change, no account operation, no target-host run. Deployment stays on hold.
+- **Next:** ChatGPT's confirmation of the fix.
+
+## Beta R4: the W2 boundary test's fixture owns its sockets (review 6927653761; #44)
+- **Review 6927653761:** the one-origin fix is resolved in source. One P2 remained: on the pinned Node 22.16.0, the boundary test's socket-redirect fixture raised an uncaught `read ECONNRESET`, because its upgraded socket had no `error` handler. Acknowledged in 6927719056, at 3:04 p.m. ET, with a 1 h estimate.
+- **Reproduced** on the pinned Node 22.16.0 (`node:22.16.0-bookworm@sha256:71bcbb3b…` in Docker, no network): full suite 13/14, isolated case 0/1, both uncaughtException ECONNRESET. On this machine's Node 22.23.4 it never reproduced in 11 runs.
+- **Repair, in `scripts/beta/w2-args-selftest.mjs` only:**
+  - every accepted socket has its own `error` handler: expected peer resets are counted, other errors are kept and fail the test;
+  - every listener, socket and child process is tracked and torn down;
+  - 3 new cases: a peer reset on the upgraded socket, an unexpected error that stays visible, and a teardown check that nothing is left open;
+  - no process-wide suppressor; the zero-network assertions are unchanged.
+- **Not rerun, as the handoff said, because only the test fixture changed:** the historical gates, the Docker fault matrix, W1 and the normal W2 workload.
+- **Final validation** on a clean checkout of the tested commit `2b17a3ffa5de9d700788e7e39ba5ba817e6fdb2a`:
+  - pinned Node 22.16.0: the isolated socket-redirect case **PASSED 3 of 3** (440 handshakes answered with 307 each; 55, 41 and 60 peer resets handled; 0 connections to the second origin), and the complete boundary suite **PASSED 17/17**;
+  - this machine's Node 22.23.4: the complete boundary suite **PASSED 17/17**;
+  - nothing left over: no containers, no test processes;
+  - static checks: only the fixture and docs changed since `4f08c1a`, runtime unchanged, eslint clean, secret scan empty.
+- **Evidence:** `docs/evidence/beta-r4-w2/repair3/`.
+- **Next:** ChatGPT's verification. Deployment stays on hold.

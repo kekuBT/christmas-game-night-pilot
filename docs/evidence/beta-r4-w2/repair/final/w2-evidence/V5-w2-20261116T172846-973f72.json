@@ -1,0 +1,8993 @@
+{
+ "tool": "scripts/beta/w2-load.mjs",
+ "toolSha256": "f80c89dedc831eb78fc3d25cb40269085ca4d2e13fbcb33a4f5da90568709af3",
+ "verdictSha256": "60c93d5a0ac57d126341ea87d5ccb0ed7cbb91b480acae9e8b68512aa92227d7",
+ "node": "v22.23.4",
+ "runId": "20261116T172846-973f72",
+ "origin": "https://localhost:18443",
+ "startedAt": "2026-11-16T17:28:46.389Z",
+ "shape": {
+  "rooms": 2,
+  "playersPerRoom": 10,
+  "tvPerRoom": 1,
+  "triviaQuestions": 10,
+  "drawTurns": 6,
+  "strokeMessagesPerTurn": 8,
+  "piecesPerMessage": 3,
+  "notesPerRoom": 5
+ },
+ "params": {
+  "maxMinutes": 20,
+  "ackTimeoutS": 30,
+  "selfTestOptions": []
+ },
+ "operatorLabels": {
+  "fixture": "local-V5",
+  "image": "cgn-render:check"
+ },
+ "target": {
+  "health": {
+   "status": 200,
+   "body": "{\"ok\":true,\"revision\":\"7097ac2bb062925bb296a129f4771f1e68fd522d\"}"
+  },
+  "revision": "7097ac2bb062925bb296a129f4771f1e68fd522d"
+ },
+ "rooms": [
+  {
+   "label": "A",
+   "roomId": "room-mwjjf91h-424767",
+   "players": [
+    {
+     "name": "W2-A-P01-973f72",
+     "playerId": "player-1"
+    },
+    {
+     "name": "W2-A-P02-973f72",
+     "playerId": "player-2"
+    },
+    {
+     "name": "W2-A-P03-973f72",
+     "playerId": "player-3"
+    },
+    {
+     "name": "W2-A-P04-973f72",
+     "playerId": "player-4"
+    },
+    {
+     "name": "W2-A-P05-973f72",
+     "playerId": "player-5"
+    },
+    {
+     "name": "W2-A-P06-973f72",
+     "playerId": "player-6"
+    },
+    {
+     "name": "W2-A-P07-973f72",
+     "playerId": "player-7"
+    },
+    {
+     "name": "W2-A-P08-973f72",
+     "playerId": "player-8"
+    },
+    {
+     "name": "W2-A-P09-973f72",
+     "playerId": "player-9"
+    },
+    {
+     "name": "W2-A-P10-973f72",
+     "playerId": "player-10"
+    }
+   ],
+   "tv": 1,
+   "trivia": {
+    "finished": true,
+    "questions": 10
+   },
+   "draw": {
+    "finished": true,
+    "turns": 6
+   }
+  },
+  {
+   "label": "B",
+   "roomId": "room-mwjjf94c-779846",
+   "players": [
+    {
+     "name": "W2-B-P01-973f72",
+     "playerId": "player-1"
+    },
+    {
+     "name": "W2-B-P02-973f72",
+     "playerId": "player-2"
+    },
+    {
+     "name": "W2-B-P03-973f72",
+     "playerId": "player-3"
+    },
+    {
+     "name": "W2-B-P04-973f72",
+     "playerId": "player-4"
+    },
+    {
+     "name": "W2-B-P05-973f72",
+     "playerId": "player-5"
+    },
+    {
+     "name": "W2-B-P06-973f72",
+     "playerId": "player-6"
+    },
+    {
+     "name": "W2-B-P07-973f72",
+     "playerId": "player-7"
+    },
+    {
+     "name": "W2-B-P08-973f72",
+     "playerId": "player-8"
+    },
+    {
+     "name": "W2-B-P09-973f72",
+     "playerId": "player-9"
+    },
+    {
+     "name": "W2-B-P10-973f72",
+     "playerId": "player-10"
+    }
+   ],
+   "tv": 1,
+   "trivia": {
+    "finished": true,
+    "questions": 10
+   },
+   "draw": {
+    "finished": true,
+    "turns": 6
+   }
+  }
+ ],
+ "actions": [
+  {
+   "category": "ready",
+   "room": "A",
+   "label": "W2-A-P01-973f72 ready (trivia)",
+   "firstAt": 520,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 44,
+   "accepted": true,
+   "reason": null,
+   "persisted": null,
+   "lastError": null
+  },
+  {
+   "category": "ready",
+   "room": "A",
+   "label": "W2-A-P02-973f72 ready (trivia)",
+   "firstAt": 520,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 50,
+   "accepted": true,
+   "reason": null,
+   "persisted": null,
+   "lastError": null
+  },
+  {
+   "category": "ready",
+   "room": "A",
+   "label": "W2-A-P03-973f72 ready (trivia)",
+   "firstAt": 521,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 50,
+   "accepted": true,
+   "reason": null,
+   "persisted": null,
+   "lastError": null
+  },
+  {
+   "category": "ready",
+   "room": "A",
+   "label": "W2-A-P04-973f72 ready (trivia)",
+   "firstAt": 521,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 53,
+   "accepted": true,
+   "reason": null,
+   "persisted": null,
+   "lastError": null
+  },
+  {
+   "category": "ready",
+   "room": "A",
+   "label": "W2-A-P05-973f72 ready (trivia)",
+   "firstAt": 521,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 56,
+   "accepted": true,
+   "reason": null,
+   "persisted": null,
+   "lastError": null
+  },
+  {
+   "category": "ready",
+   "room": "A",
+   "label": "W2-A-P06-973f72 ready (trivia)",
+   "firstAt": 522,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 58,
+   "accepted": true,
+   "reason": null,
+   "persisted": null,
+   "lastError": null
+  },
+  {
+   "category": "ready",
+   "room": "A",
+   "label": "W2-A-P07-973f72 ready (trivia)",
+   "firstAt": 522,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 47,
+   "accepted": true,
+   "reason": null,
+   "persisted": null,
+   "lastError": null
+  },
+  {
+   "category": "ready",
+   "room": "A",
+   "label": "W2-A-P08-973f72 ready (trivia)",
+   "firstAt": 523,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 68,
+   "accepted": true,
+   "reason": null,
+   "persisted": null,
+   "lastError": null
+  },
+  {
+   "category": "ready",
+   "room": "A",
+   "label": "W2-A-P09-973f72 ready (trivia)",
+   "firstAt": 523,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 72,
+   "accepted": true,
+   "reason": null,
+   "persisted": null,
+   "lastError": null
+  },
+  {
+   "category": "ready",
+   "room": "A",
+   "label": "W2-A-P10-973f72 ready (trivia)",
+   "firstAt": 524,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 76,
+   "accepted": true,
+   "reason": null,
+   "persisted": null,
+   "lastError": null
+  },
+  {
+   "category": "ready",
+   "room": "B",
+   "label": "W2-B-P01-973f72 ready (trivia)",
+   "firstAt": 532,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 30,
+   "accepted": true,
+   "reason": null,
+   "persisted": null,
+   "lastError": null
+  },
+  {
+   "category": "ready",
+   "room": "B",
+   "label": "W2-B-P02-973f72 ready (trivia)",
+   "firstAt": 532,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 56,
+   "accepted": true,
+   "reason": null,
+   "persisted": null,
+   "lastError": null
+  },
+  {
+   "category": "ready",
+   "room": "B",
+   "label": "W2-B-P03-973f72 ready (trivia)",
+   "firstAt": 532,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 71,
+   "accepted": true,
+   "reason": null,
+   "persisted": null,
+   "lastError": null
+  },
+  {
+   "category": "ready",
+   "room": "B",
+   "label": "W2-B-P04-973f72 ready (trivia)",
+   "firstAt": 532,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 75,
+   "accepted": true,
+   "reason": null,
+   "persisted": null,
+   "lastError": null
+  },
+  {
+   "category": "ready",
+   "room": "B",
+   "label": "W2-B-P05-973f72 ready (trivia)",
+   "firstAt": 532,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 53,
+   "accepted": true,
+   "reason": null,
+   "persisted": null,
+   "lastError": null
+  },
+  {
+   "category": "ready",
+   "room": "B",
+   "label": "W2-B-P06-973f72 ready (trivia)",
+   "firstAt": 533,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 77,
+   "accepted": true,
+   "reason": null,
+   "persisted": null,
+   "lastError": null
+  },
+  {
+   "category": "ready",
+   "room": "B",
+   "label": "W2-B-P07-973f72 ready (trivia)",
+   "firstAt": 533,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 81,
+   "accepted": true,
+   "reason": null,
+   "persisted": null,
+   "lastError": null
+  },
+  {
+   "category": "ready",
+   "room": "B",
+   "label": "W2-B-P08-973f72 ready (trivia)",
+   "firstAt": 533,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 84,
+   "accepted": true,
+   "reason": null,
+   "persisted": null,
+   "lastError": null
+  },
+  {
+   "category": "ready",
+   "room": "B",
+   "label": "W2-B-P09-973f72 ready (trivia)",
+   "firstAt": 533,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 88,
+   "accepted": true,
+   "reason": null,
+   "persisted": null,
+   "lastError": null
+  },
+  {
+   "category": "ready",
+   "room": "B",
+   "label": "W2-B-P10-973f72 ready (trivia)",
+   "firstAt": 533,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 91,
+   "accepted": true,
+   "reason": null,
+   "persisted": null,
+   "lastError": null
+  },
+  {
+   "category": "answer",
+   "room": "A",
+   "label": "W2-A-P01-973f72 trv-math-094",
+   "firstAt": 637,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 10,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-1",
+    "questionId": "trv-math-094",
+    "choice": 0
+   }
+  },
+  {
+   "category": "answer",
+   "room": "B",
+   "label": "W2-B-P01-973f72 trv-arts-060",
+   "firstAt": 638,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 11,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-1",
+    "questionId": "trv-arts-060",
+    "choice": 0
+   }
+  },
+  {
+   "category": "answer",
+   "room": "A",
+   "label": "W2-A-P02-973f72 trv-math-094",
+   "firstAt": 690,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 8,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-2",
+    "questionId": "trv-math-094",
+    "choice": 1
+   }
+  },
+  {
+   "category": "answer",
+   "room": "B",
+   "label": "W2-B-P02-973f72 trv-arts-060",
+   "firstAt": 690,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 12,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-2",
+    "questionId": "trv-arts-060",
+    "choice": 1
+   }
+  },
+  {
+   "category": "answer",
+   "room": "A",
+   "label": "W2-A-P03-973f72 trv-math-094",
+   "firstAt": 742,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 10,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-3",
+    "questionId": "trv-math-094",
+    "choice": 2
+   }
+  },
+  {
+   "category": "answer",
+   "room": "B",
+   "label": "W2-B-P03-973f72 trv-arts-060",
+   "firstAt": 743,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 11,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-3",
+    "questionId": "trv-arts-060",
+    "choice": 2
+   }
+  },
+  {
+   "category": "answer",
+   "room": "A",
+   "label": "W2-A-P04-973f72 trv-math-094",
+   "firstAt": 796,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 9,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-4",
+    "questionId": "trv-math-094",
+    "choice": 3
+   }
+  },
+  {
+   "category": "answer",
+   "room": "B",
+   "label": "W2-B-P04-973f72 trv-arts-060",
+   "firstAt": 796,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 12,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-4",
+    "questionId": "trv-arts-060",
+    "choice": 3
+   }
+  },
+  {
+   "category": "answer",
+   "room": "A",
+   "label": "W2-A-P05-973f72 trv-math-094",
+   "firstAt": 848,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 12,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-5",
+    "questionId": "trv-math-094",
+    "choice": 0
+   }
+  },
+  {
+   "category": "answer",
+   "room": "B",
+   "label": "W2-B-P05-973f72 trv-arts-060",
+   "firstAt": 849,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 15,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-5",
+    "questionId": "trv-arts-060",
+    "choice": 0
+   }
+  },
+  {
+   "category": "answer",
+   "room": "A",
+   "label": "W2-A-P06-973f72 trv-math-094",
+   "firstAt": 902,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 7,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-6",
+    "questionId": "trv-math-094",
+    "choice": 1
+   }
+  },
+  {
+   "category": "answer",
+   "room": "B",
+   "label": "W2-B-P06-973f72 trv-arts-060",
+   "firstAt": 902,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 10,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-6",
+    "questionId": "trv-arts-060",
+    "choice": 1
+   }
+  },
+  {
+   "category": "answer",
+   "room": "A",
+   "label": "W2-A-P07-973f72 trv-math-094",
+   "firstAt": 954,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 11,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-7",
+    "questionId": "trv-math-094",
+    "choice": 2
+   }
+  },
+  {
+   "category": "answer",
+   "room": "B",
+   "label": "W2-B-P07-973f72 trv-arts-060",
+   "firstAt": 955,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 13,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-7",
+    "questionId": "trv-arts-060",
+    "choice": 2
+   }
+  },
+  {
+   "category": "answer",
+   "room": "A",
+   "label": "W2-A-P08-973f72 trv-math-094",
+   "firstAt": 1007,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 10,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-8",
+    "questionId": "trv-math-094",
+    "choice": 3
+   }
+  },
+  {
+   "category": "answer",
+   "room": "B",
+   "label": "W2-B-P08-973f72 trv-arts-060",
+   "firstAt": 1008,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 13,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-8",
+    "questionId": "trv-arts-060",
+    "choice": 3
+   }
+  },
+  {
+   "category": "answer",
+   "room": "A",
+   "label": "W2-A-P09-973f72 trv-math-094",
+   "firstAt": 1061,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 9,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-9",
+    "questionId": "trv-math-094",
+    "choice": 0
+   }
+  },
+  {
+   "category": "answer",
+   "room": "B",
+   "label": "W2-B-P09-973f72 trv-arts-060",
+   "firstAt": 1061,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 12,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-9",
+    "questionId": "trv-arts-060",
+    "choice": 0
+   }
+  },
+  {
+   "category": "answer",
+   "room": "A",
+   "label": "W2-A-P10-973f72 trv-math-094",
+   "firstAt": 1113,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 10,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-10",
+    "questionId": "trv-math-094",
+    "choice": 1
+   }
+  },
+  {
+   "category": "answer",
+   "room": "B",
+   "label": "W2-B-P10-973f72 trv-arts-060",
+   "firstAt": 1114,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 14,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-10",
+    "questionId": "trv-arts-060",
+    "choice": 1
+   }
+  },
+  {
+   "category": "answer",
+   "room": "A",
+   "label": "W2-A-P01-973f72 trv-hist-037",
+   "firstAt": 1348,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 8,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-1",
+    "questionId": "trv-hist-037",
+    "choice": 1
+   }
+  },
+  {
+   "category": "answer",
+   "room": "B",
+   "label": "W2-B-P01-973f72 trv-ever-098",
+   "firstAt": 1349,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 11,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-1",
+    "questionId": "trv-ever-098",
+    "choice": 1
+   }
+  },
+  {
+   "category": "answer",
+   "room": "A",
+   "label": "W2-A-P02-973f72 trv-hist-037",
+   "firstAt": 1529,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 9,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-2",
+    "questionId": "trv-hist-037",
+    "choice": 2
+   }
+  },
+  {
+   "category": "answer",
+   "room": "B",
+   "label": "W2-B-P02-973f72 trv-ever-098",
+   "firstAt": 1533,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 7,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-2",
+    "questionId": "trv-ever-098",
+    "choice": 2
+   }
+  },
+  {
+   "category": "answer",
+   "room": "A",
+   "label": "W2-A-P05-973f72 trv-hist-037",
+   "firstAt": 1584,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 9,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-5",
+    "questionId": "trv-hist-037",
+    "choice": 1
+   }
+  },
+  {
+   "category": "answer",
+   "room": "B",
+   "label": "W2-B-P05-973f72 trv-ever-098",
+   "firstAt": 1588,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 9,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-5",
+    "questionId": "trv-ever-098",
+    "choice": 1
+   }
+  },
+  {
+   "category": "answer",
+   "room": "A",
+   "label": "W2-A-P03-973f72 trv-hist-037",
+   "firstAt": 1714,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 9,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-3",
+    "questionId": "trv-hist-037",
+    "choice": 3
+   }
+  },
+  {
+   "category": "answer",
+   "room": "B",
+   "label": "W2-B-P03-973f72 trv-ever-098",
+   "firstAt": 1717,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 12,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-3",
+    "questionId": "trv-ever-098",
+    "choice": 3
+   }
+  },
+  {
+   "category": "answer",
+   "room": "A",
+   "label": "W2-A-P06-973f72 trv-hist-037",
+   "firstAt": 1765,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 26,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-6",
+    "questionId": "trv-hist-037",
+    "choice": 2
+   }
+  },
+  {
+   "category": "answer",
+   "room": "B",
+   "label": "W2-B-P06-973f72 trv-ever-098",
+   "firstAt": 1767,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 18,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-6",
+    "questionId": "trv-ever-098",
+    "choice": 2
+   }
+  },
+  {
+   "category": "answer",
+   "room": "A",
+   "label": "W2-A-P09-973f72 trv-hist-037",
+   "firstAt": 1819,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 10,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-9",
+    "questionId": "trv-hist-037",
+    "choice": 1
+   }
+  },
+  {
+   "category": "answer",
+   "room": "B",
+   "label": "W2-B-P09-973f72 trv-ever-098",
+   "firstAt": 1822,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 11,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-9",
+    "questionId": "trv-ever-098",
+    "choice": 1
+   }
+  },
+  {
+   "category": "answer",
+   "room": "A",
+   "label": "W2-A-P04-973f72 trv-hist-037",
+   "firstAt": 1898,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 10,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-4",
+    "questionId": "trv-hist-037",
+    "choice": 0
+   }
+  },
+  {
+   "category": "answer",
+   "room": "B",
+   "label": "W2-B-P04-973f72 trv-ever-098",
+   "firstAt": 1901,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 10,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-4",
+    "questionId": "trv-ever-098",
+    "choice": 0
+   }
+  },
+  {
+   "category": "answer",
+   "room": "A",
+   "label": "W2-A-P07-973f72 trv-hist-037",
+   "firstAt": 1952,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 8,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-7",
+    "questionId": "trv-hist-037",
+    "choice": 3
+   }
+  },
+  {
+   "category": "answer",
+   "room": "B",
+   "label": "W2-B-P07-973f72 trv-ever-098",
+   "firstAt": 1955,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 9,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-7",
+    "questionId": "trv-ever-098",
+    "choice": 3
+   }
+  },
+  {
+   "category": "answer",
+   "room": "A",
+   "label": "W2-A-P10-973f72 trv-hist-037",
+   "firstAt": 2002,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 11,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-10",
+    "questionId": "trv-hist-037",
+    "choice": 2
+   }
+  },
+  {
+   "category": "answer",
+   "room": "B",
+   "label": "W2-B-P10-973f72 trv-ever-098",
+   "firstAt": 2007,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 9,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-10",
+    "questionId": "trv-ever-098",
+    "choice": 2
+   }
+  },
+  {
+   "category": "answer",
+   "room": "A",
+   "label": "W2-A-P01-973f72 trv-scie-010",
+   "firstAt": 2073,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 9,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-1",
+    "questionId": "trv-scie-010",
+    "choice": 2
+   }
+  },
+  {
+   "category": "answer",
+   "room": "B",
+   "label": "W2-B-P01-973f72 trv-scie-124",
+   "firstAt": 2078,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 7,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-1",
+    "questionId": "trv-scie-124",
+    "choice": 2
+   }
+  },
+  {
+   "category": "answer",
+   "room": "A",
+   "label": "W2-A-P08-973f72 trv-hist-037",
+   "firstAt": 2134,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 10,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-8",
+    "questionId": "trv-hist-037",
+    "choice": 0
+   }
+  },
+  {
+   "category": "answer",
+   "room": "B",
+   "label": "W2-B-P08-973f72 trv-ever-098",
+   "firstAt": 2138,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 11,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-8",
+    "questionId": "trv-ever-098",
+    "choice": 0
+   }
+  },
+  {
+   "category": "answer",
+   "room": "A",
+   "label": "W2-A-P05-973f72 trv-scie-010",
+   "firstAt": 2335,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 9,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-5",
+    "questionId": "trv-scie-010",
+    "choice": 2
+   }
+  },
+  {
+   "category": "answer",
+   "room": "B",
+   "label": "W2-B-P05-973f72 trv-scie-124",
+   "firstAt": 2338,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 10,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-5",
+    "questionId": "trv-scie-124",
+    "choice": 2
+   }
+  },
+  {
+   "category": "answer",
+   "room": "A",
+   "label": "W2-A-P02-973f72 trv-scie-010",
+   "firstAt": 2385,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 8,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-2",
+    "questionId": "trv-scie-010",
+    "choice": 3
+   }
+  },
+  {
+   "category": "answer",
+   "room": "B",
+   "label": "W2-B-P02-973f72 trv-scie-124",
+   "firstAt": 2390,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 7,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-2",
+    "questionId": "trv-scie-124",
+    "choice": 3
+   }
+  },
+  {
+   "category": "answer",
+   "room": "A",
+   "label": "W2-A-P09-973f72 trv-scie-010",
+   "firstAt": 2594,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 9,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-9",
+    "questionId": "trv-scie-010",
+    "choice": 2
+   }
+  },
+  {
+   "category": "answer",
+   "room": "B",
+   "label": "W2-B-P09-973f72 trv-scie-124",
+   "firstAt": 2598,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 8,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-9",
+    "questionId": "trv-scie-124",
+    "choice": 2
+   }
+  },
+  {
+   "category": "answer",
+   "room": "B",
+   "label": "W2-B-P06-973f72 trv-scie-124",
+   "firstAt": 2657,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 9,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-6",
+    "questionId": "trv-scie-124",
+    "choice": 3
+   }
+  },
+  {
+   "category": "answer",
+   "room": "A",
+   "label": "W2-A-P06-973f72 trv-scie-010",
+   "firstAt": 2663,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 10,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-6",
+    "questionId": "trv-scie-010",
+    "choice": 3
+   }
+  },
+  {
+   "category": "answer",
+   "room": "A",
+   "label": "W2-A-P03-973f72 trv-scie-010",
+   "firstAt": 2703,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 9,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-3",
+    "questionId": "trv-scie-010",
+    "choice": 0
+   }
+  },
+  {
+   "category": "answer",
+   "room": "B",
+   "label": "W2-B-P03-973f72 trv-scie-124",
+   "firstAt": 2708,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 10,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-3",
+    "questionId": "trv-scie-124",
+    "choice": 0
+   }
+  },
+  {
+   "category": "answer",
+   "room": "A",
+   "label": "W2-A-P01-973f72 trv-lite-048",
+   "firstAt": 2816,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 10,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-1",
+    "questionId": "trv-lite-048",
+    "choice": 3
+   }
+  },
+  {
+   "category": "answer",
+   "room": "B",
+   "label": "W2-B-P01-973f72 trv-spac-018",
+   "firstAt": 2820,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 8,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-1",
+    "questionId": "trv-spac-018",
+    "choice": 3
+   }
+  },
+  {
+   "category": "answer",
+   "room": "A",
+   "label": "W2-A-P10-973f72 trv-scie-010",
+   "firstAt": 2909,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 10,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-10",
+    "questionId": "trv-scie-010",
+    "choice": 3
+   }
+  },
+  {
+   "category": "answer",
+   "room": "B",
+   "label": "W2-B-P10-973f72 trv-scie-124",
+   "firstAt": 2911,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 12,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-10",
+    "questionId": "trv-scie-124",
+    "choice": 3
+   }
+  },
+  {
+   "category": "answer",
+   "room": "A",
+   "label": "W2-A-P07-973f72 trv-scie-010",
+   "firstAt": 2964,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 8,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-7",
+    "questionId": "trv-scie-010",
+    "choice": 0
+   }
+  },
+  {
+   "category": "answer",
+   "room": "B",
+   "label": "W2-B-P07-973f72 trv-scie-124",
+   "firstAt": 2967,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 9,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-7",
+    "questionId": "trv-scie-124",
+    "choice": 0
+   }
+  },
+  {
+   "category": "answer",
+   "room": "A",
+   "label": "W2-A-P04-973f72 trv-scie-010",
+   "firstAt": 3019,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 9,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-4",
+    "questionId": "trv-scie-010",
+    "choice": 1
+   }
+  },
+  {
+   "category": "answer",
+   "room": "B",
+   "label": "W2-B-P04-973f72 trv-scie-124",
+   "firstAt": 3021,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 11,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-4",
+    "questionId": "trv-scie-124",
+    "choice": 1
+   }
+  },
+  {
+   "category": "answer",
+   "room": "A",
+   "label": "W2-A-P05-973f72 trv-lite-048",
+   "firstAt": 3102,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 9,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-5",
+    "questionId": "trv-lite-048",
+    "choice": 3
+   }
+  },
+  {
+   "category": "answer",
+   "room": "B",
+   "label": "W2-B-P05-973f72 trv-spac-018",
+   "firstAt": 3106,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 8,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-5",
+    "questionId": "trv-spac-018",
+    "choice": 3
+   }
+  },
+  {
+   "category": "answer",
+   "room": "A",
+   "label": "W2-A-P02-973f72 trv-lite-048",
+   "firstAt": 3259,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 8,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-2",
+    "questionId": "trv-lite-048",
+    "choice": 0
+   }
+  },
+  {
+   "category": "answer",
+   "room": "B",
+   "label": "W2-B-P02-973f72 trv-spac-018",
+   "firstAt": 3262,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 8,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-2",
+    "questionId": "trv-spac-018",
+    "choice": 0
+   }
+  },
+  {
+   "category": "answer",
+   "room": "A",
+   "label": "W2-A-P08-973f72 trv-scie-010",
+   "firstAt": 3277,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 8,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-8",
+    "questionId": "trv-scie-010",
+    "choice": 1
+   }
+  },
+  {
+   "category": "answer",
+   "room": "B",
+   "label": "W2-B-P08-973f72 trv-scie-124",
+   "firstAt": 3283,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 7,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-8",
+    "questionId": "trv-scie-124",
+    "choice": 1
+   }
+  },
+  {
+   "category": "answer",
+   "room": "A",
+   "label": "W2-A-P09-973f72 trv-lite-048",
+   "firstAt": 3385,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 9,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-9",
+    "questionId": "trv-lite-048",
+    "choice": 3
+   }
+  },
+  {
+   "category": "answer",
+   "room": "B",
+   "label": "W2-B-P09-973f72 trv-spac-018",
+   "firstAt": 3389,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 9,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-9",
+    "questionId": "trv-spac-018",
+    "choice": 3
+   }
+  },
+  {
+   "category": "answer",
+   "room": "B",
+   "label": "W2-B-P06-973f72 trv-spac-018",
+   "firstAt": 3555,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 13,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-6",
+    "questionId": "trv-spac-018",
+    "choice": 0
+   }
+  },
+  {
+   "category": "answer",
+   "room": "A",
+   "label": "W2-A-P06-973f72 trv-lite-048",
+   "firstAt": 3562,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 16,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-6",
+    "questionId": "trv-lite-048",
+    "choice": 0
+   }
+  },
+  {
+   "category": "answer",
+   "room": "A",
+   "label": "W2-A-P01-973f72 trv-scie-015",
+   "firstAt": 3578,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 7,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-1",
+    "questionId": "trv-scie-015",
+    "choice": 0
+   }
+  },
+  {
+   "category": "answer",
+   "room": "B",
+   "label": "W2-B-P01-973f72 trv-hist-131",
+   "firstAt": 3580,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 7,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-1",
+    "questionId": "trv-hist-131",
+    "choice": 0
+   }
+  },
+  {
+   "category": "answer",
+   "room": "A",
+   "label": "W2-A-P03-973f72 trv-lite-048",
+   "firstAt": 3709,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 9,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-3",
+    "questionId": "trv-lite-048",
+    "choice": 1
+   }
+  },
+  {
+   "category": "answer",
+   "room": "B",
+   "label": "W2-B-P03-973f72 trv-spac-018",
+   "firstAt": 3714,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 7,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-3",
+    "questionId": "trv-spac-018",
+    "choice": 1
+   }
+  },
+  {
+   "category": "answer",
+   "room": "A",
+   "label": "W2-A-P10-973f72 trv-lite-048",
+   "firstAt": 3833,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 8,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-10",
+    "questionId": "trv-lite-048",
+    "choice": 0
+   }
+  },
+  {
+   "category": "answer",
+   "room": "B",
+   "label": "W2-B-P10-973f72 trv-spac-018",
+   "firstAt": 3837,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 8,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-10",
+    "questionId": "trv-spac-018",
+    "choice": 0
+   }
+  },
+  {
+   "category": "answer",
+   "room": "A",
+   "label": "W2-A-P05-973f72 trv-scie-015",
+   "firstAt": 3886,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 8,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-5",
+    "questionId": "trv-scie-015",
+    "choice": 0
+   }
+  },
+  {
+   "category": "answer",
+   "room": "B",
+   "label": "W2-B-P05-973f72 trv-hist-131",
+   "firstAt": 3889,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 9,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-5",
+    "questionId": "trv-hist-131",
+    "choice": 0
+   }
+  },
+  {
+   "category": "answer",
+   "room": "A",
+   "label": "W2-A-P07-973f72 trv-lite-048",
+   "firstAt": 3992,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 7,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-7",
+    "questionId": "trv-lite-048",
+    "choice": 1
+   }
+  },
+  {
+   "category": "answer",
+   "room": "B",
+   "label": "W2-B-P07-973f72 trv-spac-018",
+   "firstAt": 3996,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 6,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-7",
+    "questionId": "trv-spac-018",
+    "choice": 1
+   }
+  },
+  {
+   "category": "answer",
+   "room": "A",
+   "label": "W2-A-P02-973f72 trv-scie-015",
+   "firstAt": 4150,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 13,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-2",
+    "questionId": "trv-scie-015",
+    "choice": 1
+   }
+  },
+  {
+   "category": "answer",
+   "room": "B",
+   "label": "W2-B-P02-973f72 trv-hist-131",
+   "firstAt": 4151,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 16,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-2",
+    "questionId": "trv-hist-131",
+    "choice": 1
+   }
+  },
+  {
+   "category": "answer",
+   "room": "A",
+   "label": "W2-A-P04-973f72 trv-lite-048",
+   "firstAt": 4156,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 14,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-4",
+    "questionId": "trv-lite-048",
+    "choice": 2
+   }
+  },
+  {
+   "category": "answer",
+   "room": "B",
+   "label": "W2-B-P04-973f72 trv-spac-018",
+   "firstAt": 4160,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 12,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-4",
+    "questionId": "trv-spac-018",
+    "choice": 2
+   }
+  },
+  {
+   "category": "answer",
+   "room": "A",
+   "label": "W2-A-P09-973f72 trv-scie-015",
+   "firstAt": 4193,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 8,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-9",
+    "questionId": "trv-scie-015",
+    "choice": 0
+   }
+  },
+  {
+   "category": "answer",
+   "room": "B",
+   "label": "W2-B-P09-973f72 trv-hist-131",
+   "firstAt": 4197,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 6,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-9",
+    "questionId": "trv-hist-131",
+    "choice": 0
+   }
+  },
+  {
+   "category": "answer",
+   "room": "A",
+   "label": "W2-A-P01-973f72 trv-geog-034",
+   "firstAt": 4354,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 8,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-1",
+    "questionId": "trv-geog-034",
+    "choice": 1
+   }
+  },
+  {
+   "category": "answer",
+   "room": "B",
+   "label": "W2-B-P01-973f72 trv-geog-030",
+   "firstAt": 4355,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 11,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-1",
+    "questionId": "trv-geog-030",
+    "choice": 1
+   }
+  },
+  {
+   "category": "answer",
+   "room": "A",
+   "label": "W2-A-P08-973f72 trv-lite-048",
+   "firstAt": 4437,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 8,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-8",
+    "questionId": "trv-lite-048",
+    "choice": 2
+   }
+  },
+  {
+   "category": "answer",
+   "room": "B",
+   "label": "W2-B-P08-973f72 trv-spac-018",
+   "firstAt": 4441,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 8,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-8",
+    "questionId": "trv-spac-018",
+    "choice": 2
+   }
+  },
+  {
+   "category": "answer",
+   "room": "B",
+   "label": "W2-B-P06-973f72 trv-hist-131",
+   "firstAt": 4474,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 8,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-6",
+    "questionId": "trv-hist-131",
+    "choice": 1
+   }
+  },
+  {
+   "category": "answer",
+   "room": "A",
+   "label": "W2-A-P06-973f72 trv-scie-015",
+   "firstAt": 4485,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 7,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-6",
+    "questionId": "trv-scie-015",
+    "choice": 1
+   }
+  },
+  {
+   "category": "answer",
+   "room": "A",
+   "label": "W2-A-P05-973f72 trv-geog-034",
+   "firstAt": 4687,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 8,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-5",
+    "questionId": "trv-geog-034",
+    "choice": 1
+   }
+  },
+  {
+   "category": "answer",
+   "room": "B",
+   "label": "W2-B-P05-973f72 trv-geog-030",
+   "firstAt": 4690,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 9,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-5",
+    "questionId": "trv-geog-030",
+    "choice": 1
+   }
+  },
+  {
+   "category": "answer",
+   "room": "A",
+   "label": "W2-A-P03-973f72 trv-scie-015",
+   "firstAt": 4731,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 9,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-3",
+    "questionId": "trv-scie-015",
+    "choice": 2
+   }
+  },
+  {
+   "category": "answer",
+   "room": "B",
+   "label": "W2-B-P03-973f72 trv-hist-131",
+   "firstAt": 4734,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 8,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-3",
+    "questionId": "trv-hist-131",
+    "choice": 2
+   }
+  },
+  {
+   "category": "answer",
+   "room": "A",
+   "label": "W2-A-P10-973f72 trv-scie-015",
+   "firstAt": 4771,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 8,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-10",
+    "questionId": "trv-scie-015",
+    "choice": 1
+   }
+  },
+  {
+   "category": "answer",
+   "room": "B",
+   "label": "W2-B-P10-973f72 trv-hist-131",
+   "firstAt": 4776,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 8,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-10",
+    "questionId": "trv-hist-131",
+    "choice": 1
+   }
+  },
+  {
+   "category": "answer",
+   "room": "A",
+   "label": "W2-A-P09-973f72 trv-geog-034",
+   "firstAt": 5016,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 13,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-9",
+    "questionId": "trv-geog-034",
+    "choice": 1
+   }
+  },
+  {
+   "category": "answer",
+   "room": "B",
+   "label": "W2-B-P09-973f72 trv-geog-030",
+   "firstAt": 5019,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 13,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-9",
+    "questionId": "trv-geog-030",
+    "choice": 1
+   }
+  },
+  {
+   "category": "answer",
+   "room": "A",
+   "label": "W2-A-P07-973f72 trv-scie-015",
+   "firstAt": 5036,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 9,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-7",
+    "questionId": "trv-scie-015",
+    "choice": 2
+   }
+  },
+  {
+   "category": "answer",
+   "room": "B",
+   "label": "W2-B-P07-973f72 trv-hist-131",
+   "firstAt": 5040,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 10,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-7",
+    "questionId": "trv-hist-131",
+    "choice": 2
+   }
+  },
+  {
+   "category": "answer",
+   "room": "A",
+   "label": "W2-A-P02-973f72 trv-geog-034",
+   "firstAt": 5062,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 6,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-2",
+    "questionId": "trv-geog-034",
+    "choice": 2
+   }
+  },
+  {
+   "category": "answer",
+   "room": "B",
+   "label": "W2-B-P02-973f72 trv-geog-030",
+   "firstAt": 5066,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 8,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-2",
+    "questionId": "trv-geog-030",
+    "choice": 2
+   }
+  },
+  {
+   "category": "answer",
+   "room": "A",
+   "label": "W2-A-P01-973f72 trv-hist-040",
+   "firstAt": 5147,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 8,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-1",
+    "questionId": "trv-hist-040",
+    "choice": 2
+   }
+  },
+  {
+   "category": "answer",
+   "room": "B",
+   "label": "W2-B-P01-973f72 trv-arts-057",
+   "firstAt": 5152,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 7,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-1",
+    "questionId": "trv-arts-057",
+    "choice": 2
+   }
+  },
+  {
+   "category": "answer",
+   "room": "A",
+   "label": "W2-A-P04-973f72 trv-scie-015",
+   "firstAt": 5315,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 12,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-4",
+    "questionId": "trv-scie-015",
+    "choice": 3
+   }
+  },
+  {
+   "category": "answer",
+   "room": "B",
+   "label": "W2-B-P04-973f72 trv-hist-131",
+   "firstAt": 5316,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 16,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-4",
+    "questionId": "trv-hist-131",
+    "choice": 3
+   }
+  },
+  {
+   "category": "answer",
+   "room": "B",
+   "label": "W2-B-P06-973f72 trv-geog-030",
+   "firstAt": 5406,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 7,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-6",
+    "questionId": "trv-geog-030",
+    "choice": 2
+   }
+  },
+  {
+   "category": "answer",
+   "room": "A",
+   "label": "W2-A-P06-973f72 trv-geog-034",
+   "firstAt": 5415,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 9,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-6",
+    "questionId": "trv-geog-034",
+    "choice": 2
+   }
+  },
+  {
+   "category": "answer",
+   "room": "A",
+   "label": "W2-A-P05-973f72 trv-hist-040",
+   "firstAt": 5505,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 7,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-5",
+    "questionId": "trv-hist-040",
+    "choice": 2
+   }
+  },
+  {
+   "category": "answer",
+   "room": "B",
+   "label": "W2-B-P05-973f72 trv-arts-057",
+   "firstAt": 5508,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 8,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-5",
+    "questionId": "trv-arts-057",
+    "choice": 2
+   }
+  },
+  {
+   "category": "answer",
+   "room": "A",
+   "label": "W2-A-P08-973f72 trv-scie-015",
+   "firstAt": 5614,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 6,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-8",
+    "questionId": "trv-scie-015",
+    "choice": 3
+   }
+  },
+  {
+   "category": "answer",
+   "room": "B",
+   "label": "W2-B-P08-973f72 trv-hist-131",
+   "firstAt": 5618,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 8,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-8",
+    "questionId": "trv-hist-131",
+    "choice": 3
+   }
+  },
+  {
+   "category": "answer",
+   "room": "A",
+   "label": "W2-A-P10-973f72 trv-geog-034",
+   "firstAt": 5726,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 9,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-10",
+    "questionId": "trv-geog-034",
+    "choice": 2
+   }
+  },
+  {
+   "category": "answer",
+   "room": "B",
+   "label": "W2-B-P10-973f72 trv-geog-030",
+   "firstAt": 5730,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 10,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-10",
+    "questionId": "trv-geog-030",
+    "choice": 2
+   }
+  },
+  {
+   "category": "answer",
+   "room": "A",
+   "label": "W2-A-P03-973f72 trv-geog-034",
+   "firstAt": 5770,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 10,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-3",
+    "questionId": "trv-geog-034",
+    "choice": 3
+   }
+  },
+  {
+   "category": "answer",
+   "room": "B",
+   "label": "W2-B-P03-973f72 trv-geog-030",
+   "firstAt": 5772,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 14,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-3",
+    "questionId": "trv-geog-030",
+    "choice": 3
+   }
+  },
+  {
+   "category": "answer",
+   "room": "A",
+   "label": "W2-A-P09-973f72 trv-hist-040",
+   "firstAt": 5863,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 11,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-9",
+    "questionId": "trv-hist-040",
+    "choice": 2
+   }
+  },
+  {
+   "category": "answer",
+   "room": "B",
+   "label": "W2-B-P09-973f72 trv-arts-057",
+   "firstAt": 5865,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 13,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-9",
+    "questionId": "trv-arts-057",
+    "choice": 2
+   }
+  },
+  {
+   "category": "answer",
+   "room": "A",
+   "label": "W2-A-P01-973f72 trv-legacy-12",
+   "firstAt": 5957,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 10,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-1",
+    "questionId": "trv-legacy-12",
+    "choice": 3
+   }
+  },
+  {
+   "category": "answer",
+   "room": "B",
+   "label": "W2-B-P01-973f72 trv-tech-111",
+   "firstAt": 5961,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 11,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-1",
+    "questionId": "trv-tech-111",
+    "choice": 3
+   }
+  },
+  {
+   "category": "answer",
+   "room": "A",
+   "label": "W2-A-P02-973f72 trv-hist-040",
+   "firstAt": 5985,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 7,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-2",
+    "questionId": "trv-hist-040",
+    "choice": 3
+   }
+  },
+  {
+   "category": "answer",
+   "room": "B",
+   "label": "W2-B-P02-973f72 trv-arts-057",
+   "firstAt": 5990,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 5,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-2",
+    "questionId": "trv-arts-057",
+    "choice": 3
+   }
+  },
+  {
+   "category": "answer",
+   "room": "A",
+   "label": "W2-A-P07-973f72 trv-geog-034",
+   "firstAt": 6100,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 8,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-7",
+    "questionId": "trv-geog-034",
+    "choice": 3
+   }
+  },
+  {
+   "category": "answer",
+   "room": "B",
+   "label": "W2-B-P07-973f72 trv-geog-030",
+   "firstAt": 6104,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 7,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-7",
+    "questionId": "trv-geog-030",
+    "choice": 3
+   }
+  },
+  {
+   "category": "answer",
+   "room": "A",
+   "label": "W2-A-P05-973f72 trv-legacy-12",
+   "firstAt": 6339,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 8,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-5",
+    "questionId": "trv-legacy-12",
+    "choice": 3
+   }
+  },
+  {
+   "category": "answer",
+   "room": "B",
+   "label": "W2-B-P05-973f72 trv-tech-111",
+   "firstAt": 6342,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 11,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-5",
+    "questionId": "trv-tech-111",
+    "choice": 3
+   }
+  },
+  {
+   "category": "answer",
+   "room": "B",
+   "label": "W2-B-P06-973f72 trv-arts-057",
+   "firstAt": 6353,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 6,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-6",
+    "questionId": "trv-arts-057",
+    "choice": 3
+   }
+  },
+  {
+   "category": "answer",
+   "room": "A",
+   "label": "W2-A-P06-973f72 trv-hist-040",
+   "firstAt": 6364,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 7,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-6",
+    "questionId": "trv-hist-040",
+    "choice": 3
+   }
+  },
+  {
+   "category": "answer",
+   "room": "A",
+   "label": "W2-A-P04-973f72 trv-geog-034",
+   "firstAt": 6489,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 8,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-4",
+    "questionId": "trv-geog-034",
+    "choice": 0
+   }
+  },
+  {
+   "category": "answer",
+   "room": "B",
+   "label": "W2-B-P04-973f72 trv-geog-030",
+   "firstAt": 6493,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 10,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-4",
+    "questionId": "trv-geog-030",
+    "choice": 0
+   }
+  },
+  {
+   "category": "answer",
+   "room": "A",
+   "label": "W2-A-P10-973f72 trv-hist-040",
+   "firstAt": 6699,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 7,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-10",
+    "questionId": "trv-hist-040",
+    "choice": 3
+   }
+  },
+  {
+   "category": "answer",
+   "room": "B",
+   "label": "W2-B-P10-973f72 trv-arts-057",
+   "firstAt": 6704,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 6,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-10",
+    "questionId": "trv-arts-057",
+    "choice": 3
+   }
+  },
+  {
+   "category": "answer",
+   "room": "A",
+   "label": "W2-A-P09-973f72 trv-legacy-12",
+   "firstAt": 6725,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 8,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-9",
+    "questionId": "trv-legacy-12",
+    "choice": 3
+   }
+  },
+  {
+   "category": "answer",
+   "room": "B",
+   "label": "W2-B-P09-973f72 trv-tech-111",
+   "firstAt": 6729,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 12,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-9",
+    "questionId": "trv-tech-111",
+    "choice": 3
+   }
+  },
+  {
+   "category": "answer",
+   "room": "A",
+   "label": "W2-A-P01-973f72 trv-geog-031",
+   "firstAt": 6786,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 9,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-1",
+    "questionId": "trv-geog-031",
+    "choice": 0
+   }
+  },
+  {
+   "category": "answer",
+   "room": "B",
+   "label": "W2-B-P01-973f72 trv-ever-096",
+   "firstAt": 6791,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 7,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-1",
+    "questionId": "trv-ever-096",
+    "choice": 0
+   }
+  },
+  {
+   "category": "answer",
+   "room": "A",
+   "label": "W2-A-P08-973f72 trv-geog-034",
+   "firstAt": 6805,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 8,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-8",
+    "questionId": "trv-geog-034",
+    "choice": 0
+   }
+  },
+  {
+   "category": "answer",
+   "room": "B",
+   "label": "W2-B-P08-973f72 trv-geog-030",
+   "firstAt": 6810,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 7,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-8",
+    "questionId": "trv-geog-030",
+    "choice": 0
+   }
+  },
+  {
+   "category": "answer",
+   "room": "A",
+   "label": "W2-A-P03-973f72 trv-hist-040",
+   "firstAt": 6827,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 8,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-3",
+    "questionId": "trv-hist-040",
+    "choice": 0
+   }
+  },
+  {
+   "category": "answer",
+   "room": "B",
+   "label": "W2-B-P03-973f72 trv-arts-057",
+   "firstAt": 6833,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 6,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-3",
+    "questionId": "trv-arts-057",
+    "choice": 0
+   }
+  },
+  {
+   "category": "answer",
+   "room": "A",
+   "label": "W2-A-P02-973f72 trv-legacy-12",
+   "firstAt": 6925,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 9,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-2",
+    "questionId": "trv-legacy-12",
+    "choice": 0
+   }
+  },
+  {
+   "category": "answer",
+   "room": "B",
+   "label": "W2-B-P02-973f72 trv-tech-111",
+   "firstAt": 6928,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 10,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-2",
+    "questionId": "trv-tech-111",
+    "choice": 0
+   }
+  },
+  {
+   "category": "answer",
+   "room": "A",
+   "label": "W2-A-P07-973f72 trv-hist-040",
+   "firstAt": 7179,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 9,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-7",
+    "questionId": "trv-hist-040",
+    "choice": 0
+   }
+  },
+  {
+   "category": "answer",
+   "room": "B",
+   "label": "W2-B-P07-973f72 trv-arts-057",
+   "firstAt": 7182,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 9,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-7",
+    "questionId": "trv-arts-057",
+    "choice": 0
+   }
+  },
+  {
+   "category": "answer",
+   "room": "A",
+   "label": "W2-A-P05-973f72 trv-geog-031",
+   "firstAt": 7190,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 6,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-5",
+    "questionId": "trv-geog-031",
+    "choice": 0
+   }
+  },
+  {
+   "category": "answer",
+   "room": "B",
+   "label": "W2-B-P05-973f72 trv-ever-096",
+   "firstAt": 7196,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 11,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-5",
+    "questionId": "trv-ever-096",
+    "choice": 0
+   }
+  },
+  {
+   "category": "answer",
+   "room": "B",
+   "label": "W2-B-P06-973f72 trv-tech-111",
+   "firstAt": 7317,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 9,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-6",
+    "questionId": "trv-tech-111",
+    "choice": 0
+   }
+  },
+  {
+   "category": "answer",
+   "room": "A",
+   "label": "W2-A-P06-973f72 trv-legacy-12",
+   "firstAt": 7328,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 7,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-6",
+    "questionId": "trv-legacy-12",
+    "choice": 0
+   }
+  },
+  {
+   "category": "answer",
+   "room": "A",
+   "label": "W2-A-P08-973f72 trv-hist-040",
+   "firstAt": 7516,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 10,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-8",
+    "questionId": "trv-hist-040",
+    "choice": 1
+   }
+  },
+  {
+   "category": "answer",
+   "room": "B",
+   "label": "W2-B-P08-973f72 trv-arts-057",
+   "firstAt": 7520,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 10,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-8",
+    "questionId": "trv-arts-057",
+    "choice": 1
+   }
+  },
+  {
+   "category": "answer",
+   "room": "A",
+   "label": "W2-A-P09-973f72 trv-geog-031",
+   "firstAt": 7601,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 7,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-9",
+    "questionId": "trv-geog-031",
+    "choice": 0
+   }
+  },
+  {
+   "category": "answer",
+   "room": "B",
+   "label": "W2-B-P09-973f72 trv-ever-096",
+   "firstAt": 7608,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 7,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-9",
+    "questionId": "trv-ever-096",
+    "choice": 0
+   }
+  },
+  {
+   "category": "answer",
+   "room": "A",
+   "label": "W2-A-P01-973f72 trv-food-075",
+   "firstAt": 7631,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 6,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-1",
+    "questionId": "trv-food-075",
+    "choice": 1
+   }
+  },
+  {
+   "category": "answer",
+   "room": "B",
+   "label": "W2-B-P01-973f72 trv-food-076",
+   "firstAt": 7634,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 8,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-1",
+    "questionId": "trv-food-076",
+    "choice": 1
+   }
+  },
+  {
+   "category": "answer",
+   "room": "A",
+   "label": "W2-A-P04-973f72 trv-hist-040",
+   "firstAt": 7675,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 9,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-4",
+    "questionId": "trv-hist-040",
+    "choice": 1
+   }
+  },
+  {
+   "category": "answer",
+   "room": "B",
+   "label": "W2-B-P04-973f72 trv-arts-057",
+   "firstAt": 7682,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 8,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-4",
+    "questionId": "trv-arts-057",
+    "choice": 1
+   }
+  },
+  {
+   "category": "answer",
+   "room": "A",
+   "label": "W2-A-P10-973f72 trv-legacy-12",
+   "firstAt": 7687,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 7,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-10",
+    "questionId": "trv-legacy-12",
+    "choice": 0
+   }
+  },
+  {
+   "category": "answer",
+   "room": "B",
+   "label": "W2-B-P10-973f72 trv-tech-111",
+   "firstAt": 7691,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 6,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-10",
+    "questionId": "trv-tech-111",
+    "choice": 0
+   }
+  },
+  {
+   "category": "answer",
+   "room": "A",
+   "label": "W2-A-P02-973f72 trv-geog-031",
+   "firstAt": 7884,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 7,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-2",
+    "questionId": "trv-geog-031",
+    "choice": 1
+   }
+  },
+  {
+   "category": "answer",
+   "room": "B",
+   "label": "W2-B-P02-973f72 trv-ever-096",
+   "firstAt": 7889,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 9,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-2",
+    "questionId": "trv-ever-096",
+    "choice": 1
+   }
+  },
+  {
+   "category": "answer",
+   "room": "A",
+   "label": "W2-A-P03-973f72 trv-legacy-12",
+   "firstAt": 7898,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 8,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-3",
+    "questionId": "trv-legacy-12",
+    "choice": 1
+   }
+  },
+  {
+   "category": "answer",
+   "room": "B",
+   "label": "W2-B-P03-973f72 trv-tech-111",
+   "firstAt": 7903,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 9,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-3",
+    "questionId": "trv-tech-111",
+    "choice": 1
+   }
+  },
+  {
+   "category": "answer",
+   "room": "A",
+   "label": "W2-A-P05-973f72 trv-food-075",
+   "firstAt": 8056,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 10,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-5",
+    "questionId": "trv-food-075",
+    "choice": 1
+   }
+  },
+  {
+   "category": "answer",
+   "room": "B",
+   "label": "W2-B-P05-973f72 trv-food-076",
+   "firstAt": 8067,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 6,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-5",
+    "questionId": "trv-food-076",
+    "choice": 1
+   }
+  },
+  {
+   "category": "answer",
+   "room": "A",
+   "label": "W2-A-P08-973f72 trv-legacy-12",
+   "firstAt": 8245,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 10,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-8",
+    "questionId": "trv-legacy-12",
+    "choice": 2
+   }
+  },
+  {
+   "category": "answer",
+   "room": "B",
+   "label": "W2-B-P08-973f72 trv-tech-111",
+   "firstAt": 8249,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 11,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-8",
+    "questionId": "trv-tech-111",
+    "choice": 2
+   }
+  },
+  {
+   "category": "answer",
+   "room": "A",
+   "label": "W2-A-P07-973f72 trv-legacy-12",
+   "firstAt": 8277,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 9,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-7",
+    "questionId": "trv-legacy-12",
+    "choice": 1
+   }
+  },
+  {
+   "category": "answer",
+   "room": "B",
+   "label": "W2-B-P07-973f72 trv-tech-111",
+   "firstAt": 8279,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 10,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-7",
+    "questionId": "trv-tech-111",
+    "choice": 1
+   }
+  },
+  {
+   "category": "answer",
+   "room": "B",
+   "label": "W2-B-P06-973f72 trv-ever-096",
+   "firstAt": 8299,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 7,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-6",
+    "questionId": "trv-ever-096",
+    "choice": 1
+   }
+  },
+  {
+   "category": "answer",
+   "room": "A",
+   "label": "W2-A-P06-973f72 trv-geog-031",
+   "firstAt": 8309,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 7,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-6",
+    "questionId": "trv-geog-031",
+    "choice": 1
+   }
+  },
+  {
+   "category": "answer",
+   "room": "A",
+   "label": "W2-A-P09-973f72 trv-food-075",
+   "firstAt": 8492,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 9,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-9",
+    "questionId": "trv-food-075",
+    "choice": 1
+   }
+  },
+  {
+   "category": "answer",
+   "room": "B",
+   "label": "W2-B-P09-973f72 trv-food-076",
+   "firstAt": 8498,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 7,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-9",
+    "questionId": "trv-food-076",
+    "choice": 1
+   }
+  },
+  {
+   "category": "answer",
+   "room": "A",
+   "label": "W2-A-P10-973f72 trv-geog-031",
+   "firstAt": 8692,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 8,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-10",
+    "questionId": "trv-geog-031",
+    "choice": 1
+   }
+  },
+  {
+   "category": "answer",
+   "room": "B",
+   "label": "W2-B-P10-973f72 trv-ever-096",
+   "firstAt": 8696,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 7,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-10",
+    "questionId": "trv-ever-096",
+    "choice": 1
+   }
+  },
+  {
+   "category": "answer",
+   "room": "A",
+   "label": "W2-A-P02-973f72 trv-food-075",
+   "firstAt": 8859,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 10,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-2",
+    "questionId": "trv-food-075",
+    "choice": 2
+   }
+  },
+  {
+   "category": "answer",
+   "room": "B",
+   "label": "W2-B-P02-973f72 trv-food-076",
+   "firstAt": 8865,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 8,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-2",
+    "questionId": "trv-food-076",
+    "choice": 2
+   }
+  },
+  {
+   "category": "answer",
+   "room": "A",
+   "label": "W2-A-P04-973f72 trv-legacy-12",
+   "firstAt": 8879,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 8,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-4",
+    "questionId": "trv-legacy-12",
+    "choice": 2
+   }
+  },
+  {
+   "category": "answer",
+   "room": "B",
+   "label": "W2-B-P04-973f72 trv-tech-111",
+   "firstAt": 8885,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 7,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-4",
+    "questionId": "trv-tech-111",
+    "choice": 2
+   }
+  },
+  {
+   "category": "answer",
+   "room": "A",
+   "label": "W2-A-P03-973f72 trv-geog-031",
+   "firstAt": 8987,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 9,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-3",
+    "questionId": "trv-geog-031",
+    "choice": 2
+   }
+  },
+  {
+   "category": "answer",
+   "room": "A",
+   "label": "W2-A-P08-973f72 trv-geog-031",
+   "firstAt": 8992,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 8,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-8",
+    "questionId": "trv-geog-031",
+    "choice": 3
+   }
+  },
+  {
+   "category": "answer",
+   "room": "B",
+   "label": "W2-B-P03-973f72 trv-ever-096",
+   "firstAt": 8994,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 11,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-3",
+    "questionId": "trv-ever-096",
+    "choice": 2
+   }
+  },
+  {
+   "category": "answer",
+   "room": "B",
+   "label": "W2-B-P08-973f72 trv-ever-096",
+   "firstAt": 8996,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 7,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-8",
+    "questionId": "trv-ever-096",
+    "choice": 3
+   }
+  },
+  {
+   "category": "answer",
+   "room": "B",
+   "label": "W2-B-P06-973f72 trv-food-076",
+   "firstAt": 9297,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 9,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-6",
+    "questionId": "trv-food-076",
+    "choice": 2
+   }
+  },
+  {
+   "category": "answer",
+   "room": "A",
+   "label": "W2-A-P06-973f72 trv-food-075",
+   "firstAt": 9307,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 7,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-6",
+    "questionId": "trv-food-075",
+    "choice": 2
+   }
+  },
+  {
+   "category": "answer",
+   "room": "A",
+   "label": "W2-A-P07-973f72 trv-geog-031",
+   "firstAt": 9391,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 8,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-7",
+    "questionId": "trv-geog-031",
+    "choice": 2
+   }
+  },
+  {
+   "category": "answer",
+   "room": "B",
+   "label": "W2-B-P07-973f72 trv-ever-096",
+   "firstAt": 9394,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 10,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-7",
+    "questionId": "trv-ever-096",
+    "choice": 2
+   }
+  },
+  {
+   "category": "answer",
+   "room": "A",
+   "label": "W2-A-P04-973f72 trv-geog-031",
+   "firstAt": 9599,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 8,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-4",
+    "questionId": "trv-geog-031",
+    "choice": 3
+   }
+  },
+  {
+   "category": "answer",
+   "room": "B",
+   "label": "W2-B-P04-973f72 trv-ever-096",
+   "firstAt": 9604,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 6,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-4",
+    "questionId": "trv-ever-096",
+    "choice": 3
+   }
+  },
+  {
+   "category": "answer",
+   "room": "A",
+   "label": "W2-A-P10-973f72 trv-food-075",
+   "firstAt": 9716,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 9,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-10",
+    "questionId": "trv-food-075",
+    "choice": 2
+   }
+  },
+  {
+   "category": "answer",
+   "room": "B",
+   "label": "W2-B-P10-973f72 trv-food-076",
+   "firstAt": 9718,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 10,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-10",
+    "questionId": "trv-food-076",
+    "choice": 2
+   }
+  },
+  {
+   "category": "answer",
+   "room": "A",
+   "label": "W2-A-P08-973f72 trv-food-075",
+   "firstAt": 9754,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 8,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-8",
+    "questionId": "trv-food-075",
+    "choice": 0
+   }
+  },
+  {
+   "category": "answer",
+   "room": "B",
+   "label": "W2-B-P08-973f72 trv-food-076",
+   "firstAt": 9756,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 11,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-8",
+    "questionId": "trv-food-076",
+    "choice": 0
+   }
+  },
+  {
+   "category": "answer",
+   "room": "A",
+   "label": "W2-A-P03-973f72 trv-food-075",
+   "firstAt": 10095,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 11,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-3",
+    "questionId": "trv-food-075",
+    "choice": 3
+   }
+  },
+  {
+   "category": "answer",
+   "room": "B",
+   "label": "W2-B-P03-973f72 trv-food-076",
+   "firstAt": 10103,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 9,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-3",
+    "questionId": "trv-food-076",
+    "choice": 3
+   }
+  },
+  {
+   "category": "answer",
+   "room": "A",
+   "label": "W2-A-P04-973f72 trv-food-075",
+   "firstAt": 10337,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 11,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-4",
+    "questionId": "trv-food-075",
+    "choice": 0
+   }
+  },
+  {
+   "category": "answer",
+   "room": "B",
+   "label": "W2-B-P04-973f72 trv-food-076",
+   "firstAt": 10340,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 12,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-4",
+    "questionId": "trv-food-076",
+    "choice": 0
+   }
+  },
+  {
+   "category": "answer",
+   "room": "A",
+   "label": "W2-A-P07-973f72 trv-food-075",
+   "firstAt": 10522,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 12,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-7",
+    "questionId": "trv-food-075",
+    "choice": 3
+   }
+  },
+  {
+   "category": "answer",
+   "room": "B",
+   "label": "W2-B-P07-973f72 trv-food-076",
+   "firstAt": 10526,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 11,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "player": "player-7",
+    "questionId": "trv-food-076",
+    "choice": 3
+   }
+  },
+  {
+   "category": "note",
+   "room": "A",
+   "label": "A note 1",
+   "firstAt": 11725,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 8,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "text": "W2 note 1 from room A W2CANARY-20261116T172846-973f72-A-de77a6db"
+   }
+  },
+  {
+   "category": "note",
+   "room": "B",
+   "label": "B note 1",
+   "firstAt": 11725,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 10,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "text": "W2 note 1 from room B W2CANARY-20261116T172846-973f72-B-f05ba009"
+   }
+  },
+  {
+   "category": "ready",
+   "room": "A",
+   "label": "W2-A-P01-973f72 ready (draw-guess)",
+   "firstAt": 11738,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 27,
+   "accepted": true,
+   "reason": null,
+   "persisted": null,
+   "lastError": null
+  },
+  {
+   "category": "ready",
+   "room": "A",
+   "label": "W2-A-P02-973f72 ready (draw-guess)",
+   "firstAt": 11739,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 32,
+   "accepted": true,
+   "reason": null,
+   "persisted": null,
+   "lastError": null
+  },
+  {
+   "category": "ready",
+   "room": "A",
+   "label": "W2-A-P03-973f72 ready (draw-guess)",
+   "firstAt": 11741,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 31,
+   "accepted": true,
+   "reason": null,
+   "persisted": null,
+   "lastError": null
+  },
+  {
+   "category": "ready",
+   "room": "A",
+   "label": "W2-A-P04-973f72 ready (draw-guess)",
+   "firstAt": 11741,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 55,
+   "accepted": true,
+   "reason": null,
+   "persisted": null,
+   "lastError": null
+  },
+  {
+   "category": "ready",
+   "room": "A",
+   "label": "W2-A-P05-973f72 ready (draw-guess)",
+   "firstAt": 11741,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 47,
+   "accepted": true,
+   "reason": null,
+   "persisted": null,
+   "lastError": null
+  },
+  {
+   "category": "ready",
+   "room": "A",
+   "label": "W2-A-P06-973f72 ready (draw-guess)",
+   "firstAt": 11741,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 61,
+   "accepted": true,
+   "reason": null,
+   "persisted": null,
+   "lastError": null
+  },
+  {
+   "category": "ready",
+   "room": "A",
+   "label": "W2-A-P07-973f72 ready (draw-guess)",
+   "firstAt": 11741,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 65,
+   "accepted": true,
+   "reason": null,
+   "persisted": null,
+   "lastError": null
+  },
+  {
+   "category": "ready",
+   "room": "A",
+   "label": "W2-A-P08-973f72 ready (draw-guess)",
+   "firstAt": 11741,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 71,
+   "accepted": true,
+   "reason": null,
+   "persisted": null,
+   "lastError": null
+  },
+  {
+   "category": "ready",
+   "room": "A",
+   "label": "W2-A-P09-973f72 ready (draw-guess)",
+   "firstAt": 11741,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 35,
+   "accepted": true,
+   "reason": null,
+   "persisted": null,
+   "lastError": null
+  },
+  {
+   "category": "ready",
+   "room": "A",
+   "label": "W2-A-P10-973f72 ready (draw-guess)",
+   "firstAt": 11742,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 78,
+   "accepted": true,
+   "reason": null,
+   "persisted": null,
+   "lastError": null
+  },
+  {
+   "category": "ready",
+   "room": "B",
+   "label": "W2-B-P01-973f72 ready (draw-guess)",
+   "firstAt": 11748,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 26,
+   "accepted": true,
+   "reason": null,
+   "persisted": null,
+   "lastError": null
+  },
+  {
+   "category": "ready",
+   "room": "B",
+   "label": "W2-B-P02-973f72 ready (draw-guess)",
+   "firstAt": 11748,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 35,
+   "accepted": true,
+   "reason": null,
+   "persisted": null,
+   "lastError": null
+  },
+  {
+   "category": "ready",
+   "room": "B",
+   "label": "W2-B-P03-973f72 ready (draw-guess)",
+   "firstAt": 11748,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 78,
+   "accepted": true,
+   "reason": null,
+   "persisted": null,
+   "lastError": null
+  },
+  {
+   "category": "ready",
+   "room": "B",
+   "label": "W2-B-P04-973f72 ready (draw-guess)",
+   "firstAt": 11748,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 84,
+   "accepted": true,
+   "reason": null,
+   "persisted": null,
+   "lastError": null
+  },
+  {
+   "category": "ready",
+   "room": "B",
+   "label": "W2-B-P05-973f72 ready (draw-guess)",
+   "firstAt": 11748,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 87,
+   "accepted": true,
+   "reason": null,
+   "persisted": null,
+   "lastError": null
+  },
+  {
+   "category": "ready",
+   "room": "B",
+   "label": "W2-B-P06-973f72 ready (draw-guess)",
+   "firstAt": 11748,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 43,
+   "accepted": true,
+   "reason": null,
+   "persisted": null,
+   "lastError": null
+  },
+  {
+   "category": "ready",
+   "room": "B",
+   "label": "W2-B-P07-973f72 ready (draw-guess)",
+   "firstAt": 11748,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 91,
+   "accepted": true,
+   "reason": null,
+   "persisted": null,
+   "lastError": null
+  },
+  {
+   "category": "ready",
+   "room": "B",
+   "label": "W2-B-P08-973f72 ready (draw-guess)",
+   "firstAt": 11749,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 100,
+   "accepted": true,
+   "reason": null,
+   "persisted": null,
+   "lastError": null
+  },
+  {
+   "category": "ready",
+   "room": "B",
+   "label": "W2-B-P09-973f72 ready (draw-guess)",
+   "firstAt": 11749,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 109,
+   "accepted": true,
+   "reason": null,
+   "persisted": null,
+   "lastError": null
+  },
+  {
+   "category": "ready",
+   "room": "B",
+   "label": "W2-B-P10-973f72 ready (draw-guess)",
+   "firstAt": 11749,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 103,
+   "accepted": true,
+   "reason": null,
+   "persisted": null,
+   "lastError": null
+  },
+  {
+   "category": "stroke",
+   "room": "A",
+   "label": "A turn 1 strokes 1",
+   "firstAt": 11836,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 8,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 0,
+    "message": 0,
+    "strokes": [
+     0,
+     1,
+     2
+    ],
+    "digest": "6617f8810583cfa5ee62e22740bbfda4"
+   }
+  },
+  {
+   "category": "stroke",
+   "room": "B",
+   "label": "B turn 1 strokes 1",
+   "firstAt": 11865,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 7,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 0,
+    "message": 0,
+    "strokes": [
+     0,
+     1,
+     2
+    ],
+    "digest": "35b8c7aaf3d22da80910d50cd5e4125b"
+   }
+  },
+  {
+   "category": "stroke",
+   "room": "A",
+   "label": "A turn 1 strokes 2",
+   "firstAt": 12094,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 8,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 0,
+    "message": 1,
+    "strokes": [
+     3,
+     4,
+     5
+    ],
+    "digest": "4ceae486c6f6a0b3452e5ce8a6d2bdbf"
+   }
+  },
+  {
+   "category": "stroke",
+   "room": "B",
+   "label": "B turn 1 strokes 2",
+   "firstAt": 12123,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 8,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 0,
+    "message": 1,
+    "strokes": [
+     3,
+     4,
+     5
+    ],
+    "digest": "6f79ebf69188e9adca93ae1fcb3236df"
+   }
+  },
+  {
+   "category": "stroke",
+   "room": "A",
+   "label": "A turn 1 strokes 3",
+   "firstAt": 12353,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 10,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 0,
+    "message": 2,
+    "strokes": [
+     6,
+     7,
+     8
+    ],
+    "digest": "9a95b22f11908639e7f62056537ff007"
+   }
+  },
+  {
+   "category": "stroke",
+   "room": "B",
+   "label": "B turn 1 strokes 3",
+   "firstAt": 12381,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 8,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 0,
+    "message": 2,
+    "strokes": [
+     6,
+     7,
+     8
+    ],
+    "digest": "ff530aec20499a3eb05c343cc23b2963"
+   }
+  },
+  {
+   "category": "stroke",
+   "room": "A",
+   "label": "A turn 1 strokes 4",
+   "firstAt": 12614,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 9,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 0,
+    "message": 3,
+    "strokes": [
+     9,
+     10,
+     11
+    ],
+    "digest": "a89af40a42607e6f8627a996cc54aae7"
+   }
+  },
+  {
+   "category": "stroke",
+   "room": "B",
+   "label": "B turn 1 strokes 4",
+   "firstAt": 12639,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 10,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 0,
+    "message": 3,
+    "strokes": [
+     9,
+     10,
+     11
+    ],
+    "digest": "d3dc550be08b42a83c6efe2f9ff4105d"
+   }
+  },
+  {
+   "category": "stroke",
+   "room": "A",
+   "label": "A turn 1 strokes 5",
+   "firstAt": 12874,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 9,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 0,
+    "message": 4,
+    "strokes": [
+     12,
+     13,
+     14
+    ],
+    "digest": "473e234d500fd34d52391b773c480ea6"
+   }
+  },
+  {
+   "category": "stroke",
+   "room": "B",
+   "label": "B turn 1 strokes 5",
+   "firstAt": 12900,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 9,
+   "accepted": true,
+   "reason": null,
+   "persisted": false,
+   "lastError": null,
+   "expect": {
+    "turn": 0,
+    "message": 4,
+    "strokes": [
+     12,
+     13,
+     14
+    ],
+    "digest": "99a6476247ece5d5701bd087ed26dab9"
+   },
+   "readBack": "stored pieces differ from what was sent"
+  },
+  {
+   "category": "stroke",
+   "room": "A",
+   "label": "A turn 1 strokes 6",
+   "firstAt": 13134,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 12,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 0,
+    "message": 5,
+    "strokes": [
+     15,
+     16,
+     17
+    ],
+    "digest": "bce17c1c8dc557deb2ca1cffe0d3cdfd"
+   }
+  },
+  {
+   "category": "stroke",
+   "room": "B",
+   "label": "B turn 1 strokes 6",
+   "firstAt": 13159,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 10,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 0,
+    "message": 5,
+    "strokes": [
+     15,
+     16,
+     17
+    ],
+    "digest": "a2db7165e6ea5956f89cdece33dc20f5"
+   }
+  },
+  {
+   "category": "note",
+   "room": "A",
+   "label": "A note 2",
+   "firstAt": 13234,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 6,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "text": "W2 note 2 from room A W2CANARY-20261116T172846-973f72-A-de77a6db"
+   }
+  },
+  {
+   "category": "stroke",
+   "room": "A",
+   "label": "A turn 1 strokes 7",
+   "firstAt": 13396,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 9,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 0,
+    "message": 6,
+    "strokes": [
+     18,
+     19,
+     20
+    ],
+    "digest": "fe3fc7c027ca73bfc51eae050bac9854"
+   }
+  },
+  {
+   "category": "stroke",
+   "room": "B",
+   "label": "B turn 1 strokes 7",
+   "firstAt": 13420,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 9,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 0,
+    "message": 6,
+    "strokes": [
+     18,
+     19,
+     20
+    ],
+    "digest": "7210b3a219a308b4ace787c4cd8580c0"
+   }
+  },
+  {
+   "category": "note",
+   "room": "B",
+   "label": "B note 2",
+   "firstAt": 13436,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 4,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "text": "W2 note 2 from room B W2CANARY-20261116T172846-973f72-B-f05ba009"
+   }
+  },
+  {
+   "category": "stroke",
+   "room": "A",
+   "label": "A turn 1 strokes 8",
+   "firstAt": 13656,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 11,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 0,
+    "message": 7,
+    "strokes": [
+     21,
+     22,
+     23
+    ],
+    "digest": "ad68d7635dfad99553762c3a08516678"
+   }
+  },
+  {
+   "category": "stroke",
+   "room": "B",
+   "label": "B turn 1 strokes 8",
+   "firstAt": 13679,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 11,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 0,
+    "message": 7,
+    "strokes": [
+     21,
+     22,
+     23
+    ],
+    "digest": "146adcbc3982ff3ccac7d9aeb8981a11"
+   }
+  },
+  {
+   "category": "guess",
+   "room": "A",
+   "label": "A turn 1 W2-A-P01-973f72 guess",
+   "firstAt": 13922,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 12,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 0,
+    "player": "player-1"
+   }
+  },
+  {
+   "category": "guess",
+   "room": "A",
+   "label": "A turn 1 W2-A-P02-973f72 guess",
+   "firstAt": 13922,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 19,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 0,
+    "player": "player-2"
+   }
+  },
+  {
+   "category": "guess",
+   "room": "A",
+   "label": "A turn 1 W2-A-P03-973f72 guess",
+   "firstAt": 13923,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 21,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 0,
+    "player": "player-3"
+   }
+  },
+  {
+   "category": "guess",
+   "room": "A",
+   "label": "A turn 1 W2-A-P04-973f72 guess",
+   "firstAt": 13923,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 26,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 0,
+    "player": "player-4"
+   }
+  },
+  {
+   "category": "guess",
+   "room": "A",
+   "label": "A turn 1 W2-A-P05-973f72 guess",
+   "firstAt": 13923,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 31,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 0,
+    "player": "player-5"
+   }
+  },
+  {
+   "category": "guess",
+   "room": "A",
+   "label": "A turn 1 W2-A-P06-973f72 guess",
+   "firstAt": 13923,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 36,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 0,
+    "player": "player-6"
+   }
+  },
+  {
+   "category": "guess",
+   "room": "A",
+   "label": "A turn 1 W2-A-P07-973f72 guess",
+   "firstAt": 13923,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 40,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 0,
+    "player": "player-7"
+   }
+  },
+  {
+   "category": "guess",
+   "room": "A",
+   "label": "A turn 1 W2-A-P08-973f72 guess",
+   "firstAt": 13923,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 45,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 0,
+    "player": "player-8"
+   }
+  },
+  {
+   "category": "guess",
+   "room": "A",
+   "label": "A turn 1 W2-A-P10-973f72 guess",
+   "firstAt": 13923,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 51,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 0,
+    "player": "player-10"
+   }
+  },
+  {
+   "category": "guess",
+   "room": "B",
+   "label": "B turn 1 W2-B-P02-973f72 guess",
+   "firstAt": 13975,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 10,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 0,
+    "player": "player-2"
+   }
+  },
+  {
+   "category": "guess",
+   "room": "B",
+   "label": "B turn 1 W2-B-P03-973f72 guess",
+   "firstAt": 13976,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 14,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 0,
+    "player": "player-3"
+   }
+  },
+  {
+   "category": "guess",
+   "room": "B",
+   "label": "B turn 1 W2-B-P04-973f72 guess",
+   "firstAt": 13976,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 18,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 0,
+    "player": "player-4"
+   }
+  },
+  {
+   "category": "guess",
+   "room": "B",
+   "label": "B turn 1 W2-B-P05-973f72 guess",
+   "firstAt": 13976,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 22,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 0,
+    "player": "player-5"
+   }
+  },
+  {
+   "category": "guess",
+   "room": "B",
+   "label": "B turn 1 W2-B-P06-973f72 guess",
+   "firstAt": 13976,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 26,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 0,
+    "player": "player-6"
+   }
+  },
+  {
+   "category": "guess",
+   "room": "B",
+   "label": "B turn 1 W2-B-P07-973f72 guess",
+   "firstAt": 13977,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 30,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 0,
+    "player": "player-7"
+   }
+  },
+  {
+   "category": "guess",
+   "room": "B",
+   "label": "B turn 1 W2-B-P08-973f72 guess",
+   "firstAt": 13977,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 33,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 0,
+    "player": "player-8"
+   }
+  },
+  {
+   "category": "guess",
+   "room": "B",
+   "label": "B turn 1 W2-B-P09-973f72 guess",
+   "firstAt": 13977,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 38,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 0,
+    "player": "player-9"
+   }
+  },
+  {
+   "category": "guess",
+   "room": "B",
+   "label": "B turn 1 W2-B-P10-973f72 guess",
+   "firstAt": 13977,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 42,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 0,
+    "player": "player-10"
+   }
+  },
+  {
+   "category": "note",
+   "room": "A",
+   "label": "A note 3",
+   "firstAt": 14741,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 7,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "text": "W2 note 3 from room A W2CANARY-20261116T172846-973f72-A-de77a6db"
+   }
+  },
+  {
+   "category": "note",
+   "room": "B",
+   "label": "B note 3",
+   "firstAt": 15140,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 7,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "text": "W2 note 3 from room B W2CANARY-20261116T172846-973f72-B-f05ba009"
+   }
+  },
+  {
+   "category": "note",
+   "room": "A",
+   "label": "A note 4",
+   "firstAt": 16248,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 7,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "text": "W2 note 4 from room A W2CANARY-20261116T172846-973f72-A-de77a6db"
+   }
+  },
+  {
+   "category": "note",
+   "room": "B",
+   "label": "B note 4",
+   "firstAt": 16847,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 5,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "text": "W2 note 4 from room B W2CANARY-20261116T172846-973f72-B-f05ba009"
+   }
+  },
+  {
+   "category": "note",
+   "room": "A",
+   "label": "A note 5",
+   "firstAt": 17756,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 6,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "text": "W2 note 5 from room A W2CANARY-20261116T172846-973f72-A-de77a6db"
+   }
+  },
+  {
+   "category": "note",
+   "room": "B",
+   "label": "B note 5",
+   "firstAt": 18553,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 6,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "text": "W2 note 5 from room B W2CANARY-20261116T172846-973f72-B-f05ba009"
+   }
+  },
+  {
+   "category": "stroke",
+   "room": "B",
+   "label": "B turn 2 strokes 1",
+   "firstAt": 22117,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 6,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 1,
+    "message": 0,
+    "strokes": [
+     0,
+     1,
+     2
+    ],
+    "digest": "e6c6a030581bab5c1e892daca3b1c5b7"
+   }
+  },
+  {
+   "category": "stroke",
+   "room": "A",
+   "label": "A turn 2 strokes 1",
+   "firstAt": 22118,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 9,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 1,
+    "message": 0,
+    "strokes": [
+     0,
+     1,
+     2
+    ],
+    "digest": "2a7d26262d82d7c0f445db8f29346dd1"
+   }
+  },
+  {
+   "category": "stroke",
+   "room": "B",
+   "label": "B turn 2 strokes 2",
+   "firstAt": 22373,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 10,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 1,
+    "message": 1,
+    "strokes": [
+     3,
+     4,
+     5
+    ],
+    "digest": "d0e81ad22fbebe1570fe849121a9a179"
+   }
+  },
+  {
+   "category": "stroke",
+   "room": "A",
+   "label": "A turn 2 strokes 2",
+   "firstAt": 22377,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 12,
+   "accepted": true,
+   "reason": null,
+   "persisted": false,
+   "lastError": null,
+   "expect": {
+    "turn": 1,
+    "message": 1,
+    "strokes": [
+     3,
+     4,
+     5
+    ],
+    "digest": "8b5a438abece63f3c2e4dcc3975332e7"
+   },
+   "readBack": "stored pieces differ from what was sent"
+  },
+  {
+   "category": "stroke",
+   "room": "B",
+   "label": "B turn 2 strokes 3",
+   "firstAt": 22633,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 12,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 1,
+    "message": 2,
+    "strokes": [
+     6,
+     7,
+     8
+    ],
+    "digest": "c277e69a11af8d5efc99913292866d19"
+   }
+  },
+  {
+   "category": "stroke",
+   "room": "A",
+   "label": "A turn 2 strokes 3",
+   "firstAt": 22639,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 9,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 1,
+    "message": 2,
+    "strokes": [
+     6,
+     7,
+     8
+    ],
+    "digest": "17e11a2e02e8c005641db888318a2b19"
+   }
+  },
+  {
+   "category": "stroke",
+   "room": "B",
+   "label": "B turn 2 strokes 4",
+   "firstAt": 22895,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 9,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 1,
+    "message": 3,
+    "strokes": [
+     9,
+     10,
+     11
+    ],
+    "digest": "57278212feea14f258ce85884cc78f81"
+   }
+  },
+  {
+   "category": "stroke",
+   "room": "A",
+   "label": "A turn 2 strokes 4",
+   "firstAt": 22897,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 12,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 1,
+    "message": 3,
+    "strokes": [
+     9,
+     10,
+     11
+    ],
+    "digest": "17e4de0f6c36fa5d0419c47ff2a94a63"
+   }
+  },
+  {
+   "category": "stroke",
+   "room": "B",
+   "label": "B turn 2 strokes 5",
+   "firstAt": 23154,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 10,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 1,
+    "message": 4,
+    "strokes": [
+     12,
+     13,
+     14
+    ],
+    "digest": "e999bf9ab4c1448e90209cb9352f6b96"
+   }
+  },
+  {
+   "category": "stroke",
+   "room": "A",
+   "label": "A turn 2 strokes 5",
+   "firstAt": 23159,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 12,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 1,
+    "message": 4,
+    "strokes": [
+     12,
+     13,
+     14
+    ],
+    "digest": "d19a6e0ca73cd9755a58b60efb5f19cc"
+   }
+  },
+  {
+   "category": "stroke",
+   "room": "B",
+   "label": "B turn 2 strokes 6",
+   "firstAt": 23415,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 9,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 1,
+    "message": 5,
+    "strokes": [
+     15,
+     16,
+     17
+    ],
+    "digest": "8eb2da9f4e61326e087bf66bfc4686be"
+   }
+  },
+  {
+   "category": "stroke",
+   "room": "A",
+   "label": "A turn 2 strokes 6",
+   "firstAt": 23421,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 10,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 1,
+    "message": 5,
+    "strokes": [
+     15,
+     16,
+     17
+    ],
+    "digest": "cbba5d4d685393231976096d2be1c309"
+   }
+  },
+  {
+   "category": "stroke",
+   "room": "B",
+   "label": "B turn 2 strokes 7",
+   "firstAt": 23674,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 10,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 1,
+    "message": 6,
+    "strokes": [
+     18,
+     19,
+     20
+    ],
+    "digest": "094ed4abc6f6ce28899fccc6413117c6"
+   }
+  },
+  {
+   "category": "stroke",
+   "room": "A",
+   "label": "A turn 2 strokes 7",
+   "firstAt": 23681,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 8,
+   "accepted": true,
+   "reason": null,
+   "persisted": false,
+   "lastError": null,
+   "expect": {
+    "turn": 1,
+    "message": 6,
+    "strokes": [
+     18,
+     19,
+     20
+    ],
+    "digest": "ed37b424b7840f9a670da24c4ef5faed"
+   },
+   "readBack": "stored pieces differ from what was sent"
+  },
+  {
+   "category": "stroke",
+   "room": "B",
+   "label": "B turn 2 strokes 8",
+   "firstAt": 23935,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 10,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 1,
+    "message": 7,
+    "strokes": [
+     21,
+     22,
+     23
+    ],
+    "digest": "b2af0be114783ebaba96981fa194400c"
+   }
+  },
+  {
+   "category": "stroke",
+   "room": "A",
+   "label": "A turn 2 strokes 8",
+   "firstAt": 23939,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 13,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 1,
+    "message": 7,
+    "strokes": [
+     21,
+     22,
+     23
+    ],
+    "digest": "3c65921cb8e6f27487af5a550dcb8401"
+   }
+  },
+  {
+   "category": "guess",
+   "room": "B",
+   "label": "B turn 2 W2-B-P01-973f72 guess",
+   "firstAt": 24199,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 17,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 1,
+    "player": "player-1"
+   }
+  },
+  {
+   "category": "guess",
+   "room": "B",
+   "label": "B turn 2 W2-B-P02-973f72 guess",
+   "firstAt": 24200,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 20,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 1,
+    "player": "player-2"
+   }
+  },
+  {
+   "category": "guess",
+   "room": "B",
+   "label": "B turn 2 W2-B-P04-973f72 guess",
+   "firstAt": 24200,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 36,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 1,
+    "player": "player-4"
+   }
+  },
+  {
+   "category": "guess",
+   "room": "B",
+   "label": "B turn 2 W2-B-P05-973f72 guess",
+   "firstAt": 24200,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 40,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 1,
+    "player": "player-5"
+   }
+  },
+  {
+   "category": "guess",
+   "room": "B",
+   "label": "B turn 2 W2-B-P06-973f72 guess",
+   "firstAt": 24200,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 61,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 1,
+    "player": "player-6"
+   }
+  },
+  {
+   "category": "guess",
+   "room": "B",
+   "label": "B turn 2 W2-B-P07-973f72 guess",
+   "firstAt": 24200,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 84,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 1,
+    "player": "player-7"
+   }
+  },
+  {
+   "category": "guess",
+   "room": "B",
+   "label": "B turn 2 W2-B-P08-973f72 guess",
+   "firstAt": 24200,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 24,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 1,
+    "player": "player-8"
+   }
+  },
+  {
+   "category": "guess",
+   "room": "B",
+   "label": "B turn 2 W2-B-P09-973f72 guess",
+   "firstAt": 24201,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 89,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 1,
+    "player": "player-9"
+   }
+  },
+  {
+   "category": "guess",
+   "room": "B",
+   "label": "B turn 2 W2-B-P10-973f72 guess",
+   "firstAt": 24201,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 95,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 1,
+    "player": "player-10"
+   }
+  },
+  {
+   "category": "guess",
+   "room": "A",
+   "label": "A turn 2 W2-A-P01-973f72 guess",
+   "firstAt": 24224,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 23,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 1,
+    "player": "player-1"
+   }
+  },
+  {
+   "category": "guess",
+   "room": "A",
+   "label": "A turn 2 W2-A-P02-973f72 guess",
+   "firstAt": 24225,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 25,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 1,
+    "player": "player-2"
+   }
+  },
+  {
+   "category": "guess",
+   "room": "A",
+   "label": "A turn 2 W2-A-P03-973f72 guess",
+   "firstAt": 24225,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 30,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 1,
+    "player": "player-3"
+   }
+  },
+  {
+   "category": "guess",
+   "room": "A",
+   "label": "A turn 2 W2-A-P05-973f72 guess",
+   "firstAt": 24225,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 48,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 1,
+    "player": "player-5"
+   }
+  },
+  {
+   "category": "guess",
+   "room": "A",
+   "label": "A turn 2 W2-A-P06-973f72 guess",
+   "firstAt": 24225,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 41,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 1,
+    "player": "player-6"
+   }
+  },
+  {
+   "category": "guess",
+   "room": "A",
+   "label": "A turn 2 W2-A-P07-973f72 guess",
+   "firstAt": 24225,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 53,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 1,
+    "player": "player-7"
+   }
+  },
+  {
+   "category": "guess",
+   "room": "A",
+   "label": "A turn 2 W2-A-P08-973f72 guess",
+   "firstAt": 24225,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 76,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 1,
+    "player": "player-8"
+   }
+  },
+  {
+   "category": "guess",
+   "room": "A",
+   "label": "A turn 2 W2-A-P09-973f72 guess",
+   "firstAt": 24225,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 84,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 1,
+    "player": "player-9"
+   }
+  },
+  {
+   "category": "guess",
+   "room": "A",
+   "label": "A turn 2 W2-A-P10-973f72 guess",
+   "firstAt": 24225,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 91,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 1,
+    "player": "player-10"
+   }
+  },
+  {
+   "category": "stroke",
+   "room": "B",
+   "label": "B turn 3 strokes 1",
+   "firstAt": 32420,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 7,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 2,
+    "message": 0,
+    "strokes": [
+     0,
+     1,
+     2
+    ],
+    "digest": "8d61d25d6df530d0c739df24399d7e43"
+   }
+  },
+  {
+   "category": "stroke",
+   "room": "A",
+   "label": "A turn 3 strokes 1",
+   "firstAt": 32421,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 11,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 2,
+    "message": 0,
+    "strokes": [
+     0,
+     1,
+     2
+    ],
+    "digest": "1a46bdfdda42b94e0ba214add00309d7"
+   }
+  },
+  {
+   "category": "stroke",
+   "room": "B",
+   "label": "B turn 3 strokes 2",
+   "firstAt": 32677,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 11,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 2,
+    "message": 1,
+    "strokes": [
+     3,
+     4,
+     5
+    ],
+    "digest": "58e240d42bb8aa2c22e7cc04e98cf73c"
+   }
+  },
+  {
+   "category": "stroke",
+   "room": "A",
+   "label": "A turn 3 strokes 2",
+   "firstAt": 32682,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 13,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 2,
+    "message": 1,
+    "strokes": [
+     3,
+     4,
+     5
+    ],
+    "digest": "3eab56d35cff078f050f6d0e575ab66d"
+   }
+  },
+  {
+   "category": "stroke",
+   "room": "B",
+   "label": "B turn 3 strokes 3",
+   "firstAt": 32939,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 14,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 2,
+    "message": 2,
+    "strokes": [
+     6,
+     7,
+     8
+    ],
+    "digest": "82088d87ca4c07664e14270fed1a5b48"
+   }
+  },
+  {
+   "category": "stroke",
+   "room": "A",
+   "label": "A turn 3 strokes 3",
+   "firstAt": 32945,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 17,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 2,
+    "message": 2,
+    "strokes": [
+     6,
+     7,
+     8
+    ],
+    "digest": "158b1c6d753c6e0633a1a5643632449e"
+   }
+  },
+  {
+   "category": "stroke",
+   "room": "B",
+   "label": "B turn 3 strokes 4",
+   "firstAt": 33203,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 12,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 2,
+    "message": 3,
+    "strokes": [
+     9,
+     10,
+     11
+    ],
+    "digest": "c6f116580b4c0739e39c8b69f70aee21"
+   }
+  },
+  {
+   "category": "stroke",
+   "room": "A",
+   "label": "A turn 3 strokes 4",
+   "firstAt": 33212,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 11,
+   "accepted": true,
+   "reason": null,
+   "persisted": false,
+   "lastError": null,
+   "expect": {
+    "turn": 2,
+    "message": 3,
+    "strokes": [
+     9,
+     10,
+     11
+    ],
+    "digest": "9fe067b4fa08e5db0edec92011dd6be2"
+   },
+   "readBack": "stored pieces differ from what was sent"
+  },
+  {
+   "category": "stroke",
+   "room": "B",
+   "label": "B turn 3 strokes 5",
+   "firstAt": 33466,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 12,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 2,
+    "message": 4,
+    "strokes": [
+     12,
+     13,
+     14
+    ],
+    "digest": "13de6f31a08bf05e8d475ce7646553bd"
+   }
+  },
+  {
+   "category": "stroke",
+   "room": "A",
+   "label": "A turn 3 strokes 5",
+   "firstAt": 33473,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 10,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 2,
+    "message": 4,
+    "strokes": [
+     12,
+     13,
+     14
+    ],
+    "digest": "01b978df0d1978fdb36c9046a3077f7c"
+   }
+  },
+  {
+   "category": "stroke",
+   "room": "B",
+   "label": "B turn 3 strokes 6",
+   "firstAt": 33728,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 15,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 2,
+    "message": 5,
+    "strokes": [
+     15,
+     16,
+     17
+    ],
+    "digest": "03f032dceddb2f17ec555a593db9b986"
+   }
+  },
+  {
+   "category": "stroke",
+   "room": "A",
+   "label": "A turn 3 strokes 6",
+   "firstAt": 33734,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 19,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 2,
+    "message": 5,
+    "strokes": [
+     15,
+     16,
+     17
+    ],
+    "digest": "a6983aeb003493d48cabf35654e409fd"
+   }
+  },
+  {
+   "category": "stroke",
+   "room": "B",
+   "label": "B turn 3 strokes 7",
+   "firstAt": 33993,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 11,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 2,
+    "message": 6,
+    "strokes": [
+     18,
+     19,
+     20
+    ],
+    "digest": "046a83cb6283fd0ce93046aa4743c089"
+   }
+  },
+  {
+   "category": "stroke",
+   "room": "A",
+   "label": "A turn 3 strokes 7",
+   "firstAt": 34004,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 10,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 2,
+    "message": 6,
+    "strokes": [
+     18,
+     19,
+     20
+    ],
+    "digest": "7cd7c529888b1bda98aef9d152505caf"
+   }
+  },
+  {
+   "category": "stroke",
+   "room": "B",
+   "label": "B turn 3 strokes 8",
+   "firstAt": 34255,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 11,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 2,
+    "message": 7,
+    "strokes": [
+     21,
+     22,
+     23
+    ],
+    "digest": "e53c77184f7be9a74e13716f8ecf5ef3"
+   }
+  },
+  {
+   "category": "stroke",
+   "room": "A",
+   "label": "A turn 3 strokes 8",
+   "firstAt": 34264,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 9,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 2,
+    "message": 7,
+    "strokes": [
+     21,
+     22,
+     23
+    ],
+    "digest": "2e91ab491c9312bb416bec5a0770b4c9"
+   }
+  },
+  {
+   "category": "guess",
+   "room": "B",
+   "label": "B turn 3 W2-B-P01-973f72 guess",
+   "firstAt": 34523,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 25,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 2,
+    "player": "player-1"
+   }
+  },
+  {
+   "category": "guess",
+   "room": "B",
+   "label": "B turn 3 W2-B-P02-973f72 guess",
+   "firstAt": 34523,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 31,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 2,
+    "player": "player-2"
+   }
+  },
+  {
+   "category": "guess",
+   "room": "B",
+   "label": "B turn 3 W2-B-P03-973f72 guess",
+   "firstAt": 34524,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 91,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 2,
+    "player": "player-3"
+   }
+  },
+  {
+   "category": "guess",
+   "room": "B",
+   "label": "B turn 3 W2-B-P04-973f72 guess",
+   "firstAt": 34524,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 44,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 2,
+    "player": "player-4"
+   }
+  },
+  {
+   "category": "guess",
+   "room": "B",
+   "label": "B turn 3 W2-B-P05-973f72 guess",
+   "firstAt": 34524,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 61,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 2,
+    "player": "player-5"
+   }
+  },
+  {
+   "category": "guess",
+   "room": "B",
+   "label": "B turn 3 W2-B-P07-973f72 guess",
+   "firstAt": 34524,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 43,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 2,
+    "player": "player-7"
+   }
+  },
+  {
+   "category": "guess",
+   "room": "B",
+   "label": "B turn 3 W2-B-P08-973f72 guess",
+   "firstAt": 34524,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 97,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 2,
+    "player": "player-8"
+   }
+  },
+  {
+   "category": "guess",
+   "room": "B",
+   "label": "B turn 3 W2-B-P09-973f72 guess",
+   "firstAt": 34524,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 31,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 2,
+    "player": "player-9"
+   }
+  },
+  {
+   "category": "guess",
+   "room": "B",
+   "label": "B turn 3 W2-B-P10-973f72 guess",
+   "firstAt": 34525,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 101,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 2,
+    "player": "player-10"
+   }
+  },
+  {
+   "category": "guess",
+   "room": "A",
+   "label": "A turn 3 W2-A-P01-973f72 guess",
+   "firstAt": 34556,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 21,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 2,
+    "player": "player-1"
+   }
+  },
+  {
+   "category": "guess",
+   "room": "A",
+   "label": "A turn 3 W2-A-P02-973f72 guess",
+   "firstAt": 34556,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 24,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 2,
+    "player": "player-2"
+   }
+  },
+  {
+   "category": "guess",
+   "room": "A",
+   "label": "A turn 3 W2-A-P03-973f72 guess",
+   "firstAt": 34556,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 31,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 2,
+    "player": "player-3"
+   }
+  },
+  {
+   "category": "guess",
+   "room": "A",
+   "label": "A turn 3 W2-A-P04-973f72 guess",
+   "firstAt": 34556,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 44,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 2,
+    "player": "player-4"
+   }
+  },
+  {
+   "category": "guess",
+   "room": "A",
+   "label": "A turn 3 W2-A-P06-973f72 guess",
+   "firstAt": 34556,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 49,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 2,
+    "player": "player-6"
+   }
+  },
+  {
+   "category": "guess",
+   "room": "A",
+   "label": "A turn 3 W2-A-P07-973f72 guess",
+   "firstAt": 34556,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 54,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 2,
+    "player": "player-7"
+   }
+  },
+  {
+   "category": "guess",
+   "room": "A",
+   "label": "A turn 3 W2-A-P08-973f72 guess",
+   "firstAt": 34557,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 37,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 2,
+    "player": "player-8"
+   }
+  },
+  {
+   "category": "guess",
+   "room": "A",
+   "label": "A turn 3 W2-A-P09-973f72 guess",
+   "firstAt": 34557,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 74,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 2,
+    "player": "player-9"
+   }
+  },
+  {
+   "category": "guess",
+   "room": "A",
+   "label": "A turn 3 W2-A-P10-973f72 guess",
+   "firstAt": 34557,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 80,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 2,
+    "player": "player-10"
+   }
+  },
+  {
+   "category": "stroke",
+   "room": "A",
+   "label": "A turn 4 strokes 1",
+   "firstAt": 42749,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 7,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 3,
+    "message": 0,
+    "strokes": [
+     0,
+     1,
+     2
+    ],
+    "digest": "da62007f8afbe54f846b7b7bd3c3c65f"
+   }
+  },
+  {
+   "category": "stroke",
+   "room": "B",
+   "label": "B turn 4 strokes 1",
+   "firstAt": 42750,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 12,
+   "accepted": true,
+   "reason": null,
+   "persisted": false,
+   "lastError": null,
+   "expect": {
+    "turn": 3,
+    "message": 0,
+    "strokes": [
+     0,
+     1,
+     2
+    ],
+    "digest": "dd1a09db728a0a8640ffafe1431a0c4e"
+   },
+   "readBack": "stored pieces differ from what was sent"
+  },
+  {
+   "category": "stroke",
+   "room": "A",
+   "label": "A turn 4 strokes 2",
+   "firstAt": 43007,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 9,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 3,
+    "message": 1,
+    "strokes": [
+     3,
+     4,
+     5
+    ],
+    "digest": "d87edca5dd3b3852b13376aded2e7503"
+   }
+  },
+  {
+   "category": "stroke",
+   "room": "B",
+   "label": "B turn 4 strokes 2",
+   "firstAt": 43012,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 11,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 3,
+    "message": 1,
+    "strokes": [
+     3,
+     4,
+     5
+    ],
+    "digest": "9c88748c39f754f87fc16dc67fc6b8b4"
+   }
+  },
+  {
+   "category": "stroke",
+   "room": "A",
+   "label": "A turn 4 strokes 3",
+   "firstAt": 43267,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 10,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 3,
+    "message": 2,
+    "strokes": [
+     6,
+     7,
+     8
+    ],
+    "digest": "b32328d3d9b62a993210fbf43f8b39de"
+   }
+  },
+  {
+   "category": "stroke",
+   "room": "B",
+   "label": "B turn 4 strokes 3",
+   "firstAt": 43274,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 9,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 3,
+    "message": 2,
+    "strokes": [
+     6,
+     7,
+     8
+    ],
+    "digest": "26d0848103efb0948d9cbeab133a879f"
+   }
+  },
+  {
+   "category": "stroke",
+   "room": "A",
+   "label": "A turn 4 strokes 4",
+   "firstAt": 43527,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 11,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 3,
+    "message": 3,
+    "strokes": [
+     9,
+     10,
+     11
+    ],
+    "digest": "3ff84f8cacedc5545fb5acd59b4c737b"
+   }
+  },
+  {
+   "category": "stroke",
+   "room": "B",
+   "label": "B turn 4 strokes 4",
+   "firstAt": 43533,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 12,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 3,
+    "message": 3,
+    "strokes": [
+     9,
+     10,
+     11
+    ],
+    "digest": "fe95dfbd01e9f1a707d89753d251721d"
+   }
+  },
+  {
+   "category": "stroke",
+   "room": "A",
+   "label": "A turn 4 strokes 5",
+   "firstAt": 43789,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 12,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 3,
+    "message": 4,
+    "strokes": [
+     12,
+     13,
+     14
+    ],
+    "digest": "5e99d2640eefc531f89b1cf9db6bd35f"
+   }
+  },
+  {
+   "category": "stroke",
+   "room": "B",
+   "label": "B turn 4 strokes 5",
+   "firstAt": 43795,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 14,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 3,
+    "message": 4,
+    "strokes": [
+     12,
+     13,
+     14
+    ],
+    "digest": "910baf227411e67e0d583e48be24d78a"
+   }
+  },
+  {
+   "category": "stroke",
+   "room": "A",
+   "label": "A turn 4 strokes 6",
+   "firstAt": 44051,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 13,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 3,
+    "message": 5,
+    "strokes": [
+     15,
+     16,
+     17
+    ],
+    "digest": "9b2e0500c0bb08bf7ec9655f7482ffcb"
+   }
+  },
+  {
+   "category": "stroke",
+   "room": "B",
+   "label": "B turn 4 strokes 6",
+   "firstAt": 44059,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 10,
+   "accepted": true,
+   "reason": null,
+   "persisted": false,
+   "lastError": null,
+   "expect": {
+    "turn": 3,
+    "message": 5,
+    "strokes": [
+     15,
+     16,
+     17
+    ],
+    "digest": "3e6294d26b868e2f6bee5818e60f0e1c"
+   },
+   "readBack": "stored pieces differ from what was sent"
+  },
+  {
+   "category": "stroke",
+   "room": "A",
+   "label": "A turn 4 strokes 7",
+   "firstAt": 44315,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 11,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 3,
+    "message": 6,
+    "strokes": [
+     18,
+     19,
+     20
+    ],
+    "digest": "34abee381b2fc1f598b3ac748ad0d4f2"
+   }
+  },
+  {
+   "category": "stroke",
+   "room": "B",
+   "label": "B turn 4 strokes 7",
+   "firstAt": 44319,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 10,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 3,
+    "message": 6,
+    "strokes": [
+     18,
+     19,
+     20
+    ],
+    "digest": "427703f562398f07df035265d0f175ba"
+   }
+  },
+  {
+   "category": "stroke",
+   "room": "A",
+   "label": "A turn 4 strokes 8",
+   "firstAt": 44577,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 10,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 3,
+    "message": 7,
+    "strokes": [
+     21,
+     22,
+     23
+    ],
+    "digest": "d80443a8702b7ddae32aaa291056fb82"
+   }
+  },
+  {
+   "category": "stroke",
+   "room": "B",
+   "label": "B turn 4 strokes 8",
+   "firstAt": 44579,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 13,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 3,
+    "message": 7,
+    "strokes": [
+     21,
+     22,
+     23
+    ],
+    "digest": "8995dfe375b6ef8483c5f8a4f377fa97"
+   }
+  },
+  {
+   "category": "guess",
+   "room": "A",
+   "label": "A turn 4 W2-A-P01-973f72 guess",
+   "firstAt": 44842,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 23,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 3,
+    "player": "player-1"
+   }
+  },
+  {
+   "category": "guess",
+   "room": "A",
+   "label": "A turn 4 W2-A-P02-973f72 guess",
+   "firstAt": 44842,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 21,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 3,
+    "player": "player-2"
+   }
+  },
+  {
+   "category": "guess",
+   "room": "A",
+   "label": "A turn 4 W2-A-P03-973f72 guess",
+   "firstAt": 44842,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 37,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 3,
+    "player": "player-3"
+   }
+  },
+  {
+   "category": "guess",
+   "room": "A",
+   "label": "A turn 4 W2-A-P04-973f72 guess",
+   "firstAt": 44843,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 41,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 3,
+    "player": "player-4"
+   }
+  },
+  {
+   "category": "guess",
+   "room": "A",
+   "label": "A turn 4 W2-A-P05-973f72 guess",
+   "firstAt": 44843,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 68,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 3,
+    "player": "player-5"
+   }
+  },
+  {
+   "category": "guess",
+   "room": "A",
+   "label": "A turn 4 W2-A-P06-973f72 guess",
+   "firstAt": 44843,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 87,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 3,
+    "player": "player-6"
+   }
+  },
+  {
+   "category": "guess",
+   "room": "A",
+   "label": "A turn 4 W2-A-P07-973f72 guess",
+   "firstAt": 44843,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 91,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 3,
+    "player": "player-7"
+   }
+  },
+  {
+   "category": "guess",
+   "room": "A",
+   "label": "A turn 4 W2-A-P08-973f72 guess",
+   "firstAt": 44843,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 84,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 3,
+    "player": "player-8"
+   }
+  },
+  {
+   "category": "guess",
+   "room": "A",
+   "label": "A turn 4 W2-A-P09-973f72 guess",
+   "firstAt": 44843,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 26,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 3,
+    "player": "player-9"
+   }
+  },
+  {
+   "category": "guess",
+   "room": "B",
+   "label": "B turn 4 W2-B-P01-973f72 guess",
+   "firstAt": 44871,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 20,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 3,
+    "player": "player-1"
+   }
+  },
+  {
+   "category": "guess",
+   "room": "B",
+   "label": "B turn 4 W2-B-P02-973f72 guess",
+   "firstAt": 44871,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 17,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 3,
+    "player": "player-2"
+   }
+  },
+  {
+   "category": "guess",
+   "room": "B",
+   "label": "B turn 4 W2-B-P03-973f72 guess",
+   "firstAt": 44871,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 37,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 3,
+    "player": "player-3"
+   }
+  },
+  {
+   "category": "guess",
+   "room": "B",
+   "label": "B turn 4 W2-B-P05-973f72 guess",
+   "firstAt": 44871,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 44,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 3,
+    "player": "player-5"
+   }
+  },
+  {
+   "category": "guess",
+   "room": "B",
+   "label": "B turn 4 W2-B-P06-973f72 guess",
+   "firstAt": 44871,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 50,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 3,
+    "player": "player-6"
+   }
+  },
+  {
+   "category": "guess",
+   "room": "B",
+   "label": "B turn 4 W2-B-P07-973f72 guess",
+   "firstAt": 44872,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 68,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 3,
+    "player": "player-7"
+   }
+  },
+  {
+   "category": "guess",
+   "room": "B",
+   "label": "B turn 4 W2-B-P08-973f72 guess",
+   "firstAt": 44872,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 74,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 3,
+    "player": "player-8"
+   }
+  },
+  {
+   "category": "guess",
+   "room": "B",
+   "label": "B turn 4 W2-B-P09-973f72 guess",
+   "firstAt": 44872,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 41,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 3,
+    "player": "player-9"
+   }
+  },
+  {
+   "category": "guess",
+   "room": "B",
+   "label": "B turn 4 W2-B-P10-973f72 guess",
+   "firstAt": 44872,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 86,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 3,
+    "player": "player-10"
+   }
+  },
+  {
+   "category": "stroke",
+   "room": "A",
+   "label": "A turn 5 strokes 1",
+   "firstAt": 53058,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 8,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 4,
+    "message": 0,
+    "strokes": [
+     0,
+     1,
+     2
+    ],
+    "digest": "fd6b66c2e06c8f277f9ff60c1378567e"
+   }
+  },
+  {
+   "category": "stroke",
+   "room": "B",
+   "label": "B turn 5 strokes 1",
+   "firstAt": 53060,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 12,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 4,
+    "message": 0,
+    "strokes": [
+     0,
+     1,
+     2
+    ],
+    "digest": "6c9b43d1434beb01b06da764f25affce"
+   }
+  },
+  {
+   "category": "stroke",
+   "room": "A",
+   "label": "A turn 5 strokes 2",
+   "firstAt": 53316,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 12,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 4,
+    "message": 1,
+    "strokes": [
+     3,
+     4,
+     5
+    ],
+    "digest": "7d6de41fb100cb3ad85287b44e7fb38b"
+   }
+  },
+  {
+   "category": "stroke",
+   "room": "B",
+   "label": "B turn 5 strokes 2",
+   "firstAt": 53322,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 12,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 4,
+    "message": 1,
+    "strokes": [
+     3,
+     4,
+     5
+    ],
+    "digest": "5ebc5d18eae66dc0e4d97990726f3cf7"
+   }
+  },
+  {
+   "category": "stroke",
+   "room": "A",
+   "label": "A turn 5 strokes 3",
+   "firstAt": 53579,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 9,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 4,
+    "message": 2,
+    "strokes": [
+     6,
+     7,
+     8
+    ],
+    "digest": "996c82a0fbdd446912ea966efd188609"
+   }
+  },
+  {
+   "category": "stroke",
+   "room": "B",
+   "label": "B turn 5 strokes 3",
+   "firstAt": 53584,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 9,
+   "accepted": true,
+   "reason": null,
+   "persisted": false,
+   "lastError": null,
+   "expect": {
+    "turn": 4,
+    "message": 2,
+    "strokes": [
+     6,
+     7,
+     8
+    ],
+    "digest": "5b5c9989a00c55265dd89bbe8c8d8ca8"
+   },
+   "readBack": "stored pieces differ from what was sent"
+  },
+  {
+   "category": "stroke",
+   "room": "A",
+   "label": "A turn 5 strokes 4",
+   "firstAt": 53839,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 9,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 4,
+    "message": 3,
+    "strokes": [
+     9,
+     10,
+     11
+    ],
+    "digest": "32b850d2e413a268ae9d76d01167aede"
+   }
+  },
+  {
+   "category": "stroke",
+   "room": "B",
+   "label": "B turn 5 strokes 4",
+   "firstAt": 53844,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 8,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 4,
+    "message": 3,
+    "strokes": [
+     9,
+     10,
+     11
+    ],
+    "digest": "8c7e0df338f2eb52bed67425839f333f"
+   }
+  },
+  {
+   "category": "stroke",
+   "room": "A",
+   "label": "A turn 5 strokes 5",
+   "firstAt": 54099,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 9,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 4,
+    "message": 4,
+    "strokes": [
+     12,
+     13,
+     14
+    ],
+    "digest": "3ce247ccb61041b04d8035daa5dbb07a"
+   }
+  },
+  {
+   "category": "stroke",
+   "room": "B",
+   "label": "B turn 5 strokes 5",
+   "firstAt": 54103,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 9,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 4,
+    "message": 4,
+    "strokes": [
+     12,
+     13,
+     14
+    ],
+    "digest": "ad9ef96d3cd3f24baa3e0d7d317a03f1"
+   }
+  },
+  {
+   "category": "stroke",
+   "room": "A",
+   "label": "A turn 5 strokes 6",
+   "firstAt": 54359,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 9,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 4,
+    "message": 5,
+    "strokes": [
+     15,
+     16,
+     17
+    ],
+    "digest": "1333c8665db331013a84342e0c0944e0"
+   }
+  },
+  {
+   "category": "stroke",
+   "room": "B",
+   "label": "B turn 5 strokes 6",
+   "firstAt": 54362,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 13,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 4,
+    "message": 5,
+    "strokes": [
+     15,
+     16,
+     17
+    ],
+    "digest": "967606b52029504f0da4b2397876c017"
+   }
+  },
+  {
+   "category": "stroke",
+   "room": "A",
+   "label": "A turn 5 strokes 7",
+   "firstAt": 54618,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 14,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 4,
+    "message": 6,
+    "strokes": [
+     18,
+     19,
+     20
+    ],
+    "digest": "ac3a65fb965424284b47588b2fe8b900"
+   }
+  },
+  {
+   "category": "stroke",
+   "room": "B",
+   "label": "B turn 5 strokes 7",
+   "firstAt": 54625,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 13,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 4,
+    "message": 6,
+    "strokes": [
+     18,
+     19,
+     20
+    ],
+    "digest": "9e3f5c85e772eebe379d130ba888d08d"
+   }
+  },
+  {
+   "category": "stroke",
+   "room": "A",
+   "label": "A turn 5 strokes 8",
+   "firstAt": 54882,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 15,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 4,
+    "message": 7,
+    "strokes": [
+     21,
+     22,
+     23
+    ],
+    "digest": "2466b7ed29a542130f29d2d0bd771c98"
+   }
+  },
+  {
+   "category": "stroke",
+   "room": "B",
+   "label": "B turn 5 strokes 8",
+   "firstAt": 54890,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 12,
+   "accepted": true,
+   "reason": null,
+   "persisted": false,
+   "lastError": null,
+   "expect": {
+    "turn": 4,
+    "message": 7,
+    "strokes": [
+     21,
+     22,
+     23
+    ],
+    "digest": "b3857aefafa148fc91d4eadd3dab08ea"
+   },
+   "readBack": "stored pieces differ from what was sent"
+  },
+  {
+   "category": "guess",
+   "room": "A",
+   "label": "A turn 5 W2-A-P01-973f72 guess",
+   "firstAt": 55153,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 17,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 4,
+    "player": "player-1"
+   }
+  },
+  {
+   "category": "guess",
+   "room": "A",
+   "label": "A turn 5 W2-A-P02-973f72 guess",
+   "firstAt": 55153,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 27,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 4,
+    "player": "player-2"
+   }
+  },
+  {
+   "category": "guess",
+   "room": "A",
+   "label": "A turn 5 W2-A-P03-973f72 guess",
+   "firstAt": 55153,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 42,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 4,
+    "player": "player-3"
+   }
+  },
+  {
+   "category": "guess",
+   "room": "A",
+   "label": "A turn 5 W2-A-P04-973f72 guess",
+   "firstAt": 55153,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 45,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 4,
+    "player": "player-4"
+   }
+  },
+  {
+   "category": "guess",
+   "room": "A",
+   "label": "A turn 5 W2-A-P05-973f72 guess",
+   "firstAt": 55153,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 59,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 4,
+    "player": "player-5"
+   }
+  },
+  {
+   "category": "guess",
+   "room": "A",
+   "label": "A turn 5 W2-A-P06-973f72 guess",
+   "firstAt": 55153,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 100,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 4,
+    "player": "player-6"
+   }
+  },
+  {
+   "category": "guess",
+   "room": "A",
+   "label": "A turn 5 W2-A-P08-973f72 guess",
+   "firstAt": 55153,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 38,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 4,
+    "player": "player-8"
+   }
+  },
+  {
+   "category": "guess",
+   "room": "A",
+   "label": "A turn 5 W2-A-P09-973f72 guess",
+   "firstAt": 55153,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 97,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 4,
+    "player": "player-9"
+   }
+  },
+  {
+   "category": "guess",
+   "room": "A",
+   "label": "A turn 5 W2-A-P10-973f72 guess",
+   "firstAt": 55153,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 105,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 4,
+    "player": "player-10"
+   }
+  },
+  {
+   "category": "guess",
+   "room": "B",
+   "label": "B turn 5 W2-B-P01-973f72 guess",
+   "firstAt": 55186,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 21,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 4,
+    "player": "player-1"
+   }
+  },
+  {
+   "category": "guess",
+   "room": "B",
+   "label": "B turn 5 W2-B-P02-973f72 guess",
+   "firstAt": 55187,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 23,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 4,
+    "player": "player-2"
+   }
+  },
+  {
+   "category": "guess",
+   "room": "B",
+   "label": "B turn 5 W2-B-P03-973f72 guess",
+   "firstAt": 55187,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 30,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 4,
+    "player": "player-3"
+   }
+  },
+  {
+   "category": "guess",
+   "room": "B",
+   "label": "B turn 5 W2-B-P04-973f72 guess",
+   "firstAt": 55187,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 42,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 4,
+    "player": "player-4"
+   }
+  },
+  {
+   "category": "guess",
+   "room": "B",
+   "label": "B turn 5 W2-B-P05-973f72 guess",
+   "firstAt": 55187,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 47,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 4,
+    "player": "player-5"
+   }
+  },
+  {
+   "category": "guess",
+   "room": "B",
+   "label": "B turn 5 W2-B-P06-973f72 guess",
+   "firstAt": 55187,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 51,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 4,
+    "player": "player-6"
+   }
+  },
+  {
+   "category": "guess",
+   "room": "B",
+   "label": "B turn 5 W2-B-P08-973f72 guess",
+   "firstAt": 55187,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 75,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 4,
+    "player": "player-8"
+   }
+  },
+  {
+   "category": "guess",
+   "room": "B",
+   "label": "B turn 5 W2-B-P09-973f72 guess",
+   "firstAt": 55187,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 36,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 4,
+    "player": "player-9"
+   }
+  },
+  {
+   "category": "guess",
+   "room": "B",
+   "label": "B turn 5 W2-B-P10-973f72 guess",
+   "firstAt": 55187,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 80,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 4,
+    "player": "player-10"
+   }
+  },
+  {
+   "category": "stroke",
+   "room": "A",
+   "label": "A turn 6 strokes 1",
+   "firstAt": 63370,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 6,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 5,
+    "message": 0,
+    "strokes": [
+     0,
+     1,
+     2
+    ],
+    "digest": "90f59e1cf1f2dc3433eb74730a2fd581"
+   }
+  },
+  {
+   "category": "stroke",
+   "room": "B",
+   "label": "B turn 6 strokes 1",
+   "firstAt": 63372,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 9,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 5,
+    "message": 0,
+    "strokes": [
+     0,
+     1,
+     2
+    ],
+    "digest": "d27ab264ee4b8a5cc09985a7a20a5c7b"
+   }
+  },
+  {
+   "category": "stroke",
+   "room": "A",
+   "label": "A turn 6 strokes 2",
+   "firstAt": 63627,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 9,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 5,
+    "message": 1,
+    "strokes": [
+     3,
+     4,
+     5
+    ],
+    "digest": "ebdc10a3711aa1989e5da580ac9cc0e9"
+   }
+  },
+  {
+   "category": "stroke",
+   "room": "B",
+   "label": "B turn 6 strokes 2",
+   "firstAt": 63631,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 9,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 5,
+    "message": 1,
+    "strokes": [
+     3,
+     4,
+     5
+    ],
+    "digest": "e13be6175aa52c585afc05e6d6a39205"
+   }
+  },
+  {
+   "category": "stroke",
+   "room": "A",
+   "label": "A turn 6 strokes 3",
+   "firstAt": 63886,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 14,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 5,
+    "message": 2,
+    "strokes": [
+     6,
+     7,
+     8
+    ],
+    "digest": "b54392f9d0ecded6dff3feb78adeb926"
+   }
+  },
+  {
+   "category": "stroke",
+   "room": "B",
+   "label": "B turn 6 strokes 3",
+   "firstAt": 63891,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 14,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 5,
+    "message": 2,
+    "strokes": [
+     6,
+     7,
+     8
+    ],
+    "digest": "908f1d93ba88bcbf048b308873743458"
+   }
+  },
+  {
+   "category": "stroke",
+   "room": "A",
+   "label": "A turn 6 strokes 4",
+   "firstAt": 64150,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 9,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 5,
+    "message": 3,
+    "strokes": [
+     9,
+     10,
+     11
+    ],
+    "digest": "1e7908cc091f958bfdf95bd18a45dcc4"
+   }
+  },
+  {
+   "category": "stroke",
+   "room": "B",
+   "label": "B turn 6 strokes 4",
+   "firstAt": 64155,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 9,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 5,
+    "message": 3,
+    "strokes": [
+     9,
+     10,
+     11
+    ],
+    "digest": "a24d1dc4bd03eb0e2089910d844e1131"
+   }
+  },
+  {
+   "category": "stroke",
+   "room": "A",
+   "label": "A turn 6 strokes 5",
+   "firstAt": 64409,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 10,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 5,
+    "message": 4,
+    "strokes": [
+     12,
+     13,
+     14
+    ],
+    "digest": "d6522472697ec6d4df6d5caaac0e0756"
+   }
+  },
+  {
+   "category": "stroke",
+   "room": "B",
+   "label": "B turn 6 strokes 5",
+   "firstAt": 64414,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 9,
+   "accepted": true,
+   "reason": null,
+   "persisted": false,
+   "lastError": null,
+   "expect": {
+    "turn": 5,
+    "message": 4,
+    "strokes": [
+     12,
+     13,
+     14
+    ],
+    "digest": "3899cd56f36f5490c375361b4a51c5e2"
+   },
+   "readBack": "stored pieces differ from what was sent"
+  },
+  {
+   "category": "stroke",
+   "room": "A",
+   "label": "A turn 6 strokes 6",
+   "firstAt": 64670,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 13,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 5,
+    "message": 5,
+    "strokes": [
+     15,
+     16,
+     17
+    ],
+    "digest": "cde54273bd8302cb9acb54c99bebc8ce"
+   }
+  },
+  {
+   "category": "stroke",
+   "room": "B",
+   "label": "B turn 6 strokes 6",
+   "firstAt": 64673,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 16,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 5,
+    "message": 5,
+    "strokes": [
+     15,
+     16,
+     17
+    ],
+    "digest": "4b3f9b0df81c2001099f2d70ade41d4c"
+   }
+  },
+  {
+   "category": "stroke",
+   "room": "A",
+   "label": "A turn 6 strokes 7",
+   "firstAt": 64934,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 10,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 5,
+    "message": 6,
+    "strokes": [
+     18,
+     19,
+     20
+    ],
+    "digest": "8d27fe3a76a678f5dc2d1912202298f5"
+   }
+  },
+  {
+   "category": "stroke",
+   "room": "B",
+   "label": "B turn 6 strokes 7",
+   "firstAt": 64939,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 10,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 5,
+    "message": 6,
+    "strokes": [
+     18,
+     19,
+     20
+    ],
+    "digest": "fdeaa69b0dc86b028b637b3842ef4f6b"
+   }
+  },
+  {
+   "category": "stroke",
+   "room": "A",
+   "label": "A turn 6 strokes 8",
+   "firstAt": 65194,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 13,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 5,
+    "message": 7,
+    "strokes": [
+     21,
+     22,
+     23
+    ],
+    "digest": "8ce677dd3561a0003c5710488f4aee03"
+   }
+  },
+  {
+   "category": "stroke",
+   "room": "B",
+   "label": "B turn 6 strokes 8",
+   "firstAt": 65200,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 14,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 5,
+    "message": 7,
+    "strokes": [
+     21,
+     22,
+     23
+    ],
+    "digest": "9c32a6c3a604f7e25cbd1a9ccec556a8"
+   }
+  },
+  {
+   "category": "guess",
+   "room": "A",
+   "label": "A turn 6 W2-A-P01-973f72 guess",
+   "firstAt": 65461,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 23,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 5,
+    "player": "player-1"
+   }
+  },
+  {
+   "category": "guess",
+   "room": "A",
+   "label": "A turn 6 W2-A-P03-973f72 guess",
+   "firstAt": 65461,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 19,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 5,
+    "player": "player-3"
+   }
+  },
+  {
+   "category": "guess",
+   "room": "A",
+   "label": "A turn 6 W2-A-P04-973f72 guess",
+   "firstAt": 65462,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 51,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 5,
+    "player": "player-4"
+   }
+  },
+  {
+   "category": "guess",
+   "room": "A",
+   "label": "A turn 6 W2-A-P05-973f72 guess",
+   "firstAt": 65462,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 35,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 5,
+    "player": "player-5"
+   }
+  },
+  {
+   "category": "guess",
+   "room": "A",
+   "label": "A turn 6 W2-A-P06-973f72 guess",
+   "firstAt": 65462,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 36,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 5,
+    "player": "player-6"
+   }
+  },
+  {
+   "category": "guess",
+   "room": "A",
+   "label": "A turn 6 W2-A-P07-973f72 guess",
+   "firstAt": 65462,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 81,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 5,
+    "player": "player-7"
+   }
+  },
+  {
+   "category": "guess",
+   "room": "A",
+   "label": "A turn 6 W2-A-P08-973f72 guess",
+   "firstAt": 65462,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 91,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 5,
+    "player": "player-8"
+   }
+  },
+  {
+   "category": "guess",
+   "room": "A",
+   "label": "A turn 6 W2-A-P09-973f72 guess",
+   "firstAt": 65462,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 97,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 5,
+    "player": "player-9"
+   }
+  },
+  {
+   "category": "guess",
+   "room": "A",
+   "label": "A turn 6 W2-A-P10-973f72 guess",
+   "firstAt": 65462,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 103,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 5,
+    "player": "player-10"
+   }
+  },
+  {
+   "category": "guess",
+   "room": "B",
+   "label": "B turn 6 W2-B-P01-973f72 guess",
+   "firstAt": 65485,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 22,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 5,
+    "player": "player-1"
+   }
+  },
+  {
+   "category": "guess",
+   "room": "B",
+   "label": "B turn 6 W2-B-P02-973f72 guess",
+   "firstAt": 65485,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 24,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 5,
+    "player": "player-2"
+   }
+  },
+  {
+   "category": "guess",
+   "room": "B",
+   "label": "B turn 6 W2-B-P03-973f72 guess",
+   "firstAt": 65485,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 30,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 5,
+    "player": "player-3"
+   }
+  },
+  {
+   "category": "guess",
+   "room": "B",
+   "label": "B turn 6 W2-B-P04-973f72 guess",
+   "firstAt": 65485,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 47,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 5,
+    "player": "player-4"
+   }
+  },
+  {
+   "category": "guess",
+   "room": "B",
+   "label": "B turn 6 W2-B-P05-973f72 guess",
+   "firstAt": 65485,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 36,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 5,
+    "player": "player-5"
+   }
+  },
+  {
+   "category": "guess",
+   "room": "B",
+   "label": "B turn 6 W2-B-P06-973f72 guess",
+   "firstAt": 65486,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 47,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 5,
+    "player": "player-6"
+   }
+  },
+  {
+   "category": "guess",
+   "room": "B",
+   "label": "B turn 6 W2-B-P07-973f72 guess",
+   "firstAt": 65486,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 50,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 5,
+    "player": "player-7"
+   }
+  },
+  {
+   "category": "guess",
+   "room": "B",
+   "label": "B turn 6 W2-B-P08-973f72 guess",
+   "firstAt": 65486,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 62,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 5,
+    "player": "player-8"
+   }
+  },
+  {
+   "category": "guess",
+   "room": "B",
+   "label": "B turn 6 W2-B-P09-973f72 guess",
+   "firstAt": 65486,
+   "attempts": 1,
+   "malformed": 0,
+   "ackMs": 85,
+   "accepted": true,
+   "reason": null,
+   "persisted": true,
+   "lastError": null,
+   "expect": {
+    "turn": 5,
+    "player": "player-9"
+   }
+  }
+ ],
+ "sockets": [
+  {
+   "room": "A",
+   "label": "W2-A-P01-973f72",
+   "kind": "player",
+   "opens": 1,
+   "unexpectedCloses": 0,
+   "reconnects": 0,
+   "messages": 255,
+   "projections": 232,
+   "open": true,
+   "errors": 0,
+   "openAtEnd": true
+  },
+  {
+   "room": "A",
+   "label": "W2-A-P02-973f72",
+   "kind": "player",
+   "opens": 1,
+   "unexpectedCloses": 0,
+   "reconnects": 0,
+   "messages": 255,
+   "projections": 232,
+   "open": true,
+   "errors": 0,
+   "openAtEnd": true
+  },
+  {
+   "room": "A",
+   "label": "W2-A-P03-973f72",
+   "kind": "player",
+   "opens": 1,
+   "unexpectedCloses": 0,
+   "reconnects": 0,
+   "messages": 255,
+   "projections": 232,
+   "open": true,
+   "errors": 0,
+   "openAtEnd": true
+  },
+  {
+   "room": "A",
+   "label": "W2-A-P04-973f72",
+   "kind": "player",
+   "opens": 1,
+   "unexpectedCloses": 0,
+   "reconnects": 0,
+   "messages": 255,
+   "projections": 232,
+   "open": true,
+   "errors": 0,
+   "openAtEnd": true
+  },
+  {
+   "room": "A",
+   "label": "W2-A-P05-973f72",
+   "kind": "player",
+   "opens": 1,
+   "unexpectedCloses": 0,
+   "reconnects": 0,
+   "messages": 255,
+   "projections": 232,
+   "open": true,
+   "errors": 0,
+   "openAtEnd": true
+  },
+  {
+   "room": "A",
+   "label": "W2-A-P06-973f72",
+   "kind": "player",
+   "opens": 1,
+   "unexpectedCloses": 0,
+   "reconnects": 0,
+   "messages": 255,
+   "projections": 232,
+   "open": true,
+   "errors": 0,
+   "openAtEnd": true
+  },
+  {
+   "room": "A",
+   "label": "W2-A-P07-973f72",
+   "kind": "player",
+   "opens": 1,
+   "unexpectedCloses": 0,
+   "reconnects": 0,
+   "messages": 255,
+   "projections": 232,
+   "open": true,
+   "errors": 0,
+   "openAtEnd": true
+  },
+  {
+   "room": "A",
+   "label": "W2-A-P08-973f72",
+   "kind": "player",
+   "opens": 1,
+   "unexpectedCloses": 0,
+   "reconnects": 0,
+   "messages": 255,
+   "projections": 232,
+   "open": true,
+   "errors": 0,
+   "openAtEnd": true
+  },
+  {
+   "room": "A",
+   "label": "W2-A-P09-973f72",
+   "kind": "player",
+   "opens": 1,
+   "unexpectedCloses": 0,
+   "reconnects": 0,
+   "messages": 255,
+   "projections": 232,
+   "open": true,
+   "errors": 0,
+   "openAtEnd": true
+  },
+  {
+   "room": "A",
+   "label": "W2-A-P10-973f72",
+   "kind": "player",
+   "opens": 1,
+   "unexpectedCloses": 0,
+   "reconnects": 0,
+   "messages": 255,
+   "projections": 232,
+   "open": true,
+   "errors": 0,
+   "openAtEnd": true
+  },
+  {
+   "room": "A",
+   "label": "TV-A",
+   "kind": "tv",
+   "opens": 1,
+   "unexpectedCloses": 0,
+   "reconnects": 0,
+   "messages": 250,
+   "projections": 232,
+   "open": true,
+   "errors": 0,
+   "openAtEnd": true
+  },
+  {
+   "room": "B",
+   "label": "W2-B-P01-973f72",
+   "kind": "player",
+   "opens": 1,
+   "unexpectedCloses": 0,
+   "reconnects": 0,
+   "messages": 255,
+   "projections": 232,
+   "open": true,
+   "errors": 0,
+   "openAtEnd": true
+  },
+  {
+   "room": "B",
+   "label": "W2-B-P02-973f72",
+   "kind": "player",
+   "opens": 1,
+   "unexpectedCloses": 0,
+   "reconnects": 0,
+   "messages": 255,
+   "projections": 232,
+   "open": true,
+   "errors": 0,
+   "openAtEnd": true
+  },
+  {
+   "room": "B",
+   "label": "W2-B-P03-973f72",
+   "kind": "player",
+   "opens": 1,
+   "unexpectedCloses": 0,
+   "reconnects": 0,
+   "messages": 255,
+   "projections": 232,
+   "open": true,
+   "errors": 0,
+   "openAtEnd": true
+  },
+  {
+   "room": "B",
+   "label": "W2-B-P04-973f72",
+   "kind": "player",
+   "opens": 1,
+   "unexpectedCloses": 0,
+   "reconnects": 0,
+   "messages": 255,
+   "projections": 232,
+   "open": true,
+   "errors": 0,
+   "openAtEnd": true
+  },
+  {
+   "room": "B",
+   "label": "W2-B-P05-973f72",
+   "kind": "player",
+   "opens": 1,
+   "unexpectedCloses": 0,
+   "reconnects": 0,
+   "messages": 255,
+   "projections": 232,
+   "open": true,
+   "errors": 0,
+   "openAtEnd": true
+  },
+  {
+   "room": "B",
+   "label": "W2-B-P06-973f72",
+   "kind": "player",
+   "opens": 1,
+   "unexpectedCloses": 0,
+   "reconnects": 0,
+   "messages": 255,
+   "projections": 232,
+   "open": true,
+   "errors": 0,
+   "openAtEnd": true
+  },
+  {
+   "room": "B",
+   "label": "W2-B-P07-973f72",
+   "kind": "player",
+   "opens": 1,
+   "unexpectedCloses": 0,
+   "reconnects": 0,
+   "messages": 255,
+   "projections": 232,
+   "open": true,
+   "errors": 0,
+   "openAtEnd": true
+  },
+  {
+   "room": "B",
+   "label": "W2-B-P08-973f72",
+   "kind": "player",
+   "opens": 1,
+   "unexpectedCloses": 0,
+   "reconnects": 0,
+   "messages": 255,
+   "projections": 232,
+   "open": true,
+   "errors": 0,
+   "openAtEnd": true
+  },
+  {
+   "room": "B",
+   "label": "W2-B-P09-973f72",
+   "kind": "player",
+   "opens": 1,
+   "unexpectedCloses": 0,
+   "reconnects": 0,
+   "messages": 255,
+   "projections": 232,
+   "open": true,
+   "errors": 0,
+   "openAtEnd": true
+  },
+  {
+   "room": "B",
+   "label": "W2-B-P10-973f72",
+   "kind": "player",
+   "opens": 1,
+   "unexpectedCloses": 0,
+   "reconnects": 0,
+   "messages": 255,
+   "projections": 232,
+   "open": true,
+   "errors": 0,
+   "openAtEnd": true
+  },
+  {
+   "room": "B",
+   "label": "TV-B",
+   "kind": "tv",
+   "opens": 1,
+   "unexpectedCloses": 0,
+   "reconnects": 0,
+   "messages": 250,
+   "projections": 232,
+   "open": true,
+   "errors": 0,
+   "openAtEnd": true
+  }
+ ],
+ "strokeExtras": [],
+ "isolation": {
+  "passiveHits": [],
+  "probes": [
+   {
+    "from": "B",
+    "to": "A",
+    "projection": {
+     "status": 401,
+     "body": {
+      "error": "Session token required"
+     }
+    },
+    "memory": {
+     "status": 401,
+     "body": {
+      "error": "Session token required"
+     }
+    },
+    "socket": {
+     "kind": "closed",
+     "code": 1008,
+     "reason": "Session token required",
+     "messages": 0
+    }
+   },
+   {
+    "from": "A",
+    "to": "B",
+    "projection": {
+     "status": 401,
+     "body": {
+      "error": "Session token required"
+     }
+    },
+    "memory": {
+     "status": 401,
+     "body": {
+      "error": "Session token required"
+     }
+    },
+    "socket": {
+     "kind": "closed",
+     "code": 1008,
+     "reason": "Session token required",
+     "messages": 0
+    }
+   }
+  ],
+  "expectedDenial": {
+   "http": {
+    "status": 401,
+    "error": "Session token required"
+   },
+   "socket": {
+    "close": 1008,
+    "reason": "Session token required"
+   }
+  }
+ },
+ "checks": [
+  {
+   "name": "workload: 2 rooms × 10 players + a TV each (22 sockets)",
+   "ok": true,
+   "detail": "2 room(s): A 10 players, 1 TV, 11 sockets; B 10 players, 1 TV, 11 sockets"
+  },
+  {
+   "name": "workload: Trivia finished with 10 questions in every room",
+   "ok": true,
+   "detail": "A: finished, 10 questions; B: finished, 10 questions"
+  },
+  {
+   "name": "workload: Draw & Guess finished with 6 turns in every room",
+   "ok": true,
+   "detail": "A: finished, 6 turns; B: finished, 6 turns"
+  },
+  {
+   "name": "ready: every expected Ready acknowledged (20 per room)",
+   "ok": true,
+   "detail": "A: 20/20 acknowledged, 20 sent, 0 rejected, 0 unacknowledged; B: 20/20 acknowledged, 20 sent, 0 rejected, 0 unacknowledged"
+  },
+  {
+   "name": "answer: every action acknowledged and accepted (100 per room)",
+   "ok": true,
+   "detail": "A: 100/100 acknowledged, 100 sent, 0 rejected, 0 unacknowledged; B: 100/100 acknowledged, 100 sent, 0 rejected, 0 unacknowledged"
+  },
+  {
+   "name": "answer: every acknowledged action read back from the authoritative state",
+   "ok": true,
+   "detail": "A: 100/100; B: 100/100"
+  },
+  {
+   "name": "stroke: every action acknowledged and accepted (48 per room)",
+   "ok": true,
+   "detail": "A: 48/48 acknowledged, 48 sent, 0 rejected, 0 unacknowledged; B: 48/48 acknowledged, 48 sent, 0 rejected, 0 unacknowledged"
+  },
+  {
+   "name": "stroke: every acknowledged action read back from the authoritative state",
+   "ok": false,
+   "detail": "A: 45/48; B: 42/48; stored pieces nobody sent: 0"
+  },
+  {
+   "name": "guess: every action acknowledged and accepted (54 per room)",
+   "ok": true,
+   "detail": "A: 54/54 acknowledged, 54 sent, 0 rejected, 0 unacknowledged; B: 54/54 acknowledged, 54 sent, 0 rejected, 0 unacknowledged"
+  },
+  {
+   "name": "guess: every acknowledged action read back from the authoritative state",
+   "ok": true,
+   "detail": "A: 54/54; B: 54/54"
+  },
+  {
+   "name": "note: every action acknowledged and accepted (5 per room)",
+   "ok": true,
+   "detail": "A: 5/5 acknowledged, 5 sent, 0 rejected, 0 unacknowledged; B: 5/5 acknowledged, 5 sent, 0 rejected, 0 unacknowledged"
+  },
+  {
+   "name": "note: every acknowledged action read back from the authoritative state",
+   "ok": true,
+   "detail": "A: 5/5; B: 5/5"
+  },
+  {
+   "name": "rooms isolated: no other room's canary, room id or player name in any socket message or HTTP body",
+   "ok": true,
+   "detail": "0 hits"
+  },
+  {
+   "name": "every socket received a projection for its own room (22)",
+   "ok": true,
+   "detail": "22/22"
+  },
+  {
+   "name": "rooms isolated: one room's host token is refused by the app on the other room's projection, Memory Book and socket (both directions)",
+   "ok": true,
+   "detail": "room B host → room A: refused (projection 401 \"Session token required\"; memory 401 \"Session token required\"; socket closed 1008 \"Session token required\"); room A host → room B: refused (projection 401 \"Session token required\"; memory 401 \"Session token required\"; socket closed 1008 \"Session token required\")"
+  },
+  {
+   "name": "every socket open at the end (22)",
+   "ok": true,
+   "detail": "22/22"
+  }
+ ],
+ "failures": [
+  "stroke: every acknowledged action read back from the authoritative state: A: 45/48; B: 42/48; stored pieces nobody sent: 0"
+ ],
+ "notes": [
+  "first acknowledged actions NOT read back: B turn 1 strokes 5 (stored pieces differ from what was sent); A turn 2 strokes 2 (stored pieces differ from what was sent); A turn 2 strokes 7 (stored pieces differ from what was sent); A turn 3 strokes 4 (stored pieces differ from what was sent); B turn 4 strokes 1 (stored pieces differ from what was sent); B turn 4 strokes 6 (stored pieces differ from what was sent); B turn 5 strokes 3 (stored pieces differ from what was sent); B turn 5 strokes 8 (stored pieces differ from what was sent); B turn 6 strokes 5 (stored pieces differ from what was sent)"
+ ],
+ "cleanup": "No supported room-deletion path exists in the app (7097ac2): this run deleted nothing. Its rooms stay in the target's throwaway data folder; nothing else was touched.",
+ "finishedAt": "2026-11-16T17:30:01.608Z",
+ "durationS": 75,
+ "summary": {
+  "ready": {
+   "sent": 40,
+   "acknowledged": 40,
+   "rejected": 0,
+   "unacknowledged": 0,
+   "retried": 0,
+   "malformedReplies": 0,
+   "persisted": null,
+   "ackMedianMs": 61,
+   "ackP95Ms": 100,
+   "ackMaxMs": 109
+  },
+  "answer": {
+   "sent": 200,
+   "acknowledged": 200,
+   "rejected": 0,
+   "unacknowledged": 0,
+   "retried": 0,
+   "malformedReplies": 0,
+   "persisted": 200,
+   "ackMedianMs": 9,
+   "ackP95Ms": 13,
+   "ackMaxMs": 26
+  },
+  "stroke": {
+   "sent": 96,
+   "acknowledged": 96,
+   "rejected": 0,
+   "unacknowledged": 0,
+   "retried": 0,
+   "malformedReplies": 0,
+   "persisted": 87,
+   "ackMedianMs": 10,
+   "ackP95Ms": 15,
+   "ackMaxMs": 19
+  },
+  "guess": {
+   "sent": 108,
+   "acknowledged": 108,
+   "rejected": 0,
+   "unacknowledged": 0,
+   "retried": 0,
+   "malformedReplies": 0,
+   "persisted": 108,
+   "ackMedianMs": 41,
+   "ackP95Ms": 97,
+   "ackMaxMs": 105
+  },
+  "note": {
+   "sent": 10,
+   "acknowledged": 10,
+   "rejected": 0,
+   "unacknowledged": 0,
+   "retried": 0,
+   "malformedReplies": 0,
+   "persisted": 10,
+   "ackMedianMs": 6,
+   "ackP95Ms": 10,
+   "ackMaxMs": 10
+  },
+  "sockets": {
+   "total": 22,
+   "openAtEnd": 22,
+   "withOwnProjection": 22,
+   "unexpectedCloses": 0,
+   "reconnects": 0,
+   "errors": 0,
+   "messages": 5600
+  }
+ },
+ "verdict": "FAILED"
+}

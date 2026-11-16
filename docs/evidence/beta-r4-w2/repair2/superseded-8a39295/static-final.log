@@ -1,0 +1,30 @@
+# static checks on the committed files: clean checkout of 8a392954afef17ee6b27ff27b31f377507bfae43 (status 0 lines), 2026-11-16T18:19:44Z
+## 1. runtime files changed since 7097ac2 (empty = unchanged)
+(end)
+## 2. accepted deploy files changed since #43's head 46f7ff0 (empty = unchanged)
+ deploy/render/render.yaml | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+(end)
+## 3. everything changed since the reviewed head 403b53e
+ docs/PROGRESS.md                                   |  17 ++
+ docs/beta/render-w2.md                             |  11 +-
+ docs/evidence/beta-r4-w2/README.md                 |  38 ++-
+ .../beta-r4-w2/repair2/before/args-before.log      | 246 ++++++++++++++++
+ .../repair2/dev/w2-selftest-dev1-broken-proxy.log  | 263 ++++++++++++++++++
+ .../beta-r4-w2/repair2/dev/w2-selftest-dev2.log    | 309 +++++++++++++++++++++
+ scripts/beta/render-like-proxy.mjs                 |  59 +++-
+ scripts/beta/w2-args-selftest.mjs                  | 135 +++++++++
+ scripts/beta/w2-load.mjs                           |  67 ++---
+ scripts/beta/w2-selftest.sh                        |  70 +++--
+ 10 files changed, 1132 insertions(+), 83 deletions(-)
+## 4. lint and shell syntax
+eslint scripts/beta: exit 0
+shell syntax: ok
+## 5. the repository's vitest suite does not collect the W2 verdict tests
+vitest tests under scripts/beta: 0
+## 6. relative links in the changed documents
+links: 33 missing: 0
+## 7. secret scan of the changes since 46f7ff0 (private keys, age secret keys, access-code assignments, cookie values, Drive links)
+173360:+      if (req.method === "POST" && req.url === "/beta/enter") { res.writeHead(303, { location: "/", "set-cookie": "cgn_beta=fakecookie0123456789; Path=/; HttpOnly" }); return res.end(); }
+(end of secret scan)
+exit 0

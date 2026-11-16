@@ -1,0 +1,136 @@
+# BEFORE the repair: unchanged 4f08c1a (4f08c1a83638fe86994a377a212ae0964b82f45a), w2-args-selftest.mjs 0b809d2bbdbeaea0; pinned Node in docker, no network; 2026-11-16T20:40:55Z
+node v22.16.0, ws 8.22.1
+## 1. the complete boundary suite
+TAP version 13
+# Subtest: refused with zero network activity: the old fault option --plant-leak
+ok 1 - refused with zero network activity: the old fault option --plant-leak
+  ---
+  duration_ms: 705.353975
+  type: 'test'
+  ...
+# Subtest: refused with zero network activity: the old fault option --self-test-probe-origin
+ok 2 - refused with zero network activity: the old fault option --self-test-probe-origin
+  ---
+  duration_ms: 370.653628
+  type: 'test'
+  ...
+# Subtest: refused with zero network activity: a proxy fault option given to the runner
+ok 3 - refused with zero network activity: a proxy fault option given to the runner
+  ---
+  duration_ms: 384.34086
+  type: 'test'
+  ...
+# Subtest: refused with zero network activity: --rooms 1
+ok 4 - refused with zero network activity: --rooms 1
+  ---
+  duration_ms: 382.291424
+  type: 'test'
+  ...
+# Subtest: refused with zero network activity: --rooms=1
+ok 5 - refused with zero network activity: --rooms=1
+  ---
+  duration_ms: 369.608524
+  type: 'test'
+  ...
+# Subtest: refused with zero network activity: --players 4
+ok 6 - refused with zero network activity: --players 4
+  ---
+  duration_ms: 364.695306
+  type: 'test'
+  ...
+# Subtest: refused with zero network activity: --notes 1
+ok 7 - refused with zero network activity: --notes 1
+  ---
+  duration_ms: 386.083834
+  type: 'test'
+  ...
+# Subtest: refused with zero network activity: --expect-revision
+ok 8 - refused with zero network activity: --expect-revision
+  ---
+  duration_ms: 388.311365
+  type: 'test'
+  ...
+# Subtest: refused with zero network activity: a zero --max-minutes
+ok 9 - refused with zero network activity: a zero --max-minutes
+  ---
+  duration_ms: 386.079707
+  type: 'test'
+  ...
+# Subtest: refused with zero network activity: an http:// origin
+ok 10 - refused with zero network activity: an http:// origin
+  ---
+  duration_ms: 360.4224
+  type: 'test'
+  ...
+# Subtest: refused with zero network activity: an origin that is not a URL
+ok 11 - refused with zero network activity: an origin that is not a URL
+  ---
+  duration_ms: 383.917648
+  type: 'test'
+  ...
+# Subtest: control: the second listener does see a redirect that IS followed
+ok 12 - control: the second listener does see a redirect that IS followed
+  ---
+  duration_ms: 919.959503
+  type: 'test'
+  ...
+# Subtest: an authenticated HTTP redirect to another origin is not followed (the run fails, zero connections there)
+ok 13 - an authenticated HTTP redirect to another origin is not followed (the run fails, zero connections there)
+  ---
+  duration_ms: 517.872898
+  type: 'test'
+  ...
+# Subtest: a socket handshake redirect to another origin is not followed (the run fails, zero connections there)
+not ok 14 - a socket handshake redirect to another origin is not followed (the run fails, zero connections there)
+  ---
+  duration_ms: 214.331602
+  type: 'test'
+  location: '/w/scripts/beta/w2-args-selftest.mjs:131:1'
+  failureType: 'uncaughtException'
+  error: 'read ECONNRESET'
+  code: 'ECONNRESET'
+  stack: |-
+    TLSWrap.onStreamRead (node:internal/stream_base_commons:216:20)
+  ...
+1..14
+# Error: Test "a socket handshake redirect to another origin is not followed (the run fails, zero connections there)" at scripts/beta/w2-args-selftest.mjs:131:1 generated asynchronous activity after the test ended. This activity created the error "Error: read ECONNRESET" and would have caused the test to fail, but instead triggered an uncaughtException event.
+# Error: Test "a socket handshake redirect to another origin is not followed (the run fails, zero connections there)" at scripts/beta/w2-args-selftest.mjs:131:1 generated asynchronous activity after the test ended. This activity created the error "Error: read ECONNRESET" and would have caused the test to fail, but instead triggered an uncaughtException event.
+# Error: Test "a socket handshake redirect to another origin is not followed (the run fails, zero connections there)" at scripts/beta/w2-args-selftest.mjs:131:1 generated asynchronous activity after the test ended. This activity created the error "Error: read ECONNRESET" and would have caused the test to fail, but instead triggered an uncaughtException event.
+# Error: Test "a socket handshake redirect to another origin is not followed (the run fails, zero connections there)" at scripts/beta/w2-args-selftest.mjs:131:1 generated asynchronous activity after the test ended. This activity created the error "Error: read ECONNRESET" and would have caused the test to fail, but instead triggered an uncaughtException event.
+# Error: Test "a socket handshake redirect to another origin is not followed (the run fails, zero connections there)" at scripts/beta/w2-args-selftest.mjs:131:1 generated asynchronous activity after the test ended. This activity created the error "Error: read ECONNRESET" and would have caused the test to fail, but instead triggered an uncaughtException event.
+# Error: Test "a socket handshake redirect to another origin is not followed (the run fails, zero connections there)" at scripts/beta/w2-args-selftest.mjs:131:1 generated asynchronous activity after the test ended. This activity created the error "Error: read ECONNRESET" and would have caused the test to fail, but instead triggered an uncaughtException event.
+# tests 14
+# suites 0
+# pass 13
+# fail 1
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 7410.49433
+exit 1
+## 2. the isolated socket-redirect case
+TAP version 13
+# Subtest: a socket handshake redirect to another origin is not followed (the run fails, zero connections there)
+not ok 1 - a socket handshake redirect to another origin is not followed (the run fails, zero connections there)
+  ---
+  duration_ms: 275.236689
+  type: 'test'
+  location: '/w/scripts/beta/w2-args-selftest.mjs:131:1'
+  failureType: 'uncaughtException'
+  error: 'read ECONNRESET'
+  code: 'ECONNRESET'
+  stack: |-
+    TLSWrap.onStreamRead (node:internal/stream_base_commons:216:20)
+  ...
+# Error: Test "a socket handshake redirect to another origin is not followed (the run fails, zero connections there)" at scripts/beta/w2-args-selftest.mjs:131:1 generated asynchronous activity after the test ended. This activity created the error "Error: read ECONNRESET" and would have caused the test to fail, but instead triggered an uncaughtException event.
+# Error: Test "a socket handshake redirect to another origin is not followed (the run fails, zero connections there)" at scripts/beta/w2-args-selftest.mjs:131:1 generated asynchronous activity after the test ended. This activity created the error "Error: read ECONNRESET" and would have caused the test to fail, but instead triggered an uncaughtException event.
+1..1
+# tests 1
+# suites 0
+# pass 0
+# fail 1
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 859.217216
+exit 1

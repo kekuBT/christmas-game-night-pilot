@@ -1,0 +1,146 @@
+# FINAL W2 self-test on the committed files: clean checkout of b460c15c6e63ca928394b504dfeaafca6c2a2ad8 (git status clean; node_modules linked from the working tree, same lockfile, excluded locally); image cgn-render:check (built from deploy/render, unchanged since 46f7ff0)
+== w2-selftest 2026-11-16T16:18:18Z, image cgn-render:check (sha256:7b53109a7d69), w2-load 71617f50293c73a9, proxy 8daeb87c0c61f237
+      AUTHORIZED data_dir=/var/data/cgn-w1 public_origin=https://localhost:18443 trust_proxy=1 (the access code is kept only as a salted hash)
+-- V1: the full workload, then the disk
+      [0.1s] preflight: /health 200, revision 7097ac2bb062925bb296a129f4771f1e68fd522d; the gate admitted the throwaway code (run 20261116T161820-66fccc)
+      [0.5s] setup: 2 rooms × 10 players + a TV each; 22 sockets open over wss://
+      [0.8s] trivia: playing in every room (10 questions each); answering
+      PASS room A: Trivia finished
+      PASS room B: Trivia finished
+      [11.9s] trivia: finished in every room; answers read back
+      PASS room B: Draw & Guess finished (6 turns)
+      PASS room A: Draw & Guess finished (6 turns)
+      [74.2s] draw & guess and Memory Book: done; strokes, guesses and notes read back
+      
+      --- summary ---
+      ready  sent 40, acknowledged 40, rejected 0, unacknowledged 0, retried 0; ack median 77 ms, p95 129 ms, max 137 ms
+      answer sent 200, acknowledged 200, rejected 0, unacknowledged 0, retried 0, persisted 200; ack median 10 ms, p95 15 ms, max 18 ms
+      stroke sent 96, acknowledged 96, rejected 0, unacknowledged 0, retried 0, persisted 96; ack median 10 ms, p95 17 ms, max 27 ms
+      guess  sent 108, acknowledged 108, rejected 0, unacknowledged 0, retried 0, persisted 108; ack median 58 ms, p95 109 ms, max 120 ms
+      note   sent 10, acknowledged 10, rejected 0, unacknowledged 0, retried 0, persisted 10; ack median 7 ms, p95 14 ms, max 14 ms
+      sockets 22: open at the end 22, unexpected closes 0, reconnects 0, errors 0, messages received 5620
+      PASS answer: every action acknowledged and accepted — 200/200; rejected 0, unacknowledged 0
+      PASS answer: every acknowledged action read back from the authoritative state — 200/200
+      PASS stroke: every action acknowledged and accepted — 96/96; rejected 0, unacknowledged 0
+      PASS stroke: every acknowledged action read back from the authoritative state — 96/96
+      PASS guess: every action acknowledged and accepted — 108/108; rejected 0, unacknowledged 0
+      PASS guess: every acknowledged action read back from the authoritative state — 108/108
+      PASS note: every action acknowledged and accepted — 10/10; rejected 0, unacknowledged 0
+      PASS note: every acknowledged action read back from the authoritative state — 10/10
+      PASS ready: every Ready acknowledged — 40/40
+      PASS rooms isolated: no other room's canary, room id or player name in any socket message or HTTP body — 0 hits
+      PASS rooms isolated: one room's host token is refused on the other room's projection, Memory Book and socket — room B host → room A: 401/401/closed 1008; room A host → room B: 401/401/closed 1008
+      PASS every socket open at the end — 22/22
+      W2 PASSED
+PASS V1 the workload PASSED
+      PASS room A: the Trivia answers on disk — 100 on disk, 100 acknowledged
+      PASS room A: the drawing on disk — 144 pieces on disk, 48 stroke messages of 3 acknowledged
+      PASS room A: the correct guesses on disk — 54 on disk, 54 acknowledged
+      PASS room A: the Memory Book notes on disk — 5/5 acknowledged notes in the book file
+      PASS room B: the Trivia answers on disk — 100 on disk, 100 acknowledged
+      PASS room B: the drawing on disk — 144 pieces on disk, 48 stroke messages of 3 acknowledged
+      PASS room B: the correct guesses on disk — 54 on disk, 54 acknowledged
+      PASS room B: the Memory Book notes on disk — 5/5 acknowledged notes in the book file
+      W2 DISK CHECK PASSED
+PASS V1 what was acknowledged is on disk
+-- V2: a dropped acknowledgement (every 10th stroke message, and its retries, get 502)
+      [0.1s] preflight: /health 200, revision 7097ac2bb062925bb296a129f4771f1e68fd522d; the gate admitted the throwaway code (run 20261116T161936-b57ac1)
+      [0.5s] setup: 2 rooms × 10 players + a TV each; 22 sockets open over wss://
+      [0.7s] trivia: playing in every room (10 questions each); answering
+      PASS room A: Trivia finished
+      PASS room B: Trivia finished
+      [11.8s] trivia: finished in every room; answers read back
+      PASS room A: Draw & Guess finished (6 turns)
+      PASS room B: Draw & Guess finished (6 turns)
+      [109.9s] draw & guess and Memory Book: done; strokes, guesses and notes read back
+      
+      --- summary ---
+      ready  sent 40, acknowledged 40, rejected 0, unacknowledged 0, retried 0; ack median 71 ms, p95 121 ms, max 129 ms
+      answer sent 200, acknowledged 200, rejected 0, unacknowledged 0, retried 0, persisted 200; ack median 9 ms, p95 14 ms, max 18 ms
+      stroke sent 96, acknowledged 87, rejected 0, unacknowledged 9, retried 9, persisted 87; ack median 10 ms, p95 14 ms, max 41 ms
+      guess  sent 108, acknowledged 108, rejected 0, unacknowledged 0, retried 0, persisted 108; ack median 38 ms, p95 74 ms, max 94 ms
+      note   sent 10, acknowledged 10, rejected 0, unacknowledged 0, retried 0, persisted 10; ack median 6 ms, p95 13 ms, max 13 ms
+      sockets 22: open at the end 22, unexpected closes 0, reconnects 0, errors 0, messages received 5721
+      PASS answer: every action acknowledged and accepted — 200/200; rejected 0, unacknowledged 0
+      PASS answer: every acknowledged action read back from the authoritative state — 200/200
+      FAIL stroke: every action acknowledged and accepted — 87/96; rejected 0, unacknowledged 9
+      PASS stroke: every acknowledged action read back from the authoritative state — 87/87
+      PASS guess: every action acknowledged and accepted — 108/108; rejected 0, unacknowledged 0
+      PASS guess: every acknowledged action read back from the authoritative state — 108/108
+      PASS note: every action acknowledged and accepted — 10/10; rejected 0, unacknowledged 0
+      PASS note: every acknowledged action read back from the authoritative state — 10/10
+      PASS ready: every Ready acknowledged — 40/40
+      PASS rooms isolated: no other room's canary, room id or player name in any socket message or HTTP body — 0 hits
+      PASS rooms isolated: one room's host token is refused on the other room's projection, Memory Book and socket — room B host → room A: 401/401/closed 1008; room A host → room B: 401/401/closed 1008
+      PASS every socket open at the end — 22/22
+      W2 FAILED (1 failure(s))
+PASS V2 FAILED on the unacknowledged strokes alone
+-- V3: a fake acknowledgement (every 10th stroke message is answered accepted without reaching the server)
+      [0.1s] preflight: /health 200, revision 7097ac2bb062925bb296a129f4771f1e68fd522d; the gate admitted the throwaway code (run 20261116T162127-a799b3)
+      [0.5s] setup: 2 rooms × 10 players + a TV each; 22 sockets open over wss://
+      [0.6s] trivia: playing in every room (10 questions each); answering
+      PASS room A: Trivia finished
+      PASS room B: Trivia finished
+      [11.7s] trivia: finished in every room; answers read back
+      PASS room A: Draw & Guess finished (6 turns)
+      PASS room B: Draw & Guess finished (6 turns)
+      [73.9s] draw & guess and Memory Book: done; strokes, guesses and notes read back
+      
+      --- summary ---
+      ready  sent 40, acknowledged 40, rejected 0, unacknowledged 0, retried 0; ack median 74 ms, p95 111 ms, max 125 ms
+      answer sent 200, acknowledged 200, rejected 0, unacknowledged 0, retried 0, persisted 200; ack median 9 ms, p95 15 ms, max 22 ms
+      stroke sent 96, acknowledged 96, rejected 0, unacknowledged 0, retried 0, persisted 32; ack median 10 ms, p95 15 ms, max 17 ms
+      guess  sent 108, acknowledged 108, rejected 0, unacknowledged 0, retried 0, persisted 108; ack median 59 ms, p95 124 ms, max 147 ms
+      note   sent 10, acknowledged 10, rejected 0, unacknowledged 0, retried 0, persisted 10; ack median 7 ms, p95 28 ms, max 28 ms
+      sockets 22: open at the end 22, unexpected closes 0, reconnects 0, errors 0, messages received 5500
+      PASS answer: every action acknowledged and accepted — 200/200; rejected 0, unacknowledged 0
+      PASS answer: every acknowledged action read back from the authoritative state — 200/200
+      PASS stroke: every action acknowledged and accepted — 96/96; rejected 0, unacknowledged 0
+      FAIL stroke: every acknowledged action read back from the authoritative state — 32/96
+      PASS guess: every action acknowledged and accepted — 108/108; rejected 0, unacknowledged 0
+      PASS guess: every acknowledged action read back from the authoritative state — 108/108
+      PASS note: every action acknowledged and accepted — 10/10; rejected 0, unacknowledged 0
+      PASS note: every acknowledged action read back from the authoritative state — 10/10
+      PASS ready: every Ready acknowledged — 40/40
+      PASS rooms isolated: no other room's canary, room id or player name in any socket message or HTTP body — 0 hits
+      PASS rooms isolated: one room's host token is refused on the other room's projection, Memory Book and socket — room B host → room A: 401/401/closed 1008; room A host → room B: 401/401/closed 1008
+      PASS every socket open at the end — 22/22
+      W2 FAILED (1 failure(s))
+PASS V3 FAILED on the read-back of the strokes alone
+-- V4: a planted cross-room leak (room B saves a note with room A's canary)
+      [0.1s] preflight: /health 200, revision 7097ac2bb062925bb296a129f4771f1e68fd522d; the gate admitted the throwaway code (run 20261116T162243-dc91d4)
+      [0.5s] setup: 2 rooms × 10 players + a TV each; 22 sockets open over wss://
+      [0.6s] trivia: playing in every room (10 questions each); answering
+      PASS room A: Trivia finished
+      PASS room B: Trivia finished
+      [11.7s] trivia: finished in every room; answers read back
+      PASS room B: Draw & Guess finished (6 turns)
+      PASS room A: Draw & Guess finished (6 turns)
+      [73.7s] draw & guess and Memory Book: done; strokes, guesses and notes read back
+      
+      --- summary ---
+      ready  sent 40, acknowledged 40, rejected 0, unacknowledged 0, retried 0; ack median 70 ms, p95 116 ms, max 129 ms
+      answer sent 200, acknowledged 200, rejected 0, unacknowledged 0, retried 0, persisted 200; ack median 9 ms, p95 15 ms, max 56 ms
+      stroke sent 96, acknowledged 96, rejected 0, unacknowledged 0, retried 0, persisted 96; ack median 10 ms, p95 15 ms, max 18 ms
+      guess  sent 108, acknowledged 108, rejected 0, unacknowledged 0, retried 0, persisted 108; ack median 39 ms, p95 99 ms, max 114 ms
+      note   sent 11, acknowledged 11, rejected 0, unacknowledged 0, retried 0, persisted 11; ack median 7 ms, p95 30 ms, max 30 ms
+      sockets 22: open at the end 22, unexpected closes 0, reconnects 0, errors 0, messages received 5610
+      PASS answer: every action acknowledged and accepted — 200/200; rejected 0, unacknowledged 0
+      PASS answer: every acknowledged action read back from the authoritative state — 200/200
+      PASS stroke: every action acknowledged and accepted — 96/96; rejected 0, unacknowledged 0
+      PASS stroke: every acknowledged action read back from the authoritative state — 96/96
+      PASS guess: every action acknowledged and accepted — 108/108; rejected 0, unacknowledged 0
+      PASS guess: every acknowledged action read back from the authoritative state — 108/108
+      PASS note: every action acknowledged and accepted — 11/11; rejected 0, unacknowledged 0
+      PASS note: every acknowledged action read back from the authoritative state — 11/11
+      PASS ready: every Ready acknowledged — 40/40
+      FAIL rooms isolated: no other room's canary, room id or player name in any socket message or HTTP body — 2 hit(s), first: {"inRoom":"B","where":"HTTP POST /rooms/room-mwjh2bfx-428487/memory","foreignRoom":"A","matched":["canary"]}
+      PASS rooms isolated: one room's host token is refused on the other room's projection, Memory Book and socket — room B host → room A: 401/401/closed 1008; room A host → room B: 401/401/closed 1008
+      PASS every socket open at the end — 22/22
+      W2 FAILED (1 failure(s))
+PASS V4 FAILED on room isolation alone
+PASS no log or evidence file holds the access code or a beta cookie
+
+passed 6, failed 0
+W2 SELFTEST PASSED
+exit 0

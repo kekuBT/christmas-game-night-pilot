@@ -4,6 +4,13 @@
 - **Bases:** docs `d554b800e51ae78a9ca205d12a2d6622eb7795f9`; pinned runtime `7097ac2bb062925bb296a129f4771f1e68fd522d`, with the audited archive's SHA-256 `a693c543…3a5131`.
 - **Who decides:** ChatGPT owns the final route recommendation and the owner-facing cost approval. The owner decides.
 - **Accepted and approved:** review 6919662222 accepted revision 5. The owner then approved this Render setup ("Proceed with that Render setup using my existing account", relayed in handoff 6919813048): Starter + a 1 GB disk, the $7.25/month baseline with overages disclosed, and the access-gated public URL. **Next, the package:** [deploy/render/](../../deploy/render/README.md) (Dockerfile, artifact gate, the reviewed scripts, the exact configuration, what the Render integration can't do) and the W1 steps in [render-w1.md](render-w1.md). Nothing is deployed yet; the backup destination and key, and the real-device steps, are still pending.
+- **Current status** (2026-11-16; handoff 6919813048 as edited, review 6921505856). This bullet is the current status; the sections below keep revision 5's text, as history.
+  - **The package:** [deploy/render/](../../deploy/render/README.md) was accepted within its scope (review 6921505856). **Not** a target-host or launch clearance.
+  - **The account:** connected. The owner chose their **existing** workspace, which holds no services, databases or Key Value instances.
+    - Its plan must still be verified as **Hobby**.
+    - It must stay otherwise empty: that is the way-in control below.
+  - **The off-provider destination:** selected by the owner (a private folder), with access and owner-only sharing verified by ChatGPT.
+  - **Still pending:** the transfer, receipt and restore with throwaway data (W5, W6); the owner's `age` key pair; W1–W8; native devices; the go/no-go.
 - **The requirement:** an independently hosted full website, with no dependency on a home computer. It supersedes the home-route (H1) prerequisite.
 - **Revision 5 (this one), for review 6918922306:** a run killed outright after its files exist.
   - **The fix:** each run now records what it may create before creating it, and every process it starts carries its token. Reconciliation (automatic at the start of every backup, or `cgn-backup reconcile`) removes an abandoned run's recorded files once none of its processes lives. It never touches a running run or any path no record lists.
@@ -28,10 +35,10 @@
 |---|---|
 | **Compute** | **Starter**: 512 MB, 0.5 CPU, **$7/month**. Measured locally: a peak of 95.5 MB, and well under 1 CPU-second per step, at 220 open sockets. |
 | **Disk** | **1 GB** mounted at **`/var/data`**, **$0.25/month**. Game data in `MCHEZO_DATA_DIR=/var/data/cgn`; backups in `/var/data/backups`. A disk can grow later but never shrink. |
-| **Workspace** | **A new, dedicated Hobby workspace** ($0/month plus compute), holding only this service. Render allows up to five Hobby workspaces. This is the way-in control below. |
+| **Workspace** | **A dedicated Hobby workspace** ($0/month plus compute), holding only this service. This is the way-in control below. *Revision 5 said "a new" one, and Render allows up to five Hobby workspaces. Current: the owner's existing, otherwise-empty workspace, with its Hobby plan still to verify.* |
 | **Monthly baseline** | **$7.25** ($87 a year), before any tax (not checked). **It is not a cap:** see "Cost". |
 | **Off-Render backup** | Encrypted to the owner's public key, then kept in the owner's private storage: **$0 extra**. |
-| **Existing Render account** | **Pending, not verified:** its plan, payment method and contents are unknown here. |
+| **Existing Render account** | *Revision 5: pending, not verified.* **Current:** connected on 2026-11-16. The workspace holds nothing; its plan and payment method are still to verify. |
 
 **The other routes:**
 - **Route F, Fly.io:** about $3.84 per 30 days at list price, $0 under Fly's under-$5 waiver with a card on file. The waiver is Fly's policy, not a free tier.
@@ -159,7 +166,7 @@ The copy is therefore one state of the folder. Nothing is inferred from comparin
 
 ## The way in (ingress)
 - **A dedicated workspace.** Render puts services of the same workspace and region on one private network. A Hobby workspace can't block that traffic (Pro and up can).
-  - **So the service gets a new Hobby workspace with no other service in it.** Then nothing but Render's proxy can reach `0.0.0.0:10000`.
+  - **So the service's Hobby workspace holds no other service.** Then nothing but Render's proxy can reach `0.0.0.0:10000`. That is the owner's existing, otherwise-empty workspace (revision 5 said "a new" one).
   - **The check, before every deploy and in validation:** the workspace lists exactly this one service.
   - **This replaces the loopback rule B-07** for this route, for your review.
 - **What `MCHEZO_TRUST_PROXY` controls** (`access.ts` lines 13–14, 66–73): only the client address that the wrong-code limits count against. It doesn't affect HTTPS or authorization.
@@ -232,7 +239,15 @@ All of it runs on the paid service, in production mode, with a throwaway access 
 | W7 | **Rollback:** a revert-commit deploy of the previous release, then the acceptance checks. And one deliberate one-click rollback across a configuration change, to see the guard refuse it. | The previous release serves the current configuration; the one-click rollback fails closed |
 | W8 | **Native devices:** an iPhone (Safari) and an Android phone (Chrome), P1–P8 from REAL_DEVICE_TESTING.md over the public URL. That covers the gate, a QR join, play, lock and unlock, Home Screen install, and a Memory Book export. | No Blocker |
 
-## Approvals still needed
+## Approvals still needed (as listed at revision 5), with their current status
+**Current status** (2026-11-16):
+1. **Approved:** the owner's ruling, handoff 6919813048.
+2. **Partly done:** the account is connected, and the existing workspace was chosen. Its Hobby plan, the payment method and the region are still to confirm.
+3. **Approved.**
+4. **Accepted within scope:** review 6921505856. The private deploy repository is ChatGPT's.
+5. **Partly done:** the destination is selected and its access verified. The owner's key pair, and the transfer, receipt and restore, are pending.
+6. **Pending.**
+
 1. **The route and the spend:** Render, a new Hobby workspace, Starter and a 1 GB disk, **$7.25/month baseline with uncapped bandwidth overage.** This needs an explicit ruling against the "$0 / no paid resources" rule. ChatGPT presents it to the owner.
 2. **The account:** the existing Render account (pending), a payment method, a region, and `onrender.com` or an own domain.
 3. **A public URL behind the access gate,** with maintenance mode outside approved windows. This replaces "no public exposure".

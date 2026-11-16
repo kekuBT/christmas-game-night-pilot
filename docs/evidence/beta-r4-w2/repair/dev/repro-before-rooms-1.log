@@ -1,0 +1,33 @@
+== repro-before 2026-11-16T16:49:46Z, tool b38c892 71617f50293c73a9, clean: 0 changed files
+      AUTHORIZED data_dir=/var/data/cgn-w1 public_origin=https://localhost:18443 trust_proxy=1 (the access code is kept only as a salted hash)
+-- the b38c892 tool with --rooms 1
+      [0.1s] preflight: /health 200, revision 7097ac2bb062925bb296a129f4771f1e68fd522d; the gate admitted the throwaway code (run 20261116T164948-5f37a5)
+      [0.5s] setup: 1 rooms × 10 players + a TV each; 11 sockets open over wss://
+      [0.6s] trivia: playing in every room (10 questions each); answering
+      PASS room A: Trivia finished
+      [11.7s] trivia: finished in every room; answers read back
+      PASS room A: Draw & Guess finished (6 turns)
+      [73.4s] draw & guess and Memory Book: done; strokes, guesses and notes read back
+      
+      --- summary ---
+      ready  sent 20, acknowledged 20, rejected 0, unacknowledged 0, retried 0; ack median 37 ms, p95 63 ms, max 69 ms
+      answer sent 100, acknowledged 100, rejected 0, unacknowledged 0, retried 0, persisted 100; ack median 8 ms, p95 11 ms, max 16 ms
+      stroke sent 48, acknowledged 48, rejected 0, unacknowledged 0, retried 0, persisted 48; ack median 10 ms, p95 12 ms, max 13 ms
+      guess  sent 54, acknowledged 54, rejected 0, unacknowledged 0, retried 0, persisted 54; ack median 39 ms, p95 64 ms, max 77 ms
+      note   sent 5, acknowledged 5, rejected 0, unacknowledged 0, retried 0, persisted 5; ack median 7 ms, p95 11 ms, max 11 ms
+      sockets 11: open at the end 11, unexpected closes 0, reconnects 0, errors 0, messages received 2799
+      PASS answer: every action acknowledged and accepted — 100/100; rejected 0, unacknowledged 0
+      PASS answer: every acknowledged action read back from the authoritative state — 100/100
+      PASS stroke: every action acknowledged and accepted — 48/48; rejected 0, unacknowledged 0
+      PASS stroke: every acknowledged action read back from the authoritative state — 48/48
+      PASS guess: every action acknowledged and accepted — 54/54; rejected 0, unacknowledged 0
+      PASS guess: every acknowledged action read back from the authoritative state — 54/54
+      PASS note: every action acknowledged and accepted — 5/5; rejected 0, unacknowledged 0
+      PASS note: every acknowledged action read back from the authoritative state — 5/5
+      PASS ready: every Ready acknowledged — 20/20
+      PASS rooms isolated: no other room's canary, room id or player name in any socket message or HTTP body — 0 hits
+      PASS rooms isolated: one room's host token is refused on the other room's projection, Memory Book and socket
+      PASS every socket open at the end — 11/11
+      W2 PASSED
+exit 0
+code in logs/evidence: 0 file(s)
