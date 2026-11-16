@@ -15,14 +15,28 @@ FAIL=0; PASS=0
 check() { if [ "$2" = 0 ]; then echo "PASS $1${3:+ — $3}"; PASS=$((PASS+1)); else echo "FAIL $1${3:+ — $3}"; FAIL=$((FAIL+1)); fi; }
 step() { echo; echo "== $*"; }
 SRV_PID=; CADDY_PID=; RESTORED_PID=
+
+# Review 6908455526: refuse BEFORE anything can be cleaned up. Nothing exists yet that this run owns, so a refusal
+# exits without any trap: it can't delete an account, a group or a folder it didn't create.
+if getent passwd cgn >/dev/null; then echo "REFUSED: a user named cgn already exists here; this drill won't touch it"; exit 2; fi
+if getent group cgn >/dev/null; then echo "REFUSED: a group named cgn already exists here; this drill won't touch it"; exit 2; fi
+if [ -e "$P" ]; then echo "REFUSED: $P already exists"; exit 2; fi
+
+# What this run created, recorded as it happens. Cleanup removes only these, also after a partial failure, an early
+# exit, SIGTERM or SIGINT.
+OWN_USER=0; OWN_GROUP=0; OWN_PREFIX=0
 cleanup() {
   for p in $SRV_PID $RESTORED_PID $CADDY_PID; do kill "$p" 2>/dev/null; done; sleep 1
-  id cgn >/dev/null 2>&1 && userdel cgn 2>/dev/null; getent group cgn >/dev/null && groupdel cgn 2>/dev/null
-  rm -rf "$P"
+  if [ $OWN_USER = 1 ] && getent passwd cgn >/dev/null; then userdel cgn; fi
+  if [ $OWN_GROUP = 1 ] && getent group cgn >/dev/null; then groupdel cgn; fi
+  if [ $OWN_PREFIX = 1 ]; then rm -rf "$P"; fi
+  echo "cleanup: removed only what this run created (user $OWN_USER, group $OWN_GROUP, prefix $OWN_PREFIX)"
 }
 trap cleanup EXIT
-id cgn >/dev/null 2>&1 && { echo "a user named cgn already exists here; refusing to touch it"; exit 2; }
-mkdir -p "$P"; chmod 0755 "$P"
+trap 'exit 143' TERM
+trap 'exit 130' INT
+mkdir "$P" && OWN_PREFIX=1 || { echo "could not create $P"; exit 2; }
+chmod 0755 "$P"
 cp -a "$NODE_DIR" "$P/node"; chmod -R a+rX "$P/node"; export PATH="$P/node/bin:$PATH"
 cp "$CADDY_SRC" "$P/caddy"; chmod 0755 "$P/caddy"
 echo "prefix $P · node $(node -v) · npm $(npm -v) · caddy $("$P/caddy" version) · revision $SHA"
@@ -44,7 +58,12 @@ TOP=$(cd "$REL" && npm ls --omit=dev --depth=0 --parseable 2>/dev/null | tail -n
 chown -R root:root "$REL"; chmod -R go-w "$REL"
 
 step "B. First install: the service user, private folders, settings, check, start"
-useradd --system --no-create-home --shell /usr/sbin/nologin --user-group cgn; check "B1 the service user" $?
+useradd --system --no-create-home --shell /usr/sbin/nologin --user-group cgn; R=$?
+# Both were absent at the start (refused otherwise), so whatever exists now was created by this run, even if useradd
+# failed halfway (for example after creating the group).
+getent passwd cgn >/dev/null && OWN_USER=1; getent group cgn >/dev/null && OWN_GROUP=1
+check "B1 the service user" $R "useradd exit $R; created: user $OWN_USER, group $OWN_GROUP"
+[ $R = 0 ] || { echo "the service user couldn't be created: stopping the drill"; exit 1; }
 install -d -m 0755 "$P/var" "$P/var/lib" "$P/var/backups" "$P/etc"
 install -d -m 0700 -o cgn -g cgn "$P/var/lib/christmas-game-night"
 install -d -m 0700 "$P/var/backups/christmas-game-night"

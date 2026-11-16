@@ -94,6 +94,10 @@ Each line is observable before anything is installed. **Who:** the owner, or the
 
 **Run as a drill here:** this machine played the runbook with the real package, a real service user and Caddy 2.6.2 in front. It used a local CA, because a public certificate can't be had from here: `docs/evidence/beta-r2-preflight/`. Not run here: a real host, a public certificate, systemd as PID 1, any of the four routes, and real phones.
 
+**The drill script is for a disposable machine only.** Never run it on the beta host.
+- **Its refusal:** it won't start where a `cgn` user, a `cgn` group or its folder already exists.
+- **Its cleanup:** it deletes only what that run created (review 6908455526, D-BR2-06).
+
 ### Sources (official, read 2026-11-16)
 - **Caddy documentation**, `caddyserver/website` at `c33ee8b`:
   - [automatic-https.md](https://github.com/caddyserver/website/blob/c33ee8b02a245045bc18c406a1aa0e06cd1fb772/src/docs/markdown/automatic-https.md): the public-certificate requirements, the local CA, the DNS challenge, `.ts.net`;

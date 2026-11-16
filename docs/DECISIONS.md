@@ -2247,3 +2247,17 @@ Handoff 6813167965 (with the Stage 9.2 clearance). Spec: `docs/stage9/stage93.md
   - **The host:** the revision, a restart with persistence, an independent backup, an isolated restore, the first-install stop, and no route around the proxy.
   - **Who does each pending check:** each is paired with its evidence and the person who can do it. Claude can't run them.
   - **The catalog:** the playable catalog is unchanged.
+- **D-BR2-06 The rehearsal script refuses before it can clean up, and cleans up only what it created** (review 6908455526).
+  - **The defect:** the first `preflight-drill.sh` installed its EXIT trap before the `cgn` check, so a refusal would delete an existing `cgn` user and group. Reproduced with logging stubs in `repro-v1-unsafe-cleanup.log`.
+  - **What it didn't harm:** in runs 1–4 no `cgn` existed beforehand on this machine.
+  - **The fix:**
+    - the user, group and prefix refusals come first, with no trap;
+    - ownership is recorded per resource, including after a partial `useradd` failure;
+    - cleanup is limited to owned resources and its own processes;
+    - a failed service-user step ends the run;
+    - SIGTERM and SIGINT go through the same cleanup.
+  - **Proved by** `drill-safety-check.sh` (14/14: existing user, existing group, partial failure, SIGTERM mid-run) and a full run (42/42).
+  - **The record:** the unsafe version and its logs stay as history, marked do-not-run.
+  - **Alternatives rejected:**
+    - Deleting the old version: it would hide what runs 1–4 actually ran.
+    - Using a randomly named service user: the drill exists to rehearse the runbook's own `cgn` steps.

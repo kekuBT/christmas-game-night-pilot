@@ -1,0 +1,10 @@
+# Reproduction of review 6908455526 with the UNSAFE first version of preflight-drill.sh (as published at 30ea026).
+# Fixture: a cgn user made for this check (with its own cgn group). userdel/groupdel are logging-only stubs: nothing is deleted.
+fixture: uid=996(cgn) gid=995(cgn) groups=995(cgn)
+a user named cgn already exists here; refusing to touch it
+v1 exit: 2
+deletion attempts recorded by the stubs:
+userdel cgn
+groupdel cgn
+fixture after: uid=996(cgn) gid=995(cgn) groups=995(cgn)
+fixture removed by the check: no cgn user / no cgn group

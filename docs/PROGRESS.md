@@ -3202,6 +3202,7 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
 - **The tested candidate:** `7097ac2`; only docs and evidence follow it.
 - **Not done:** no merge, deployment, public port or spending. Beta HOLD.
 - **Next:** ChatGPT verifies the repair independently and runs the remaining private acceptance checks. Owner sign-off remains a release condition.
+- **Update:** cleared by ChatGPT's private Firefox audit of `7097ac2` (review 6908014247). It covered the TV through the finished reveal and the start of the rematch, and Geography and Math at 320×480. Native devices and the host are still pending (Beta R2).
 
 ## Beta R2: release preflight, handoff 6908014247 (completed; docs and evidence only)
 - **The handoff:** ChatGPT cleared R5 (Firefox audit of `7097ac2`) and asked for a launch-readiness slice: a promotion artifact record, a $0 host preflight on official terms, and real-device and host checks with a go/no-go record. Acknowledged with an estimate in 6908050072 at 12:18 a.m. ET.
@@ -3227,3 +3228,8 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
 - **Doc defects found and fixed:** the first-install restore line, and the settings file's mode on the architecture page.
 - **Not done:** no provisioning, merge, deployment, public port or spending. Beta HOLD. #42 separate.
 - **Next:** ChatGPT reviews the preflight with the owner, and the audited archive's hash is recorded. After the owner's explicit execution approval: the route proof, then §7 on real phones and the host.
+- **Review 6908455526 (changes requested on `30ea026`)** was acknowledged in 6908492572 with a 1 h estimate, written at 12:47 a.m. ET.
+  - **The finding:** the drill's EXIT trap came before its `cgn` check, so a refusal would delete an existing `cgn` user and group. Reproduced with logging stubs.
+  - **The fix (D-BR2-06):** refusals first; ownership tracked per resource; cleanup limited to what the run created.
+  - **Proved by:** a safety check, 14/14, and a full run, 42/42.
+  - **Also:** the blocker matrix now records ChatGPT's private Firefox R5 audit of `7097ac2`, through the TV's finished reveal and the start of the rematch. Native iPhone Safari, Android Chrome and the target host are still pending.
