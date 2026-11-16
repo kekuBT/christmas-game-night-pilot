@@ -3202,3 +3202,28 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
 - **The tested candidate:** `7097ac2`; only docs and evidence follow it.
 - **Not done:** no merge, deployment, public port or spending. Beta HOLD.
 - **Next:** ChatGPT verifies the repair independently and runs the remaining private acceptance checks. Owner sign-off remains a release condition.
+
+## Beta R2: release preflight, handoff 6908014247 (completed; docs and evidence only)
+- **The handoff:** ChatGPT cleared R5 (Firefox audit of `7097ac2`) and asked for a launch-readiness slice: a promotion artifact record, a $0 host preflight on official terms, and real-device and host checks with a go/no-go record. Acknowledged with an estimate in 6908050072 at 12:18 a.m. ET.
+- **Estimate:** about 4 h 20 min, written at 12:18 a.m. ET. **Actual:** see the completed report on #43.
+- **Runtime unchanged:** `7097ac2`. Its full gate `20261116-035311-7097ac2b-9479` (PASSED, exit 0, 111/111) is reused. The head delta from `7097ac2` is docs and evidence only.
+- **Item 1, the artifact:** `docs/beta/release-7097ac2.md` and `release-7097ac2.inventory.sha256`.
+  - **Built three times** from fresh clones (Node v22.16.0 twice, from the checksum-verified official download; v22.23.4 once): three different archive hashes, **one** 144-file inventory, digest `fe6d74f8…a61c`.
+  - **The audited archive** in the review Codespace wasn't reachable. Its hash is left for its holder, with the commands to verify it against the inventory.
+- **Item 2, the host:** the release runbook's new "Preflight" section.
+  - **The comparison:** four viable $0 routes, from official Caddy, Let's Encrypt and Cloudflare documentation at pinned commits and Tailscale's code. Tailscale's site, Oracle, Google Cloud and AWS couldn't be read from here; they are listed as facts to confirm.
+  - **The checklist:** P1–P9, a one-time route proof, and a measured proxy count (Caddy 2.6.2's handling checked here).
+- **Item 3, the checks:** `docs/REAL_DEVICE_TESTING.md` §7 and `docs/device-testing/BETA_GO_NO_GO_TEMPLATE.md`.
+  - **The phones:** P1–P8.
+  - **The host:** H1–H6.
+  - **The record:** go/no-go, plus the pending checks with their evidence and who can do them.
+- **Validation:** `docs/evidence/beta-r2-preflight/`.
+  - **The preflight drill:** the runbook's commands, with a real service user, the real package and Caddy 2.6.2 in front (local CA).
+    - Run 1: invalid, my driver's errors.
+    - Run 2: two checks proved nothing; not counted.
+    - **Run 3: PASSED, 42/42.**
+    - Run 4: a negative run, which failed as it should (exit 2).
+  - **The link and path check:** passed, 105 in 8 files.
+- **Doc defects found and fixed:** the first-install restore line, and the settings file's mode on the architecture page.
+- **Not done:** no provisioning, merge, deployment, public port or spending. Beta HOLD. #42 separate.
+- **Next:** ChatGPT reviews the preflight with the owner, and the audited archive's hash is recorded. After the owner's explicit execution approval: the route proof, then §7 on real phones and the host.

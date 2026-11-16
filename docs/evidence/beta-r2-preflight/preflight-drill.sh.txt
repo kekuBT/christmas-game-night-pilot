@@ -1,0 +1,198 @@
+#!/bin/bash
+# Beta R2 preflight drill: the release runbook (docs/beta/beta-r1-release.md) run as written, on one disposable Linux
+# machine, with the real package, a real service user and a real HTTPS proxy (Caddy) in front. Private and $0:
+# everything listens on 127.0.0.1, uses a throwaway prefix ($P stands for "/" in the runbook's paths), a synthetic
+# access code and synthetic names, and is removed at the end. Not covered here: systemd as PID 1 (the container has
+# none: the service is started the way the unit would start it), a public certificate, a real host, real phones.
+#   bash preflight-drill.sh <package.tgz> <recorded sha256> <recorded inventory digest> <node dir> <caddy binary> <expected revision>
+set -uo pipefail
+TGZ=$1; REC_SHA=$2; REC_INV=$3; NODE_DIR=$4; CADDY_SRC=$5; SHA=$6
+HERE=$(cd "$(dirname "$0")" && pwd)
+P=/srv/cgn-r2-drill-$(date -u +%Y%m%dT%H%M%SZ)
+PORT=3907; HPORT=18443; WPORT=18080; HOSTNAME_=beta.test; ORIGIN=https://$HOSTNAME_:$HPORT
+CODE="drill-$(head -c 12 /dev/urandom | base64 | tr -dc 'A-Za-z0-9' | head -c 16)"
+FAIL=0; PASS=0
+check() { if [ "$2" = 0 ]; then echo "PASS $1${3:+ — $3}"; PASS=$((PASS+1)); else echo "FAIL $1${3:+ — $3}"; FAIL=$((FAIL+1)); fi; }
+step() { echo; echo "== $*"; }
+SRV_PID=; CADDY_PID=; RESTORED_PID=
+cleanup() {
+  for p in $SRV_PID $RESTORED_PID $CADDY_PID; do kill "$p" 2>/dev/null; done; sleep 1
+  id cgn >/dev/null 2>&1 && userdel cgn 2>/dev/null; getent group cgn >/dev/null && groupdel cgn 2>/dev/null
+  rm -rf "$P"
+}
+trap cleanup EXIT
+id cgn >/dev/null 2>&1 && { echo "a user named cgn already exists here; refusing to touch it"; exit 2; }
+mkdir -p "$P"; chmod 0755 "$P"
+cp -a "$NODE_DIR" "$P/node"; chmod -R a+rX "$P/node"; export PATH="$P/node/bin:$PATH"
+cp "$CADDY_SRC" "$P/caddy"; chmod 0755 "$P/caddy"
+echo "prefix $P · node $(node -v) · npm $(npm -v) · caddy $("$P/caddy" version) · revision $SHA"
+
+step "A. The artifact: verify the recorded hash, unpack, inventory, runtime install"
+cp "$TGZ" "$P/cgn-$SHA.tgz"; cd "$P"
+echo "$REC_SHA  cgn-$SHA.tgz" > expected.sha256
+sha256sum -c expected.sha256; check "A1 sha256sum matches the recorded hash" $?
+mkdir -p "$P/opt/christmas-game-night/releases"; chmod 0755 "$P/opt" "$P/opt/christmas-game-night" "$P/opt/christmas-game-night/releases"
+REL=$P/opt/christmas-game-night/releases/$SHA
+mkdir "$REL" && tar -xzf "cgn-$SHA.tgz" -C "$REL"; check "A2 unpacked into releases/<sha>" $?
+cat "$REL/release.json"
+REV=$(node -e "process.stdout.write(require('$REL/release.json').revision)"); [ "$REV" = "$SHA" ]; check "A3 release.json names the revision, no -dirty" $? "$REV"
+INV=$( (cd "$REL" && LC_ALL=C find . -type f ! -path ./release.json ! -path './node_modules/*' -print0 | LC_ALL=C sort -z | xargs -0 sha256sum) | sha256sum | cut -c1-64)
+[ "$INV" = "$REC_INV" ]; check "A4 the file inventory's digest matches the recorded one" $? "$INV"
+(cd "$REL" && npm ci --omit=dev --ignore-scripts --no-audit --no-fund > "$P/npm-ci.log" 2>&1); R=$?; tail -1 "$P/npm-ci.log"; check "A5 npm ci --omit=dev --ignore-scripts" $R "exit $R"
+TOP=$(cd "$REL" && npm ls --omit=dev --depth=0 --parseable 2>/dev/null | tail -n +2 | xargs -n1 basename | sort | tr '\n' ' ')
+[ "$TOP" = "ws zod " ]; check "A6 only ws and zod installed" $? "$(cd "$REL" && npm ls --omit=dev --depth=0 2>/dev/null | tail -n +2 | tr '\n' ' ')"
+chown -R root:root "$REL"; chmod -R go-w "$REL"
+
+step "B. First install: the service user, private folders, settings, check, start"
+useradd --system --no-create-home --shell /usr/sbin/nologin --user-group cgn; check "B1 the service user" $?
+install -d -m 0755 "$P/var" "$P/var/lib" "$P/var/backups" "$P/etc"
+install -d -m 0700 -o cgn -g cgn "$P/var/lib/christmas-game-night"
+install -d -m 0700 "$P/var/backups/christmas-game-night"
+install -d -m 0750 -g cgn "$P/etc/christmas-game-night"
+install -m 0640 -g cgn /dev/null "$P/etc/christmas-game-night/env"
+cat > "$P/etc/christmas-game-night/env" <<EOF
+NODE_ENV=production
+PORT=$PORT
+MCHEZO_LISTEN_HOST=127.0.0.1
+MCHEZO_DATA_DIR=$P/var/lib/christmas-game-night
+MCHEZO_PUBLIC_ORIGIN=$ORIGIN
+MCHEZO_BETA_ACCESS_CODE=$CODE
+MCHEZO_TRUST_PROXY=1
+EOF
+stat -c '%a %U:%G %n' "$P/var/lib/christmas-game-night" "$P/var/backups/christmas-game-night" "$P/etc/christmas-game-night" "$P/etc/christmas-game-night/env"
+[ "$(stat -c '%a %U' "$P/var/lib/christmas-game-night")" = "700 cgn" ] && [ "$(stat -c '%a %U' "$P/var/backups/christmas-game-night")" = "700 root" ] && [ "$(stat -c '%a %G' "$P/etc/christmas-game-night/env")" = "640 cgn" ]
+check "B2 data 0700 cgn, backups 0700 root, settings 0640 root:cgn" $?
+runuser -u nobody -- cat "$P/etc/christmas-game-night/env" >/dev/null 2>&1; [ $? -ne 0 ]; check "B3 another user can't read the settings (they hold the code)" $?
+ln -sfn "$REL" "$P/opt/christmas-game-night/current"; check "B4 current -> releases/<sha>" $?
+cd "$P/opt/christmas-game-night/current"
+OUT=$(runuser -u cgn -- node dist/server/datatool.js check --data "$P/var/lib/christmas-game-night" 2>&1); echo "$OUT"
+echo "$OUT" | grep -q "^check OK: 0 room(s)"; check "B5 datatool check as cgn on the empty folder" $? "$OUT"
+start_server() { # the way the unit starts it: as cgn, the env file, UMask 0077, from current
+  setpriv --reuid=cgn --regid=cgn --init-groups env -i PATH=/usr/bin:/bin bash -c "set -a; . '$P/etc/christmas-game-night/env'; set +a; umask 0077; cd '$P/opt/christmas-game-night/current'; exec '$P/node/bin/node' dist/server/serve.js" >> "$1" 2>&1 &
+  SRV_PID=$!
+  for i in $(seq 1 100); do curl --noproxy '*' -m 10 -s -o /dev/null "http://127.0.0.1:$PORT/health" && return 0; sleep 0.1; done; return 1
+}
+stop_server() { kill -TERM "$SRV_PID"; wait "$SRV_PID"; local c=$?; SRV_PID=; return $c; }
+start_server "$P/server-1.log"; check "B6 the server starts as cgn (production settings accepted)" $?
+sleep 0.5; cat "$P/server-1.log"
+grep -q "Christmas Game Night server on http://localhost:$PORT" "$P/server-1.log"; check "B7 the start line" $?
+grep -q "\[restore\]" "$P/server-1.log"; [ $? -ne 0 ]; check "B8 an empty first install prints no [restore] line (the runbook used to promise '0 room(s) restored')" $?
+HEXPORT=$(printf '%04X' $PORT); LISTEN=$(awk -v p=":$HEXPORT" '$4=="0A" && substr($2, length($2)-4)==p {print $2}' /proc/net/tcp /proc/net/tcp6 | sort -u | tr '\n' ' '); echo "listening sockets on $PORT: $LISTEN"
+[ "$LISTEN" = "0100007F:$HEXPORT " ]; check "B9 the server listens on 127.0.0.1 only (/proc/net/tcp)" $? "$LISTEN"
+
+step "C. The HTTPS proxy: the runbook's Caddy site block, with a local CA because this name isn't public"
+mkdir -p "$P/caddy-data"
+cat > "$P/Caddyfile" <<EOF
+{
+	admin off
+	skip_install_trust
+	http_port $WPORT
+	https_port $HPORT
+}
+$HOSTNAME_:$HPORT {
+	bind 127.0.0.1
+	tls internal
+	reverse_proxy 127.0.0.1:$PORT
+	header Strict-Transport-Security "max-age=31536000"
+	handle_errors {
+		respond "Christmas Game Night is updating. Back in a few minutes." 503
+	}
+}
+EOF
+cat > "$P/Caddyfile.example" <<'EOF'
+games.example.org {
+	reverse_proxy 127.0.0.1:3000
+	header Strict-Transport-Security "max-age=31536000"
+	handle_errors {
+		respond "Christmas Game Night is updating. Back in a few minutes." 503
+	}
+}
+EOF
+XDG_DATA_HOME=$P/caddy-data XDG_CONFIG_HOME=$P/caddy-data "$P/caddy" validate --config "$P/Caddyfile.example" --adapter caddyfile > "$P/caddy-validate.log" 2>&1; R=$?; tail -2 "$P/caddy-validate.log"
+check "C1 caddy validate accepts the runbook's example site block (+ maintenance page)" $R
+XDG_DATA_HOME=$P/caddy-data XDG_CONFIG_HOME=$P/caddy-data "$P/caddy" run --config "$P/Caddyfile" --adapter caddyfile > "$P/caddy.log" 2>&1 &
+CADDY_PID=$!
+CA=$P/caddy-data/caddy/pki/authorities/local/root.crt
+for i in $(seq 1 100); do [ -f "$CA" ] && curl --noproxy '*' -m 10 -s -o /dev/null --resolve "$HOSTNAME_:$HPORT:127.0.0.1" --cacert "$CA" "$ORIGIN/health" && break; sleep 0.2; done
+H=$(curl --noproxy '*' -m 10 -sS --resolve "$HOSTNAME_:$HPORT:127.0.0.1" --cacert "$CA" "$ORIGIN/health"); R=$?; echo "$H"
+[ $R = 0 ] && [ "$H" = "{\"ok\":true,\"revision\":\"$SHA\"}" ]; check "C2 Caddy serves https://$HOSTNAME_:$HPORT, its certificate verified against its own root (curl exit 0, the expected body)" $? "curl exit $R"
+export ORIGIN CODE CA PROXY_ADDR=127.0.0.1 WS_MODULE=$REL/package.json EXPECT_REVISION=$SHA
+node "$HERE/drill-client.mjs" play "$P/state.json"; check "C3 through the proxy: /health, HSTS, the gate, a room, wss://" $?
+
+step "D. Restart with persistence"
+stop_server; R=$?; check "D1 SIGTERM stops it cleanly (exit 0)" $R "exit $R"
+[ ! -e "$P/var/lib/christmas-game-night/server.lock" ]; check "D2 the lock record is gone" $?
+MAINT=$(curl --noproxy '*' -m 10 -s -w ' HTTP %{http_code}' --resolve "$HOSTNAME_:$HPORT:127.0.0.1" --cacert "$CA" "$ORIGIN/health"); echo "$MAINT"
+echo "$MAINT" | grep -q "updating.*HTTP 503"; check "D3 while stopped, the proxy's maintenance page (503)" $? "$MAINT"
+find "$P/var/lib/christmas-game-night" -maxdepth 1 -type f -printf '%m %u %f\n' | sort
+[ -z "$(find "$P/var/lib/christmas-game-night" -type f ! -user cgn)" ] && [ -z "$(find "$P/var/lib/christmas-game-night" -type f -perm /077)" ]; check "D4 every data file belongs to cgn and is private (UMask 0077)" $?
+start_server "$P/server-2.log"; check "D5 started again" $?
+sleep 0.5; grep "\[restore\]" "$P/server-2.log"
+grep -q "\[restore\] 1 room(s) restored, 0 not loaded" "$P/server-2.log"; check "D6 the restore line: 1 room restored, 0 not loaded" $?
+node "$HERE/drill-client.mjs" after-restart "$P/state.json"; check "D7 the room and the cookie survive the restart" $?
+
+step "E. Backup (server stopped, as root) and restore into an isolated folder as the service user"
+stop_server; check "E1 stopped for the backup" $?
+DATA_BEFORE=$(cd "$P/var/lib/christmas-game-night" && find . -type f ! -name server.lock -print0 | LC_ALL=C sort -z | xargs -0 sha256sum | sha256sum | cut -c1-64)
+BK=$P/var/backups/christmas-game-night/$(date -u +%Y%m%dT%H%MZ)-before-${SHA:0:7}
+OUT=$(node dist/server/datatool.js backup --data "$P/var/lib/christmas-game-night" --out "$BK" 2>&1); echo "$OUT"
+echo "$OUT" | grep -q "^backup OK: 1 room(s)"; check "E2 backup OK, 1 room" $?
+[ "$(stat -c '%a %U' "$BK")" = "700 root" ] && [ -z "$(find "$BK" -type f -perm /077)" ]; check "E3 the backup is root's, 0700/0600" $? "$(stat -c '%a %U' "$BK")"
+runuser -u cgn -- ls "$BK" >/dev/null 2>&1; [ $? -ne 0 ]; check "E4 the service user can't read the backup" $?
+OUT=$(node dist/server/datatool.js verify --backup "$BK" 2>&1); echo "$OUT"; echo "$OUT" | grep -q "^verify OK"; check "E5 verify" $?
+RD=$P/var/lib/christmas-game-night-restored-$(date -u +%Y%m%d)
+OUT=$(node dist/server/datatool.js restore --backup "$BK" --into "$RD" --owner cgn 2>&1); echo "$OUT"; echo "$OUT" | grep -q "^restore OK: 1 room(s)"; check "E6 restore into a new folder with --owner cgn" $?
+OUT=$(runuser -u cgn -- node dist/server/datatool.js check --data "$RD" 2>&1); echo "$OUT"; echo "$OUT" | grep -q "^check OK: 1 room(s)"; check "E7 check as cgn on the restored folder" $?
+OUT=$(node dist/server/datatool.js restore --backup "$BK" --into "$P/var/lib/christmas-game-night" --owner cgn 2>&1); R=$?; echo "$OUT"; [ $R -ne 0 ]; check "E8 restore refuses the live (non-empty) folder" $? "exit $R"
+setpriv --reuid=cgn --regid=cgn --init-groups env -i PATH=/usr/bin:/bin NODE_ENV=production MCHEZO_DATA_DIR="$RD" MCHEZO_PUBLIC_ORIGIN="$ORIGIN" MCHEZO_BETA_ACCESS_CODE="$CODE" MCHEZO_LISTEN_HOST=127.0.0.1 PORT=3999 "$P/node/bin/node" dist/server/serve.js > "$P/restored.log" 2>&1 &
+RESTORED_PID=$!
+for i in $(seq 1 100); do curl --noproxy '*' -m 10 -s -o /dev/null http://127.0.0.1:3999/health && break; sleep 0.1; done; sleep 0.3
+grep "\[restore\]" "$P/restored.log"; grep -q "\[restore\] 1 room(s) restored, 0 not loaded" "$P/restored.log"; check "E9 the restore drill's server (port 3999, as cgn) loads the room" $?
+kill -TERM $RESTORED_PID; wait $RESTORED_PID; R=$?; RESTORED_PID=; check "E10 the drill server stops cleanly" $R
+rm -r "$RD"; [ ! -e "$RD" ]; check "E11 the drill copy is removed" $?
+DATA_AFTER=$(cd "$P/var/lib/christmas-game-night" && find . -type f ! -name server.lock -print0 | LC_ALL=C sort -z | xargs -0 sha256sum | sha256sum | cut -c1-64)
+[ "$DATA_BEFORE" = "$DATA_AFTER" ]; check "E12 the live data is byte-for-byte unchanged by backup and restore" $?
+
+step "F. First-install stop (no previous package to roll back to)"
+start_server "$P/server-3.log"; check "F1 running again before the stop" $?
+stop_server; R=$?; check "F2 stopped and kept stopped (the runbook's 'systemctl disable --now')" $R
+ls -la "$P/var/lib/christmas-game-night"
+[ "$(cd "$P/var/lib/christmas-game-night" && find . -type f ! -name server.lock -print0 | LC_ALL=C sort -z | xargs -0 sha256sum | sha256sum | cut -c1-64)" = "$DATA_BEFORE" ]; check "F3 the data is untouched" $?
+MAINT=$(curl --noproxy '*' -m 10 -s -w ' HTTP %{http_code}' --resolve "$HOSTNAME_:$HPORT:127.0.0.1" --cacert "$CA" "$ORIGIN/"); echo "$MAINT"
+echo "$MAINT" | grep -q "HTTP 503"; check "F4 the site shows the maintenance page while stopped" $?
+
+step "G. The service unit from the architecture page (syntax only: no systemd as PID 1 here)"
+cat > "$P/christmas-game-night.service" <<EOF
+[Unit]
+Description=Christmas Game Night (private beta)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=cgn
+Group=cgn
+WorkingDirectory=/opt/christmas-game-night/current
+EnvironmentFile=/etc/christmas-game-night/env
+ExecStart=/usr/bin/node dist/server/serve.js
+Restart=on-failure
+RestartSec=5
+KillSignal=SIGTERM
+TimeoutStopSec=20
+NoNewPrivileges=true
+UMask=0077
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+ReadWritePaths=/var/lib/christmas-game-night
+
+[Install]
+WantedBy=multi-user.target
+EOF
+systemd-analyze verify "$P/christmas-game-night.service" > "$P/unit-verify.log" 2>&1; R=$?
+sed "s#$P#<prefix>#g" "$P/unit-verify.log"
+UNIT_OTHER=$(grep -v -E "WorkingDirectory=|/usr/bin/node|EnvironmentFile|is not executable|No such file|Failed to prepare filename|ReadWritePaths" "$P/unit-verify.log" | grep -c .)
+[ "$UNIT_OTHER" = 0 ]; check "G1 systemd-analyze verify: no complaint other than the host paths this machine lacks" $? "exit $R, other lines: $UNIT_OTHER"
+
+echo; echo "preflight drill: $PASS passed, $FAIL failed"
+[ $FAIL = 0 ] && echo "PREFLIGHT DRILL PASSED" || echo "PREFLIGHT DRILL FAILED"
+exit $FAIL

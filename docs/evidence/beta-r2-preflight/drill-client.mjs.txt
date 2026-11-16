@@ -1,0 +1,81 @@
+// Beta R2 preflight drill: the client side, through the HTTPS proxy (Caddy) by its public name, the certificate verified
+// against the proxy's own local CA. Nothing here waives TLS checks.
+//   node drill-client.mjs <mode> <state.json>     mode: play | after-restart | gated
+// Env: ORIGIN (https://beta.test:<port>), PROXY_ADDR (127.0.0.1), CA (path to the proxy's root), CODE, WS_MODULE (path to ws)
+import { readFileSync, writeFileSync, existsSync } from "node:fs";
+import https from "node:https";
+import { createRequire } from "node:module";
+
+const [mode, stateFile] = process.argv.slice(2);
+const ORIGIN = process.env.ORIGIN, CODE = process.env.CODE, CA = readFileSync(process.env.CA);
+const addr = process.env.PROXY_ADDR ?? "127.0.0.1";
+const { WebSocket } = createRequire(process.env.WS_MODULE)("ws");
+const url = new URL(ORIGIN);
+const lookup = (_h, o, cb) => (o && o.all ? cb(null, [{ address: addr, family: 4 }]) : cb(null, addr, 4));
+let failures = 0;
+const check = (name, ok, detail = "") => { console.log(`${ok ? "PASS" : "FAIL"} ${name}${detail ? ` — ${detail}` : ""}`); if (!ok) failures++; };
+
+function req(method, path, { body, headers = {}, form } = {}) {
+  return new Promise((resolve, reject) => {
+    const data = form ? new URLSearchParams(form).toString() : body ? JSON.stringify(body) : undefined;
+    const h = { origin: ORIGIN, ...headers };
+    if (data) { h["content-type"] = form ? "application/x-www-form-urlencoded" : "application/json"; h["content-length"] = Buffer.byteLength(data); }
+    const r = https.request({ host: url.hostname, port: url.port, servername: url.hostname, path, method, headers: h, ca: CA, lookup }, (res) => {
+      let s = ""; res.on("data", (d) => { s += d; }); res.on("end", () => { let json; try { json = JSON.parse(s); } catch { json = undefined; } resolve({ status: res.statusCode, headers: res.headers, text: s, json }); });
+    });
+    r.on("error", reject); r.setTimeout(10000, () => r.destroy(new Error("timeout")));
+    if (data) r.write(data); r.end();
+  });
+}
+const state = existsSync(stateFile) ? JSON.parse(readFileSync(stateFile, "utf8")) : {};
+const api = (method, path, body) => req(method, path, { body, headers: { cookie: state.cookie } });
+const names = async () => { const r = await api("GET", `/rooms/${state.roomId}/projection?audience=tv`); return r.status === 200 ? (r.json.players ?? []).map((p) => p.displayName).sort().join(",") : `HTTP ${r.status}`; };
+function wsLive() {
+  return new Promise((resolve) => {
+    const u = `wss://${url.host}/?roomId=${state.roomId}&audience=tv`;
+    const ws = new WebSocket(u, { ca: CA, servername: url.hostname, lookup, origin: ORIGIN, headers: { cookie: state.cookie } });
+    const t = setTimeout(() => { ws.terminate(); resolve({ ok: false, why: "no message in 8 s" }); }, 8000);
+    ws.on("message", (m) => { clearTimeout(t); ws.close(); resolve({ ok: true, why: `first message ${String(m).length} bytes` }); });
+    ws.on("unexpected-response", (_r, res) => { clearTimeout(t); resolve({ ok: false, why: `HTTP ${res.statusCode}` }); });
+    ws.on("error", (e) => { clearTimeout(t); resolve({ ok: false, why: e.message }); });
+  });
+}
+
+const health = await req("GET", "/health");
+console.log(`health: HTTP ${health.status} ${health.text.trim()}`);
+check("/health over HTTPS (certificate verified) names the revision, and nothing else", health.status === 200 && health.json?.ok === true && health.json?.revision === process.env.EXPECT_REVISION && Object.keys(health.json).sort().join() === "ok,revision", health.text.trim());
+check("the proxy adds HSTS", /max-age=31536000/.test(String(health.headers["strict-transport-security"] ?? "")), String(health.headers["strict-transport-security"]));
+
+if (mode === "gated" || mode === "play") {
+  const noCookie = await req("GET", "/rooms/none/projection?audience=tv");
+  check("without the cookie the API is refused (401 BETA_ACCESS_REQUIRED)", noCookie.status === 401 && noCookie.json?.code === "BETA_ACCESS_REQUIRED", `HTTP ${noCookie.status}`);
+  const wrong = await req("POST", "/beta/enter", { form: { code: "wrong-code-123456", next: "/" } });
+  check("a wrong code is refused (401) and sets no cookie", wrong.status === 401 && !wrong.headers["set-cookie"], `HTTP ${wrong.status}`);
+  const enter = await req("POST", "/beta/enter", { form: { code: CODE, next: "/?join=ABCD" } });
+  const sc = String(enter.headers["set-cookie"] ?? "");
+  check("the right code: 303 back to the page asked for, a Secure HttpOnly cookie that isn't the code", enter.status === 303 && enter.headers.location === "/?join=ABCD" && /Secure/.test(sc) && /HttpOnly/i.test(sc) && !sc.includes(CODE), `HTTP ${enter.status} → ${enter.headers.location}`);
+  state.cookie = sc.split(";")[0];
+  const page = await req("GET", "/", { headers: { cookie: state.cookie, accept: "text/html" } });
+  check("with the cookie the app page loads", page.status === 200 && /<div id="root"|<script/.test(page.text), `HTTP ${page.status}`);
+  const evil = await req("POST", "/rooms", { body: { name: "x", kind: "casual" }, headers: { cookie: state.cookie, origin: "https://evil.test" } });
+  check("a foreign Origin is refused even with the cookie (403)", evil.status === 403, `HTTP ${evil.status}`);
+}
+if (mode === "play") {
+  const room = await api("POST", "/rooms", { name: "Preflight night", kind: "casual" });
+  check("a room is created through the proxy", room.status === 200 || room.status === 201, `HTTP ${room.status}`);
+  state.roomId = room.json.roomId;
+  const h = await api("POST", "/rooms/join-by-code", { joinCode: room.json.joinCode, displayName: "Host Drill", asHost: true, hostClaimToken: room.json.hostClaimToken });
+  const g = await api("POST", "/rooms/join-by-code", { joinCode: room.json.joinCode, displayName: "Guest Drill" });
+  check("host and guest join", [h.status, g.status].every((s) => s === 200 || s === 201), `${h.status}/${g.status}`);
+  check("the room has both players", (await names()) === "Guest Drill,Host Drill", await names());
+  const live = await wsLive();
+  check("a wss:// socket through the proxy opens and gets a live message", live.ok, live.why);
+}
+if (mode === "after-restart") {
+  check("after the restart, the same room with both players (cookie still valid)", (await names()) === "Guest Drill,Host Drill", await names());
+  const live = await wsLive();
+  check("after the restart, wss:// opens again", live.ok, live.why);
+}
+writeFileSync(stateFile, JSON.stringify(state));
+console.log(`client ${mode}: ${failures === 0 ? "PASSED" : `FAILED (${failures})`}`);
+process.exit(failures ? 1 : 0);

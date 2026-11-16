@@ -1,0 +1,6 @@
+#!/bin/bash
+# R2: per-file SHA-256 inventory of an unpacked release package. release.json is listed apart: it holds the build time.
+# usage: inventory.sh <unpacked package folder>   (prints the inventory; the last line is its digest)
+set -euo pipefail
+cd "$1"
+LC_ALL=C find . -type f ! -path ./release.json ! -path './node_modules/*' -print0 | LC_ALL=C sort -z | xargs -0 sha256sum

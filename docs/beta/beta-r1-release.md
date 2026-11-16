@@ -20,6 +20,102 @@
 5. **A backup before every deploy,** taken with the server stopped.
 6. **Previews are private:** local, the home Wi-Fi, or a private Codespace (`docs/CODESPACES_PREVIEW.md`). Never a public port, never the beta's data or access code.
 
+## Preflight: the host and the route, at $0 (Beta R2)
+
+**Status:** a comparison and a checklist for ChatGPT and the owner, from handoff [6908014247](https://github.com/kekuBT/christmas-game-night-pilot/pull/43#issuecomment-6908014247) item 2. **Nothing is chosen, provisioned or bought here.** ChatGPT reviews the recommendation with the owner before anything is executed, and execution needs the owner's explicit approval. The release candidate is recorded in [`release-7097ac2.md`](release-7097ac2.md).
+
+**Scope:** only an **already-authorized private host** (a machine or an account the owner already has, already at $0) or an **owner-provided LAN route**. New accounts that need a card, a paid tier or a domain purchase are out of scope: they need the owner's explicit approval (`docs/COST_FEASIBILITY.md`).
+
+### What every option must keep (unchanged from the architecture page)
+- **One Node 22 service:** one process, on Linux. Production refuses to start off Linux, because the single-writer lock is a Linux abstract socket.
+- **One HTTPS origin** with WebSocket proxying, in front of a **loopback-only backend** (`MCHEZO_LISTEN_HOST=127.0.0.1`).
+- **One data writer** on one local persistent disk: no second instance, no network volume.
+- **Separate private folders** for releases (root, read-only to the service), data (`cgn`, 0700) and backups (root, 0700), plus a copy of the backups off the host.
+
+### The viable options
+**Facts marked "official"** were read on 2026-11-16 in the providers' own documentation sources, at pinned revisions (listed under "Sources" below).
+- **Unreachable from this session:** tailscale.com (refused by this session's network policy), and the Oracle, Google Cloud and AWS documentation sites.
+- **So for those providers,** only facts from Tailscale's own source code are stated. Everything else is a fact **to confirm on the provider's page** (the last table).
+
+| | **H1. LAN only:** the owner's always-on Linux computer, home Wi-Fi only, a name in a domain the owner **already** has | **H2. Cloudflare named Tunnel** from that computer, with a domain the owner **already** has on Cloudflare | **H3. Tailscale Funnel** from that computer (no domain) | **H4. A VM the owner already has at $0** (for example, an existing always-free VM) |
+|---|---|---|---|---|
+| **Compute** | The owner's computer, on during game nights, not sleeping | The same | The same | The provider's VM: always on, if the account allows it |
+| **TLS and WebSockets** | Caddy with a **public** certificate through the **DNS challenge**. It needs no open ports, but Caddy needs the DNS provider's API credentials and a Caddy build with that provider's module (official, Caddy). Ubuntu's `caddy` 2.6.2 has **no** DNS-provider module (`caddy list-modules`, checked here). WebSockets pass through `reverse_proxy` (official, Caddy; drilled here). | TLS ends at Cloudflare's edge. "Cloudflare supports proxied WebSocket connections without additional configuration", on all plans (official, Cloudflare). `cloudflared` makes outbound connections only, with no inbound ports, and must reach Cloudflare on port 7844 (official). | A `*.ts.net` name. Caddy fetches `.ts.net` certificates from the local Tailscale (official, Caddy). Funnel needs HTTPS enabled on the tailnet and the `funnel` node attribute, and its ports come from the tailnet's policy (Tailscale's source code). **WebSockets through Funnel: not confirmed from an official page.** | The architecture page as written: Caddy with a public certificate (the A/AAAA record points at the VM, ports 80 and 443 open: official, Caddy) |
+| **Stable participant access** | **Only on the home Wi-Fi.** The name must resolve to the computer's LAN address (a DHCP reservation keeps it stable). Some routers refuse DNS answers pointing at private addresses: check it on a phone. No remote players. | Any network, by a stable name in the owner's domain | Any network, by a stable `*.ts.net` name | Any network, by the VM's DNS name |
+| **Who sits in the path** | Nobody outside the home | **Cloudflare:** traffic "flows through Cloudflare", which applies caching and WAF to it (official). So Cloudflare handles the decrypted requests, including the beta cookie and session tokens. | Tailscale relays the connection. Whether it ever sees the decrypted traffic is **to confirm** on Tailscale's page. | The VM provider |
+| **Persistent private disk and backups** | The computer's own disk; backups to a second local disk, plus an off-host copy | The same | The same | The VM's boot or block volume. **Its retention when an account or VM is idle is to confirm** on the provider's page. |
+| **Client address (`MCHEZO_TRUST_PROXY`)** | `1` (Caddy on the same machine) | **Count first.** "X-Forwarded-For maintains proxy server and original visitor IP addresses", with `CF-Connecting-IP` alongside (official). Caddy warns that X-Forwarded-For can be spoofed behind Cloudflare. **Leave it unset until counted on the host.** | Count first; leave it unset until then | `1` (Caddy on the VM) |
+| **Quotas and billing** | None beyond the existing domain's renewal (the owner's existing cost) | Tunnel and WebSockets on all plans, the free plan included (official). The domain's existing renewal. | **To confirm:** the plan's price, limits and use terms | **To confirm:** the account's own free allowance, from its billing page |
+| **Owner-dependent facts** | A Linux machine; a domain **already** owned; a DNS provider with an API; router DNS behaviour | A Linux machine; a domain **already** on Cloudflare, or moving its nameservers there (this affects the domain's other DNS and email); a Cloudflare account | A Linux machine; a Tailscale account and its plan terms | That the account **already** exists and is authorized, with no card added for this |
+
+**Not viable, and why:**
+- **Cloudflare quick tunnels** (`trycloudflare.com`): "for testing and development. For production, create a Cloudflare Tunnel". They have no uptime guarantee, a 200 in-flight-request limit, and a new name each run (official).
+- **Caddy's own local CA for the phones:** every guest's phone would have to install and trust its root. "Any client accessing the site without trusting Caddy's root CA certificate will show security errors" (official).
+- **Serverless, sleeping or ephemeral-disk platforms:** they break the rooms (architecture page).
+- **A public Codespace port:** ruled out by the owner.
+- **A non-Linux computer:** production refuses to start off Linux.
+- **New accounts that need a card:** need the owner's explicit approval.
+
+**A recommendation for ChatGPT and the owner to weigh (provisional, not a decision).** It depends on two owner facts: is there an always-on Linux computer at home (or an already-authorized $0 VM), and is a domain already owned?
+- **All players at home, and a domain already owned → H1.** Nobody outside the home is in the path, and nothing is reachable from the internet. Its cost is a Caddy build with the DNS module and a narrowly scoped DNS token. Let's Encrypt warns that full DNS API credentials on the web server raise the impact of a compromise (official).
+- **Remote players, and a domain already on Cloudflare → H2.** Cloudflare then sees the decrypted traffic: the owner accepts that, or chooses H1 or H3.
+- **No domain → H3,** the only no-domain $0 route found. It holds only after Tailscale's terms, limits and WebSocket behaviour are confirmed on tailscale.com and one test room is proved over it (below).
+- **H4** fits only if such a VM already exists. It is then the closest to the architecture page.
+
+### The preflight checklist (before the first install)
+Each line is observable before anything is installed. **Who:** the owner, or the person they name, on the candidate host or account; ChatGPT reviews the record.
+
+| # | Check | How to observe it | Pass when |
+|---|---|---|---|
+| P1 | Linux, always on | `uname -s`; the machine's sleep and power settings | `Linux`; no sleep during game nights |
+| P2 | Node 22 where the unit expects it | `command -v node; node -v` | `/usr/bin/node`, `v22.x` (or edit the unit's `ExecStart=` to the real path) |
+| P3 | Free disk for data and backups | `df -h /var/lib /var/backups` | At least 1 GB free on each |
+| P4 | An off-host copy for backups | The owner names the private place (an external drive, or private storage they already use) | Named, and not in git, a release folder or anything served |
+| P5 | The name and the certificate | H1/H4: `dig +short <name>` from a phone's network; H2: the domain listed in the Cloudflare account; H3: HTTPS and Funnel enabled in the tailnet | The name resolves to the right place; the certificate is publicly trusted (no warning on a phone) |
+| P6 | The terms, for H2–H4 | The provider's own pricing and terms pages, and the account's billing page | $0 at the expected use, no card added, and the limits and retention written into the go/no-go record |
+| P7 | No inbound port opened by mistake | The router's port-forwarding list (H1–H3) or the VM's firewall (H4) | H1–H3: none; H4: 80 and 443 only, plus SSH by key |
+| P8 | The proxy count, for `MCHEZO_TRUST_PROXY` | Below, step 3 | Counted, or the setting left unset |
+| P9 | The access code | Generated as on the architecture page, stored only in the env file | At least 12 characters, never in GitHub |
+
+**Then prove the route once, before the beta's data exists:**
+1. **Install the package on a throwaway data folder** and a throwaway access code, with the steps in "First install".
+2. **Check `/health`:** `curl -s https://<name>/health` gives `{"ok":true,"revision":"7097ac2…"}`.
+3. **Count the proxies.** The server takes the client's address from the X-Forwarded-For entry `MCHEZO_TRUST_PROXY` places from the end (`src/server/access.ts`), so the value must be the number of proxies that append to it.
+   1. Stop the service, and run `nc -l 127.0.0.1 3000` in its place: it prints each request exactly as the route delivers it.
+   2. From another computer, send a fake entry first: `curl -H 'X-Forwarded-For: 203.0.113.7' https://<name>/proxy-count-test`. Use one off the home network for H2–H4, or on the home Wi-Fi for H1.
+   3. Read the `X-Forwarded-For` line `nc` prints, then stop `nc` with Ctrl-C and start the service again. The curl gets an error; that is expected.
+   - **The reading:** ignore `203.0.113.7` if it is still there. A proxy that refuses client-sent values drops it: Caddy does by default, and Caddy 2.6.2 did here (`docs/evidence/beta-r2-preflight/xff-caddy-2.6.2.out.txt`).
+     - The **remaining entries** are the ones the route's proxies wrote.
+     - **The first of them** should be the curl computer's own address.
+   - **The setting:** `MCHEZO_TRUST_PROXY` is the number of those entries, if it is 1 to 3. For example, `<curl's address>` alone, or `203.0.113.7, <curl's address>`, means `1`.
+   - **If the first appended entry isn't the curl computer's address, or there are none,** leave the setting unset and record why. The per-device limits then count everyone together, which is safe.
+4. **On one phone off the home network** (H2–H4) or on the home Wi-Fi (H1): enter the code, create a room, and watch a second phone join live. That proves WebSockets over the real route.
+5. **Stop, remove the throwaway folder and code,** and start the real first install.
+
+**Run as a drill here:** this machine played the runbook with the real package, a real service user and Caddy 2.6.2 in front. It used a local CA, because a public certificate can't be had from here: `docs/evidence/beta-r2-preflight/`. Not run here: a real host, a public certificate, systemd as PID 1, any of the four routes, and real phones.
+
+### Sources (official, read 2026-11-16)
+- **Caddy documentation**, `caddyserver/website` at `c33ee8b`:
+  - [automatic-https.md](https://github.com/caddyserver/website/blob/c33ee8b02a245045bc18c406a1aa0e06cd1fb772/src/docs/markdown/automatic-https.md): the public-certificate requirements, the local CA, the DNS challenge, `.ts.net`;
+  - [reverse_proxy.md](https://github.com/caddyserver/website/blob/c33ee8b02a245045bc18c406a1aa0e06cd1fb772/src/docs/markdown/caddyfile/directives/reverse_proxy.md): WebSockets, X-Forwarded-For, Cloudflare spoofing.
+- **Let's Encrypt documentation**, `letsencrypt/website` at `c5aba6d`: [challenge-types.md](https://github.com/letsencrypt/website/blob/c5aba6d794bfabcbbcea2319db9d65734c382461/content/en/docs/challenge-types.md) (DNS-01).
+- **Cloudflare documentation**, `cloudflare/cloudflare-docs` at `2a6ef7a`:
+  - [Tunnel overview](https://github.com/cloudflare/cloudflare-docs/blob/2a6ef7a61fe2efc78971fa497438526117ef849c/src/content/docs/tunnel/index.mdx) and [get started](https://github.com/cloudflare/cloudflare-docs/blob/2a6ef7a61fe2efc78971fa497438526117ef849c/src/content/docs/tunnel/get-started/index.mdx);
+  - [Quick Tunnels](https://github.com/cloudflare/cloudflare-docs/blob/2a6ef7a61fe2efc78971fa497438526117ef849c/src/content/docs/tunnel/get-started/quick-tunnels/index.mdx);
+  - [WebSockets](https://github.com/cloudflare/cloudflare-docs/blob/2a6ef7a61fe2efc78971fa497438526117ef849c/src/content/docs/network/websockets.mdx);
+  - [HTTP headers](https://github.com/cloudflare/cloudflare-docs/blob/2a6ef7a61fe2efc78971fa497438526117ef849c/src/content/docs/fundamentals/reference/http-headers.mdx).
+- **Tailscale source code**, `tailscale/tailscale` at `6e16dac`: [ipn/serve.go](https://github.com/tailscale/tailscale/blob/6e16dac9e9beec391730423198b3115eb3422efe/ipn/serve.go) (`CheckFunnelAccess`, `NodeCanFunnel`, `CheckFunnelPort`).
+- **Extracts of every passage relied on,** with the commands that fetched them: `docs/evidence/beta-r2-preflight/official-sources.md`.
+- **Node.js:** [nodejs.org previous releases](https://nodejs.org/en/about/previous-releases) and [`nodejs/release`](https://github.com/nodejs/release#release-schedule).
+
+**To confirm on the provider's own page:** none of these could be read from this session.
+
+| Provider | What to confirm | Where |
+|---|---|---|
+| Tailscale | Plan price and use terms; Funnel's availability on that plan; its limits; WebSockets through Funnel; whether the relay ever decrypts | tailscale.com: pricing, the Funnel docs (kb/1223) |
+| Cloudflare | That the free plan's terms allow this use; log and retention terms for proxied traffic | cloudflare.com: plans and terms |
+| Oracle, Google Cloud, AWS (H4 only) | The account's free allowance, idle-reclamation rules and billing | The account's console and billing page |
+
 ## Building the package (on a development machine)
 
 ```
@@ -30,10 +126,17 @@ node scripts/release/pack.mjs --out ../cgn-<sha> # refuses a dirty tree, or an o
 cat ../cgn-<sha>/release.json                    # "revision" must be <cleared-sha>, with no "-dirty"
 tar -czf ../cgn-<sha>.tgz -C ../cgn-<sha> .
 sha256sum ../cgn-<sha>.tgz                       # record it with the release note
+(cd ../cgn-<sha> && LC_ALL=C find . -type f ! -path ./release.json ! -path './node_modules/*' -print0 \
+   | LC_ALL=C sort -z | xargs -0 sha256sum) > ../cgn-<sha>.inventory.sha256
+sha256sum ../cgn-<sha>.inventory.sha256          # the inventory digest: record it too
 ```
 
 - **What the package holds:** the compiled server, the built web app, `content/` (no pilot batches, and no approvals unless the repository has them), the two package files and `release.json`. `scripts/check-release-package.mjs` proves this on every gate run.
 - **It isn't byte-for-byte reproducible:** `release.json` records the build time, and the tarball the files' times. Two builds of one SHA have different hashes (the drill's logs show it). That is why the host gets the same file that was checked, by its recorded hash, never a rebuild.
+- **Its files are reproducible:**
+  - **What was built:** three builds of `7097ac2`, from fresh clones under Node v22.16.0 and v22.23.4, gave the same 144-file inventory.
+  - **So the inventory digest** is how a reviewer confirms that an archive holds exactly the cleared revision's files.
+  - **The record:** [`release-7097ac2.md`](release-7097ac2.md) has the digest and the verification steps.
 
 ## First install (no previous package)
 
@@ -63,7 +166,10 @@ systemctl daemon-reload && systemctl enable --now christmas-game-night
 
 # 5. Check, as after any promotion
 curl -s https://<host>/health                    # {"ok":true,"revision":"<sha>"}
-journalctl -u christmas-game-night -n 20         # "[restore] 0 room(s) restored"
+journalctl -u christmas-game-night -n 20         # "Christmas Game Night server on http://localhost:3000 ..." and
+                                                 # "Listening on 127.0.0.1; public origin https://<host>."
+                                                 # An empty first install prints no "[restore]" line: the server
+                                                 # prints it only when a room loaded or failed (drill, step B8).
 ```
 
 - **Then:** one phone through the gate, and the first backup after the first game night (below).
@@ -75,7 +181,12 @@ journalctl -u christmas-game-night -n 20         # "[restore] 0 room(s) restored
 # 1. Unpack and install it (root owns the release folder; the service only reads it)
 sha256sum cgn-<sha>.tgz                          # must match the recorded hash
 mkdir /opt/christmas-game-night/releases/<sha> && tar -xzf cgn-<sha>.tgz -C /opt/christmas-game-night/releases/<sha>
-cd /opt/christmas-game-night/releases/<sha> && npm ci --omit=dev --ignore-scripts   # installs ws and zod only
+cd /opt/christmas-game-night/releases/<sha>
+cat release.json                                 # "revision": "<sha>", no "-dirty"
+LC_ALL=C find . -type f ! -path ./release.json ! -path './node_modules/*' -print0 | LC_ALL=C sort -z | xargs -0 sha256sum | sha256sum
+                                                 # the release record's inventory digest (for 7097ac2: release-7097ac2.md)
+npm ci --omit=dev --ignore-scripts               # installs ws and zod only
+npm ls --omit=dev --depth=0                      # ws and zod, nothing else
 
 # 2. Maintenance: stop the server (it saves, closes the sockets and frees its lock)
 systemctl stop christmas-game-night
@@ -179,11 +290,11 @@ ls -la /var/lib/christmas-game-night             # the data is untouched: never 
 
 ## What the person deploying reports
 
-- the SHA and the package's SHA-256;
+- the SHA, the package's SHA-256 and its inventory digest;
 - the time;
 - the backup folder name;
 - the `/health` revision after the start;
 - the restore line;
 - any rollback.
 
-These go into the deploy note on the release PR or issue, without the access code, names or room data.
+These go into the deploy note on the release PR or issue, without the access code, names or room data. For the first install they are part of the go/no-go record ([`docs/device-testing/BETA_GO_NO_GO_TEMPLATE.md`](../device-testing/BETA_GO_NO_GO_TEMPLATE.md); the checks are in [`docs/REAL_DEVICE_TESTING.md` §7](../REAL_DEVICE_TESTING.md#7-beta-launch-checks-real-phones-and-the-host-beta-r2)).

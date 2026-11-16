@@ -33,6 +33,10 @@
 
 ## Host options at $0 (input for ChatGPT's selection)
 
+> **Superseded by Beta R2:** the comparison now lives in the release runbook's preflight ([`beta-r1-release.md`, "Preflight"](beta-r1-release.md#preflight-the-host-and-the-route-at-0-beta-r2)).
+> - **What changed:** it rests on the providers' official documentation where it could be read, and it lists what still has to be confirmed on each provider's own page.
+> - **Why this table stays:** as the Beta R1 record. Its facts came from search results, not primary pages.
+
 **Where these facts come from:** web search results only. The providers' own pages couldn't be read from this session: render.com, fly.io, tailscale.com and developers.cloudflare.com aren't reachable from here, and oracle.com answered 403. **Reconfirm each on the provider's own page before choosing.**
 
 | Option | Fits the needs? | Account and access it needs | Watch out for |
@@ -53,7 +57,7 @@
 
 ## The server's settings
 
-An environment file, readable by root only (`/etc/christmas-game-night/env`, mode 0600):
+An environment file, readable by root and the service user only (`/etc/christmas-game-night/env`, mode 0640, group `cgn`, in a 0750 folder). This is the mode the release runbook's first install creates and the R2 preflight drill used. Beta R2 corrected this page, which said 0600 root-only and disagreed with the runbook. systemd reads the file as root either way.
 
 ```
 NODE_ENV=production

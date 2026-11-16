@@ -1,0 +1,61 @@
+prefix /srv/cgn-r2-drill-20261116T052620Z · node v22.16.0 · npm 10.9.2 · caddy 2.6.2 · revision 7097ac2bb062925bb296a129f4771f1e68fd522d
+
+== A. The artifact: verify the recorded hash, unpack, inventory, runtime install
+cgn-7097ac2bb062925bb296a129f4771f1e68fd522d.tgz: OK
+PASS A1 sha256sum matches the recorded hash
+PASS A2 unpacked into releases/<sha>
+{
+  "revision": "7097ac2bb062925bb296a129f4771f1e68fd522d",
+  "builtAt": "2026-11-16T05:21:48.125Z",
+  "node": "v22.16.0"
+}
+PASS A3 release.json names the revision, no -dirty — 7097ac2bb062925bb296a129f4771f1e68fd522d
+PASS A4 the file inventory's digest matches the recorded one — fe6d74f8df7280a52102f70ab1d356428e810dfa614f45b53a60596d8e89a61c
+added 2 packages in 701ms
+PASS A5 npm ci --omit=dev --ignore-scripts
+PASS A6 only ws and zod installed — +-- ws@8.22.1 `-- zod@3.25.76  
+
+== B. First install: the service user, private folders, settings, check, start
+PASS B1 the service user
+700 cgn:cgn /srv/cgn-r2-drill-20261116T052620Z/var/lib/christmas-game-night
+700 root:root /srv/cgn-r2-drill-20261116T052620Z/var/backups/christmas-game-night
+750 root:cgn /srv/cgn-r2-drill-20261116T052620Z/etc/christmas-game-night
+640 root:cgn /srv/cgn-r2-drill-20261116T052620Z/etc/christmas-game-night/env
+PASS B2 data 0700 cgn, backups 0700 root, settings 0640 root:cgn
+PASS B3 another user can't read the settings (they hold the code)
+PASS B4 current -> releases/<sha>
+check OK: 0 room(s), 0 Memory Book(s); owned by this user (uid 996) and private; the lock and a test write worked. A server run by this user can use it.
+PASS B5 datatool check as cgn on the empty folder — check OK: 0 room(s), 0 Memory Book(s); owned by this user (uid 996) and private; the lock and a test write worked. A server run by this user can use it.
+PASS B6 the server starts as cgn (production settings accepted)
+Christmas Game Night server on http://localhost:3907 (web app at / after npm run build:web)
+Listening on 127.0.0.1; public origin https://beta.test:18443.
+PASS B7 the start line
+PASS B8 an empty first install prints no [restore] line (the runbook used to promise '0 room(s) restored')
+<scratchpad>/r2/drill/preflight-drill.sh: line 80: ss: command not found
+FAIL B9 the server listens on 127.0.0.1 only
+
+== C. The HTTPS proxy: the runbook's Caddy site block, with a local CA because this name isn't public
+{"level":"info","ts":1794806783.7965703,"logger":"tls.cache.maintenance","msg":"stopped background certificate maintenance","cache":"0xc000214f50"}
+Valid configuration
+PASS C1 caddy validate accepts the runbook's example site block (+ maintenance page)
+curl: (35) Recv failure: Connection reset by peer
+
+PASS C2 Caddy serves https://beta.test:18443, its certificate verified against its own root
+health: HTTP 200 {"ok":true,"revision":"7097ac2bb062925bb296a129f4771f1e68fd522d"}
+PASS /health over HTTPS (certificate verified) names the revision, and nothing else — {"ok":true,"revision":"7097ac2bb062925bb296a129f4771f1e68fd522d"}
+PASS the proxy adds HSTS — max-age=31536000
+PASS without the cookie the API is refused (401 BETA_ACCESS_REQUIRED) — HTTP 401
+PASS a wrong code is refused (401) and sets no cookie — HTTP 401
+PASS the right code: 303 back to the page asked for, a Secure HttpOnly cookie that isn't the code — HTTP 303 → /?join=ABCD
+PASS with the cookie the app page loads — HTTP 200
+PASS a foreign Origin is refused even with the cookie (403) — HTTP 403
+PASS a room is created through the proxy — HTTP 201
+PASS host and guest join — 201/201
+PASS the room has both players — Guest Drill,Host Drill
+PASS a wss:// socket through the proxy opens and gets a live message — first message 1432 bytes
+client play: PASSED
+PASS C3 through the proxy: /health, HSTS, the gate, a room, wss://
+
+== D. Restart with persistence
+PASS D1 SIGTERM stops it cleanly (exit 0) — exit 0
+PASS D2 the lock record is gone

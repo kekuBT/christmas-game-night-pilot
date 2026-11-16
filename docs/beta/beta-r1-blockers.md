@@ -93,13 +93,16 @@ The evidence files are in `docs/evidence/beta-r1-local/`.
 These aren't code defects in this branch, but the beta must not open until each is done or explicitly waived by the owner.
 
 1. **A host:** ChatGPT selects it and the owner approves it, within $0. The app needs one long-lived Node 22 process, a persistent disk, WebSockets and HTTPS (`docs/beta/beta-r1-architecture.md`). None is chosen or provisioned here.
+   - **Beta R2:** a $0 preflight compares the viable routes on official sources, with a provisional recommendation and a checklist, for ChatGPT to review with the owner (`docs/beta/beta-r1-release.md`, "Preflight").
 2. **The owner's independent private Codespace audit** of the exact SHA to be released, as the brief requires before any release clearance.
    - **Its route works** (review 6904986723): ChatGPT ran it on `456cb0d`. It used route B: a private noVNC desktop in the Codespace, with Firefox ESR in disposable host, guest and TV profiles.
      - **The protections held:** TLS validation stayed on (a session CA trusted only in those profiles), the app's own exact-origin check applied, the port was private, and Firefox's seccomp-BPF content sandbox was on (level 6, without user namespaces).
      - **What it covered:** the gate; host, guest and TV in Casual Trivia; reloads; the TV withholding answers; a real six-minute timeout; and a rematch.
    - **It found one product defect,** B-15 (§8), repaired here. **Still to do:** ChatGPT's independent verification of the repair and the remaining acceptance checks, then the owner's sign-off. The audit's limits are its own: desktop Firefox at phone sizes, not real phones; the TV after results and through a replay wasn't observed; and it isn't an all-games pass.
 3. **Real phones:** every browser check so far is Chromium emulation. Before the beta opens, the checklist in `docs/REAL_DEVICE_TESTING.md` needs at least one iPhone (Safari) and one Android phone (Chrome), through the real HTTPS proxy, including the access gate, a reconnect and the TV.
+   - **Beta R2:** written as `docs/REAL_DEVICE_TESTING.md` §7 (P1–P8), with a go/no-go record (`docs/device-testing/BETA_GO_NO_GO_TEMPLATE.md`). Not run: it needs real phones and the chosen host.
 4. **The release steps run once on the real host:** a backup, the deploy of the reviewed package, the rollback, and a restore drill (`docs/beta/beta-r1-release.md`).
+   - **Beta R2:** the host checks are §7's H1–H6, rehearsed locally as a drill (`docs/evidence/beta-r2-preflight/`). The package is recorded in `docs/beta/release-7097ac2.md`; the audited archive's hash is still to be recorded by its holder.
 
 **Recommended, not blocking a gated family beta:** the zod 4 migration (D-2; its reachable exposure is mitigated by B-14), a per-address room-creation limit (C-4), and a full CSP (C-5).
 

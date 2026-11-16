@@ -1,0 +1,18 @@
+#!/bin/bash
+# R2: build the release package of 7097ac2 from a fresh clone, under the verified Node v22.16.0.
+set -euo pipefail
+SP=<scratchpad>
+SHA=7097ac2bb062925bb296a129f4771f1e68fd522d
+export PATH=$SP/r2/node/node-v22.16.0-linux-x64/bin:$PATH
+W=$SP/r2/build; rm -rf $W; mkdir -p $W; cd $W
+echo "node $(node -v), npm $(npm -v)"
+git clone -q /home/user/christmas-game-night-pilot cgn-release 2>/dev/null || true
+cd cgn-release
+git fetch -q <scratchpad>/wtb1 $SHA || true
+git checkout -q --detach $SHA
+echo "HEAD $(git rev-parse HEAD)"; git status --porcelain | wc -l
+npm ci --no-audit --no-fund 2>&1 | tail -3
+node scripts/release/pack.mjs --out ../cgn-$SHA
+cat ../cgn-$SHA/release.json
+tar -czf ../cgn-$SHA.tgz -C ../cgn-$SHA .
+sha256sum ../cgn-$SHA.tgz

@@ -2202,3 +2202,48 @@ Handoff 6813167965 (with the Stage 9.2 clearance). Spec: `docs/stage9/stage93.md
     - Re-recording the Everyday baseline: it would accept the two new styles without a review. Keeping the screen's own styles keeps W8's promise.
     - Auto-advancing: excluded by the review.
     - Fixing Trivia alone: it would leave the same defect in Geography and Math Mayhem.
+
+## Beta R2: release preflight (handoff 6908014247; docs and evidence only)
+
+- **D-BR2-01 The promotion artifact is the audited archive, identified by its own hash; a reviewer checks its contents against a recorded file inventory** (`docs/beta/release-7097ac2.md`).
+  - **The problem:** the audited archive sits in the private review Codespace, which this session can't reach. `pack.mjs` writes the build time into `release.json`, and `tar` the files' times, so no rebuild can reproduce the archive's hash.
+  - **The decision:**
+    - **Recorded:** the runtime SHA `7097ac2`, Node v22.16.0, and a 144-file inventory of every package file except `release.json`. The inventory's digest is `fe6d74f8…a61c`, the same in three builds from fresh clones under two Node 22 versions.
+    - **Left blank:** the audited archive's SHA-256, for its holder to recompute.
+    - **On the host:** the host gets that archive, checked by its hash, and the unpacked release is checked against the inventory before `current` is switched.
+  - **If the archive is lost:** a rebuild is recorded as a different file, with its own hash. Whether a matching inventory is enough, or a short private re-check is needed, is the owner's call.
+  - **Alternatives rejected:**
+    - Recording my rebuild's hash as the release: it isn't the audited file.
+    - Making the build reproducible byte for byte: that changes `pack.mjs`, a runtime-release change outside this docs-only slice.
+- **D-BR2-02 Host comparison: only already-authorized or owner-provided $0 routes, on official sources, with a provisional recommendation** (the runbook's "Preflight").
+  - **The options:**
+    - **H1:** LAN only, with a domain the owner already has and a DNS-challenge certificate;
+    - **H2:** a Cloudflare named Tunnel, with a domain already on Cloudflare;
+    - **H3:** Tailscale Funnel;
+    - **H4:** a $0 VM the owner already has.
+    Each is compared on compute, TLS and WebSockets, participant access, who is in the path, disk and backups, the proxy count, quotas and billing, and the owner-dependent facts.
+  - **The sources:** facts are stated only from the providers' official documentation sources, read at pinned commits, or from Tailscale's own code. The pages unreachable from this session (Tailscale's site, Oracle, Google Cloud, AWS) become "to confirm" rows, not facts.
+  - **The recommendation:** it depends on two owner facts, an always-on Linux machine and a domain already owned:
+    - **H1** when everyone plays at home;
+    - **H2** with a Cloudflare domain and remote players, accepting that Cloudflare sees the decrypted traffic;
+    - **H3** with no domain, once Tailscale's terms and WebSocket behaviour are confirmed.
+  - **Who decides:** ChatGPT reviews this with the owner. Execution needs the owner's explicit approval.
+  - **Alternatives rejected:**
+    - Keeping R1's search-result table as the basis: the handoff asks for official terms.
+    - Asking for this session's network to be widened to reach the blocked sites: an approval request for a fact the owner or ChatGPT can confirm from a normal browser.
+- **D-BR2-03 The proxy count is measured, not assumed.** The runbook's step sends a fake `X-Forwarded-For` through the real route to `nc`, and sets `MCHEZO_TRUST_PROXY` to the number of entries the route itself wrote, when the first of them is the client's real address.
+  - **The evidence:** Caddy 2.6.2 was checked here. It drops a client-sent value and writes the connecting address.
+  - **When that can't be shown:** the setting stays unset, which is safe: the per-device limits then count everyone together.
+- **D-BR2-04 Two doc defects found by the drill are corrected.**
+  - **The restore line:** an empty first install prints no `[restore]` line (the server prints it only when a room loaded or failed). The runbook had promised `0 room(s) restored`.
+  - **The settings file's mode:** the architecture page said 0600 root-only, against the runbook's 0640 root:`cgn`. It now states the runbook's mode, the one the drill ran.
+  - **No code changed:** both are documentation corrections.
+- **D-BR2-05 Beta launch checks are written for real phones and the host, with a go/no-go record**:
+  - `docs/REAL_DEVICE_TESTING.md` §7;
+  - `docs/device-testing/BETA_GO_NO_GO_TEMPLATE.md`.
+
+  **What they cover:**
+  - **The phones:** an iPhone with Safari and an Android phone with Chrome against the exact package through the real HTTPS address. That means the gate, invite by QR, manual join, the TV, reconnects, small-screen lock and continue, TV privacy through a rematch, and a reload.
+  - **The host:** the revision, a restart with persistence, an independent backup, an isolated restore, the first-install stop, and no route around the proxy.
+  - **Who does each pending check:** each is paired with its evidence and the person who can do it. Claude can't run them.
+  - **The catalog:** the playable catalog is unchanged.
