@@ -1,0 +1,38 @@
+== w3-rehearsal 2026-11-16T21:14:14Z, image cgn-render:check (sha256:7b53109a7d69), driver ae31eb13dc19f0a8, proxy 06b1738ccd75d5f8
+   /health: {"ok":true,"revision":"7097ac2bb062925bb296a129f4771f1e68fd522d"}
+   AUTHORIZED data_dir=/var/data/cgn-w1 public_origin=https://localhost:18443 trust_proxy=1 (the access code is kept only as a salted hash)
+-- the rehearsal (bounded: timeout 600 s, and the driver's own --max-minutes)
+   PASS setup: one active Casual Trivia round with a host, the guest and the TV — {"start":201,"game":true,"seat":true,"tvPlaying":true}
+   [3.6s] setup done (run 20261116T211416-89014f); the round is playing
+   PASS R1 question 1 answered and acknowledged before any interruption (locked in, recorded once) — 1 recorded
+   [4.5s] R2: the guest's network goes down for 15 s (question 2 on screen, unanswered)
+   PASS R2 during the outage the guest's screen says it is reconnecting — Connection lost. Reconnecting… Answers the game confirmed are safe. Taps made now may not arrive.
+   PASS R2 during the outage the host's view marks the guest away — after 24 ms
+   PASS R2 after the network returns: socket reopened, host sees the guest back, the phone usable on question 2 — {"socketMs":4,"hostMs":67,"usableMs":72}
+   PASS R2 the SAME seat and the SAME round (same player id and name, same game, still playing) — {"sameSeat":true,"sameGame":true,"status":"playing"}
+   PASS R2 question 1's answer is still recorded, exactly once — 1 recorded
+   PASS R2 the host and the TV show the same public phase — {"host":{"status":"playing","phaseKey":null},"tv":{"status":"playing","phaseKey":null}}
+   [19.6s] R2b: a SILENT outage for 15 s: the page isn't told, its socket stays open, traffic stops both ways
+   PASS R2b during the silent outage the app's own watchdog noticed (banner: reconnecting) — after 8549 ms
+   PASS R2b after the path returns (no online event): socket reopened, host sees the guest back, the phone usable on question 2 — {"socketMs":512,"hostMs":565,"usableMs":570}
+   PASS R2b the same seat and round, question 1 still recorded once — {"sameSeat":true,"sameGame":true,"recorded":1}
+   [35.2s] R3: the guest answers question 2; the request reaches the server, its response is lost and the network goes down for 8 s
+   PASS R3 the lost-response request reached the server and was accepted — {"status":200}
+   PASS R3 while the network was down the phone did not claim the answer was in (it said it couldn't confirm) — the phone said it couldn't confirm the answer ("We couldn’t confirm that — check your connection. If it doesn’t show as in, try again.")
+   PASS R3 after the network returns the phone shows question 2's answer as in (the server's record) — after 209 ms
+   PASS R3 question 2 recorded exactly once (2 answers in total) — 2 recorded
+   PASS R3 replaying the very same request (same clientEventId) is answered from the dedupe and changes nothing — {"status":200,"accepted":true,"recorded":2}
+   PASS R3 a different second answer to question 2 is refused (ALREADY_ANSWERED), so nothing can count twice — {"accepted":false,"reason":"ALREADY_ANSWERED"}
+   [43.5s] R4: question 3's first response is lost, the network stays up
+   PASS R4 the lost first response was recovered by the phone's own retry: shown as in, recorded once (3 answers) — {"shownInMs":1123,"recorded":3}
+   [44.9s] R5: the guest finishes through the UI, the host through the API
+   PASS R5 the round finished with all 10 of the guest's answers recorded once — {"recorded":10}
+   PASS R5 the guest's final score equals the score of the recorded answers (nothing counted twice) — {"score":120,"expected":120}
+   PASS R5 the host and the TV converge on the finished round
+   evidence: <scratch>/w3/trial4/evidence/w3-20261116T211416-89014f.json
+   W3 REHEARSAL PASSED
+   driver exit: 0
+-- cleanup
+   container left: 0; listeners left on 18443/18480/18080: 0; processes left: 0 (the throwaway data folder lived in the removed container)
+   files holding the access code: 0; files holding a beta cookie value: 0
+W3 REHEARSAL HARNESS PASSED

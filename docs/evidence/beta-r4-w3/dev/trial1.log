@@ -1,0 +1,10 @@
+== w3-rehearsal 2026-11-16T21:09:12Z, image cgn-render:check (sha256:7b53109a7d69), driver 877c43768d94e7dd, proxy 06b1738ccd75d5f8
+   /health: {"ok":true,"revision":"7097ac2bb062925bb296a129f4771f1e68fd522d"}
+   AUTHORIZED data_dir=/var/data/cgn-w1 public_origin=https://localhost:18443 trust_proxy=1 (the access code is kept only as a salted hash)
+-- the rehearsal (bounded: timeout 600 s, and the driver's own --max-minutes)
+   MCHEZO_INFRA_ERROR: the browser for the pinned Playwright is not installed (expected /opt/pw-browsers/chromium_headless_shell-1248/chrome-headless-shell-linux64/chrome-headless-shell). Run "npx playwright install chromium", or set MCHEZO_CHROMIUM_PATH to an existing chrome-headless-shell build.
+   driver exit: 3
+-- cleanup
+   container left: 0; listeners left on 18443/18480/18080: 0; processes left: 0 (the throwaway data folder lived in the removed container)
+   files holding the access code: 0; files holding a beta cookie value: 0
+W3 REHEARSAL HARNESS FAILED

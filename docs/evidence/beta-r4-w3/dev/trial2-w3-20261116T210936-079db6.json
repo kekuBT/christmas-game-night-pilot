@@ -1,0 +1,148 @@
+{
+ "tool": "scripts/beta/w3-rehearsal.mjs",
+ "toolSha256": "877c43768d94e7ddba363db747f17a407c3d7a49ca825092ecc2d2789d90a9c4",
+ "node": "v22.23.4",
+ "runId": "20261116T210936-079db6",
+ "origin": "https://localhost:18443",
+ "startedAt": "2026-11-16T21:09:36.213Z",
+ "params": {
+  "downSeconds": 15,
+  "lostAckDownSeconds": 8,
+  "maxMinutes": 8
+ },
+ "scope": "LOCAL rehearsal: the packaged pinned runtime behind a local TLS proxy, synthetic Chromium pages, a simulated network interruption. Not Render, not a phone, not a real network handoff.",
+ "timings": {
+  "outageSeconds": 15.2,
+  "bannerAfterDropMs": 8,
+  "hostSawAwayAfterDropMs": null,
+  "r2SocketReopenedMs": 3,
+  "r2HostSawGuestBackMs": null,
+  "r2PhoneUsableMs": 30256,
+  "r3PhoneShowsAnswerInMs": 209,
+  "r3SocketReopenedMs": 4,
+  "r4ShownInAfterTapMs": 1107
+ },
+ "seen": {
+  "guestDuringOutage": "Connection lost. Reconnecting… Answers the game confirmed are safe. Taps made now may not arrive.",
+  "hostViewOfGuestDuringOutage": "still connected",
+  "tvDuringOutage": "the round still playing",
+  "guestAfterReturn": "(no banner)",
+  "guestAfterLostAnswer": "the phone said it couldn't confirm the answer (\"We couldn’t confirm that — check your connection. If it doesn’t show as in, try again.\")",
+  "guestAfterLostAnswerReturn": "question 2 shown as locked in",
+  "final": {
+   "answersRecorded": 0,
+   "questions": 0,
+   "expectedFromRecordedAnswers": 0
+  }
+ },
+ "checks": [
+  {
+   "name": "setup: one active Casual Trivia round with a host, the guest and the TV",
+   "ok": false,
+   "detail": "start 201"
+  },
+  {
+   "name": "R1 question 1 answered and acknowledged before any interruption (locked in, recorded once)",
+   "ok": true,
+   "detail": "1 recorded"
+  },
+  {
+   "name": "R2 during the outage the guest's screen says it is reconnecting",
+   "ok": true,
+   "detail": "Connection lost. Reconnecting… Answers the game confirmed are safe. Taps made now may not arrive."
+  },
+  {
+   "name": "R2 during the outage the host's view marks the guest away",
+   "ok": false,
+   "detail": "after null ms"
+  },
+  {
+   "name": "R2 after the network returns: socket reopened, host sees the guest back, the phone usable on question 2",
+   "ok": false,
+   "detail": "{\"socketMs\":3,\"hostMs\":null,\"usableMs\":30256}"
+  },
+  {
+   "name": "R2 the SAME seat and the SAME round (same player id and name, same game, still playing)",
+   "ok": true,
+   "detail": "{\"sameSeat\":true,\"sameGame\":true,\"status\":\"playing\"}"
+  },
+  {
+   "name": "R2 question 1's answer is still recorded, exactly once",
+   "ok": true,
+   "detail": "1 recorded"
+  },
+  {
+   "name": "R2 the host and the TV show the same public phase",
+   "ok": false,
+   "detail": "{\"host\":{\"status\":\"playing\",\"phaseKey\":null},\"tv\":null}"
+  },
+  {
+   "name": "R3 the lost-response request reached the server and was accepted",
+   "ok": true,
+   "detail": "{\"status\":200}"
+  },
+  {
+   "name": "R3 while the network was down the phone did not claim the answer was in (it said it couldn't confirm)",
+   "ok": true,
+   "detail": "the phone said it couldn't confirm the answer (\"We couldn’t confirm that — check your connection. If it doesn’t show as in, try again.\")"
+  },
+  {
+   "name": "R3 after the network returns the phone shows question 2's answer as in (the server's record)",
+   "ok": true,
+   "detail": "after 209 ms"
+  },
+  {
+   "name": "R3 question 2 recorded exactly once (2 answers in total)",
+   "ok": true,
+   "detail": "2 recorded"
+  },
+  {
+   "name": "R3 replaying the very same request (same clientEventId) is answered from the dedupe and changes nothing",
+   "ok": true,
+   "detail": "{\"status\":200,\"accepted\":true,\"recorded\":2}"
+  },
+  {
+   "name": "R3 a different second answer to question 2 is refused (ALREADY_ANSWERED), so nothing can count twice",
+   "ok": false,
+   "detail": "{\"accepted\":false,\"reason\":\"INVALID_INTENT\"}"
+  },
+  {
+   "name": "R4 the lost first response was recovered by the phone's own retry: shown as in, recorded once (3 answers)",
+   "ok": true,
+   "detail": "{\"shownInMs\":1107,\"recorded\":3}"
+  },
+  {
+   "name": "R5 the round finished with all 10 of the guest's answers recorded once",
+   "ok": false,
+   "detail": "{\"recorded\":0}"
+  },
+  {
+   "name": "R5 the guest's final score equals the score of the recorded answers (nothing counted twice)",
+   "ok": false,
+   "detail": "{\"expected\":0}"
+  },
+  {
+   "name": "R5 the host and the TV converge on the finished round",
+   "ok": false,
+   "detail": ""
+  }
+ ],
+ "failures": [
+  "setup: one active Casual Trivia round with a host, the guest and the TV",
+  "R2 during the outage the host's view marks the guest away",
+  "R2 after the network returns: socket reopened, host sees the guest back, the phone usable on question 2",
+  "R2 the host and the TV show the same public phase",
+  "R3 a different second answer to question 2 is refused (ALREADY_ANSWERED), so nothing can count twice",
+  "R5 the round finished with all 10 of the guest's answers recorded once",
+  "R5 the guest's final score equals the score of the recorded answers (nothing counted twice)",
+  "R5 the host and the TV converge on the finished round"
+ ],
+ "network": {
+  "abortedWhileDown": 14,
+  "socketsRefusedWhileDown": 7,
+  "socketOpens": 3
+ },
+ "finishedAt": "2026-11-16T21:11:31.242Z",
+ "durationS": 115,
+ "verdict": "FAILED"
+}

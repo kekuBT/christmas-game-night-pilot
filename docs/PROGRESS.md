@@ -3555,4 +3555,24 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
 - **The handoff:** W3 reconnect drill preparation, as one unmerged draft PR stacked on #44 at `2e2257c`:
   - an operator runbook (host, guest and TV in one active Trivia round; physical iPhone Safari and Android Chrome background and foreground, lock and unlock, and a Wi-Fi to mobile data switch);
   - one focused local rehearsal against the pinned runtime.
-- **Acknowledged** in 6929252910, at 4:05 p.m. ET, with a 3 h estimate.
+- **Acknowledged** in 6929252910, at 4:05 p.m. ET, with a 3 h estimate. The PR is **#45**, stacked on #44 at `2e2257c`.
+- **Done:**
+  - **`docs/beta/render-w3.md`, the operator runbook:**
+    - preconditions, and a known starting room and round (host, iPhone Safari, Android Chrome, TV; throwaway names);
+    - what each role shows;
+    - C1 background and foreground, C2 lock and unlock, C3 Wi-Fi to mobile data, C4 an interrupted submission (airplane mode);
+    - the end-of-round score rule (120 × correct);
+    - pass, fail and inconclusive criteria;
+    - an observation budget from the rehearsal (banner within 15 s, usable within 15 s after the network returns, 60 s means fail);
+    - what never enters evidence.
+
+    The native checks stay **pending**.
+  - **`scripts/beta/w3-rehearsal.mjs`** (local only; Chromium host, guest and TV) and **`scripts/beta/w3-rehearsal.sh`** (bounded, self-cleaning, secret scan). The checks:
+    - R1, an acknowledged answer;
+    - R2, an outage the page is told about;
+    - R2b, a silent outage;
+    - R3, an interrupted submission with an outage;
+    - R4, an interrupted submission with the network up;
+    - R5, all answers once and the score consistent.
+- **Dev trials:** trial 1 failed on infrastructure (the Chromium build); trial 2 failed on 8 of my own driver bugs; trials 3 and 4 passed. No runtime defect was found.
+- **Not done:** no runtime or deploy change, no native device, no hosting operation.
