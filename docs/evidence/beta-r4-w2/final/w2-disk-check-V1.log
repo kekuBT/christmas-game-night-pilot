@@ -1,0 +1,9 @@
+PASS room A: the Trivia answers on disk — 100 on disk, 100 acknowledged
+PASS room A: the drawing on disk — 144 pieces on disk, 48 stroke messages of 3 acknowledged
+PASS room A: the correct guesses on disk — 54 on disk, 54 acknowledged
+PASS room A: the Memory Book notes on disk — 5/5 acknowledged notes in the book file
+PASS room B: the Trivia answers on disk — 100 on disk, 100 acknowledged
+PASS room B: the drawing on disk — 144 pieces on disk, 48 stroke messages of 3 acknowledged
+PASS room B: the correct guesses on disk — 54 on disk, 54 acknowledged
+PASS room B: the Memory Book notes on disk — 5/5 acknowledged notes in the book file
+W2 DISK CHECK PASSED

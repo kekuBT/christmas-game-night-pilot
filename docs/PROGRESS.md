@@ -3462,7 +3462,8 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
   - **Trials:** 4. Trial 1 correctly failed when the local target was down. Trials 2 and 3 failed on my own read-back bugs: the Trivia answers' location, and per-room player ids. Trial 4 passed.
   - **Self-test 1:** 6/6.
 - **Not done:** no runtime change (`7097ac2`), no deploy-script change, no account operation, no target-host run, no Render metrics, no full gate rerun.
-- **Next:** the final runs on the committed files, then the report on #44. W2 on Render follows W1, with ChatGPT.
+- **Final runs** on a clean checkout of the tested commit `b460c15c6e63ca928394b504dfeaafca6c2a2ad8`: the W2 self-test **PASSED, 6/6**; the W1 self-test **PASSED, 18/18**; the static checks passed (no runtime or deploy-file change).
+- **Next:** ChatGPT's review of #44. W2 on Render follows W1, with ChatGPT.
 - **Risk:**
   - Render's latency and limits are unknown.
   - The run's rooms stay in the throwaway folder (no deletion path).

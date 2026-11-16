@@ -1,0 +1,34 @@
+# FINAL static checks on the committed files: clean checkout of b460c15c6e63ca928394b504dfeaafca6c2a2ad8 (status 0 lines), 2026-11-16T16:25:08Z
+## 1. runtime files changed since 7097ac2 (empty = unchanged)
+(end)
+## 2. accepted deploy files changed since #43's head 46f7ff0 (empty = unchanged)
+(end)
+## 3. everything changed since 46f7ff0
+ deploy/render/README.md                            |   17 +-
+ deploy/render/render.yaml                          |    3 +-
+ docs/PROGRESS.md                                   |   33 +
+ docs/beta/beta-r4-hosting-proposal.md              |   23 +-
+ docs/beta/render-w1.md                             |   10 +-
+ docs/beta/render-w2.md                             |   75 +
+ docs/evidence/beta-r4-w2/README.md                 |   45 +
+ ...run1-evidence-V1-w2-20261116T161030-b0d93e.json | 7705 +++++++++++++++++++
+ ...run1-evidence-V2-w2-20261116T161146-e79770.json | 7709 +++++++++++++++++++
+ ...run1-evidence-V3-w2-20261116T161338-1015ad.json | 7709 +++++++++++++++++++
+ ...run1-evidence-V4-w2-20261116T161454-74aa3e.json | 7741 ++++++++++++++++++++
+ .../dev/trial-1-w2-20261116T160415-0028c7.json     |  107 +
+ .../dev/trial-2-w2-20261116T160447-810a69.json     | 7708 +++++++++++++++++++
+ .../dev/trial-3-w2-20261116T160619-7439b3.json     | 7708 +++++++++++++++++++
+ .../dev/trial-4-w2-20261116T160753-6cd37b.json     | 7704 +++++++++++++++++++
+ docs/evidence/beta-r4-w2/dev/w2-selftest-run1.log  |  144 +
+ scripts/beta/render-like-proxy.mjs                 |   36 +-
+ scripts/beta/w2-disk-check.mjs                     |   32 +
+ scripts/beta/w2-load.mjs                           |  385 +
+ scripts/beta/w2-selftest.sh                        |   80 +
+ 20 files changed, 54956 insertions(+), 18 deletions(-)
+## 4. lint and shell syntax
+eslint scripts/beta: exit 0
+shell syntax: ok
+## 5. relative links
+links: 29 missing: 0
+## 6. secret scan of the changes since 46f7ff0 (private keys, age secret keys, access-code assignments, cookie values, Drive links)
+(end of secret scan)
