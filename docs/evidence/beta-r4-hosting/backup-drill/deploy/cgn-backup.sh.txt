@@ -1,32 +1,58 @@
 #!/bin/sh
-# cgn-backup: PROPOSED deploy file for the Render route (Beta R4, review 6917441687). Not part of the runtime.
-# A backup of the game data taken with the writer STOPPED, verified, then encrypted to the owner's public key.
+# cgn-backup: PROPOSED deploy file for the Render route (Beta R4, reviews 6917441687 and 6918277617). Not part of the
+# runtime. A backup of the game data taken with the writer STOPPED, verified, then encrypted to the owner's public key.
 # Run over SSH on the instance, between sessions, with Render's maintenance mode on (public traffic refused).
 #
 # The consistency rule: the server process has EXITED (its SIGTERM handler runs between event-loop turns, and every
 # save is synchronous inside a turn, so no save is half done), and `datatool backup` (without --allow-running) holds
 # the data folder's lock for the whole copy: it refuses if any process still holds it, and no server can start until
-# it ends. The copy is therefore one state of the folder, with no writer at all. The manifest must record
-# serverWasRunning: false.
+# it ends. The manifest must record serverWasRunning: false. Consistency rests on that lock, not on the hold below.
 #
-# Fail-closed rules:
-# - Prints "BACKUP_OK <file> sha256=<hash>" ONLY after the copy, `datatool verify`, the manifest check and the
-#   encryption all succeeded. Anything else prints BACKUP_FAILED and exits non-zero; no step after it may count on a
-#   backup (a deploy, a restore, a data-folder change all require this run's BACKUP_OK).
-# - Checks everything it can BEFORE stopping the server (tools, the recipient key, the folders, a running server).
-# - The hold is released on every exit path (trap), so the entrypoint restarts the server; the data folder itself is
-#   only ever read.
-# - A partial copy left by a failure has no verified manifest, so `datatool verify` refuses it.
-set -eu
+# The hold only stops cgn-entrypoint from restarting (or giving up on) the server while this run copies:
+# - taken atomically (mkdir fails if any hold exists) and owned: it records this run's pid and a random token;
+# - released only by its owner (the token must match), on every exit path including HUP, INT and TERM, so a run can
+#   never release another run's hold; released as soon as the verified copy exists (encryption reads only the copy);
+# - if this run dies without releasing it (SIGKILL), cgn-entrypoint sees the recorded pid gone and releases it within
+#   about a second; an instance restart clears it in any case (it lives in an ephemeral folder).
+#
+# Success is two-staged:
+# - "BACKUP_OK <archive> sha256=<hash>" here means the encrypted archive is complete ON THE RENDER DISK. It is printed
+#   only after every step succeeded: copy, verify, manifest check, checksum list, archive, archive listing, encryption,
+#   hash, publish (a rename) and removing the temporary plaintext tar. No pipeline is used, so no failure is hidden.
+# - "RECEIPT_OK" (cgn-receive, on the receiving device) means the independent copy OFF Render was received and
+#   verified. A deploy, a restore or a data-folder change requires RECEIPT_OK for a backup from the same window.
+# On any failure: BACKUP_FAILED, a non-zero exit, and everything this run created in the backup folder is removed, so
+# no archive and no success remain. The data folder itself is only ever read.
+set -u
 RUN=${CGN_RUN_DIR:-/tmp/cgn}
 APP=${CGN_APP_DIR:-/app}
 DATA=${MCHEZO_DATA_DIR:-}
 ROOT=${CGN_BACKUP_ROOT:-/var/data/backups}
 RECIPIENT=${CGN_BACKUP_RECIPIENT:-}
 LIMIT=${CGN_BACKUP_LIMIT_S:-30}
+HOLD="$RUN/hold"
+TOKEN=""        # set while this run owns the hold
+MADE=""         # paths this run created in the backup folder, removed unless the run succeeds
+STATUS=failed
+note() { echo "cgn-backup: $*"; }
+release() {
+  if [ -n "$TOKEN" ] && [ "$(cat "$HOLD/owner" 2>/dev/null)" = "$TOKEN" ]; then
+    rm -f "$HOLD/owner" "$HOLD/pid" && rmdir "$HOLD" && note "hold released"
+  fi
+  TOKEN=""
+}
+cleanup() {
+  release
+  if [ "$STATUS" != ok ]; then for p in $MADE; do rm -rf -- "$p"; done; fi
+}
 fail() { echo "BACKUP_FAILED: $*" >&2; exit 1; }
+trap cleanup EXIT
+trap 'echo "BACKUP_FAILED: interrupted" >&2; exit 129' HUP
+trap 'echo "BACKUP_FAILED: interrupted" >&2; exit 130' INT
+trap 'echo "BACKUP_FAILED: interrupted" >&2; exit 143' TERM
+
 # An SSH session may not carry the service's environment: read what is missing from the running server instead.
-from_server() { [ -s "$RUN/server.pid" ] && tr '\0' '\n' < "/proc/$(cat "$RUN/server.pid")/environ" 2>/dev/null | sed -n "s/^$1=//p"; }
+from_server() { p=$(cat "$RUN/server.pid" 2>/dev/null) || return 1; tr '\0' '\n' < "/proc/$p/environ" 2>/dev/null | sed -n "s/^$1=//p"; }
 [ -n "$DATA" ] || DATA=$(from_server MCHEZO_DATA_DIR || true)
 [ -n "$RECIPIENT" ] || RECIPIENT=$(from_server CGN_BACKUP_RECIPIENT || true)
 
@@ -34,45 +60,80 @@ from_server() { [ -s "$RUN/server.pid" ] && tr '\0' '\n' < "/proc/$(cat "$RUN/se
 [ -n "$DATA" ] || fail "MCHEZO_DATA_DIR is not set"
 [ -d "$DATA" ] || fail "no data folder at $DATA"
 case "$RECIPIENT" in age1*) ;; *) fail "CGN_BACKUP_RECIPIENT is not an age public key (age1...)";; esac
-command -v age >/dev/null 2>&1 || fail "age is not installed"
-command -v timeout >/dev/null 2>&1 || fail "timeout is not installed"
-[ ! -e "$RUN/hold" ] || fail "a hold already exists ($RUN/hold): another backup may be running"
-[ -s "$RUN/server.pid" ] || fail "no running server recorded in $RUN/server.pid (is cgn-entrypoint PID 1?)"
-pid=$(cat "$RUN/server.pid")
-kill -0 "$pid" 2>/dev/null || fail "the recorded server (pid $pid) isn't running"
+case "$ROOT" in /*) ;; *) fail "CGN_BACKUP_ROOT must be an absolute path";; esac
+case "$ROOT" in *[[:space:]]*) fail "CGN_BACKUP_ROOT must not contain spaces";; esac
+for c in age tar sha256sum timeout mv find grep od; do command -v "$c" >/dev/null 2>&1 || fail "$c is not installed"; done
+[ -d "$RUN" ] || fail "no run folder at $RUN (is cgn-entrypoint the container's first process?)"
 mkdir -p "$ROOT" || fail "cannot create $ROOT"
 chmod 700 "$ROOT" || fail "cannot make $ROOT private"
-STAMP=$(date -u +%Y%m%dT%H%M%SZ)
-OUT="$ROOT/$STAMP"
-ARCHIVE="$ROOT/cgn-$STAMP.tar.age"
-[ ! -e "$OUT" ] && [ ! -e "$ARCHIVE" ] || fail "$OUT or $ARCHIVE already exists"
 
-# 1. Hold, then stop the server gracefully. From here the entrypoint will not restart it.
-: > "$RUN/hold"
-trap 'rm -f "$RUN/hold"' EXIT
+# 1. Take the hold atomically, and record this run as its owner.
+mkdir "$HOLD" 2>/dev/null || fail "another backup holds the server ($HOLD exists)"
+tok=$(od -An -N12 -tx1 /dev/urandom) || { rmdir "$HOLD"; fail "no randomness for the hold's token"; }
+TOKEN="$$-$(printf '%s' "$tok" | tr -d ' \n')"
+{ printf '%s\n' "$$" > "$HOLD/pid" && printf '%s\n' "$TOKEN" > "$HOLD/owner"; } || { rm -rf "$HOLD"; TOKEN=""; fail "could not record the hold's owner"; }
 t0=$(date +%s)
-echo "cgn-backup: stopping the server (pid $pid)"
-kill -TERM "$pid" 2>/dev/null || fail "could not signal the server (pid $pid)"
-i=0
-while kill -0 "$pid" 2>/dev/null; do
-  i=$((i + 1)); [ "$i" -le 100 ] || fail "the server did not stop within 10 s"
-  sleep 0.1
-done
-echo "cgn-backup: server stopped"
 
-# 2. Copy under the data lock, then verify. No --allow-running: a live writer makes it refuse.
+# The names are chosen, and checked, only while holding: no other backup can create them meanwhile. A run that finds
+# any of them already there stops before claiming them, so it can never remove another run's files.
+STAMP=$(date -u +%Y%m%dT%H%M%SZ) || fail "no clock"
+OUT="$ROOT/$STAMP"; SUMS="$ROOT/$STAMP.SHA256SUMS"; LIST="$ROOT/.cgn-$STAMP.list"; TARLIST="$ROOT/.cgn-$STAMP.tarlist"
+TAR="$ROOT/.cgn-$STAMP.tar.tmp"; PART="$ROOT/.cgn-$STAMP.tar.age.part"; ARCHIVE="$ROOT/cgn-$STAMP.tar.age"
+for p in "$OUT" "$SUMS" "$LIST" "$TARLIST" "$TAR" "$PART" "$ARCHIVE"; do [ ! -e "$p" ] || fail "$p already exists (another backup in the same second)"; done
+MADE="$OUT $SUMS $LIST $TARLIST $TAR $PART $ARCHIVE"
+
+# 2. Stop the server gracefully. With the hold in place the entrypoint won't restart it. If none is running, there is
+#    nothing to stop; the data lock in step 3 still refuses if any process writes the folder.
+pid=$(cat "$RUN/server.pid" 2>/dev/null || true)
+if [ -n "$pid" ] && kill -0 "$pid" 2>/dev/null; then
+  note "stopping the server (pid $pid)"
+  kill -TERM "$pid" 2>/dev/null || fail "could not signal the server (pid $pid)"
+  i=0
+  while kill -0 "$pid" 2>/dev/null; do
+    i=$((i + 1)); [ "$i" -le 100 ] || fail "the server did not stop within 10 s"
+    sleep 0.1
+  done
+fi
+note "server stopped"
+
+# 3. Copy under the data lock (no --allow-running: a live writer makes it refuse), verify, check the manifest.
 cd "$APP" || fail "no app folder at $APP"
 timeout "$LIMIT" node dist/server/datatool.js backup --data "$DATA" --out "$OUT" || fail "datatool backup failed or timed out"
 node dist/server/datatool.js verify --backup "$OUT" || fail "datatool verify failed"
 grep -q '"serverWasRunning": false' "$OUT/manifest.json" || fail "the manifest does not record a stopped server"
 
-# 3. Release the hold: the entrypoint restarts the server. The rest reads only the copy.
-rm -f "$RUN/hold"
+# 4. Release the hold: the entrypoint restarts the server. Everything below reads only the copy.
+release
 t1=$(date +%s)
-echo "cgn-backup: hold released after $((t1 - t0)) s; the entrypoint restarts the server"
 
-# 4. Encrypt to the owner's public key. Only the owner's private key, kept off Render, can read the result.
-tar -C "$ROOT" -cf - "$STAMP" | age -r "$RECIPIENT" -o "$ARCHIVE.part" || fail "encryption failed"
-mv "$ARCHIVE.part" "$ARCHIVE" || fail "could not finish $ARCHIVE"
-sum=$(sha256sum "$ARCHIVE" | cut -d' ' -f1)
-echo "BACKUP_OK $ARCHIVE sha256=$sum server_stopped_s=$((t1 - t0))"
+# 5. A checksum list for the receiving side (standard tools only), covering every file of the copy.
+(cd "$ROOT" && find "$STAMP" -type f > "$LIST") || fail "could not list the copy"
+: > "$SUMS" || fail "could not create $SUMS"
+n=0
+while IFS= read -r f; do
+  line=$(cd "$ROOT" && sha256sum -- "$f") || fail "could not hash $f"
+  printf '%s\n' "$line" >> "$SUMS" || fail "could not write $SUMS"
+  n=$((n + 1))
+done < "$LIST"
+files=$(grep -c '"sha256"' "$OUT/manifest.json") || fail "could not count the manifest's files"
+[ "$n" -eq $((files + 1)) ] || fail "the copy holds $n files; the manifest lists $files plus itself"
+
+# 6. Archive, then prove the archive lists every file. No pipeline: each step's own status is checked.
+tar -C "$ROOT" -cf "$TAR" "$STAMP" "$STAMP.SHA256SUMS" || fail "the archiver failed"
+tar -tf "$TAR" > "$TARLIST" || fail "the archive can't be listed"
+grep -Fxq "$STAMP.SHA256SUMS" "$TARLIST" || fail "the archive lacks the checksum list"
+while IFS= read -r f; do grep -Fxq "$f" "$TARLIST" || fail "the archive lacks $f"; done < "$LIST"
+
+# 7. Encrypt to the owner's public key, hash, and publish by rename. Only the owner's private key, never on Render,
+#    can read the archive.
+age -r "$RECIPIENT" -o "$PART" "$TAR" || fail "encryption failed"
+[ -s "$PART" ] || fail "the encrypted archive is empty"
+line=$(sha256sum -- "$PART") || fail "could not hash the archive"
+sum=${line%% *}
+case "$sum" in *[!0-9a-f]*|"") fail "the archive's hash is unreadable";; esac
+[ "${#sum}" -eq 64 ] || fail "the archive's hash is unreadable"
+mv -- "$PART" "$ARCHIVE" || fail "could not publish the archive"
+[ -s "$ARCHIVE" ] && [ ! -e "$PART" ] || fail "the archive was not published"
+rm -f -- "$TAR" "$LIST" "$TARLIST" || fail "could not remove the temporary files"
+STATUS=ok
+echo "BACKUP_OK $ARCHIVE sha256=$sum files=$n server_stopped_s=$((t1 - t0))"

@@ -3354,3 +3354,28 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
 - **Not done:** no account, resource, deploy, exposure, charge, runtime change or gate rerun. Beta HOLD. #42 queued as is.
 - **Next:** ChatGPT's review and the owner's approvals, as listed in the proposal.
 - **Risk:** the drill is local; Render-side behaviour (the entrypoint as first process, the SSH user and environment, health-check timing, disk ownership) is unverified until W4–W7.
+
+## Beta R4 hosting proposal, revision 4: the backup's failure handling and hold ownership (review 6918277617; docs and evidence only)
+- **Brief:** ChatGPT found two blocking defects in the proposed `cgn-backup`.
+  - **The archive:** `tar | age` checked only the encryptor, so a failed archiver still gave `BACKUP_OK`.
+  - **The hold:** it was taken in two steps and released unconditionally, so one run could release another's.
+  - **Also asked for:** a bounded recovery for abandoned sessions, and verified receipt of the off-Render copy before any destructive step.
+  - **Acknowledged** in 6918312651, at 8:50 a.m. ET, with a 2 h 30 min estimate.
+- **Reproduced first,** on the scripts as committed at `6aad6d5`: a failed archiver and a failed hash each gave `BACKUP_OK`; overlapping runs let a server start mid-backup; an abandoned or hung-up session left the server down.
+- **Done:**
+  - **`cgn-backup`:**
+    - every step's status is checked, with no pipeline;
+    - on any failure, everything the run created is removed;
+    - the hold is taken atomically with `mkdir`, owns a pid and token, and is released only by its owner, on every exit path;
+    - the backup's names are chosen and checked only while holding.
+  - **`cgn-entrypoint`:** releases a hold whose owner is gone, within about a second.
+  - **New `cgn-receive`:** `RECEIPT_OK` for the off-Render copy (hash, decrypt, checksum list).
+  - **The rule:** a deploy, restore or data-folder change requires `RECEIPT_OK`.
+  - **The proposal and the evidence READMEs** are updated.
+- **Evidence:** `docs/evidence/beta-r4-hosting/backup-drill/round4/`.
+  - **The focused negatives:** P0, X1–X4, H0–H5.
+  - **The full drill:** receipt, four receipt negatives, and a restore of the received copy.
+  - **Runs:** 2 reproduction runs (7 failures each, as expected), 2 focused runs (the second added H0 and H5, after I found my first repair let a same-second run remove another's files), 1 drill run, then a final run of each on the committed files.
+- **Not done:** no account, resource, deploy, expense, runtime change or gate rerun. Beta HOLD. #42 separate.
+- **Next:** ChatGPT's review.
+- **Risk:** Render-side behaviour (the dropped-SSH signal, the entrypoint as the first process, health-check timing) and the real off-Render path are still unverified until W4–W7.

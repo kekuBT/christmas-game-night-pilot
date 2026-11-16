@@ -1,4 +1,6 @@
-# Beta R4, revision 3: the stopped-writer backup and the rollback guard, drilled locally (review 6917441687)
+# Beta R4: the stopped-writer backup and the rollback guard, drilled locally (reviews 6917441687, 6918277617)
+
+**Round 4 (review 6918277617)** repaired the backup's failure handling and the hold's ownership, and added the off-Render receipt (`cgn-receive`). See [round4/](round4/README.md): the reproduction on the scripts as committed at `6aad6d5`, the focused negatives, the full drill and every run. **The scripts in [deploy/](deploy/) are now the round-4 versions.** Round 3's versions are at commit `6aad6d5`. The rest of this page is round 3, kept as it ran.
 
 Evidence for [the proposal](../../../beta/beta-r4-hosting-proposal.md).
 - **Where it ran:** this session's machine, on disposable data, against the **unchanged** server in production mode. No Render, no account, no network beyond localhost. The runtime is unchanged at `7097ac2bb062925bb296a129f4771f1e68fd522d`; each log's header shows the runtime diff.
@@ -10,13 +12,14 @@ Evidence for [the proposal](../../../beta/beta-r4-hosting-proposal.md).
 **The gap is on Render.** The disk is reachable only from the running instance: not from builds, pre-deploy commands or one-off jobs. And if the server is the container's only process, stopping it ends the container, and with it SSH and the disk. So the smallest slice is a container entrypoint that keeps the instance up while the server is stopped on purpose. It is deploy-side shell, not a runtime change.
 
 ## The proposed deploy-side slice
-Three files, proposed for the image, not deployed anywhere:
+Proposed files, not deployed anywhere. Three are for the image; `cgn-receive` runs where the off-Render copy is received. The descriptions are the round-4 versions.
 
 | File | What it does |
 |---|---|
-| [cgn-entrypoint.sh.txt](deploy/cgn-entrypoint.sh.txt) | The container's command. It runs the server, passes `SIGTERM` on, and holds the server stopped while a backup runs. A server exit with no hold ends the container, so the platform restarts it. **The rollback guard:** before starting, the environment must match the authorized record, or it exits 78. |
-| [cgn-backup.sh.txt](deploy/cgn-backup.sh.txt) | Preflight; hold; `SIGTERM`; wait up to 10 s; `datatool backup` under the lock (no `--allow-running`; 30 s limit); `verify`; check `serverWasRunning: false`; release; encrypt with `age` to the owner's public key. It prints `BACKUP_OK` only if all of that succeeded. It reads the data folder and the key from the running server when an SSH session lacks them. |
+| [cgn-entrypoint.sh.txt](deploy/cgn-entrypoint.sh.txt) | The container's command. It runs the server, passes `SIGTERM` on, and holds the server stopped while a backup runs. A hold whose owner is gone is released within about a second (round 4). A server exit with no hold ends the container, so the platform restarts it. **The rollback guard:** before starting, the environment must match the authorized record, or it exits 78. |
+| [cgn-backup.sh.txt](deploy/cgn-backup.sh.txt) | **The steps:** preflight; take the hold atomically (`mkdir`, owner pid and token); `SIGTERM`; wait up to 10 s; `datatool backup` under the lock (no `--allow-running`; 30 s limit); `verify`; check `serverWasRunning: false`; release (owner only); a checksum list; tar to a file and list it; encrypt with `age`; hash; publish by rename. **Every step's status is checked, with no pipeline.** `BACKUP_OK` means the archive is complete on the disk. On any failure, everything this run made is removed. It reads the data folder and the key from the running server when an SSH session lacks them. |
 | [cgn-authorize.sh.txt](deploy/cgn-authorize.sh.txt) | Records the approved data folder, origin, proxy count and a salted hash of the access code (read from standard input, never printed or stored) on the disk, mode 600. |
+| [cgn-receive.sh.txt](deploy/cgn-receive.sh.txt) | Round 4. Run where the independent copy is received, with standard tools only. `RECEIPT_OK` only if the archive has the `BACKUP_OK` hash, decrypts with the owner's key, and every file matches the checksum list, which covers the whole copy. A deploy, a restore or a data-folder change requires it. |
 
 ## The drill
 [drill.sh.txt](drill.sh.txt) runs every case in order and ends with one verdict. Its helpers:

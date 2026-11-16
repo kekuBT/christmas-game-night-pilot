@@ -1,10 +1,14 @@
-# Beta R4: independent cloud hosting, a proposal (handoffs 6916543972, 6916659110, 6916722530; review 6917441687)
+# Beta R4: independent cloud hosting, a proposal (handoffs 6916543972, 6916659110, 6916722530; reviews 6917441687, 6918277617)
 
 **Planning only.** Nothing was created, deployed, configured or bought, and no runtime changed.
 - **Bases:** docs `d554b800e51ae78a9ca205d12a2d6622eb7795f9`; pinned runtime `7097ac2bb062925bb296a129f4771f1e68fd522d`, with the audited archive's SHA-256 `a693c543…3a5131`.
 - **Who decides:** ChatGPT owns the final route recommendation and the owner-facing cost approval. The owner decides.
 - **The requirement:** an independently hosted full website, with no dependency on a home computer. It supersedes the home-route (H1) prerequisite.
-- **Revision 3 (this one), for review 6917441687:**
+- **Revision 4 (this one), for review 6918277617:** the backup's failure handling and the hold's ownership, repaired. That review reproduced both defects; the repair is in [round4/](../evidence/beta-r4-hosting/backup-drill/round4/README.md).
+  - **Every step is checked, with no pipeline,** and a failure leaves no archive and no success behind.
+  - **The hold is exclusive and owned,** and a dead owner's hold is released within about a second.
+  - **Success has two stages:** `BACKUP_OK` means the archive is on the Render disk; **`RECEIPT_OK`** (`cgn-receive`) means the independent copy off Render was received and verified. A deploy or restore requires `RECEIPT_OK`.
+- **Revision 3, for review 6917441687:**
   - The backup now **stops the writer** and holds the data lock for the copy. Revision 2's "take it twice and compare" claim is withdrawn: matching lists can't rule out a change that was reverted between the copies.
   - Explicit rules for the way in (ingress) and for rollback, with an enforced rollback guard.
   - The baseline is separated from any spending cap.
@@ -66,24 +70,35 @@
 
 The copy is therefore one state of the folder. Nothing is inferred from comparing copies.
 
-**How, on Render: the proposed deploy-side slice** (three short shell scripts, in the image, not in the runtime; [the scripts](../evidence/beta-r4-hosting/backup-drill/README.md#the-proposed-deploy-side-slice)):
+**How, on Render: the proposed deploy-side slice** (short shell scripts, not in the runtime: three in the image, and `cgn-receive` where the copy is received; [the scripts](../evidence/beta-r4-hosting/backup-drill/README.md#the-proposed-deploy-side-slice)):
 - **`cgn-entrypoint`** is the container's first process. It runs the unchanged server, passes Render's `SIGTERM` on to it, and keeps the instance up while a backup holds the server stopped.
-  - **The hold** is a file in an ephemeral folder, so an instance restart always clears it.
+  - **The hold** is a folder in an ephemeral folder, so an instance restart always clears it.
+  - **A dead owner:** if the hold's owner is gone (the backup killed, the SSH session lost), the entrypoint releases it within about a second and the server starts again.
   - **A server exit without a hold** ends the container, so Render restarts the instance as it would without the script.
 - **`cgn-backup`**, run over SSH between sessions with **maintenance mode on** (public traffic refused):
-  - **Checks first, before anything stops:** the owner's public key, the folders, and a running server.
-  - **Then the backup:** hold, `SIGTERM`, wait (10 s limit), copy under the lock (30 s limit), `datatool verify`, the manifest check. Then release the hold; the entrypoint restarts the server.
-  - **Then the copy is encrypted** to the owner's `age` public key.
-  - **It prints `BACKUP_OK <file> sha256=…` only when every step succeeded.**
+  - **Checks first, before anything stops:** the owner's public key, the folders and the tools.
+  - **Takes the hold atomically and owns it.** `mkdir` fails if any hold exists; the hold records this run's pid and a random token. Only its owner releases it, on every exit path including hang-up, interrupt and terminate. The backup's names are chosen and checked only while holding, so a run never removes another run's files.
+  - **Then the backup:** `SIGTERM`, wait (10 s limit), copy under the lock (30 s limit), `datatool verify`, the manifest check. Then release the hold; the entrypoint restarts the server.
+  - **Then, reading only the copy:** a checksum list over the whole copy; a tar written to a file and listed back; encryption to the owner's `age` public key; the hash; publish by rename. **Every step's own status is checked, with no pipeline.**
+  - **It prints `BACKUP_OK <file> sha256=…` only after all of that.** On any failure, everything the run created in the backup folder is removed.
+- **`cgn-receive`**, where the copy is received off Render (the owner's device). It prints **`RECEIPT_OK`** only if all of these hold:
+  - the archive's SHA-256 is the one in the `BACKUP_OK` line;
+  - it decrypts with the owner's key;
+  - every file matches the checksum list, and the list covers the whole copy.
 - **Measured locally:** the server was down for **about 1 s**, against Render's 15 s (traffic paused) and 60 s (instance restarted) health-check limits.
 
 **The fail-closed rules:**
-- **Nothing counts as a backup without this run's `BACKUP_OK`.** A deploy, a restore and a data-folder change all require it.
+- **Two stages.** `BACKUP_OK` only says the archive is complete on the Render disk. **A deploy, a restore and a data-folder change each require `RECEIPT_OK` for a backup from the same window.** That proves the independent copy exists off Render and is readable.
+- **The expected hash** given to `cgn-receive` comes from the `BACKUP_OK` line seen in the SSH session, never from the archive's folder.
 - **A failure before the stop** changes nothing.
-- **A failure after the stop** (a copy that fails or times out, a failed verify) releases the hold. The server restarts on the same, untouched data, and no archive is made.
-- **A partial copy** has no verified manifest, so `datatool verify` refuses it.
+- **A failure after the stop or after the release** releases the hold (if still held), and removes everything the run created: no archive, no `.part`, no checksum list, no copy. That covers the copy, verify, the archive, the encryption, the hash and the publish. The server restarts on the same, untouched data.
+- **A second backup** is refused while one holds, and can never release another run's hold.
+- **An abandoned session:**
+  - **A hang-up or interrupt** releases the hold at once, through the script's own trap.
+  - **A run killed outright** leaves a hold whose owner is gone; the entrypoint releases it within about a second.
+  - **If an orphaned copy still holds the data lock,** the server refuses to start, the entrypoint exits, and Render restarts the instance.
 - **A server that doesn't stop within 10 s:** no backup, and the hold is released. The pending `SIGTERM` then stops the server, and the platform restarts the instance.
-- **An instance restart mid-backup** clears the hold, and the server starts on boot. The interrupted copy is never verified.
+- **An instance restart mid-backup** clears the hold, and the server starts on boot. Nothing from the interrupted run is ever verified.
 
 **Where the backups live, and who can read them:**
 
@@ -93,7 +108,7 @@ The copy is therefore one state of the folder. Nothing is inferred from comparin
 | **Off Render** | After each night: `scp -s` the `.tar.age` file to an administrative device, then upload it to the **owner's existing private cloud storage**. The laptop is only a transfer device: the game service never depends on it. |
 | **Access** | The owner's storage account, with two-factor sign-in. The operator gets SSH to the instance only during approved windows, and never the private key. |
 | **Retention** | Off Render: every pre-deploy and pre-restore backup for 90 days, plus the last 8 game-night backups. On the disk: the last 3 plaintext copies (as private as the data itself), deleted only after their archive is confirmed off Render. Render's own daily snapshots (7 days) are an extra layer inside Render, not the independent one. |
-| **Restore** | Decrypt on the owner's device, `datatool verify`, upload with `scp -s`, then `datatool restore` into a **new** folder, `datatool check`, `cgn-authorize` the new folder, then change `MCHEZO_DATA_DIR` (which redeploys). The old folder is kept. |
+| **Restore** | **From the received copy only, after its `RECEIPT_OK`:**<ul><li>upload it with `scp -s`;</li><li>`datatool verify` it on the instance;</li><li>`datatool restore` it into a **new** folder, then `datatool check`;</li><li>`cgn-authorize` the new folder, then change `MCHEZO_DATA_DIR` (which redeploys).</li></ul>The old folder is kept. |
 | **Cost** | $0 extra, with storage the owner already has. Each archive is a few KB per room. |
 
 **Evidence: one drill on disposable local data** ([backup-drill/](../evidence/beta-r4-hosting/backup-drill/README.md)).
@@ -113,6 +128,18 @@ The copy is therefore one state of the folder. Nothing is inferred from comparin
   - a server that doesn't stop.
 - **The checker's own negatives:** three deliberately damaged backups, each caught.
 - **The final run on the committed files:** see the evidence README.
+
+**Round 4's evidence** ([round4/](../evidence/beta-r4-hosting/backup-drill/round4/README.md)):
+- **The review's defects, reproduced on the revision 3 scripts:**
+  - a failing archiver behind a working encryptor gave `BACKUP_OK`, and so did a failed hash;
+  - one run's exit released another run's hold, and a server started mid-backup;
+  - an abandoned or hung-up session left the server down.
+- **The focused negatives** (failures injected by command stubs), on the repaired scripts:
+  - a failed archiver, encryptor, hash or publish, each leaving nothing behind;
+  - two backups started at once (5 rounds), a second backup while one holds, and a second backup after a release but during encryption;
+  - the same backup stamp twice;
+  - a killed session and a hung-up session, each back in about 1 s.
+- **The full drill** now receives the archive in a separate folder with `cgn-receive` (`RECEIPT_OK`), refuses four bad receipts, and restores **the received copy**.
 
 ## The way in (ingress)
 - **A dedicated workspace.** Render puts services of the same workspace and region on one private network. A Hobby workspace can't block that traffic (Pro and up can).
@@ -146,7 +173,7 @@ The copy is therefore one state of the folder. Nothing is inferred from comparin
 
 **The rules:**
 1. **Don't use the one-click rollback.** Roll back by a normal manual deploy of the previous audited release from the deploy repository (a revert commit). It runs the same artifact gate and uses the service's **current** environment values.
-2. **Before any deploy, rollback or restore:** this run's `BACKUP_OK`, with maintenance mode on.
+2. **Before any deploy, rollback or restore:** a backup from this window with `BACKUP_OK` **and its `RECEIPT_OK`**, with maintenance mode on.
 3. **After any deploy:**
    - `/health` reports the expected revision;
    - the startup log names the intended data folder and the number of rooms restored;
@@ -184,8 +211,8 @@ All of it runs on the paid service, in production mode, with a throwaway access 
 | W2 | **Live play at family scale:** 2 rooms × 10 phones + a TV each, driven by the drill's load script pointed at `https://`. A full Trivia game with every phone answering, then a **drawing** game (Draw & Guess or Team Draw) with strokes, plus Memory Book saves. | Every answer, stroke and save acknowledged and saved. Render's memory and CPU graphs stay under 50% of Starter. Acknowledgement times recorded (median and 95th percentile). |
 | W3 | **Reconnect:** phones backgrounded and foregrounded; a Wi-Fi to mobile data switch | Every client back in its seat, with no lost answer |
 | W4 | **Restart:** a manual deploy, and a dashboard restart, each mid-game | The room restored; acknowledged answers kept; sockets back |
-| W5 | **Backup:** `cgn-backup` during a validation night, then `scp -s` off Render, decrypt, `datatool verify` | `BACKUP_OK`; the off-Render copy verifies; the stop under 10 s |
-| W6 | **Restore:** into a new folder, then `check`, authorize, switch, redeploy. Separately, a Render snapshot restore on throwaway data. | The rooms and books back; the old folder kept |
+| W5 | **Backup:** `cgn-backup` during a validation night, then `scp -s` off Render to the owner's storage, fetch it back, then `cgn-receive` | `BACKUP_OK`, then `RECEIPT_OK` on the owner's device; the stop under 10 s |
+| W6 | **Restore of the received copy:** upload, `verify`, into a new folder, then `check`, authorize, switch, redeploy. Separately, a Render snapshot restore on throwaway data. | The rooms and books back; the old folder kept |
 | W7 | **Rollback:** a revert-commit deploy of the previous release, then the acceptance checks. And one deliberate one-click rollback across a configuration change, to see the guard refuse it. | The previous release serves the current configuration; the one-click rollback fails closed |
 | W8 | **Native devices:** an iPhone (Safari) and an Android phone (Chrome), P1–P8 from REAL_DEVICE_TESTING.md over the public URL. That covers the gate, a QR join, play, lock and unlock, Home Screen install, and a Memory Book export. | No Blocker |
 
@@ -194,7 +221,7 @@ All of it runs on the paid service, in production mode, with a throwaway access 
 2. **The account:** the existing Render account (pending), a payment method, a region, and `onrender.com` or an own domain.
 3. **A public URL behind the access gate,** with maintenance mode outside approved windows. This replaces "no public exposure".
 4. **The deploy-side slice:**
-   - the three scripts and the Dockerfile in a private deploy repository, with the audited archive;
+   - the three image scripts and the Dockerfile in a private deploy repository, with the audited archive, plus `cgn-receive` for the receiving device;
    - review of the `0.0.0.0`-in-a-dedicated-workspace rule in place of B-07.
 5. **The off-Render destination:** which of the owner's storage services; the owner's `age` key pair, made and kept by the owner; the retention above.
 6. **Execution windows** for W1–W8, each with throwaway data. Real data comes only after W1–W8 pass and the go/no-go.
