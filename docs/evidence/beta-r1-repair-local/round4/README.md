@@ -47,7 +47,9 @@ Each gate ran from a fresh clone of the exact commit (`scripts/gate.mjs`, three 
 | targeted `20261116-024127-34996cf4-7748` | `34996cf` (driver fix only; product identical to `5525ded`) | **PASSED (exit 0), 12/12:** check-locked-answer, answer-helper, math, geography, audit-fixes, mchezo, answer-race, solo, session-flow and tv-lifecycle, plus the build and the browser preflight. |
 | full `20261116-024847-34996cf4-10213` | `34996cf` | **CANCELLED (exit 130), by me, after 1 min 59 s:** 6 passed, 3 cancelled, 102 not run. The scope answer 6905044291 arrived and asked for one more Math check, which changes the candidate. The gate cancelled cleanly on SIGTERM, with no process left behind. |
 | targeted `20261116-025541-c955613d-16045` | `c955613` (adds the Math open-flow checks and a unit-test pin; product identical to `5525ded`) | **PASSED (exit 0), 8/8:** check-locked-answer, math, math-timing, geography, solo and answer-helper, plus the build and the browser preflight. |
-| full FULL_RUN_ID | `c955613` | FULL_VERDICT |
+| full `20261116-025903-c955613d-17498` | `c955613` | **FAILED (exit 1), 110/111.** check-warm-ivory W8 ("Everyday unchanged") found two new styles on the Everyday locked screen at 390 and 320, both my choices: the orange brand keycap for Next question, and a divider line above the room's progress. Every other difference was the same colour style under a new key (the screen gained test ids). All 110 other steps passed, check-locked-answer included. |
+| targeted `20261116-034821-7097ac2b-7629` | `7097ac2` (Next question back on the screen's own neutral keycap, no divider; `W8_INTENDED` lists the re-keyed elements) | **PASSED (exit 0), 8/8:** check-locked-answer, warm-ivory (W8 locked-390 and locked-320: 0 new styles, 0 missing, 44 intended element changes, each reusing a base style), contrast, audit-fixes, math and solo, plus the build and the preflight. |
+| **full `20261116-035311-7097ac2b-9479`** | **`7097ac2`** | **PASSED (exit 0), 111/111**: unit 2068/2068, check-locked-answer, W8 locked-390 and locked-320 with 0 new styles. Wall time 43 min 18 s, nothing left running. |
 
 **Why the first targeted run failed, measured before changing anything:** `stamp-probe.mjs.txt` and `stamp-probe-after-gate-failure.out.txt`.
 - **The probe:** the same build at 320×480, four locks. It sets the 80-character answer and samples the stamp and answer every 40 ms for 1.4 s.
@@ -55,7 +57,7 @@ Each gate ran from a fresh clone of the exact commit (`scripts/gate.mjs`, three 
 - **So:** the driver measured mid-animation, while the gate loaded the machine. The existing A-01 check (check-audit-fixes) measures after the stamp lands for the same reason.
 - **The fix, driver only (`34996cf`):** after each lock and after setting the long answer, wait until the stamp's animation is no longer running. The local rerun is `after-local-run4-settled-stamp.log`: 136/136, 0 px² at 320 and 390.
 
-**Screenshots from the final candidate:** `after-c955613/`, taken by the passing targeted run `20261116-025541-c955613d-16045`'s check-locked-answer.
+**Screenshots from the final candidate:** `after-7097ac2/`, taken by the passing targeted run `20261116-034821-7097ac2b-7629`'s check-locked-answer (Next question on the neutral keycap).
 - the nonfinal and final screens at 320×480, 390×844 and 1440×900;
 - an 80-character answer at 320 and 390;
 - 150% and 200% zoom;
@@ -69,3 +71,14 @@ Each gate ran from a fresh clone of the exact commit (`scripts/gate.mjs`, three 
 - **After Next question on a page that reports itself hidden:** still not opened, the visibility guard. The page's visibility is overridden the way check-math-timing does it.
 - **Once the page is shown:** question 2 opens and its prompt appears.
 - **Its answer is timed from that open:** 402 ms locally and 498 ms in the gate. The 7 s on the locked and hidden screens don't count.
+
+**Local runs for `7097ac2`:**
+- `local-warm-ivory-local1.log`: ALL WARM IVORY CHECKS PASSED. W8 shows 0 new and 0 missing styles on the locked screen.
+- `local-after-run6.log`: check-locked-answer 141/141 on the neutral keycap.
+
+## The journey on the real clock
+`realclock-7097ac2.log`: check-locked-answer with `MCHEZO_LOCKED_ANSWER_SCALE=1`. It ran from the clean `7097ac2` clone with that full gate's own web build, after the gate had finished.
+- **The result:** **PASSED, 141/141.** Trivia's real 6-minute deadline was 340 s away when measured, and the run took 478 s.
+- **The deadline:** the server ended the game at its deadline, with no host action.
+- **The scores:** the guest's 2 answers scored 120, the host's 10 scored 240, and the results said time ran out.
+- **Play again:** both seats kept, nobody ready, and the TV showed the new game with no answers.

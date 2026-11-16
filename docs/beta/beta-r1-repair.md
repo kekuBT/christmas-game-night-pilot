@@ -285,7 +285,7 @@ The times come from the runs' own timestamps (the isolated sweep started at 6:23
   - **The helper's self-test:** it models the new final screen and adds the failure case.
 
 ### Checks
-- **`scripts/check-locked-answer.mjs`:** 136 checks in Chromium emulation.
+- **`scripts/check-locked-answer.mjs`:** 141 checks in Chromium emulation (136, plus 5 for Math's open flow).
   - **The layout,** in Casual Trivia at 320×480, 390×844 and 1440×900, for host and guest. The guest's name is the 24-character maximum.
     - Next question is enabled, inside the first screen, uncovered at its centre, and opens the next question.
     - It comes before the ring, and nothing says to wait for everyone.
@@ -316,3 +316,31 @@ The times come from the runs' own timestamps (the isolated sweep started at 6:23
   **One rendering difference in solo Math:** after the last answer it now says "All your answers are in." instead of offering the enabled "Waiting for the game to finish". The solo flow is otherwise unchanged; check-solo passes 80/80.
 - **The existing drivers the change touches,** run on the working tree: 242/242 checks over seven drivers (`round4/README.md`).
 - **Typecheck and lint:** exit 0.
+
+### The gates (every run, each from a fresh clone of the exact commit)
+| Run | Commit | Verdict |
+|---|---|---|
+| targeted `20261116-022947-5525dedb-4704` | `5525ded` (the repair) | **FAILED (exit 1), 11/12.** My new check measured the LOCKED IN stamp during its 0.55 s slam (61 px²). A probe on the same build shows 0 px² at rest. The driver now waits for the stamp to land. |
+| targeted `20261116-024127-34996cf4-7748` | `34996cf` (driver fix) | PASSED (exit 0), 12/12 |
+| full `20261116-024847-34996cf4-10213` | `34996cf` | **CANCELLED (exit 130)** by me after 1 min 59 s: the scope answer 6905044291 changed the candidate. 6 passed, 3 cancelled, 102 not run. |
+| targeted `20261116-025541-c955613d-16045` | `c955613` (Math open-flow checks) | PASSED (exit 0), 8/8 |
+| full `20261116-025903-c955613d-17498` | `c955613` | **FAILED (exit 1), 110/111.** check-warm-ivory W8 found two new Everyday styles on the locked screen, both my choices: the orange brand keycap for Next question, and a divider line. |
+| targeted `20261116-034821-7097ac2b-7629` | `7097ac2` (the neutral keycap, no divider, `W8_INTENDED`) | PASSED (exit 0), 8/8, warm-ivory and contrast included |
+| **full `20261116-035311-7097ac2b-9479`** | **`7097ac2`** | **PASSED (exit 0), 111/111**: unit 2068/2068, check-locked-answer, W8 locked-390 and locked-320 with 0 new styles. Wall time 43 min 18 s. |
+
+**The tested candidate is `7097ac2`.** Only docs and evidence follow it.
+
+**The journey on the real clock:** after the full gate, check-locked-answer ran once with Trivia's real 6-minute deadline (`MCHEZO_LOCKED_ANSWER_SCALE=1`), from the clean `7097ac2` clone and that gate's web build. It passed 141/141 (`round4/realclock-7097ac2.log`).
+
+### Estimate vs actual (fourth round)
+| Part | Estimate | Actual (ET) |
+|---|---|---|
+| Reproduce first | 35 min | about 7 min (8:44 to 8:51), including two runs that failed on my driver |
+| The repair | 45 min | about 9 min (8:51 to 9:00) |
+| The regression check, journeys and screenshots | 60 min | about 18 min (9:00 to 9:18), with the seven-driver sweep |
+| Focused checks and targeted gates | 25 min | about 40 min across four targeted runs (one failed on my check's timing), the stamp probe and the Math open-flow checks the scope answer asked for |
+| One full gate | 45 min | **three full runs, about 88 min of gate time:** cancelled after 2 min (the candidate changed), **failed** after 43 min (W8, two new Everyday styles), passed after 43 min |
+| Evidence, docs, report | 35 min | about 30 min, mostly while the gates ran, plus the real-clock run (8 min) |
+| **Total** | **about 4 h** | **about 3 h 20 min** (8:44 p.m. to about 12:05 a.m. ET) |
+
+**The ETA:** at 9:51 p.m. I posted about 11:15 p.m. The failed full gate and its rerun added about 50 minutes, which accounts for the difference.

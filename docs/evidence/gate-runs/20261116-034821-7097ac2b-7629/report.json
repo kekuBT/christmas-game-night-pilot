@@ -1,0 +1,471 @@
+{
+  "runId": "20261116-034821-7097ac2b-7629",
+  "level": "targeted",
+  "startedAt": "2026-11-16T03:48:21.617Z",
+  "finishedAt": "2026-11-16T03:53:01.041Z",
+  "exitCode": 0,
+  "verdict": "PASSED",
+  "repo": "/tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/r5t4",
+  "git": {
+    "head": "7097ac2bb062925bb296a129f4771f1e68fd522d",
+    "branch": "HEAD",
+    "dirty": []
+  },
+  "fingerprint": {
+    "hash": "c525301788edb582cf898b26e1221f537aea362043cc2ec37166f28c78013493",
+    "files": 634
+  },
+  "node": "v22.23.4",
+  "platform": "linux-x64",
+  "machine": {
+    "cpus": 4,
+    "memAvailMB": 15427
+  },
+  "workers": 3,
+  "workersWhy": "auto: 4 CPUs, 15.1 GB available",
+  "browser": {
+    "version": "153.0.8010.12",
+    "executable": "/opt/pw-browsers/chromium_headless_shell-1243/chrome-headless-shell-linux64/chrome-headless-shell",
+    "source": "MCHEZO_CHROMIUM_PATH",
+    "build": "chrome-headless-shell"
+  },
+  "steps": [
+    {
+      "name": "build-web",
+      "kind": "check",
+      "command": "node ./node_modules/vite/bin/vite.js build --config apps/web/vite.config.ts --outDir ./test-results/20261116-034821-7097ac2b-7629/web-dist --emptyOutDir --logLevel warn",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 5.4,
+      "log": "./logs/01-build-web.log",
+      "detail": "",
+      "worker": 1,
+      "estSec": 5,
+      "startOffsetSec": 0.2,
+      "endOffsetSec": 5.6,
+      "cpuSec": 9.5,
+      "peakRssMB": 533,
+      "machine": {
+        "memAvailMinMB": 14858,
+        "cpuSaturatedSec": 0,
+        "samples": 6
+      },
+      "failureKind": null
+    },
+    {
+      "name": "browser-preflight",
+      "kind": "infra",
+      "command": "node --input-type=module -e const m = await import('./scripts/lib/driver-env.mjs'); const exe = m.chromiumExecutable(); const b = await m.launchChromium(); console.log(JSON.stringify({ version: b.version(), executable: exe.path, source: exe.source })); await b.close();",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 0.8,
+      "log": "./logs/02-browser-preflight.log",
+      "detail": "",
+      "worker": 1,
+      "estSec": 1,
+      "startOffsetSec": 5.6,
+      "endOffsetSec": 6.4,
+      "cpuSec": 0.7,
+      "peakRssMB": 215,
+      "machine": {
+        "memAvailMinMB": 15075,
+        "cpuSaturatedSec": 0,
+        "samples": 2
+      },
+      "browserUse": {
+        "browsers": 1,
+        "contexts": 0,
+        "pages": 0,
+        "peakOpenPages": 0
+      },
+      "failureKind": null
+    },
+    {
+      "name": "check-audit-fixes",
+      "kind": "browser",
+      "command": "node scripts/check-audit-fixes.mjs http://localhost:45919",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 234.3,
+      "log": "./logs/03-check-audit-fixes.log",
+      "detail": "",
+      "worker": 1,
+      "estSec": 219,
+      "startOffsetSec": 7.7,
+      "endOffsetSec": 242,
+      "cpuSec": 15.5,
+      "peakRssMB": 346,
+      "roomsOnGateServer": 12,
+      "machine": {
+        "memAvailMinMB": 13342,
+        "cpuSaturatedSec": 0,
+        "samples": 238
+      },
+      "browserUse": {
+        "browsers": 1,
+        "contexts": 28,
+        "pages": 28,
+        "peakOpenPages": 20
+      },
+      "failureKind": null
+    },
+    {
+      "name": "check-locked-answer",
+      "kind": "browser",
+      "command": "node scripts/check-locked-answer.mjs http://localhost:41419",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 180.4,
+      "log": "./logs/04-check-locked-answer.log",
+      "detail": "",
+      "worker": 2,
+      "estSec": 168,
+      "startOffsetSec": 7.7,
+      "endOffsetSec": 188.1,
+      "cpuSec": 12.6,
+      "peakRssMB": 366,
+      "roomsOnGateServer": 8,
+      "machine": {
+        "memAvailMinMB": 14190,
+        "cpuSaturatedSec": 0,
+        "samples": 182
+      },
+      "browserUse": {
+        "browsers": 1,
+        "contexts": 19,
+        "pages": 19,
+        "peakOpenPages": 3
+      },
+      "failureKind": null
+    },
+    {
+      "name": "check-solo",
+      "kind": "browser",
+      "command": "node scripts/check-solo.mjs http://localhost:45355",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 154.5,
+      "log": "./logs/05-check-solo.log",
+      "detail": "",
+      "worker": 3,
+      "estSec": 141,
+      "startOffsetSec": 7.8,
+      "endOffsetSec": 162.3,
+      "cpuSec": 9.2,
+      "peakRssMB": 284,
+      "roomsOnGateServer": 7,
+      "machine": {
+        "memAvailMinMB": 14313,
+        "cpuSaturatedSec": 0,
+        "samples": 155
+      },
+      "browserUse": {
+        "browsers": 1,
+        "contexts": 6,
+        "pages": 7,
+        "peakOpenPages": 2
+      },
+      "failureKind": null
+    },
+    {
+      "name": "check-warm-ivory",
+      "kind": "browser",
+      "command": "node scripts/check-warm-ivory.mjs http://localhost:45355",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 68.4,
+      "log": "./logs/06-check-warm-ivory.log",
+      "detail": "",
+      "worker": 3,
+      "estSec": 64,
+      "startOffsetSec": 162.3,
+      "endOffsetSec": 230.8,
+      "cpuSec": 11.6,
+      "peakRssMB": 375,
+      "roomsOnGateServer": 0,
+      "machine": {
+        "memAvailMinMB": 13465,
+        "cpuSaturatedSec": 0,
+        "samples": 71
+      },
+      "browserUse": {
+        "browsers": 1,
+        "contexts": 21,
+        "pages": 22,
+        "peakOpenPages": 3
+      },
+      "failureKind": null
+    },
+    {
+      "name": "check-math",
+      "kind": "browser",
+      "command": "node scripts/check-math.mjs http://localhost:41419",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 53.9,
+      "log": "./logs/07-check-math.log",
+      "detail": "",
+      "worker": 2,
+      "estSec": 55,
+      "startOffsetSec": 188.1,
+      "endOffsetSec": 242.1,
+      "cpuSec": 5.7,
+      "peakRssMB": 269,
+      "roomsOnGateServer": 2,
+      "machine": {
+        "memAvailMinMB": 13342,
+        "cpuSaturatedSec": 0,
+        "samples": 57
+      },
+      "browserUse": {
+        "browsers": 1,
+        "contexts": 2,
+        "pages": 4,
+        "peakOpenPages": 4
+      },
+      "failureKind": null
+    },
+    {
+      "name": "check-contrast",
+      "kind": "browser",
+      "command": "node scripts/check-contrast.mjs http://localhost:45355",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 48.3,
+      "log": "./logs/08-check-contrast.log",
+      "detail": "",
+      "worker": 3,
+      "estSec": 26,
+      "startOffsetSec": 230.8,
+      "endOffsetSec": 279.1,
+      "cpuSec": 3.5,
+      "peakRssMB": 263,
+      "roomsOnGateServer": 2,
+      "machine": {
+        "memAvailMinMB": 13342,
+        "cpuSaturatedSec": 0,
+        "samples": 51
+      },
+      "browserUse": {
+        "browsers": 1,
+        "contexts": 2,
+        "pages": 2,
+        "peakOpenPages": 2
+      },
+      "failureKind": null
+    }
+  ],
+  "notRun": [],
+  "notes": [],
+  "servers": [
+    {
+      "worker": "w1",
+      "port": 45919,
+      "pid": 7754,
+      "dataDir": "/tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/r5t4/test-results/20261116-034821-7097ac2b-7629/server-data/w1",
+      "log": "./logs/server-w1.log"
+    },
+    {
+      "worker": "w2",
+      "port": 41419,
+      "pid": 7755,
+      "dataDir": "/tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/r5t4/test-results/20261116-034821-7097ac2b-7629/server-data/w2",
+      "log": "./logs/server-w2.log"
+    },
+    {
+      "worker": "w3",
+      "port": 45355,
+      "pid": 7756,
+      "dataDir": "/tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/r5t4/test-results/20261116-034821-7097ac2b-7629/server-data/w3",
+      "log": "./logs/server-w3.log"
+    }
+  ],
+  "timing": {
+    "wallSec": 279,
+    "sumSec": 746,
+    "utilisation": 0.89,
+    "perWorkerBusySec": {
+      "w1": 241,
+      "w2": 234,
+      "w3": 271
+    },
+    "predicted": {
+      "low": 188,
+      "mid": 245,
+      "high": 427,
+      "confidence": "measured"
+    },
+    "contentionRatio": 1.073,
+    "longest": [
+      {
+        "name": "check-audit-fixes",
+        "sec": 234.3
+      },
+      {
+        "name": "check-locked-answer",
+        "sec": 180.4
+      },
+      {
+        "name": "check-solo",
+        "sec": 154.5
+      },
+      {
+        "name": "check-warm-ivory",
+        "sec": 68.4
+      },
+      {
+        "name": "check-math",
+        "sec": 53.9
+      }
+    ],
+    "backpressure": {
+      "waits": 0,
+      "seconds": 0
+    },
+    "system": {
+      "cpuPctMean": 25,
+      "cpuPctPeak": 87,
+      "memAvailMinMB": 13342,
+      "load1Peak": 2.66,
+      "cpuPctEvery10s": [
+        77,
+        17,
+        19,
+        19,
+        14,
+        28,
+        21,
+        15,
+        12,
+        28,
+        38,
+        20,
+        12,
+        8,
+        16,
+        6,
+        10,
+        10,
+        42,
+        23,
+        25,
+        66,
+        48,
+        61,
+        14,
+        2,
+        3,
+        11
+      ]
+    },
+    "serverUse": [
+      {
+        "worker": "w1",
+        "cpuSec": 3.6,
+        "peakRssMB": 152
+      },
+      {
+        "worker": "w2",
+        "cpuSec": 3.2,
+        "peakRssMB": 151
+      },
+      {
+        "worker": "w3",
+        "cpuSec": 3.1,
+        "peakRssMB": 145
+      }
+    ],
+    "historicalSequentialWallSec": 4669
+  },
+  "plan": {
+    "steps": [
+      {
+        "index": 1,
+        "name": "build-web",
+        "phase": "build",
+        "estSec": 5,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 2,
+        "name": "browser-preflight",
+        "phase": "browser",
+        "estSec": 1,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 3,
+        "name": "check-audit-fixes",
+        "phase": "browser",
+        "estSec": 219,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 4,
+        "name": "check-locked-answer",
+        "phase": "browser",
+        "estSec": 168,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 5,
+        "name": "check-solo",
+        "phase": "browser",
+        "estSec": 141,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 6,
+        "name": "check-warm-ivory",
+        "phase": "browser",
+        "estSec": 64,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 7,
+        "name": "check-math",
+        "phase": "browser",
+        "estSec": 55,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 8,
+        "name": "check-contrast",
+        "phase": "browser",
+        "estSec": 26,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      }
+    ],
+    "predicted": {
+      "low": 188.30353749999998,
+      "mid": 245.0565,
+      "high": 427.1450624999999,
+      "sequentialSec": 678.55,
+      "confidence": "measured",
+      "contention": 1.062,
+      "contentionSource": "measured"
+    }
+  },
+  "server": {
+    "port": 45919,
+    "pid": 7754,
+    "dataDir": "/tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/r5t4/test-results/20261116-034821-7097ac2b-7629/server-data/w1",
+    "webDist": "/tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/r5t4/test-results/20261116-034821-7097ac2b-7629/web-dist"
+  }
+}

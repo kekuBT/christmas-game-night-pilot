@@ -1,0 +1,20 @@
+$ node scripts/check-tv-lifecycle.mjs http://localhost:40133
+# timeout 900s | worker w3 | server http://localhost:40133 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/r5full3/test-results/20261116-035311-7097ac2b-9479/server-data/w3)
+
+[+6.2s] PASS lobby: TV shows the dashboard
+[+6.3s] PASS trivia briefing: TV shows the rules and who is ready, no question
+[+26.6s] PASS Start now names the not-ready TV seat — TV: not ready yet
+[+26.6s] PASS trivia playing: TV auto-switches to the stage
+[+66.9s] PASS trivia finished: TV shows the leaderboard stage
+[+67.9s] PASS newer game briefing: TV leaves the Trivia stage for the new rules
+[+90.1s] PASS newer game playing: TV leaves the Trivia stage for the dashboard
+[+90.1s] PASS newer game playing: dashboard names Math Mayhem as now playing
+[+128.2s] DEBUG TV body at math finish: 
+[+128.2s] MchezoCode: TLRE7ZPlaying as TV · Room: Game nightLobby & GamesChampionshipTV DashboardMemory BookReconnectSaved.Math Mayhem · OfficialEveryone tiedAAdaBBeaCCalTTVEveryone tied. A perfectly balanced family.You tied for 1st of 4480 ptsYou share the top spot. Sharing is caring.🏆 ResultsMath MayhemIt
+[+129.8s] PASS newer game finished: TV still on the live show for Math Mayhem, no stale Trivia stage — 
+[+129.8s] mchezoMath MayhemFinal standingsOfficialJoin TLRE7ZEveryone tiedFamily Cup · after this game1Ada50 pts†1Bea50 pts†1Cal5
+[+151.5s] PASS trivia restarts: TV returns to a fresh question stage
+[+151.5s] TV LIFECYCLE ALL PASSED
+[+151.5s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":2,"pages":4,"peakOpenPages":4}
+
+# PASS (exit 0) in 151.5s | cpu 9.2s, peak memory 263 MB

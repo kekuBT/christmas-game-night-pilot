@@ -3174,3 +3174,31 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
 - **Invalid runs:** three, because a whole-VM sysctl was refused. They are kept and labelled; R4b and R5b replaced them with a per-namespace limit.
 - **No product source changed, and no gate ran.**
 - **Next:** the reviewer runs the diagnostics and chooses an option. Option 2 needs the owner's approval first.
+
+## Beta R1-R, fourth round: continuing Trivia on small screens, review 6904986723 (R5; completed)
+- **Brief:** ChatGPT's independent private audit of `456cb0d` (Firefox ESR through route B) found that after a nonfinal locked answer, "Waiting for everyone" and the ring came before Next question.
+  - **At 320×480:** Next question was off the first screen.
+  - **The lower seat's label** lay on the text below the ring.
+  - **Asked:** a bounded presentation repair, a browser regression, the journeys, and one full gate. Acknowledged with an estimate in 6905027233.
+- **Estimate:** about 4 h, written at 8:44 p.m. ET. **Actual:** about 3 h 20 min. The failed full gate added about 50 min beyond the ETA I posted at 9:51 p.m.
+- **Scope answer:** 6905044291 (acknowledged in 6905935948) confirmed Geography and Math Mayhem. It asked for a check that Math's next prompt and speed clock begin only through the existing open flow after Next question, visibility guard included. Added and passing.
+- **Reproduced first:** `scripts/check-locked-answer.mjs` (first version) on `f93e9cb`, 28 failed checks. Two earlier runs were my driver's errors and are kept.
+- **The repair (B-15, D-BR1R-12):** `apps/web/src/components/mchezo/LockedAnswer.tsx`, shared by Trivia, Geography and Math Mayhem, in Everyday's existing colours (Next question on the screen's own neutral keycap).
+  - **A nonfinal answer:** a compact card, "keep going", Next question and the time left, then the room's progress.
+  - **The last answer:** "All your answers are in", with no continuation control.
+  - **`.mz-wait`:** keeps room under the ring.
+  - **Presentation only.**
+- **The drivers:** the answer helper and four drivers stop expecting the old final keycap.
+- **The tests:** `LockedAnswer.test.tsx` (6), and the new browser check (141 checks, including Math's open flow and visibility guard: sizes, long text, zoom, Geography, Math, the sat-out ring, and the host/guest/TV journey on a 0.2-scaled clock).
+- **The gates:**
+  - **Targeted `20261116-022947-5525dedb-4704` on `5525ded`: FAILED, 11/12.** The new check measured the stamp mid-animation (probe: 0 px² at rest). Driver fixed in `34996cf`.
+  - **Targeted `20261116-024127-34996cf4-7748` on `34996cf`: PASSED, 12/12.**
+  - **Full `20261116-024847-34996cf4-10213` on `34996cf`: CANCELLED** by me after 2 min. Scope answer 6905044291 (acknowledged in 6905935948) added a Math open-flow check, which changed the candidate.
+  - **Targeted `20261116-025541-c955613d-16045` on `c955613`: PASSED, 8/8.**
+  - **Full `20261116-025903-c955613d-17498` on `c955613`: FAILED, 110/111.** check-warm-ivory W8 found two new Everyday styles on the locked screen: my orange Next question and a divider. Fixed in `7097ac2`: the neutral keycap and spacing, with `W8_INTENDED` for the re-keyed elements.
+  - **Targeted `20261116-034821-7097ac2b-7629` on `7097ac2` (the final candidate): PASSED, 8/8.**
+  - **Full `20261116-035311-7097ac2b-9479` on `7097ac2`: PASSED (exit 0), 111/111, unit 2068/2068.**
+  - **Real clock:** check-locked-answer with Trivia's real 6-minute deadline, on the clean `7097ac2` clone: 141/141.
+- **The tested candidate:** `7097ac2`; only docs and evidence follow it.
+- **Not done:** no merge, deployment, public port or spending. Beta HOLD.
+- **Next:** ChatGPT verifies the repair independently and runs the remaining private acceptance checks. Owner sign-off remains a release condition.
