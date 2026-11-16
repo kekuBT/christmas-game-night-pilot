@@ -97,6 +97,7 @@
 1. **Render's daily disk snapshots, kept 7 days.** They are inside Render, so not independent. A restore replaces the whole disk and loses everything since the snapshot.
 2. **Our own, off Render, after each game night:**
    - Over SSH: `datatool backup --data /var/data/cgn --out /var/data/backups/<date> --allow-running`, taken when no game is running. Its manifest records `serverWasRunning: true`.
+   - **Proving it is consistent:** `--allow-running` copies each file whole, but can't show that a room and its Memory Book are from the same moment. So take the backup **twice**, one after the other. If the two manifests list the same files with the same SHA-256 hashes, nothing changed during either copy, and the backup is one consistent state. If they differ, repeat. This is an operator step; no code change.
    - Copied off with `scp -s` to the owner's computer, then `datatool verify` there.
    - A second copy in the owner's existing private cloud storage.
 
@@ -124,7 +125,7 @@
 4. **Memory and CPU on the real Starter instance,** during a private validation night with real answers. Move up a size only if needed.
 5. **The route checks, adapted:** TLS `/health` from a phone (V1); the proxy count for `MCHEZO_TRUST_PROXY` (V2); WebSockets with the throwaway code on two phones (V3).
 6. **A deploy and a restart with a room open:** clients reconnect, the room is restored, and the `SIGTERM` shutdown finishes well inside 30 s.
-7. **The backup drill:** `--allow-running` backup, `scp -s` off, `verify`, then restore into a new folder, `check`, and switch `MCHEZO_DATA_DIR`. A snapshot restore drill on throwaway data.
+7. **The backup drill:** `--allow-running` backup taken twice with matching manifests, `scp -s` off, `verify`, then restore into a new folder, `check`, and switch `MCHEZO_DATA_DIR`. A snapshot restore drill on throwaway data.
 8. **A rollback drill:** the previous deploy comes back, the data is kept, and the access code is checked.
 9. **Bandwidth** after the first nights, from the dashboard.
 10. **Native-device checks P1–P8** over the public URL.
