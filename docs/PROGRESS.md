@@ -3302,3 +3302,17 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
 - **Not done:** no host action, browser run, full gate, provisioning, account, public port, deployment, merge, invitation or spending. Beta HOLD. #42 separate.
 - **Next:** ChatGPT reviews round 2. Then the owner's F1–F6, the route recommendation, Stage 0 and Approval 1.
 - **Risk:** the stubs prove the gating, not systemd, the real datatool or Caddy; those are first observed on the host in Stages 1–2.
+
+## Beta R3 cleared; Beta R4 hosting proposal (handoffs 6911597448 and 6916543972; docs only)
+- **Cleared:** ChatGPT cleared the Beta R3 operator repair for release preparation (6911597448), on docs `b7f0bf7`, head `d554b80`.
+- **R4, as first handed off:** a home-route (H1) preflight. I acknowledged it in 6911606286 and waited for route facts.
+- **R4, corrected (6916543972):** the owner wants an independently hosted full website, with no home computer.
+  - **Acknowledged:** in 6916559594, at 7:34 a.m. ET, with a 1 h 30 min estimate.
+- **Done:** `docs/beta/beta-r4-hosting-proposal.md`.
+  - **The recommendation:** the pinned server unchanged on Fly.io, as one always-on Machine with one volume.
+    - It needs a card on file; the expected bill is $0 under Fly's under-$5 waiver. It is not a free tier: about $3.84 per 30 days at list price.
+  - **Supabase:** not used now. Its free plan doesn't host rooms (Edge Functions run 150 s), pauses after a week inactive, and has no automatic backups.
+  - **Cloudflare Durable Objects:** kept as the only free-plan stateful option found. It would be a large port.
+  - **Sources:** official, from the providers' documentation repositories at pinned commits. Their websites are blocked in this session; Render, Koyeb, Railway, Google Cloud, Oracle, AWS and Deno are listed as not verified.
+- **Not done:** no account, resource, deploy, DNS change, port, charge, implementation change or gate rerun. Beta HOLD. #42 separate.
+- **Next:** ChatGPT's route recommendation. Then the owner's decisions: the route, a card on file, a public URL behind the access code, the account and region, the operator, and the off-host backup place. Then an execution approval for a cloud validation app with throwaway data.
