@@ -1,0 +1,64 @@
+== M-hash: the archive hash check removed
+   changed: if printf '%s  %s\n' "$EXPECTED_SHA256" "$ARCHIVE" | sha256sum --check --strict --quiet \
+   to:      if true \
+   harness: exit 3; artifact gate fixtures: 39 passed, 3 failed
+     FAIL the extracted block uses sha256sum --check --strict
+     FAIL G2/G3 nothing is unpacked when the checksum fails
+     FAIL G8 only the archive hash stops it: STOP, nothing unpacked, no marker, no sentinel, no switch
+   CAUGHT: G8 failed, as it should
+
+== M-marker: the stale-marker clear removed
+   changed: rm -f "$MARK"
+if printf
+   to:      if printf
+   harness: exit 1; artifact gate fixtures: 41 passed, 1 failed
+     FAIL G6 the stale marker is cleared first; no sentinel, no switch
+   CAUGHT: G6 failed, as it should
+
+== M-stopgate: step 2 stops the server without the verified marker
+   changed: if [ -f "$MARK" ]; then systemctl stop christmas-game-night; else
+   to:      if true; then systemctl stop christmas-game-night; else
+   harness: exit 6; artifact gate fixtures: 36 passed, 6 failed
+     FAIL G2 reaches no sentinel (no stop, backup or start) — 1 sentinel(s)
+     FAIL G3 reaches no sentinel (no stop, backup or start) — 1 sentinel(s)
+     FAIL G4 reaches no sentinel (no stop, backup or start) — 1 sentinel(s)
+     FAIL G5 reaches no sentinel (no stop, backup or start) — 1 sentinel(s)
+     FAIL G6 the stale marker is cleared first; no sentinel, no switch
+     FAIL G8 only the archive hash stops it: STOP, nothing unpacked, no marker, no sentinel, no switch
+   CAUGHT: G2 failed, as it should
+
+== M-backup: step 4 switches without this run's backup
+   changed: if [ -f "$MARK" ] && [ -n "$BACKUP_OK" ]; then ln -sfn
+   to:      if [ -f "$MARK" ]; then ln -sfn
+   harness: exit 1; artifact gate fixtures: 41 passed, 1 failed
+     FAIL G7 no backup: no switch, no start sentinel
+   CAUGHT: G7 failed, as it should
+
+== M-link: the first install links without the verified marker
+   changed: if [ -f "$MARK" ]; then ln -sfn "$REL" "$OPT/current"; else
+   to:      if true; then ln -sfn "$REL" "$OPT/current"; else
+   harness: exit 6; artifact gate fixtures: 36 passed, 6 failed
+     FAIL F1 first install, correct archive: VERIFIED and current linked
+     FAIL F1 the unit now names the throwaway folder, and the start sentinel is reached
+     FAIL F1 only the throwaway data folder is created and checked
+     FAIL F2 prints STOP at the gate and at the link
+     FAIL F3 prints STOP at the gate and at the link
+     FAIL F4 no start without the unit naming the throwaway folder
+   CAUGHT: F2 failed, as it should
+
+== M-unitgate: the first install starts without checking the unit's ReadWritePaths=
+   changed: if [ -f "$MARK" ] && grep -qx "ReadWritePaths=$DATA" /etc/systemd/system/christmas-game-night.service
+   to:      if [ -f "$MARK" ]
+   harness: exit 1; artifact gate fixtures: 41 passed, 1 failed
+     FAIL F4 no start without the unit naming the throwaway folder
+   CAUGHT: F4 failed, as it should
+
+== M-switchgate: the switch starts without checking the settings
+   changed: if grep -qx "MCHEZO_DATA_DIR=$DATA" /etc/christmas-game-night/env \
+   to:      if true \
+   harness: exit 1; artifact gate fixtures: 41 passed, 1 failed
+     FAIL W2 no start (and so no invitations) while the settings name the throwaway folder
+   CAUGHT: W2 failed, as it should
+
+mutations: 7 caught, 0 not caught
+ALL MUTATIONS CAUGHT

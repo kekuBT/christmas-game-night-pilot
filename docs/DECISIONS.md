@@ -2282,3 +2282,30 @@ Handoff 6813167965 (with the Stage 9.2 clearance). Spec: `docs/stage9/stage93.md
 - **D-BR3-03 The draft go/no-go record fills only evidenced fields.** Everything that needs the host, a phone or the owner is PENDING, and the default is NO-GO.
   - **Enforced by** `check-r3-record.mjs`, which fails on a fabricated result, a disagreeing hash or a filled host field.
 - **D-BR3-04 The route decision needs six owner facts (F1–F6), not another survey.** ChatGPT recommends once they are known, and the owner chooses.
+- **D-BR3-05 One order of execution, and routes available only within this handoff** (review 6909578563; the runbook's "The order of execution").
+  - **The stages:**
+    - 0: read-only preflight R1–R8;
+    - Approval 1;
+    - 1: isolated staging;
+    - 2: route checks V1–V3;
+    - 3: host and device checks;
+    - 4: go/no-go, then Approval 2, then the switch and invitations.
+  - **The rules:** each stage starts only when the one before it is recorded, and any failure is a no-go. The checks that need the running isolated preview are named per stage and stay PENDING until observed there.
+  - **Routes:** H1 (LAN only) is the only route available under this handoff. H2–H4 need public exposure, new provisioning or possibly spending, so they are recorded as unavailable; making one available needs a separate, explicit owner decision. Approval 1 allows no public port or public exposure: the earlier "a public port beyond the chosen route" wording is gone.
+  - **Alternative rejected:** keeping H2–H4 selectable with a warning. The handoff excludes exposure, provisioning and spending, and an option the operator may not take shouldn't look like one.
+- **D-BR3-06 The archive checksum is a command precondition** (the runbook's "Promoting it", step 1).
+  - **The gate:** `sha256sum --check --strict` against the full pinned SHA-256 is the first link of one `&&` chain: unpack, `release.json`'s revision, the inventory digest, `npm ci`, then exactly `ws` and `zod`.
+  - **The marker:** only a complete chain writes `verified-<sha>`, outside the release folder so the inventory is unaffected. Any failure prints `STOP` and leaves no marker, and a stale marker is removed first.
+  - **What the marker gates:** stopping the server, the backup, the switch (which also needs this run's backup), and the first install's link and start.
+  - **Proved by** `docs/evidence/beta-r3-gate/`:
+    - **fixtures from the runbook's own blocks:** a correct archive reaches the sentinels; a wrong, missing, wrong-revision, extra-file or repacked archive never does.
+    - **mutation runs:** each guard removed in a copy of the runbook makes its own case fail.
+  - **Rebuilds stay distinct:** a rebuild has the same inventory but a different hash, so the gate refuses it (fixture G8).
+  - **Alternative rejected:** a separate "compare the printed hash by eye" step. It doesn't stop the commands after it.
+- **D-BR3-07 The isolated install uses its own data folder, end to end** (found by tracing the new order; review 6909578563 item 1).
+  - **First install** now runs from one `DATA=/var/lib/cgn-validation`. Before, its commands created and checked the real folder, and the unit's `ReadWritePaths=` named only the real folder, so a service pointed at the throwaway folder couldn't write under `ProtectSystem=strict`.
+  - **The unit** isn't in the package. The operator writes it from the architecture page, sets `ReadWritePaths=` to `$DATA`, and the start is gated on that line.
+  - **`MCHEZO_TRUST_PROXY`** is left out until V2 counts the proxies on the running preview.
+  - **Approval 1** names the host software Stage 0 may find missing: Node 22, and for H1, Caddy with the DNS module.
+  - **The Stage 4 switch** is one gated block. It starts only when the settings and the unit both name the new, empty real folder.
+  - **Alternative rejected:** a systemd drop-in for the data path. It is one more file to keep in step, and the gate checks the unit line directly.

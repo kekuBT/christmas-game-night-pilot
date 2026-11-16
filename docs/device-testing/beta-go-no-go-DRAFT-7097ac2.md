@@ -20,10 +20,13 @@
 | Inventory digest, seen **on the host** | **PENDING:** no host yet | H1 |
 | Archive SHA-256, seen **on the host** | **PENDING** | H1 |
 | `/health` **on the host** after the start | **PENDING:** no host yet | H1 |
-| Node on the host (`node -v`) | **PENDING** | preflight P2 |
-| Host route chosen (H1–H4) and its name | **PENDING:** the owner's facts (runbook "Deciding the route"), then ChatGPT's recommendation and the owner's choice | — |
-| Preflight P1–P9 completed on (date), by | **PENDING** | — |
-| `MCHEZO_TRUST_PROXY` value and how it was counted | **PENDING:** the route proof's measured count | runbook step 3 |
+| Node on the host (`node -v`) | **PENDING** | read-only check R2 |
+| Host route chosen (H1–H4) and its name | **PENDING:** the owner's facts (runbook "Deciding the route"), then ChatGPT's recommendation and the owner's choice. Only H1 is available under the current handoff. H2–H4 are unavailable: they need exposure, provisioning or spending. | runbook "The order of execution" |
+| Read-only preflight R1–R8 completed on (date), by | **PENDING** | Stage 0 |
+| Approval 1 (private validation of the pinned artifact on the selected route) | **PENDING** | — |
+| Isolated staging: the artifact gate printed `VERIFIED` (with throwaway data and code) | **PENDING:** needs the host | Stage 1 |
+| Route checks V1–V3 (TLS, proxy count, WebSockets) | **PENDING:** needs the running isolated preview | Stage 2 |
+| `MCHEZO_TRUST_PROXY` value and how it was counted | **PENDING:** V2's measured count, on the running isolated preview | Stage 2 |
 | Backup folder name, and where the off-host copy is | **PENDING** | H3 |
 
 ## Evidence so far (none of it replaces a row below)
@@ -41,6 +44,8 @@
 | TV or laptop | PENDING | PENDING | PENDING | PENDING |
 
 ## The checks
+**All of these need the running isolated preview** (Stage 3) and stay PENDING until observed there.
+
 | # | iPhone | Android | TV | Note |
 |---|---|---|---|---|
 | P1 gate | PENDING | PENDING | — | |

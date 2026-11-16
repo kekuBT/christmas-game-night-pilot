@@ -1,0 +1,44 @@
+#!/bin/bash
+# Beta R3 (review 6909578563): the fixture harness's own negative runs. Each mutation disables ONE guard in a copy of
+# the runbook; the harness must then fail, and fail in the case that guard exists for. Nothing else is changed.
+#   bash gate-mutations.sh <repo root> <gate-fixtures.sh>
+set -uo pipefail
+REPO=$1; HARNESS=$2
+M=$(mktemp -d); trap 'rm -rf "$M"' EXIT
+echo "== mutating copies of: $REPO — commit $(git -C "$REPO" rev-parse HEAD), $(git -C "$REPO" status --porcelain | wc -l) uncommitted path(s)"
+CAUGHT=0; MISSED=0
+mut() { # $1 name, $2 what it disables, $3 the case that must fail, $4 old text, $5 new text
+  local d="$M/$1"; mkdir -p "$d/docs/beta"
+  cp "$REPO/docs/beta/beta-r1-release.md" "$REPO/docs/beta/beta-r1-architecture.md" "$d/docs/beta/"
+  python3 -c "
+import sys; p=sys.argv[1]; s=open(p).read(); o=sys.argv[2]; n=sys.argv[3]
+assert s.count(o)==1, 'mutation target not found exactly once: '+o
+open(p,'w').write(s.replace(o,n))" "$d/docs/beta/beta-r1-release.md" "$4" "$5" || { echo "== M-$1: TARGET NOT FOUND"; MISSED=$((MISSED+1)); return; }
+  local out rc; out=$(bash "$HARNESS" "$REPO" "$d" 2>&1); rc=$?
+  echo "== M-$1: $2"
+  echo "   changed: $4" | head -3
+  echo "   to:      $5" | head -3
+  echo "   harness: exit $rc; $(echo "$out" | grep -E '^artifact gate fixtures:')"
+  echo "$out" | grep '^FAIL' | cut -c1-140 | sed 's/^/     /'
+  if [ "$rc" -ne 0 ] && echo "$out" | grep -q "^FAIL $3"; then echo "   CAUGHT: $3 failed, as it should"; CAUGHT=$((CAUGHT+1))
+  else echo "   NOT CAUGHT: expected a FAIL in $3"; MISSED=$((MISSED+1)); fi
+  echo
+}
+mut hash "the archive hash check removed" G8 \
+  "if printf '%s  %s\n' \"\$EXPECTED_SHA256\" \"\$ARCHIVE\" | sha256sum --check --strict --quiet \\" "if true \\"
+mut marker "the stale-marker clear removed" G6 \
+  'rm -f "$MARK"
+if printf' 'if printf'
+mut stopgate "step 2 stops the server without the verified marker" G2 \
+  'if [ -f "$MARK" ]; then systemctl stop christmas-game-night; else' 'if true; then systemctl stop christmas-game-night; else'
+mut backup "step 4 switches without this run's backup" G7 \
+  'if [ -f "$MARK" ] && [ -n "$BACKUP_OK" ]; then ln -sfn' 'if [ -f "$MARK" ]; then ln -sfn'
+mut link "the first install links without the verified marker" F2 \
+  'if [ -f "$MARK" ]; then ln -sfn "$REL" "$OPT/current"; else' 'if true; then ln -sfn "$REL" "$OPT/current"; else'
+mut unitgate "the first install starts without checking the unit's ReadWritePaths=" F4 \
+  'if [ -f "$MARK" ] && grep -qx "ReadWritePaths=$DATA" /etc/systemd/system/christmas-game-night.service' 'if [ -f "$MARK" ]'
+mut switchgate "the switch starts without checking the settings" W2 \
+  'if grep -qx "MCHEZO_DATA_DIR=$DATA" /etc/christmas-game-night/env \' 'if true \'
+echo "mutations: $CAUGHT caught, $MISSED not caught"
+[ "$MISSED" = 0 ] && echo "ALL MUTATIONS CAUGHT" || echo "SOME MUTATIONS NOT CAUGHT"
+exit "$MISSED"

@@ -61,36 +61,106 @@
 - **Remote players, and a domain already on Cloudflare → H2.** Cloudflare then sees the decrypted traffic: the owner accepts that, or chooses H1 or H3.
 - **No domain → H3,** the only no-domain $0 route found. It holds only after Tailscale's terms, limits and WebSocket behaviour are confirmed on tailscale.com and one test room is proved over it (below).
 - **H4** fits only if such a VM already exists. It is then the closest to the architecture page.
+- **Under the current handoff, only H1 can go to Approval 1** (review 6909578563). H2–H4 need public exposure, new provisioning or possibly spending, so they are recorded as **unavailable**. See "The order of execution" below. Making one of them available would take a separate, explicit owner decision, which this runbook doesn't give.
 
-### The preflight checklist (before the first install)
-Each line is observable before anything is installed. **Who:** the owner, or the person they name, on the candidate host or account; ChatGPT reviews the record.
+### The order of execution (Beta R3; review 6909578563)
+**One sequence.** Each stage starts only when every step of the one before it is recorded, and any failure stops it: record a no-go and use "Rolling back" (or, on a first install, "When there is no previous package"). The go/no-go record ([draft for `7097ac2`](../device-testing/beta-go-no-go-DRAFT-7097ac2.md)) collects the evidence.
 
-| # | Check | How to observe it | Pass when |
+| Stage | What happens | Changes the host? | Starts only after | Checks that need the running isolated preview |
+|---|---|---|---|---|
+| **0. Read-only preflight** | R1–R8 below: observing and reading only | **No** | The route is selected for a route available under this handoff (below) | none |
+| **Approval 1** | The owner explicitly approves private validation on the selected route | — | Stage 0 recorded | — |
+| **1. Isolated staging** | The checksum-gated unpack of the pinned archive. A first install with a **throwaway** data folder and a **throwaway** access code. | **Yes**, privately | Approval 1 | — |
+| **2. Route checks** | V1–V3 below: TLS, WebSockets, the proxy count | Configuration only | Stage 1 | **V1, V2, V3** |
+| **3. Host and device checks** | H1–H6 and P1–P8 ([REAL_DEVICE_TESTING.md §7](../REAL_DEVICE_TESTING.md#7-beta-launch-checks-real-phones-and-the-host-beta-r2)) | Restarts, backups, a restore drill | Stage 2 | **H1–H6, P1–P8** |
+| **4. Go/no-go, then Approval 2** | The completed record, the owner's sign-off, ChatGPT's review. Then the switch to the real data folder and code, and only then invitations. | **Yes** | Stage 3 recorded, no blocker | the final `/health` and one P1 |
+
+**Every check in the last column stays PENDING until it is observed on the running isolated preview.** Neither the local rehearsal nor the private Firefox audit counts as observing it.
+
+**Routes available under this handoff:** none may need new public exposure, new provisioning or spending.
+
+| Route | Needs public exposure? | Needs new provisioning? | Needs spending? | Under this handoff |
+|---|---|---|---|---|
+| H1, LAN only | No: reachable only on the home Wi-Fi | Only configuration of what the owner already has: a DNS record and a narrowly scoped DNS token on the existing domain, plus a Caddy build with that DNS module | No, if the domain is already owned | **Available,** with that configuration named in Approval 1 |
+| H2, Cloudflare named Tunnel | **Yes:** a public hostname on the internet | **Yes:** a tunnel, and possibly an account or moving the domain's DNS | Possibly | **Unavailable**: needs a separate explicit owner decision |
+| H3, Tailscale Funnel | **Yes:** a public `*.ts.net` address | **Yes:** tailnet HTTPS, the Funnel attribute, possibly an account | Unknown (terms unread) | **Unavailable**: needs a separate explicit owner decision |
+| H4, an existing $0 VM | **Yes:** ports 80 and 443 open to the internet | Firewall and DNS changes | Account-dependent | **Unavailable**: needs a separate explicit owner decision |
+
+#### Stage 0: the read-only preflight
+Observing and reading only: nothing is installed, configured, opened, created or bought.
+- **Who:** the owner, or the person they name (F6), on the candidate host and their own accounts.
+- **Where the results go:** the go/no-go record.
+
+| # | Check | How to observe it (read-only) | Pass when |
 |---|---|---|---|
-| P1 | Linux, always on | `uname -s`; the machine's sleep and power settings | `Linux`; no sleep during game nights |
-| P2 | Node 22 where the unit expects it | `command -v node; node -v` | `/usr/bin/node`, `v22.x` (or edit the unit's `ExecStart=` to the real path) |
-| P3 | Free disk for data and backups | `df -h /var/lib /var/backups` | At least 1 GB free on each |
-| P4 | An off-host copy for backups | The owner names the private place (an external drive, or private storage they already use) | Named, and not in git, a release folder or anything served |
-| P5 | The name and the certificate | H1/H4: `dig +short <name>` from a phone's network; H2: the domain listed in the Cloudflare account; H3: HTTPS and Funnel enabled in the tailnet | The name resolves to the right place; the certificate is publicly trusted (no warning on a phone) |
-| P6 | The terms, for H2–H4 | The provider's own pricing and terms pages, and the account's billing page | $0 at the expected use, no card added, and the limits and retention written into the go/no-go record |
-| P7 | No inbound port opened by mistake | The router's port-forwarding list (H1–H3) or the VM's firewall (H4) | H1–H3: none; H4: 80 and 443 only, plus SSH by key |
-| P8 | The proxy count, for `MCHEZO_TRUST_PROXY` | Below, step 3 | Counted, or the setting left unset |
-| P9 | The access code | Generated as on the architecture page, stored only in the env file | At least 12 characters, never in GitHub |
+| R1 | Linux, always on | `uname -s`; the machine's sleep and power settings | `Linux`; no sleep during game nights |
+| R2 | Node 22 where the unit expects it | `command -v node; node -v` | `/usr/bin/node`, `v22.x`.<br>If it is missing or another version, installing Node is a host change: it waits for Stage 1, from the OS's or nodejs.org's own packages, at $0. |
+| R3 | Free disk for data and backups | `df -h /var/lib /var/backups` | At least 1 GB free on each |
+| R4 | A private backup destination | The owner names it (F5): an external drive or private storage they already use | Named, and not in git, a release folder or anything served |
+| R5 | $0 eligibility | The owner reads their own account, billing and terms pages for everything the route uses (H1: the domain's renewal and its DNS provider's API tokens) | Nothing new to buy, no new account, trial or card, and nothing past a free limit |
+| R6 | Network constraints | The router's port-forwarding list, and the host's firewall (`sudo nft list ruleset` or `sudo iptables -S`, read only) | Nothing forwarded to the host from outside, and the route needs no inbound port |
+| R7 | The name and who will create its record | The planned hostname under the owner's domain; `dig +short <name>` shows whether it exists yet | Written down. Creating or changing the record is configuration, done in Stage 1 under Approval 1. |
+| R8 | The operator | Who runs Stages 1–4 with shell access (F6) | Named |
 
-**Then prove the route once, before the beta's data exists:**
-1. **Install the package on a throwaway data folder** and a throwaway access code, with the steps in "First install".
-2. **Check `/health`:** `curl -s https://<name>/health` gives `{"ok":true,"revision":"7097ac2…"}`.
-3. **Count the proxies.** The server takes the client's address from the X-Forwarded-For entry `MCHEZO_TRUST_PROXY` places from the end (`src/server/access.ts`), so the value must be the number of proxies that append to it.
-   1. Stop the service, and run `nc -l 127.0.0.1 3000` in its place: it prints each request exactly as the route delivers it.
-   2. From another computer, send a fake entry first: `curl -H 'X-Forwarded-For: 203.0.113.7' https://<name>/proxy-count-test`. Use one off the home network for H2–H4, or on the home Wi-Fi for H1.
-   3. Read the `X-Forwarded-For` line `nc` prints, then stop `nc` with Ctrl-C and start the service again. The curl gets an error; that is expected.
-   - **The reading:** ignore `203.0.113.7` if it is still there. A proxy that refuses client-sent values drops it: Caddy does by default, and Caddy 2.6.2 did here (`docs/evidence/beta-r2-preflight/xff-caddy-2.6.2.out.txt`).
-     - The **remaining entries** are the ones the route's proxies wrote.
-     - **The first of them** should be the curl computer's own address.
-   - **The setting:** `MCHEZO_TRUST_PROXY` is the number of those entries, if it is 1 to 3. For example, `<curl's address>` alone, or `203.0.113.7, <curl's address>`, means `1`.
-   - **If the first appended entry isn't the curl computer's address, or there are none,** leave the setting unset and record why. The per-device limits then count everyone together, which is safe.
-4. **On one phone off the home network** (H2–H4) or on the home Wi-Fi (H1): enter the code, create a room, and watch a second phone join live. That proves WebSockets over the real route.
-5. **Stop, remove the throwaway folder and code,** and start the real first install.
+#### Stage 1: isolated staging (after Approval 1)
+1. **Host software, only what Stage 0 found missing and Approval 1 names,** at $0 and from official packages:
+   - Node 22 (R2);
+   - for H1, Caddy built with the DNS provider's module, its narrowly scoped DNS token in a private file, and the DNS record from R7.
+
+   Nothing beyond that.
+2. **"First install", steps 0–5, as written.** It uses:
+   - the throwaway data folder `DATA=/var/lib/cgn-validation`, never the beta's;
+   - a throwaway `MCHEZO_BETA_ACCESS_CODE` that nobody in the family will be given;
+   - no `MCHEZO_TRUST_PROXY` until V2.
+
+   Its step 3 is the artifact gate ("Promoting it", step 1): it must print `VERIFIED`. On `STOP`, stop and record a no-go.
+3. **The proxy in front** (for H1, Caddy as in the architecture page's example, with the DNS challenge). It is then the running isolated preview.
+
+#### Stage 2: the route checks (on the running isolated preview)
+| # | Check | Pass when |
+|---|---|---|
+| V1 | **TLS:** `curl -s https://<name>/health` from a device on the route, and the same address on a phone | `{"ok":true,"revision":"7097ac2bb062925bb296a129f4771f1e68fd522d"}`, with no certificate warning |
+| V2 | **The proxy count** (below) | Counted, or `MCHEZO_TRUST_PROXY` left unset with the reason recorded |
+| V3 | **WebSockets:** on a phone on the route, enter the throwaway code and create a room, then a second phone joins | The second phone appears live, without a reload |
+
+**Counting the proxies (V2).** The server takes the client's address from the X-Forwarded-For entry `MCHEZO_TRUST_PROXY` places from the end (`src/server/access.ts`), so the value must be the number of proxies that append to it.
+1. Stop the service, and run `nc -l 127.0.0.1 3000` in its place: it prints each request exactly as the route delivers it.
+2. From another computer on the route, send a fake entry first: `curl -H 'X-Forwarded-For: 203.0.113.7' https://<name>/proxy-count-test`.
+3. Read the `X-Forwarded-For` line `nc` prints, then stop `nc` with Ctrl-C and start the service again. The curl gets an error; that is expected.
+
+- **The reading:** ignore `203.0.113.7` if it is still there. A proxy that refuses client-sent values drops it: Caddy does by default, and Caddy 2.6.2 did here (`docs/evidence/beta-r2-preflight/xff-caddy-2.6.2.out.txt`).
+  - The **remaining entries** are the ones the route's proxies wrote.
+  - **The first of them** should be the curl computer's own address.
+- **The setting:** `MCHEZO_TRUST_PROXY` is the number of those entries, if it is 1 to 3. For example, `<curl's address>` alone, or `203.0.113.7, <curl's address>`, means `1`.
+- **If the first appended entry isn't the curl computer's address, or there are none,** leave the setting unset and record why. The per-device limits then count everyone together, which is safe.
+- **Then:** write the value (or nothing) to the settings file, restart the service, and run V1 again.
+
+#### Stage 3: the host and device checks (on the running isolated preview)
+- **What runs:** H1–H6 and P1–P8 from [REAL_DEVICE_TESTING.md §7](../REAL_DEVICE_TESTING.md#7-beta-launch-checks-real-phones-and-the-host-beta-r2).
+- **Where:** against the isolated install from Stage 1, with the owner's own testers, recorded in the go/no-go record.
+- **The rooms played** live only in the throwaway data folder.
+
+#### Stage 4: go/no-go, Approval 2, then the switch
+1. **Complete the go/no-go record** with no blocker. Then the owner's sign-off and ChatGPT's review: that is Approval 2.
+2. **After Approval 2 only,** switch to a new, empty data folder and the real code:
+
+   ```
+   # >>> switch (begin)
+   systemctl stop christmas-game-night
+   DATA=/var/lib/christmas-game-night
+   install -d -m 0700 -o cgn -g cgn "$DATA"          # new and empty: the validation rooms stay behind
+   # edit /etc/christmas-game-night/env: MCHEZO_DATA_DIR=<$DATA> and the real MCHEZO_BETA_ACCESS_CODE
+   sed -i "s#^ReadWritePaths=.*#ReadWritePaths=$DATA#" /etc/systemd/system/christmas-game-night.service
+   systemctl daemon-reload
+   if grep -qx "MCHEZO_DATA_DIR=$DATA" /etc/christmas-game-night/env \
+      && grep -qx "ReadWritePaths=$DATA" /etc/systemd/system/christmas-game-night.service
+   then systemctl start christmas-game-night
+   else echo "STOP: the settings or the unit don't name $DATA. Don't start or invite."; fi
+   # <<< switch (end)
+   ```
+
+   Then check `/health` and P1 on one phone. Remove the throwaway folder (`rm -r /var/lib/cgn-validation`) once nothing in it is needed.
+3. **Then invite the family.**
 
 **Run as a drill here:** this machine played the runbook with the real package, a real service user and Caddy 2.6.2 in front. It used a local CA, because a public certificate can't be had from here: `docs/evidence/beta-r2-preflight/`. Not run here: a real host, a public certificate, systemd as PID 1, any of the four routes, and real phones.
 
@@ -109,7 +179,7 @@ Each line is observable before anything is installed. **Who:** the owner, or the
 | F2 | **Is there an always-on Linux machine** the owner already has and may use (at home), or an already-authorized $0 VM? Which, and what Node version can it run? | H1–H3 need the home machine; H4 needs the VM. Production refuses non-Linux. |
 | F3 | **Is a domain already owned?** If so, which DNS provider runs it (Cloudflare, or another with an API)? | H1 needs the DNS API for a public certificate; H2 needs the domain on Cloudflare. With no domain, H3. |
 | F4 | **Is a third party in the path acceptable?** Cloudflare (H2) handles the decrypted traffic. | Whether H2 stays an option |
-| F5 | **Where does the off-host backup copy go?** A private place the owner already has (an external drive, private storage). | Preflight P4 and host check H3 |
+| F5 | **Where does the off-host backup copy go?** A private place the owner already has (an external drive, private storage). | Read-only check R4 and host check H3 |
 | F6 | **Who runs the host steps,** with shell access? | The runbook's operator, and §7's host checks |
 
 **Already verified:** these don't need the owner.
@@ -121,7 +191,7 @@ Each line is observable before anything is installed. **Who:** the owner, or the
 - **Caddy, Let's Encrypt and Cloudflare facts:** from official docs at pinned commits (above).
 - **Tailscale's Funnel prerequisites:** HTTPS on the tailnet and the `funnel` node attribute, from its source code.
 
-**Unknown until checked on the owner's own accounts and pages** (preflight P5–P7):
+**Unknown until checked on the owner's own accounts and pages** (read-only checks R5–R7):
 - Tailscale's plan terms, Funnel's limits and WebSocket behaviour;
 - Cloudflare's plan terms and retention;
 - a VM account's allowance, idle rules and billing;
@@ -135,10 +205,10 @@ Execution has two separate boundaries. Each needs the owner's own explicit appro
 
 | | **Approval 1: private target-host validation** | **Approval 2: invitations and go** |
 |---|---|---|
-| **When** | After the route is chosen (F1–F6, ChatGPT's recommendation, the owner's choice) | After every row of the go/no-go record has evidence |
-| **What it allows** | **On the chosen host, privately:** installing the pinned artifact (SHA-256 `a693c543…3a5131`, release record [release-7097ac2.md](release-7097ac2.md)) with the steps on this page. Then the preflight P1–P9, the route proof, host checks H1–H6, and phone checks P1–P8 with the owner's own testers. | **Inviting the family** to the beta at that address |
-| **What it doesn't allow** | Inviting anyone; a different artifact; a public port beyond the chosen route; any new account, trial or spending without its own approval | Changing the artifact. Any new release needs both approvals again. |
-| **Evidence it needs** | The route decision, recorded | The completed go/no-go record ([draft](../device-testing/beta-go-no-go-DRAFT-7097ac2.md); [template](../device-testing/BETA_GO_NO_GO_TEMPLATE.md)), with no blocker. Then the owner's sign-off and ChatGPT's review. |
+| **When** | After a route **available under this handoff** is selected (F1–F6, ChatGPT's recommendation, the owner's choice) and the read-only preflight R1–R8 is recorded | After every row of the go/no-go record has evidence |
+| **What it allows** | **On the selected host, privately, in this order** ("The order of execution"):<br>• Stage 1: only the host software Stage 0 found missing (Node 22; for H1, Caddy with the DNS module), from official packages at $0; the checksum-gated install of the pinned artifact (SHA-256 `a693c543…3a5131`, release record [release-7097ac2.md](release-7097ac2.md)) with throwaway data and a throwaway code; any H1 DNS configuration it names;<br>• Stage 2: route checks V1–V3;<br>• Stage 3: host checks H1–H6 and phone checks P1–P8, with the owner's own testers. | **Stage 4:** switching to the real data folder and access code, and **inviting the family** to the beta at that address |
+| **What it doesn't allow** | Inviting anyone; a different artifact; **any public port or public exposure**; any route that needs exposure, provisioning or spending (H2–H4 are unavailable under this handoff); any new account, trial or spending | Changing the artifact. Any new release needs both approvals again. |
+| **Evidence it needs** | The route decision and the read-only preflight, recorded | The completed go/no-go record ([draft](../device-testing/beta-go-no-go-DRAFT-7097ac2.md); [template](../device-testing/BETA_GO_NO_GO_TEMPLATE.md)), with no blocker. Then the owner's sign-off and ChatGPT's review. |
 | **If something fails** | Stop. Keep the data and use the stop steps: "Rolling back", including "When there is no previous package". Record it as no-go. | §7.3's no-go triggers ([REAL_DEVICE_TESTING.md](../REAL_DEVICE_TESTING.md#73-go-or-no-go)), and "Rolling back" |
 
 **Not evidence for either approval:** the local rehearsal and the private Firefox audit. They are listed in the draft record as earlier evidence, not as host or device checks.
@@ -189,29 +259,43 @@ sha256sum ../cgn-<sha>.inventory.sha256          # the inventory digest: record 
 
 ## First install (no previous package)
 
-On a host that has never run the game. As root (or with `sudo`), between sessions, once the owner has approved the revision. The service and its settings are in `docs/beta/beta-r1-architecture.md`.
+On a host that has never run the game. As root (or with `sudo`), between sessions.
+- **When:** in Stage 1 of "The order of execution", after the read-only preflight and the owner's Approval 1, with the throwaway data folder and code that Stage 1 names.
+- **Where the service and its settings are:** `docs/beta/beta-r1-architecture.md`.
 
 ```
+# >>> first install (begin)
+# 0. This install's data folder. Stage 1 uses the THROWAWAY one; only Stage 4, after Approval 2, switches to
+#    /var/lib/christmas-game-night.
+DATA=/var/lib/cgn-validation
+
 # 1. The service user and its folders: the data belongs to it, the backups to root, both private
 useradd --system --no-create-home --shell /usr/sbin/nologin --user-group cgn
-install -d -m 0700 -o cgn -g cgn /var/lib/christmas-game-night
+install -d -m 0700 -o cgn -g cgn "$DATA"
 install -d -m 0700 /var/backups/christmas-game-night
 install -d -m 0755 /opt/christmas-game-night/releases
 
 # 2. The settings: readable by root and the service only (they hold the access code)
 install -d -m 0750 -g cgn /etc/christmas-game-night
-install -m 0640 -g cgn /dev/null /etc/christmas-game-night/env    # then edit: NODE_ENV=production, MCHEZO_DATA_DIR,
-                                                                  # MCHEZO_PUBLIC_ORIGIN, MCHEZO_BETA_ACCESS_CODE,
-                                                                  # MCHEZO_TRUST_PROXY=1, MCHEZO_LISTEN_HOST=127.0.0.1, PORT
+install -m 0640 -g cgn /dev/null /etc/christmas-game-night/env    # then edit: NODE_ENV=production, MCHEZO_DATA_DIR=<$DATA>,
+                                                                  # MCHEZO_PUBLIC_ORIGIN, the THROWAWAY MCHEZO_BETA_ACCESS_CODE,
+                                                                  # MCHEZO_LISTEN_HOST=127.0.0.1, PORT. Leave MCHEZO_TRUST_PROXY
+                                                                  # out: Stage 2's V2 counts it.
 
-# 3. The package: as in "Promoting it", step 1 (hash, unpack, npm ci --omit=dev), then
-ln -sfn /opt/christmas-game-night/releases/<sha> /opt/christmas-game-night/current
+# 3. The package: run only "Promoting it", step 1 (the artifact gate), in this shell. It must print VERIFIED.
+#    If it printed STOP, stop here. Then link it, only with the verified marker:
+if [ -f "$MARK" ]; then ln -sfn "$REL" "$OPT/current"; else echo "STOP: not verified. Don't link or start."; fi
 
-# 4. Check the (empty) data folder as the service user, then the unit, then start
-cd /opt/christmas-game-night/current
-sudo -u cgn node dist/server/datatool.js check --data /var/lib/christmas-game-night   # "check OK: 0 room(s) ..."
-install -m 0644 christmas-game-night.service /etc/systemd/system/   # the unit from the architecture page
-systemctl daemon-reload && systemctl enable --now christmas-game-night
+# 4. Check the (empty) data folder as the service user, then the unit, then start.
+#    The unit isn't in the package: write the architecture page's unit to /etc/systemd/system/christmas-game-night.service
+#    (mode 0644). Its ReadWritePaths= must name this install's data folder, or the service can't write there:
+cd /opt/christmas-game-night/current && sudo -u cgn node dist/server/datatool.js check --data "$DATA"   # "check OK: 0 room(s) ..."
+sed -i "s#^ReadWritePaths=.*#ReadWritePaths=$DATA#" /etc/systemd/system/christmas-game-night.service
+systemctl daemon-reload
+if [ -f "$MARK" ] && grep -qx "ReadWritePaths=$DATA" /etc/systemd/system/christmas-game-night.service
+then systemctl enable --now christmas-game-night
+else echo "STOP: not verified, or the unit doesn't name $DATA. Don't start."; fi
+# <<< first install (end)
 
 # 5. Check, as after any promotion
 curl -s https://<host>/health                    # {"ok":true,"revision":"<sha>"}
@@ -226,34 +310,60 @@ journalctl -u christmas-game-night -n 20         # "Christmas Game Night server 
 
 ## Promoting it (on the host, between sessions)
 
-```
-# 1. Unpack and install it (root owns the release folder; the service only reads it)
-sha256sum cgn-<sha>.tgz                          # must match the recorded hash
-mkdir /opt/christmas-game-night/releases/<sha> && tar -xzf cgn-<sha>.tgz -C /opt/christmas-game-night/releases/<sha>
-cd /opt/christmas-game-night/releases/<sha>
-cat release.json                                 # "revision": "<sha>", no "-dirty"
-LC_ALL=C find . -type f ! -path ./release.json ! -path './node_modules/*' -print0 | LC_ALL=C sort -z | xargs -0 sha256sum | sha256sum
-                                                 # the release record's inventory digest (for 7097ac2: release-7097ac2.md)
-npm ci --omit=dev --ignore-scripts               # installs ws and zod only
-npm ls --omit=dev --depth=0                      # ws and zod, nothing else
+**The artifact gate** (review 6909578563).
+- **Where the values come from:** the release record for the revision (for `7097ac2`: [release-7097ac2.md](release-7097ac2.md)). That means the audited archive's full SHA-256 and its inventory digest, never a rebuild's.
+- **What the gate does:** every later command runs only if the one before it passed. A wrong or missing archive, a wrong revision, a wrong inventory or unexpected packages print `STOP` and leave no "verified" marker.
+- **What the marker controls:** steps 2–4 refuse to stop, back up or switch without it. Step 4 also requires this run's backup to have succeeded.
+- **The demonstration:** this block, extracted from this page, was run against disposable test files (`docs/evidence/beta-r3-gate/`).
+- **Run it in one shell, as root,** with the audited archive copied to the host unchanged.
 
-# 2. Maintenance: stop the server (it saves, closes the sockets and frees its lock)
-systemctl stop christmas-game-night
+```
+# >>> promote (begin)
+# 1. Verify, then unpack and install: each step runs only if the one before it passed.
+SHA=7097ac2bb062925bb296a129f4771f1e68fd522d
+EXPECTED_SHA256=a693c5433d8dd8c17368e9c02fd8092b316d67b6e62ac9c0070a60b99c3a5131
+EXPECTED_INVENTORY=fe6d74f8df7280a52102f70ab1d356428e810dfa614f45b53a60596d8e89a61c
+ARCHIVE=./mchezo-7097ac2.tgz
+OPT=/opt/christmas-game-night
+REL="$OPT/releases/$SHA"; MARK="$OPT/verified-$SHA"
+rm -f "$MARK"
+if printf '%s  %s\n' "$EXPECTED_SHA256" "$ARCHIVE" | sha256sum --check --strict --quiet \
+   && mkdir "$REL" \
+   && tar -xzf "$ARCHIVE" -C "$REL" \
+   && grep -q "\"revision\": \"$SHA\"" "$REL/release.json" \
+   && [ "$(cd "$REL" && LC_ALL=C find . -type f ! -path ./release.json ! -path './node_modules/*' -print0 | LC_ALL=C sort -z | xargs -0 sha256sum | sha256sum | cut -c1-64)" = "$EXPECTED_INVENTORY" ] \
+   && (cd "$REL" && npm ci --omit=dev --ignore-scripts --no-audit --no-fund) \
+   && [ "$(cd "$REL" && npm ls --omit=dev --depth=0 --parseable | tail -n +2 | xargs -n1 basename | sort | tr '\n' ' ')" = "ws zod " ]
+then touch "$MARK" && echo "VERIFIED $SHA: ready to switch"
+else echo "STOP: the archive, its revision, its inventory or its packages didn't verify. Don't switch; record a no-go."
+fi
+
+# 2. Maintenance: stop the server (it saves, closes the sockets and frees its lock). Only for a verified release.
+if [ -f "$MARK" ]; then systemctl stop christmas-game-night; else echo "STOP: not verified; the server keeps running."; fi
 
 # 3. Back up, with the server stopped, using the NEW release's tool (as root: the backup is root's, 0700/0600).
 #    The tool holds the data folder while it copies: a server started meanwhile is refused (systemd retries).
-node dist/server/datatool.js backup --data /var/lib/christmas-game-night \
-     --out /var/backups/christmas-game-night/$(date -u +%Y%m%dT%H%MZ)-before-<sha>
+BACKUP_OK=
+if [ ! -f "$MARK" ]; then echo "STOP: not verified."
+elif (cd "$REL" && node dist/server/datatool.js backup --data /var/lib/christmas-game-night \
+     --out /var/backups/christmas-game-night/$(date -u +%Y%m%dT%H%MZ)-before-$SHA); then BACKUP_OK=1
+else echo "STOP: no backup. Don't switch; 'systemctl start christmas-game-night' restarts the previous release."; fi
 
-# 4. Switch and start
-ln -sfn /opt/christmas-game-night/releases/<sha> /opt/christmas-game-night/current
-systemctl start christmas-game-night
+# 4. Switch and start: only with this release's verified marker and this run's backup.
+if [ -f "$MARK" ] && [ -n "$BACKUP_OK" ]; then ln -sfn "$REL" "$OPT/current" && systemctl start christmas-game-night
+else echo "STOP: $SHA isn't verified, or there is no backup. Don't switch."; fi
+# <<< promote (end)
 
 # 5. Check
 curl -s https://<host>/health                    # {"ok":true,"revision":"<sha>"}
 journalctl -u christmas-game-night -n 20         # "[restore] N room(s) restored, 0 not loaded"
 ```
 
+- **If any step printed `STOP`:** don't continue.
+  - **Keep** the unpacked folder, if there is one, for inspection.
+  - **Record** a no-go.
+  - **Don't** delete or overwrite the archive.
+  - **A retry** needs the folder `$REL` removed first: `mkdir` refuses an existing one, on purpose.
 - **Then one phone:** open the site, enter the code, and open an existing room.
 - **Check the restore line:** if it reports anything "NOT LOADED" or quarantined, roll back (below) before anyone plays. Quarantined files are kept in `quarantine/`, never deleted.
 
@@ -281,7 +391,8 @@ There is nothing to switch back to, and the data stays where it is.
 
 ```
 systemctl disable --now christmas-game-night     # stop it, and keep it stopped
-ls -la /var/lib/christmas-game-night             # the data is untouched: never delete it
+ls -la "$DATA"                                   # the data folder in use (Stage 1: /var/lib/cgn-validation) is
+                                                 # untouched: never delete it
 ```
 
 - **The site:** it shows the proxy's error, or the maintenance page below, until a corrected package is reviewed, approved and installed with the steps in "Promoting it".

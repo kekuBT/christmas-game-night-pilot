@@ -13,7 +13,10 @@ Copy this file to `beta-go-no-go-YYYY-MM-DD.md`, fill it in during the checks in
 | `/health` after the start | |
 | Node on the host (`node -v`) | |
 | Host route chosen (H1–H4, runbook preflight) and its name | |
-| Preflight P1–P9 completed on (date), by | |
+| Read-only preflight R1–R8 completed on (date), by (runbook Stage 0) | |
+| Approval 1, given on (date), by | |
+| Artifact gate printed `VERIFIED` on the host (Stage 1, throwaway data and code) | |
+| Route checks V1–V3 (Stage 2) | |
 | `MCHEZO_TRUST_PROXY` value and how it was counted | |
 | Backup folder name, and where the off-host copy is | |
 
