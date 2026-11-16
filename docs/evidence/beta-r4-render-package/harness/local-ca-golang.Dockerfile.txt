@@ -1,0 +1,4 @@
+# LOCAL TEST ONLY: the pinned Go image plus this sandbox's TLS-inspection CA, so builds here can reach proxy.golang.org.
+FROM public.ecr.aws/docker/library/golang:1.24.4-bookworm@sha256:10f549dc8489597aa7ed2b62008199bb96717f52a8e8434ea035d5b44368f8a6
+COPY sandbox-ca.crt /tmp/sandbox-ca.crt
+RUN cat /tmp/sandbox-ca.crt >> /etc/ssl/certs/ca-certificates.crt && rm /tmp/sandbox-ca.crt

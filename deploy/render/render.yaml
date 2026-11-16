@@ -1,0 +1,35 @@
+# CANDIDATE Render Blueprint for the approved setup (Beta R4, handoff 6919813048). NOT APPLIED. It states, field by field,
+# the configuration in README.md ("The exact Render configuration"); the dashboard route in that table is equivalent.
+# If it is used: in the NEW dedicated Hobby workspace only, with auto-sync OFF, from the private deploy repository whose
+# root is this folder plus artifact/mchezo-7097ac2.tgz. Field names are from render.com/docs/blueprint-spec, read
+# 2026-11-16 (see docs/evidence/beta-r4-render-package/render-fetch-log.txt).
+# Never put a secret here: the access code and the origin are "sync: false" (entered in the dashboard by the owner).
+services:
+  - type: web
+    name: cgn-beta                # a placeholder: the onrender.com address comes from it, so pick a neutral name
+    runtime: docker
+    plan: 0.5c-512mb              # "Starter": 0.5 CPU, 512 MB, $7/month (render.com/pricing)
+    region: virginia              # to confirm with the owner; it can't be changed after creation
+    numInstances: 1               # a service with a disk can't scale out anyway
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    # dockerCommand is left out: the image's CMD (cgn-entrypoint, exec form) must be PID 1
+    autoDeployTrigger: "off"      # manual deploys only
+    healthCheckPath: /health
+    maintenanceMode:
+      enabled: true               # public traffic refused except inside approved windows
+    disk:
+      name: cgn-data
+      mountPath: /var/data
+      sizeGB: 1                   # REQUIRED here: the Blueprint default is 10 GB
+    envVars:
+      - key: MCHEZO_DATA_DIR
+        value: /var/data/cgn-w1   # the THROWAWAY validation folder (W1-W8); the real folder only after go/no-go
+      - key: MCHEZO_TRUST_PROXY
+        value: "1"                # the starting value; W1's forgery and separation tests settle it
+      - key: MCHEZO_PUBLIC_ORIGIN
+        sync: false               # https://<the service's onrender.com name>, known once it exists
+      - key: MCHEZO_BETA_ACCESS_CODE
+        sync: false               # a THROWAWAY code for W1, typed by the owner in the dashboard; never in git or chat
+      - key: CGN_BACKUP_RECIPIENT
+        sync: false               # PENDING: the owner's age public key (not a secret); not needed for W1

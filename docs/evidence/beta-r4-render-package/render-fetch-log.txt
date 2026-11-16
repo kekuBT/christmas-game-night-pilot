@@ -1,0 +1,27 @@
+# Render pages read from this session on 2026-11-16 for the packaging step (render.com allowed by the owner's earlier environment change). Columns: HTTP status, bytes, time (UTC), first 16 hex digits of the page's SHA-256, URL. docs/workspaces returned 404 and was not used. community.render.com is not reachable from this session (refused by the sandbox's proxy) and was not used.
+200 1455666 2026-11-16T14:54:12Z e44f7eaf1be36937 https://render.com/docs/blueprint-spec
+200 383611 2026-11-16T14:54:13Z 8c843a302d987d35 https://render.com/docs/infrastructure-as-code
+200 659333 2026-11-16T14:54:13Z c4057b1fb6a57de3 https://render.com/docs/mcp-server
+200 369157 2026-11-16T14:54:13Z 3a0f36271dc9128c https://render.com/docs/disks
+200 343665 2026-11-16T14:54:14Z 52892b2b69f254da https://render.com/docs/docker
+200 476788 2026-11-16T14:54:14Z 3477b7d7d6ac20f0 https://render.com/docs/ssh
+200 622608 2026-11-16T14:54:15Z d301f858b530a358 https://render.com/docs/deploys
+200 513578 2026-11-16T14:54:15Z af80044ddbc8e351 https://render.com/docs/environment-variables
+200 393071 2026-11-16T14:54:15Z d98b69a301bc3180 https://render.com/docs/health-checks
+200 333334 2026-11-16T14:54:16Z 9e13ce8967dc828b https://render.com/docs/maintenance-mode
+200 340476 2026-11-16T14:54:16Z a5e24d78c1323141 https://render.com/docs/rollbacks
+200 510119 2026-11-16T14:54:17Z 0b6dbc4b4e3b0203 https://render.com/docs/web-services
+200 343560 2026-11-16T14:54:17Z 1f06259836382c00 https://render.com/docs/api
+200 572211 2026-11-16T14:54:17Z 4f69439f5033b679 https://render.com/docs/cli
+200 366496 2026-11-16T14:54:18Z 97ae0606f5a1c1ac https://render.com/docs/deploy-hooks
+200 346756 2026-11-16T14:54:18Z 69e831aea48b90c2 https://render.com/docs/docker-secrets
+200 368426 2026-11-16T14:54:18Z 47d77e84bfc6ecc9 https://render.com/docs/private-network
+404 168039 2026-11-16T14:54:19Z 8b1257181f249192 https://render.com/docs/workspaces
+200 325394 2026-11-16T14:54:19Z 1cde601d38ed0183 https://render.com/docs/build-pipeline
+200 427024 2026-11-16T14:54:19Z e8bc719bd8f94d70 https://render.com/docs/service-previews
+200 295124 2026-11-16T14:54:20Z 0a3e6f99aa377df1 https://render.com/docs/regions
+200 466373 2026-11-16T14:54:20Z 682f54e82df3c046 https://render.com/docs/monorepo-support
+200 448561 2026-11-16T14:54:21Z d22d9323f6d10d2e https://render.com/docs/configure-environment-variables
+200 402729 2026-11-16T14:54:21Z 42918766a3d02762 https://render.com/docs/deploying-an-image
+200 35742 2026-11-16T14:54:45Z 273c1af8af053a45 https://raw.githubusercontent.com/render-oss/render-mcp-server/main/README.md
+200 764094 2026-11-16T15:22:17Z f88833aeed5028a9 https://render.com/pricing

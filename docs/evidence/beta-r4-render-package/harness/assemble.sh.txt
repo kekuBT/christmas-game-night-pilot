@@ -1,0 +1,12 @@
+#!/bin/bash
+# LOCAL TEST: assemble a Render build context from deploy/render plus an archive. Usage: assemble.sh <deploy/render> <archive> <out dir> [test-pin]
+# With "test-pin", pins/archive.sha256 is replaced by the given archive's own SHA-256 (a LOCAL REBUILD is not the audited archive).
+set -euo pipefail
+SRC=$1; ARC=$2; OUT=$3; MODE=${4:-production-pin}
+rm -rf "$OUT"; mkdir -p "$OUT/artifact"
+(cd "$SRC" && cp -a Dockerfile .dockerignore cgn-artifact-gate.sh cgn-entrypoint.sh cgn-backup.sh cgn-authorize.sh pins "$OUT/")
+cp "$ARC" "$OUT/artifact/mchezo-7097ac2.tgz"
+if [ "$MODE" = test-pin ]; then
+  (cd "$OUT/artifact" && sha256sum mchezo-7097ac2.tgz) > "$OUT/pins/archive.sha256"
+  echo "TEST PIN: pins/archive.sha256 now names the local archive ($(cut -c1-16 "$OUT/pins/archive.sha256")...), not the audited a693c543..."
+fi

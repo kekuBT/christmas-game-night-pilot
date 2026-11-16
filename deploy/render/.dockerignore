@@ -1,0 +1,13 @@
+# Only these files may enter the build context (Render also copies the service's secret files into the context's root;
+# they are excluded here, and the Dockerfile copies named files only).
+*
+!Dockerfile
+!cgn-artifact-gate.sh
+!cgn-entrypoint.sh
+!cgn-backup.sh
+!cgn-authorize.sh
+!pins/age.sha256
+!pins/archive.sha256
+!pins/release-7097ac2.inventory.sha256
+!pins/scripts.sha256
+!artifact/mchezo-7097ac2.tgz

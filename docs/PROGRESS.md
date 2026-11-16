@@ -3396,3 +3396,36 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
 - **Not done:** no account, resource, deploy, expense, runtime change or gate rerun. Beta HOLD. #42 separate.
 - **Next:** ChatGPT's review.
 - **Risk:** on Render, it is unverified whether `/proc/<pid>/environ` is readable for the service user's processes, and what a dropped SSH session sends. Both are for W5.
+
+## Beta R4: revision 5 accepted; the Render package and W1 preparation (review 6919662222; handoff 6919813048)
+- **Review 6919662222** accepted revision 5's backup-reconciliation repair, after ChatGPT's own shell checks and a private browser check. No repeat repair and no gate requested.
+- **Handoff 6919813048:** the owner approved the Render route ("Proceed with that Render setup using my existing account"): Starter + 1 GB disk, the $7.25/month baseline with overages disclosed, and the access-gated public URL.
+  - **The approval covers that setup only:** no plan upgrades, unrelated resources, merges or unrestricted launch.
+  - **The account connection is ChatGPT's**, and not yet confirmed.
+  - **The backup destination is not selected;** Google Drive is proposed.
+  - **Acknowledged** in 6919880607, at 9:53 a.m. ET, with a 6½-hour estimate.
+- **Done** (no runtime change; docs, deploy files and tools only):
+  - **`deploy/render/`:**
+    - **`Dockerfile`:** three stages, every base pinned by digest, no `ARG`. age v1.2.1 is built from source with a pinned binary hash. The runtime is the pinned Node 22.16.0 slim image, non-root `cgn`, with `/app` read-only.
+    - **`cgn-artifact-gate.sh`:** the archive's SHA-256; its entries; the 144-file inventory; `release.json`; Node; `npm ci`; exactly `ws` and `zod`. It runs at build time, again on the finished image, and over SSH.
+    - **The three reviewed `cgn-*` scripts, byte-identical**, plus `operator/cgn-receive.sh`.
+    - **`pins/`**, a `.dockerignore` allowlist, and a candidate `render.yaml`.
+    - **`README.md`:** the pinned inventory; the exact Render configuration; what the Render integration (MCP) can't do, which needs the dashboard.
+  - **`scripts/beta/`:** `w1-check.mjs` (W1 modes `closed`, `boundary`, `forgery`, `separation` and `reconnect`, with redacted evidence JSON), `render-like-proxy.mjs` and `w1-selftest.sh`.
+  - **`docs/beta/render-w1.md`:** the W1 steps (Step 0 on the instance, the window, the order, what to record, and failure handling).
+- **Evidence:** `docs/evidence/beta-r4-render-package/`, covering image checks B0, G1–G12 and C1–C11, the W1 self-test S1–S8, and every run in order, failures included.
+- **Findings that changed the plan:**
+  - npm 10 leaves empty scope folders after `--omit=dev`, so the gate now checks files rather than folders.
+  - Once data exists, the instance won't restart until `cgn-authorize` has run, as designed. So W1 Step 0 authorizes the throwaway configuration before any restart.
+  - `forgery` locks the tester's address, so it runs after `boundary` and `reconnect`.
+- **Not done:**
+  - no Render account use, service, deploy, expense, or real data;
+  - no audited archive here (a local rebuild with a test pin; the production pin refuses it);
+  - the historical full game gate not rerun.
+  - Beta HOLD for real users until W1–W8 and the go/no-go. #42 separate.
+- **Next:** ChatGPT's review. Then the account and the deploy repository (ChatGPT), and W1 per `docs/beta/render-w1.md`.
+- **Risk:** unverified until W1 Step 0:
+  - the disk mount's ownership (a root-owned mount fails closed);
+  - the real proxy count;
+  - Render's build-host architecture (the age pin assumes `amd64`);
+  - Docker Hub pulls during Render's build.

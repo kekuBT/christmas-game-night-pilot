@@ -1,0 +1,51 @@
+# age v1.2.1 built from source twice, each in a fresh container from the pinned Go image (local copy adding this sandbox's TLS-inspection CA), as the Dockerfile's age stage does: CGO_ENABLED=0, GOFLAGS=-trimpath, GOTOOLCHAIN=local, GOPROXY=https://proxy.golang.org, GOSUMDB=sum.golang.org. 2026-11-16T15:26:07Z
+## build 1
+go version go1.24.4 linux/amd64
+go: downloading filippo.io/age v1.2.1
+go: downloading golang.org/x/crypto v0.24.0
+go: downloading golang.org/x/term v0.21.0
+go: downloading filippo.io/edwards25519 v1.1.0
+go: downloading golang.org/x/sys v0.21.0
+e9f29db5f16a0da8761d5945c93c9518d81cbaa3ab428277f4465793038613f0  age
+v1.2.1
+age: go1.24.4
+	path	filippo.io/age/cmd/age
+	mod	filippo.io/age	v1.2.1	h1:X0TZjehAZylOIj4DubWYU1vWQxv9bJpo+Uu2/LGhi1o=
+	dep	filippo.io/edwards25519	v1.1.0	h1:FNf4tywRC1HmFuKW5xopWpigGjJKiJSV0Cqo0cJWDaA=
+	dep	golang.org/x/crypto	v0.24.0	h1:mnl8DM0o513X8fdIkmyFE/5hTYxbwYOjDS/+rK6qpRI=
+	dep	golang.org/x/sys	v0.21.0	h1:rF+pYz3DAGSQAxAu1CbC7catZg4ebC4UIeIhKxBZvws=
+	dep	golang.org/x/term	v0.21.0	h1:WVXCp+/EBEHOj53Rvu+7KiT/iElMrO8ACK16SMZ3jaA=
+	build	-buildmode=exe
+	build	-compiler=gc
+	build	-trimpath=true
+	build	DefaultGODEBUG=asynctimerchan=1,gotestjsonbuildtext=1,gotypesalias=0,httplaxcontentlength=1,httpmuxgo121=1,httpservecontentkeepheaders=1,multipathtcp=0,panicnil=1,randseednop=0,rsa1024min=0,tls10server=1,tls3des=1,tlsmlkem=0,tlsrsakex=1,tlsunsafeekm=1,winreadlinkvolume=0,winsymlink=0,x509keypairleaf=0,x509negativeserial=1,x509rsacrt=0,x509usepolicies=0
+	build	CGO_ENABLED=0
+	build	GOARCH=amd64
+	build	GOOS=linux
+	build	GOAMD64=v1
+exit 0
+## build 2
+go version go1.24.4 linux/amd64
+go: downloading filippo.io/age v1.2.1
+go: downloading golang.org/x/crypto v0.24.0
+go: downloading golang.org/x/term v0.21.0
+go: downloading golang.org/x/sys v0.21.0
+go: downloading filippo.io/edwards25519 v1.1.0
+e9f29db5f16a0da8761d5945c93c9518d81cbaa3ab428277f4465793038613f0  age
+v1.2.1
+age: go1.24.4
+	path	filippo.io/age/cmd/age
+	mod	filippo.io/age	v1.2.1	h1:X0TZjehAZylOIj4DubWYU1vWQxv9bJpo+Uu2/LGhi1o=
+	dep	filippo.io/edwards25519	v1.1.0	h1:FNf4tywRC1HmFuKW5xopWpigGjJKiJSV0Cqo0cJWDaA=
+	dep	golang.org/x/crypto	v0.24.0	h1:mnl8DM0o513X8fdIkmyFE/5hTYxbwYOjDS/+rK6qpRI=
+	dep	golang.org/x/sys	v0.21.0	h1:rF+pYz3DAGSQAxAu1CbC7catZg4ebC4UIeIhKxBZvws=
+	dep	golang.org/x/term	v0.21.0	h1:WVXCp+/EBEHOj53Rvu+7KiT/iElMrO8ACK16SMZ3jaA=
+	build	-buildmode=exe
+	build	-compiler=gc
+	build	-trimpath=true
+	build	DefaultGODEBUG=asynctimerchan=1,gotestjsonbuildtext=1,gotypesalias=0,httplaxcontentlength=1,httpmuxgo121=1,httpservecontentkeepheaders=1,multipathtcp=0,panicnil=1,randseednop=0,rsa1024min=0,tls10server=1,tls3des=1,tlsmlkem=0,tlsrsakex=1,tlsunsafeekm=1,winreadlinkvolume=0,winsymlink=0,x509keypairleaf=0,x509negativeserial=1,x509rsacrt=0,x509usepolicies=0
+	build	CGO_ENABLED=0
+	build	GOARCH=amd64
+	build	GOOS=linux
+	build	GOAMD64=v1
+exit 0
