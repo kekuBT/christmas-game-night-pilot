@@ -1,7 +1,11 @@
-// Beta R4 (handoff 6921505856; repaired for review 6922818863): the W2 family-scale workload against an operator-supplied
-// HTTPS target, with redacted evidence. Not a gate driver (it lives under scripts/beta/). Run from a checkout of this
-// repository after `npm ci` (it uses the repository's `ws` package), on Node 22. It only ever talks to the one --origin
-// given, and only through the app's public API, as a phone would.
+// Beta R4 (handoff 6921505856; repaired for reviews 6922818863 and 6924352924): the W2 family-scale workload against an
+// operator-supplied HTTPS target, with redacted evidence. Not a gate driver (it lives under scripts/beta/). Run from a
+// checkout of this repository after `npm ci` (it uses the repository's `ws` package), on Node 22.
+// ONE ORIGIN ONLY: every request, HTTP and WebSocket, authenticated or not, goes to the --origin given, through the
+// app's public API, as a phone would. Redirects are never followed (fetch redirect "manual", ws followRedirects false):
+// a 3xx is an answer, not a hop. The runner has NO fault-injection options; deliberate faults for its self-test live in
+// the disposable local harness (scripts/beta/render-like-proxy.mjs). Options are checked before the code file is read
+// and before any network activity: an unknown or reduced option exits 2 having touched nothing.
 //
 //   node scripts/beta/w2-load.mjs --origin https://<service>.onrender.com --code-file <throwaway code> [options]
 //
@@ -47,13 +51,10 @@
 //   --ack-timeout-s N       default 30                                       --label key=value  operator identifiers to
 //                                                                            record (deploy id, artifact SHA-256, …);
 //                                                                            repeatable; never a secret
-// SELF-TEST ONLY (scripts/beta/w2-selftest.sh; never on a real run). A run with either can never print "W2 PASSED":
-//   --plant-leak                  room B's host saves a note carrying room A's canary (the isolation scan must fail)
-//   --self-test-probe-origin URL  send the active isolation probes to another origin (a faulty edge or a closed port)
 // For a local self-signed target, start Node with NODE_EXTRA_CA_CERTS=<that certificate>.
-// Output: progress lines, a summary, the checks, then "W2 PASSED" (exit 0), "W2 FAILED" (exit 1), or with a self-test
-// option and no failed check "W2 NOT ACCEPTED" (exit 3); bad options exit 2. Never printed or recorded: the code, the
-// cookie, session/recovery/spectator tokens, host claim tokens, join codes.
+// Output: progress lines, a summary, the checks, then "W2 PASSED" (exit 0) or "W2 FAILED" (exit 1); bad options exit 2
+// before anything else happens. Never printed or recorded: the code, the cookie, session/recovery/spectator tokens, host
+// claim tokens, join codes.
 import { createHash, randomBytes, randomUUID } from "node:crypto";
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
@@ -63,29 +64,25 @@ import {
 } from "./w2-verdict.mjs";
 
 const argv = process.argv.slice(2);
-const VALUED = new Set(["origin", "code-file", "evidence", "max-minutes", "ack-timeout-s", "label", "self-test-probe-origin"]);
-const FLAGS = new Set(["plant-leak"]);
+// The whole option check happens here, before the code file is read and before any network activity (review 6924352924).
+const VALUED = new Set(["origin", "code-file", "evidence", "max-minutes", "ack-timeout-s", "label"]);
 for (let i = 0; i < argv.length; i++) {
   const m = /^--([a-z-]+)$/.exec(argv[i]);
   if (!m) { console.error(`w2-load: unexpected argument ${JSON.stringify(argv[i].slice(0, 40))}`); process.exit(2); }
   if (["rooms", "players", "notes"].includes(m[1])) { console.error(`w2-load: --${m[1]} is not accepted: W2's workload is fixed (${W2_SHAPE.rooms} rooms × ${W2_SHAPE.playersPerRoom} players + a TV each, ${W2_SHAPE.notesPerRoom} notes per room), so a reduced run can't be taken for acceptance`); process.exit(2); }
-  if (FLAGS.has(m[1])) continue;
   if (!VALUED.has(m[1]) || argv[i + 1] === undefined || argv[i + 1].startsWith("--")) { console.error(`w2-load: unknown option or missing value: --${m[1]} (see the header)`); process.exit(2); }
   i++;
 }
 const opt = (n, d) => { const i = argv.indexOf(`--${n}`); return i >= 0 ? argv[i + 1] : d; };
 const labels = Object.fromEntries(argv.flatMap((a, i) => (a === "--label" && argv[i + 1]?.includes("=") ? [argv[i + 1].split(/=(.*)/s).slice(0, 2)] : [])));
 if (!opt("origin") || !opt("code-file")) { console.error("usage: node scripts/beta/w2-load.mjs --origin https://<service>.onrender.com --code-file <file> [options] (see the header)"); process.exit(2); }
-const ORIGIN = new URL(opt("origin")).origin;
-if (!ORIGIN.startsWith("https://")) { console.error("--origin must be https://"); process.exit(2); }
+let ORIGIN; try { ORIGIN = new URL(opt("origin")).origin; } catch { console.error("w2-load: --origin is not a URL"); process.exit(2); }
+if (!ORIGIN.startsWith("https://")) { console.error("w2-load: --origin must be https://"); process.exit(2); }
+for (const k of ["max-minutes", "ack-timeout-s"]) if (opt(k) !== undefined && !(Number(opt(k)) > 0)) { console.error(`w2-load: --${k} must be a positive number`); process.exit(2); }
 const WSS = ORIGIN.replace(/^https:/, "wss:");
-const PROBE_ORIGIN = opt("self-test-probe-origin") ? new URL(opt("self-test-probe-origin")).origin : ORIGIN;
-const PROBE_WSS = PROBE_ORIGIN.replace(/^https:/, "wss:");
 const CODE = readFileSync(opt("code-file"), "utf8").trim();
 const ROOMS = W2_SHAPE.rooms, PLAYERS = W2_SHAPE.playersPerRoom, NOTES = W2_SHAPE.notesPerRoom;
 const MAX_MS = Number(opt("max-minutes", "20")) * 60_000, ACK_MS = Number(opt("ack-timeout-s", "30")) * 1000;
-const PLANT_LEAK = argv.includes("--plant-leak");
-const SELF_TEST = [...(PLANT_LEAK ? ["--plant-leak"] : []), ...(PROBE_ORIGIN !== ORIGIN ? ["--self-test-probe-origin"] : [])];
 const RUN = `${new Date().toISOString().replace(/[-:]/g, "").slice(0, 15)}-${randomBytes(3).toString("hex")}`;
 const T0 = Date.now();
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -94,7 +91,7 @@ const sha = (u) => createHash("sha256").update(readFileSync(new URL(u, import.me
 
 const ev = {
   tool: "scripts/beta/w2-load.mjs", toolSha256: sha(import.meta.url), verdictSha256: sha("./w2-verdict.mjs"), node: process.version, runId: RUN, origin: ORIGIN,
-  startedAt: new Date(T0).toISOString(), shape: W2_SHAPE, params: { maxMinutes: MAX_MS / 60_000, ackTimeoutS: ACK_MS / 1000, selfTestOptions: SELF_TEST, ...(PROBE_ORIGIN !== ORIGIN ? { probeOrigin: PROBE_ORIGIN } : {}) },
+  startedAt: new Date(T0).toISOString(), shape: W2_SHAPE, params: { maxMinutes: MAX_MS / 60_000, ackTimeoutS: ACK_MS / 1000 },
   operatorLabels: labels, target: {}, rooms: [], actions: [], sockets: [], strokeExtras: [], isolation: { passiveHits: [], probes: [] }, checks: [], failures: [], notes: [],
   cleanup: "No supported room-deletion path exists in the app (7097ac2): this run deleted nothing. Its rooms stay in the target's throwaway data folder; nothing else was touched.",
 };
@@ -107,8 +104,8 @@ const overTime = () => Date.now() - T0 > MAX_MS;
 // ---------- HTTP ----------
 let cookie = "";
 const roomOfPath = (p) => (/^\/rooms\/([^/?]+)/.exec(p) ?? [])[1];
-async function call(method, path, body, token, base = ORIGIN) {
-  const r = await fetch(base + path, {
+async function call(method, path, body, token) {
+  const r = await fetch(ORIGIN + path, {
     method, redirect: "manual", signal: AbortSignal.timeout(15_000),
     headers: { cookie, ...(body ? { "content-type": "application/json" } : {}), ...(token ? { "x-session-token": token } : {}) },
     ...(body ? { body: JSON.stringify(body) } : {}),
@@ -171,7 +168,7 @@ function openSocket(room, label, audience, protocol) {
   ev.sockets.push(rec);
   let stopped = false; let ws;
   const connect = () => {
-    ws = new WebSocket(`${WSS}/?roomId=${room.id}&audience=${audience}`, protocol ? [protocol] : [], { headers: { cookie }, handshakeTimeout: 15_000 });
+    ws = new WebSocket(`${WSS}/?roomId=${room.id}&audience=${audience}`, protocol ? [protocol] : [], { headers: { cookie }, handshakeTimeout: 15_000, followRedirects: false });
     ws.on("open", () => { rec.opens++; if (rec.opens > 1) rec.reconnects++; rec.open = true; });
     ws.on("message", (d) => {
       const text = String(d);
@@ -189,14 +186,14 @@ function openSocket(room, label, audience, protocol) {
 
 // ---------- the isolation probes: never throw; record exactly what came back ----------
 async function probeRead(path, token) {
-  try { const r = await call("GET", path, undefined, token, PROBE_ORIGIN); return { status: r.status, body: r.body && typeof r.body === "object" && !Array.isArray(r.body) ? { error: r.body.error, code: r.body.code } : r.body === undefined ? undefined : { shape: Array.isArray(r.body) ? "array" : typeof r.body } }; }
+  try { const r = await call("GET", path, undefined, token); return { status: r.status, body: r.body && typeof r.body === "object" && !Array.isArray(r.body) ? { error: r.body.error, code: r.body.code } : r.body === undefined ? undefined : { shape: Array.isArray(r.body) ? "array" : typeof r.body } }; }
   catch (e) { return { error: String(e?.cause?.code ?? e?.name ?? e?.message ?? e).slice(0, 60) }; }
 }
 function probeSocket(target, token) {
   return new Promise((resolve) => {
     let messages = 0; let done = false;
     const finish = (x) => { if (done) return; done = true; clearTimeout(timer); try { ws.terminate(); } catch { /* closed */ } resolve(x); };
-    const ws = new WebSocket(`${PROBE_WSS}/?roomId=${target.id}&audience=player`, [`cgn-session-${token}`], { headers: { cookie }, handshakeTimeout: 15_000 });
+    const ws = new WebSocket(`${WSS}/?roomId=${target.id}&audience=player`, [`cgn-session-${token}`], { headers: { cookie }, handshakeTimeout: 15_000, followRedirects: false });
     ws.on("message", (d) => {
       messages++;
       let projectionOfTarget = false; try { const m = JSON.parse(String(d)); projectionOfTarget = m?.kind === "projection" && m.state?.roomId === target.id; } catch { /* not JSON */ }
@@ -230,7 +227,7 @@ const pct = (xs, q) => { if (!xs.length) return null; const s = [...xs].sort((a,
 const rooms = [];
 try {
   // ---- 0. preflight ----
-  const h = await fetch(ORIGIN + "/health", { signal: AbortSignal.timeout(15_000) }).then(async (r) => ({ status: r.status, body: await r.text() }));
+  const h = await fetch(ORIGIN + "/health", { redirect: "manual", signal: AbortSignal.timeout(15_000) }).then(async (r) => ({ status: r.status, body: await r.text() }));
   ev.target.health = { status: h.status, body: h.body.slice(0, 200) };
   let revision; try { revision = JSON.parse(h.body).revision; } catch { /* not JSON */ }
   ev.target.revision = revision ?? null;
@@ -239,7 +236,7 @@ try {
   const sc = g.headers.get("set-cookie") ?? "";
   if (g.status !== 303 || !sc.startsWith("cgn_beta=")) throw new Error(`preflight: the gate answered ${g.status} without a cookie`);
   cookie = sc.split(";")[0]; secrets.add(cookie.slice("cgn_beta=".length));
-  say(`preflight: /health 200, revision ${revision}; the gate admitted the throwaway code (run ${RUN})${SELF_TEST.length ? `; SELF-TEST options ${SELF_TEST.join(" ")}: not W2 evidence` : ""}`);
+  say(`preflight: /health 200, revision ${revision}; the gate admitted the throwaway code (run ${RUN})`);
 
   // ---- 1. setup ----
   for (let r = 0; r < ROOMS; r++) {
@@ -309,14 +306,6 @@ try {
       rec.expect = { text };
       await sleep(1500 + r * 200);
     }
-    if (PLANT_LEAK && room.label === "B") {
-      const other = rooms.find((x) => x.label === "A");
-      const text = `planted ${other.canary}`;
-      // SELF-TEST: an extra, unexpected note (category "planted", so the counts above stay those of the workload).
-      const rec = await act("planted", room, "B planted note (SELF-TEST: carries room A's canary)", () => call("POST", `/rooms/${room.id}/memory`, { text, day: 1, requestId: randomUUID(), fromGame: room.triviaId }, room.host.token), (st, b) => noteAck(st, b, text));
-      rec.expect = { text };
-      ev.notes.push("SELF-TEST --plant-leak: room B saved a note carrying room A's canary; the isolation check must fail.");
-    }
   }));
   await Promise.all(rooms.map(async (room) => {
     room.drawId = await startGame(room, "draw-guess");
@@ -360,7 +349,7 @@ try {
   for (const room of rooms) {
     const book = await must("GET", `/rooms/${room.id}/memory`, undefined, room.host.token);
     const texts = new Set((Array.isArray(book) ? book : book.entries ?? []).map((e) => e.text));
-    for (const rec of ev.actions.filter((a) => (a.category === "note" || a.category === "planted") && a.room === room.label)) rec.persisted = rec.accepted === true && texts.has(rec.expect.text);
+    for (const rec of ev.actions.filter((a) => a.category === "note" && a.room === room.label)) rec.persisted = rec.accepted === true && texts.has(rec.expect.text);
   }
   say(`draw & guess: ${rooms.map((r) => `${r.label} ${r.ev.draw.finished ? "finished" : "NOT finished"} (${r.ev.draw.turns} turns)`).join(", ")}; strokes, guesses and notes read back`);
 
@@ -408,11 +397,11 @@ try {
   // ---- verdict: every check always runs (scripts/beta/w2-verdict.mjs) ----
   for (const c of verdictChecks(ev)) check(c.name, c.ok, c.detail);
   for (const a of ev.actions) delete a.result;
-  const unacked = ev.actions.filter((a) => a.accepted !== true && a.category !== "planted").slice(0, 20);
+  const unacked = ev.actions.filter((a) => a.accepted !== true).slice(0, 20);
   if (unacked.length) ev.notes.push(`first actions without an accepted acknowledgement: ${unacked.map((a) => `${a.label} (${a.reason ?? a.lastError})`).join("; ")}`);
   const notPersisted = ev.actions.filter((a) => a.accepted === true && a.persisted === false).slice(0, 20);
   if (notPersisted.length) ev.notes.push(`first acknowledged actions NOT read back: ${notPersisted.map((a) => `${a.label}${a.readBack ? ` (${a.readBack})` : ""}`).join("; ")}`);
-  ev.verdict = ev.failures.length ? "FAILED" : SELF_TEST.length ? "NOT ACCEPTED (self-test options)" : "PASSED";
+  ev.verdict = ev.failures.length ? "FAILED" : "PASSED";
   const dir = opt("evidence", "w2-evidence");
   mkdirSync(dir, { recursive: true });
   const file = join(dir, `w2-${RUN}.json`);
@@ -420,5 +409,5 @@ try {
   writeFileSync(file, out + "\n");
   console.log(`evidence: ${file}`);
   console.log(`W2 ${ev.verdict}${ev.failures.length ? ` (${ev.failures.length} failure(s))` : ""}`);
-  process.exit(ev.failures.length ? 1 : SELF_TEST.length ? 3 : 0);
+  process.exit(ev.failures.length ? 1 : 0);
 }

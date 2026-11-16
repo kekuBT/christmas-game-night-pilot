@@ -10,6 +10,11 @@
   - the drawing was compared by piece count only.
 
   All three are fixed, and each now has a test that fails on its own check.
+- **Repaired again after review 6924352924.** Two of the runner's self-test options could make it act outside its fixed workload:
+  - `--self-test-probe-origin` could send the authenticated probes to another origin;
+  - `--plant-leak` could write an extra note.
+
+  The runner now has **no fault options at all**: it talks only to `--origin`, and never follows a redirect. The deliberate faults live in the disposable local harness (`scripts/beta/render-like-proxy.mjs`), and a focused regression proves the boundary.
 
 ## What existed, and what was added (the gap analysis)
 | Existing helper | What it already did | Why it isn't W2 by itself |
@@ -45,11 +50,13 @@ node scripts/beta/w2-load.mjs --origin https://<service>.onrender.com --code-fil
 - **It stops itself:** at `--max-minutes 20`, and gives up on any one action after `--ack-timeout-s 30`.
 - **The workload is fixed:** 2 rooms × 10 players + a TV each, and 5 notes per room.
   - There is no smaller or "smoke" mode.
-  - `--rooms`, `--players`, `--notes` and any unknown option are refused (exit 2) before anything is created.
+  - `--rooms`, `--players`, `--notes`, any unknown option (the removed self-test options included), an `http://` origin and an invalid value are all refused with exit 2. The check happens before the code file is read and before any network activity.
+- **One origin only:** every request goes to `--origin`, HTTP and WebSocket, the gate, the workload and the isolation probes alike.
+  - A redirect is never followed: a 3xx is recorded as the answer.
+  - The runner has no fault-injection options.
 - **The answer:**
   - `W2 PASSED` (exit 0) is the only pass.
   - `W2 FAILED` is exit 1.
-  - `--plant-leak` and `--self-test-probe-origin` are self-test options. A run with either never prints `W2 PASSED`: at best it ends with `W2 NOT ACCEPTED` (exit 3).
 - **The `--label` values** are recorded as given, for the record only. Never put a secret in one.
 - **While it runs, the operator records Render's CPU and memory for the service**, from the dashboard's Metrics, or the integration's `get_metrics` for the window's start and end. Then the peaks. **The tool can't see them, and nothing local is a Render measurement.**
 

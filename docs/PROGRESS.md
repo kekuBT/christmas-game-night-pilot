@@ -3507,3 +3507,20 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
 - **Risk:**
   - The expected counts and the denial text are those of `7097ac2`. A new release that changes them makes W2 fail closed until `W2_SHAPE` or `APP_DENIAL` is updated.
   - Everything here is local and synthetic, not Render.
+
+## Beta R4: the W2 runner stays on its one origin (review 6924352924; #44)
+- **Review 6924352924:** the three earlier findings are resolved on the local evidence. One blocking finding remained: the runner's test-only options could send the authenticated probes to another origin (`--self-test-probe-origin`), or make it write an extra note (`--plant-leak`), before the final guard.
+- **Acknowledged** in 6924388254, at 12:49 p.m. ET, with a 1 h 15 min estimate.
+- **Done:**
+  - **`scripts/beta/w2-load.mjs`: no fault options.**
+    - It talks only to `--origin`.
+    - `redirect: "manual"` is on every fetch, preflight included, and `followRedirects: false` on every socket.
+    - The whole option check runs before the code file is read and before any network activity: an `http://` or invalid origin and a non-positive limit also exit 2.
+  - **`scripts/beta/render-like-proxy.mjs`:** `--fault-cross-room 503|reset` (the proxy learns each token's room and faults any cross-room request or handshake) and `--plant-leak` (the proxy itself saves one note carrying the other room's canary). Both are off by default.
+  - **`scripts/beta/w2-args-selftest.mjs` (new; `node:test`, no Docker):**
+    - 11 refused-option cases: each exits 2, reads no code file, writes no evidence, and causes 0 connections at the origin and at a second listener;
+    - a control;
+    - HTTP and socket redirects to a second origin are not followed (0 connections there).
+  - **What it shows on the old runner (`403b53e`):** 4 of the 14 tests fail.
+  - **`scripts/beta/w2-selftest.sh`:** V4, V6 and V7 now use the proxy's faults; V8 is the new regression.
+- **My own bug, caught by the dev run:** rewriting the proxy's response handler dropped the status-and-headers line, so every run aborted at preflight. Restored and rerun.

@@ -1,4 +1,4 @@
-# Beta R4 W2 preparation: local evidence for the W2 workload tool (handoff 6921505856, repaired for review 6922818863)
+# Beta R4 W2 preparation: local evidence for the W2 workload tool (handoff 6921505856, repaired for reviews 6922818863 and 6924352924)
 
 **Where it ran:** this session's machine. The target was the packaged image from `deploy/render` (`cgn-render:check`, built in [the package evidence](../beta-r4-render-package/README.md) from a local rebuild of `7097ac2`), with these settings:
 - production mode, the throwaway data folder `/var/data/cgn-w1`;
@@ -7,6 +7,42 @@
 - behind `scripts/beta/render-like-proxy.mjs`: TLS for `localhost` with a per-run certificate, and an appended `X-Forwarded-For`.
 
 No Render, no account, no real data. **This is protocol and load evidence from synthetic clients, on one machine.** It is not Render (no Render CPU or memory figures), not a browser and not a native device. W2 on Render is ChatGPT's, after W1: see [render-w2.md](../../beta/render-w2.md), which also has the gap analysis.
+
+## Repair 2 for review 6924352924: the runner stays on its one origin
+**The finding:** two of the runner's self-test options could make `w2-load.mjs` act outside its fixed workload. `--self-test-probe-origin` sent the authenticated probes, carrying a host token and the gate cookie, to another origin. `--plant-leak` made the runner write an extra note. The guard against a pass came only after those requests.
+
+**The repair:**
+- **The runner has no fault options at all.**
+  - Every request, HTTP and WebSocket, goes only to `--origin`.
+  - Redirects are never followed: `redirect: "manual"` on every fetch, the preflight included, and `followRedirects: false` on every socket.
+  - The whole option check runs before the code file is read and before any network activity. An unknown or reduced option, an `http://` or invalid origin, or a non-positive limit all exit 2.
+  - The verdict, the fixed workload and the checks are unchanged.
+- **The deliberate faults moved into the disposable local harness, `scripts/beta/render-like-proxy.mjs`,** off by default:
+  - **`--fault-cross-room 503|reset`:** the proxy learns each session token's room from that token's first successful request for a room. It answers any later request or socket handshake carrying the token for another room with 503 (V6), or resets the connection (V7). The probes still go only to the one origin.
+  - **`--plant-leak`:** the proxy itself saves one extra note in one room, carrying the other room's canary (V4).
+- **A focused regression,** `scripts/beta/w2-args-selftest.mjs` (`node:test`, no Docker; the self-test's V8). Each refused option must:
+  - exit 2;
+  - print nothing on stdout;
+  - not read the code file (which doesn't exist);
+  - write no evidence;
+  - cause 0 connections at the `--origin` listener and at a second listener.
+
+  A fake target then answers authenticated HTTP requests, and then socket handshakes, with 307 to a second origin. The run must fail with 0 connections there. A control shows that the second listener does count a redirect that is followed.
+
+**What the regression shows on the old runner** (`403b53e`, [before/args-before.log](repair2/before/args-before.log)): 4 of 14 tests fail.
+- `--plant-leak` and `--self-test-probe-origin` were accepted: the run went on to read the code file.
+- A zero `--max-minutes` was accepted.
+- An origin that isn't a URL crashed instead of exiting 2.
+
+The redirect tests passed there as well. The old runner already used `redirect: "manual"` for its authenticated calls, and `ws` doesn't follow redirects by default; the risk was the probe-origin option itself. Both are now explicit, and pinned by the test.
+
+### Repair 2's runs, in order
+| Run | What changed before it | Verdict | Evidence |
+|---|---|---|---|
+| The new regression on the old runner | Nothing in the runner (`403b53e`) | **4 of 14 failed,** as described above | [repair2/before/args-before.log](repair2/before/args-before.log) |
+| The new regression on the new runner | The runner repair | PASSED, 14/14 | (rerun inside every self-test below, as V8) |
+| Self-test, dev run 1 | The proxy's new faults | **FAILED, 2/12. My own bug:** rewriting the proxy's response handler dropped the line that copies the backend's status and headers, so every response went out as a bare 200. The gate's 303 lost its cookie, and every run aborted at preflight. I stopped the run after V9, restored the line, and reran. | [repair2/dev/w2-selftest-dev1-broken-proxy.log](repair2/dev/w2-selftest-dev1-broken-proxy.log) |
+| Self-test, dev run 2 | The proxy's response line restored | **PASSED, 13/13:**<ul><li>V4 was caught (the proxy planted one note, HTTP 201);</li><li>V6 and V7 were inconclusive (the proxy learned 20 tokens and faulted 6 cross-room requests and handshakes: 503, then UND_ERR_SOCKET and ECONNRESET);</li><li>V8 passed, 14/14.</li></ul> | [repair2/dev/w2-selftest-dev2.log](repair2/dev/w2-selftest-dev2.log) |
 
 ## Repair for review 6922818863: the W2 checker can no longer pass on nothing
 **The review's three blocking findings were all in the checker**, not in the app. All three are fixed, and each has a test that fails on the old behaviour.

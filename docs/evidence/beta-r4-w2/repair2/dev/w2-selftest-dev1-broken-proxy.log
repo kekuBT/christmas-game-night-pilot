@@ -1,0 +1,263 @@
+== w2-selftest 2026-11-16T17:53:56Z, image cgn-render:check (sha256:7b53109a7d69), w2-load 63c1b262576bc412, proxy e9e589653ee49795
+      AUTHORIZED data_dir=/var/data/cgn-w1 public_origin=https://localhost:18443 trust_proxy=1 (the access code is kept only as a salted hash)
+-- U: the verdict's focused tests
+      # tests 37
+      # pass 37
+      # fail 0
+PASS U the verdict's focused tests pass
+-- V1: the full workload, then the disk
+      [0.1s] FAIL run aborted: preflight: the gate answered 200 without a cookie
+      
+      --- summary ---
+      ready  sent 0, acknowledged 0, rejected 0, unacknowledged 0, retried 0, malformed replies 0; ack median — ms, p95 — ms, max — ms
+      answer sent 0, acknowledged 0, rejected 0, unacknowledged 0, retried 0, malformed replies 0, persisted 0; ack median — ms, p95 — ms, max — ms
+      stroke sent 0, acknowledged 0, rejected 0, unacknowledged 0, retried 0, malformed replies 0, persisted 0; ack median — ms, p95 — ms, max — ms
+      guess  sent 0, acknowledged 0, rejected 0, unacknowledged 0, retried 0, malformed replies 0, persisted 0; ack median — ms, p95 — ms, max — ms
+      note   sent 0, acknowledged 0, rejected 0, unacknowledged 0, retried 0, malformed replies 0, persisted 0; ack median — ms, p95 — ms, max — ms
+      sockets 0: open at the end 0, with a projection of their own room 0, unexpected closes 0, reconnects 0, errors 0, messages received 0
+      FAIL workload: 2 rooms × 10 players + a TV each (22 sockets) — 0 room(s): none
+      FAIL workload: Trivia finished with 10 questions in every room — A: NOT finished, 0 questions; B: NOT finished, 0 questions
+      FAIL workload: Draw & Guess finished with 6 turns in every room — A: NOT finished, 0 turns; B: NOT finished, 0 turns
+      FAIL ready: every expected Ready acknowledged (20 per room) — A: 0/20 acknowledged, 0 sent, 0 rejected, 0 unacknowledged; B: 0/20 acknowledged, 0 sent, 0 rejected, 0 unacknowledged
+      FAIL answer: every action acknowledged and accepted (100 per room) — A: 0/100 acknowledged, 0 sent, 0 rejected, 0 unacknowledged; B: 0/100 acknowledged, 0 sent, 0 rejected, 0 unacknowledged
+      PASS answer: every acknowledged action read back from the authoritative state — A: 0/0; B: 0/0
+      FAIL stroke: every action acknowledged and accepted (48 per room) — A: 0/48 acknowledged, 0 sent, 0 rejected, 0 unacknowledged; B: 0/48 acknowledged, 0 sent, 0 rejected, 0 unacknowledged
+      PASS stroke: every acknowledged action read back from the authoritative state — A: 0/0; B: 0/0; stored pieces nobody sent: 0
+      FAIL guess: every action acknowledged and accepted (54 per room) — A: 0/54 acknowledged, 0 sent, 0 rejected, 0 unacknowledged; B: 0/54 acknowledged, 0 sent, 0 rejected, 0 unacknowledged
+      PASS guess: every acknowledged action read back from the authoritative state — A: 0/0; B: 0/0
+      FAIL note: every action acknowledged and accepted (5 per room) — A: 0/5 acknowledged, 0 sent, 0 rejected, 0 unacknowledged; B: 0/5 acknowledged, 0 sent, 0 rejected, 0 unacknowledged
+      PASS note: every acknowledged action read back from the authoritative state — A: 0/0; B: 0/0
+      PASS rooms isolated: no other room's canary, room id or player name in any socket message or HTTP body — 0 hits
+      FAIL every socket received a projection for its own room (22) — 0/22
+      FAIL rooms isolated: one room's host token is refused by the app on the other room's projection, Memory Book and socket (both directions) — no probes
+      FAIL every socket open at the end (22) — 0/22
+      W2 FAILED (12 failure(s))
+FAIL V1 the workload did not pass
+      FAIL the evidence names rooms — none
+      W2 DISK CHECK FAILED (1)
+FAIL V1-disk the disk check failed
+-- V2: a dropped acknowledgement (every 10th stroke message, and its retries, get 502)
+      [0.1s] FAIL run aborted: preflight: the gate answered 200 without a cookie
+      
+      --- summary ---
+      ready  sent 0, acknowledged 0, rejected 0, unacknowledged 0, retried 0, malformed replies 0; ack median — ms, p95 — ms, max — ms
+      answer sent 0, acknowledged 0, rejected 0, unacknowledged 0, retried 0, malformed replies 0, persisted 0; ack median — ms, p95 — ms, max — ms
+      stroke sent 0, acknowledged 0, rejected 0, unacknowledged 0, retried 0, malformed replies 0, persisted 0; ack median — ms, p95 — ms, max — ms
+      guess  sent 0, acknowledged 0, rejected 0, unacknowledged 0, retried 0, malformed replies 0, persisted 0; ack median — ms, p95 — ms, max — ms
+      note   sent 0, acknowledged 0, rejected 0, unacknowledged 0, retried 0, malformed replies 0, persisted 0; ack median — ms, p95 — ms, max — ms
+      sockets 0: open at the end 0, with a projection of their own room 0, unexpected closes 0, reconnects 0, errors 0, messages received 0
+      FAIL workload: 2 rooms × 10 players + a TV each (22 sockets) — 0 room(s): none
+      FAIL workload: Trivia finished with 10 questions in every room — A: NOT finished, 0 questions; B: NOT finished, 0 questions
+      FAIL workload: Draw & Guess finished with 6 turns in every room — A: NOT finished, 0 turns; B: NOT finished, 0 turns
+      FAIL ready: every expected Ready acknowledged (20 per room) — A: 0/20 acknowledged, 0 sent, 0 rejected, 0 unacknowledged; B: 0/20 acknowledged, 0 sent, 0 rejected, 0 unacknowledged
+      FAIL answer: every action acknowledged and accepted (100 per room) — A: 0/100 acknowledged, 0 sent, 0 rejected, 0 unacknowledged; B: 0/100 acknowledged, 0 sent, 0 rejected, 0 unacknowledged
+      PASS answer: every acknowledged action read back from the authoritative state — A: 0/0; B: 0/0
+      FAIL stroke: every action acknowledged and accepted (48 per room) — A: 0/48 acknowledged, 0 sent, 0 rejected, 0 unacknowledged; B: 0/48 acknowledged, 0 sent, 0 rejected, 0 unacknowledged
+      PASS stroke: every acknowledged action read back from the authoritative state — A: 0/0; B: 0/0; stored pieces nobody sent: 0
+      FAIL guess: every action acknowledged and accepted (54 per room) — A: 0/54 acknowledged, 0 sent, 0 rejected, 0 unacknowledged; B: 0/54 acknowledged, 0 sent, 0 rejected, 0 unacknowledged
+      PASS guess: every acknowledged action read back from the authoritative state — A: 0/0; B: 0/0
+      FAIL note: every action acknowledged and accepted (5 per room) — A: 0/5 acknowledged, 0 sent, 0 rejected, 0 unacknowledged; B: 0/5 acknowledged, 0 sent, 0 rejected, 0 unacknowledged
+      PASS note: every acknowledged action read back from the authoritative state — A: 0/0; B: 0/0
+      PASS rooms isolated: no other room's canary, room id or player name in any socket message or HTTP body — 0 hits
+      FAIL every socket received a projection for its own room (22) — 0/22
+      FAIL rooms isolated: one room's host token is refused by the app on the other room's projection, Memory Book and socket (both directions) — no probes
+      FAIL every socket open at the end (22) — 0/22
+      W2 FAILED (12 failure(s))
+FAIL V2 expected exactly the stroke acknowledgement check to fail (exit 1, 11 FAIL lines)
+-- V3: a fake acknowledgement (every 10th stroke message is answered accepted without reaching the server)
+      [0.1s] FAIL run aborted: preflight: the gate answered 200 without a cookie
+      
+      --- summary ---
+      ready  sent 0, acknowledged 0, rejected 0, unacknowledged 0, retried 0, malformed replies 0; ack median — ms, p95 — ms, max — ms
+      answer sent 0, acknowledged 0, rejected 0, unacknowledged 0, retried 0, malformed replies 0, persisted 0; ack median — ms, p95 — ms, max — ms
+      stroke sent 0, acknowledged 0, rejected 0, unacknowledged 0, retried 0, malformed replies 0, persisted 0; ack median — ms, p95 — ms, max — ms
+      guess  sent 0, acknowledged 0, rejected 0, unacknowledged 0, retried 0, malformed replies 0, persisted 0; ack median — ms, p95 — ms, max — ms
+      note   sent 0, acknowledged 0, rejected 0, unacknowledged 0, retried 0, malformed replies 0, persisted 0; ack median — ms, p95 — ms, max — ms
+      sockets 0: open at the end 0, with a projection of their own room 0, unexpected closes 0, reconnects 0, errors 0, messages received 0
+      FAIL workload: 2 rooms × 10 players + a TV each (22 sockets) — 0 room(s): none
+      FAIL workload: Trivia finished with 10 questions in every room — A: NOT finished, 0 questions; B: NOT finished, 0 questions
+      FAIL workload: Draw & Guess finished with 6 turns in every room — A: NOT finished, 0 turns; B: NOT finished, 0 turns
+      FAIL ready: every expected Ready acknowledged (20 per room) — A: 0/20 acknowledged, 0 sent, 0 rejected, 0 unacknowledged; B: 0/20 acknowledged, 0 sent, 0 rejected, 0 unacknowledged
+      FAIL answer: every action acknowledged and accepted (100 per room) — A: 0/100 acknowledged, 0 sent, 0 rejected, 0 unacknowledged; B: 0/100 acknowledged, 0 sent, 0 rejected, 0 unacknowledged
+      PASS answer: every acknowledged action read back from the authoritative state — A: 0/0; B: 0/0
+      FAIL stroke: every action acknowledged and accepted (48 per room) — A: 0/48 acknowledged, 0 sent, 0 rejected, 0 unacknowledged; B: 0/48 acknowledged, 0 sent, 0 rejected, 0 unacknowledged
+      PASS stroke: every acknowledged action read back from the authoritative state — A: 0/0; B: 0/0; stored pieces nobody sent: 0
+      FAIL guess: every action acknowledged and accepted (54 per room) — A: 0/54 acknowledged, 0 sent, 0 rejected, 0 unacknowledged; B: 0/54 acknowledged, 0 sent, 0 rejected, 0 unacknowledged
+      PASS guess: every acknowledged action read back from the authoritative state — A: 0/0; B: 0/0
+      FAIL note: every action acknowledged and accepted (5 per room) — A: 0/5 acknowledged, 0 sent, 0 rejected, 0 unacknowledged; B: 0/5 acknowledged, 0 sent, 0 rejected, 0 unacknowledged
+      PASS note: every acknowledged action read back from the authoritative state — A: 0/0; B: 0/0
+      PASS rooms isolated: no other room's canary, room id or player name in any socket message or HTTP body — 0 hits
+      FAIL every socket received a projection for its own room (22) — 0/22
+      FAIL rooms isolated: one room's host token is refused by the app on the other room's projection, Memory Book and socket (both directions) — no probes
+      FAIL every socket open at the end (22) — 0/22
+      W2 FAILED (12 failure(s))
+FAIL V3 expected exactly the stroke read-back check to fail (exit 1, 11 FAIL lines)
+-- V4: a planted cross-room leak (the proxy saves one extra note in one room with the other room's canary)
+      [0.1s] FAIL run aborted: preflight: the gate answered 200 without a cookie
+      
+      --- summary ---
+      ready  sent 0, acknowledged 0, rejected 0, unacknowledged 0, retried 0, malformed replies 0; ack median — ms, p95 — ms, max — ms
+      answer sent 0, acknowledged 0, rejected 0, unacknowledged 0, retried 0, malformed replies 0, persisted 0; ack median — ms, p95 — ms, max — ms
+      stroke sent 0, acknowledged 0, rejected 0, unacknowledged 0, retried 0, malformed replies 0, persisted 0; ack median — ms, p95 — ms, max — ms
+      guess  sent 0, acknowledged 0, rejected 0, unacknowledged 0, retried 0, malformed replies 0, persisted 0; ack median — ms, p95 — ms, max — ms
+      note   sent 0, acknowledged 0, rejected 0, unacknowledged 0, retried 0, malformed replies 0, persisted 0; ack median — ms, p95 — ms, max — ms
+      sockets 0: open at the end 0, with a projection of their own room 0, unexpected closes 0, reconnects 0, errors 0, messages received 0
+      FAIL workload: 2 rooms × 10 players + a TV each (22 sockets) — 0 room(s): none
+      FAIL workload: Trivia finished with 10 questions in every room — A: NOT finished, 0 questions; B: NOT finished, 0 questions
+      FAIL workload: Draw & Guess finished with 6 turns in every room — A: NOT finished, 0 turns; B: NOT finished, 0 turns
+      FAIL ready: every expected Ready acknowledged (20 per room) — A: 0/20 acknowledged, 0 sent, 0 rejected, 0 unacknowledged; B: 0/20 acknowledged, 0 sent, 0 rejected, 0 unacknowledged
+      FAIL answer: every action acknowledged and accepted (100 per room) — A: 0/100 acknowledged, 0 sent, 0 rejected, 0 unacknowledged; B: 0/100 acknowledged, 0 sent, 0 rejected, 0 unacknowledged
+      PASS answer: every acknowledged action read back from the authoritative state — A: 0/0; B: 0/0
+      FAIL stroke: every action acknowledged and accepted (48 per room) — A: 0/48 acknowledged, 0 sent, 0 rejected, 0 unacknowledged; B: 0/48 acknowledged, 0 sent, 0 rejected, 0 unacknowledged
+      PASS stroke: every acknowledged action read back from the authoritative state — A: 0/0; B: 0/0; stored pieces nobody sent: 0
+      FAIL guess: every action acknowledged and accepted (54 per room) — A: 0/54 acknowledged, 0 sent, 0 rejected, 0 unacknowledged; B: 0/54 acknowledged, 0 sent, 0 rejected, 0 unacknowledged
+      PASS guess: every acknowledged action read back from the authoritative state — A: 0/0; B: 0/0
+      FAIL note: every action acknowledged and accepted (5 per room) — A: 0/5 acknowledged, 0 sent, 0 rejected, 0 unacknowledged; B: 0/5 acknowledged, 0 sent, 0 rejected, 0 unacknowledged
+      PASS note: every acknowledged action read back from the authoritative state — A: 0/0; B: 0/0
+      PASS rooms isolated: no other room's canary, room id or player name in any socket message or HTTP body — 0 hits
+      FAIL every socket received a projection for its own room (22) — 0/22
+      FAIL rooms isolated: one room's host token is refused by the app on the other room's projection, Memory Book and socket (both directions) — no probes
+      FAIL every socket open at the end (22) — 0/22
+      W2 FAILED (12 failure(s))
+      render-like-proxy: planted note: none
+FAIL V4 expected exactly the isolation check to fail (exit 1, 11 FAIL lines)
+-- V5: the right count, the wrong pieces (every 10th stroke message forwarded with one coordinate moved)
+      [0.1s] FAIL run aborted: preflight: the gate answered 200 without a cookie
+      
+      --- summary ---
+      ready  sent 0, acknowledged 0, rejected 0, unacknowledged 0, retried 0, malformed replies 0; ack median — ms, p95 — ms, max — ms
+      answer sent 0, acknowledged 0, rejected 0, unacknowledged 0, retried 0, malformed replies 0, persisted 0; ack median — ms, p95 — ms, max — ms
+      stroke sent 0, acknowledged 0, rejected 0, unacknowledged 0, retried 0, malformed replies 0, persisted 0; ack median — ms, p95 — ms, max — ms
+      guess  sent 0, acknowledged 0, rejected 0, unacknowledged 0, retried 0, malformed replies 0, persisted 0; ack median — ms, p95 — ms, max — ms
+      note   sent 0, acknowledged 0, rejected 0, unacknowledged 0, retried 0, malformed replies 0, persisted 0; ack median — ms, p95 — ms, max — ms
+      sockets 0: open at the end 0, with a projection of their own room 0, unexpected closes 0, reconnects 0, errors 0, messages received 0
+      FAIL workload: 2 rooms × 10 players + a TV each (22 sockets) — 0 room(s): none
+      FAIL workload: Trivia finished with 10 questions in every room — A: NOT finished, 0 questions; B: NOT finished, 0 questions
+      FAIL workload: Draw & Guess finished with 6 turns in every room — A: NOT finished, 0 turns; B: NOT finished, 0 turns
+      FAIL ready: every expected Ready acknowledged (20 per room) — A: 0/20 acknowledged, 0 sent, 0 rejected, 0 unacknowledged; B: 0/20 acknowledged, 0 sent, 0 rejected, 0 unacknowledged
+      FAIL answer: every action acknowledged and accepted (100 per room) — A: 0/100 acknowledged, 0 sent, 0 rejected, 0 unacknowledged; B: 0/100 acknowledged, 0 sent, 0 rejected, 0 unacknowledged
+      PASS answer: every acknowledged action read back from the authoritative state — A: 0/0; B: 0/0
+      FAIL stroke: every action acknowledged and accepted (48 per room) — A: 0/48 acknowledged, 0 sent, 0 rejected, 0 unacknowledged; B: 0/48 acknowledged, 0 sent, 0 rejected, 0 unacknowledged
+      PASS stroke: every acknowledged action read back from the authoritative state — A: 0/0; B: 0/0; stored pieces nobody sent: 0
+      FAIL guess: every action acknowledged and accepted (54 per room) — A: 0/54 acknowledged, 0 sent, 0 rejected, 0 unacknowledged; B: 0/54 acknowledged, 0 sent, 0 rejected, 0 unacknowledged
+      PASS guess: every acknowledged action read back from the authoritative state — A: 0/0; B: 0/0
+      FAIL note: every action acknowledged and accepted (5 per room) — A: 0/5 acknowledged, 0 sent, 0 rejected, 0 unacknowledged; B: 0/5 acknowledged, 0 sent, 0 rejected, 0 unacknowledged
+      PASS note: every acknowledged action read back from the authoritative state — A: 0/0; B: 0/0
+      PASS rooms isolated: no other room's canary, room id or player name in any socket message or HTTP body — 0 hits
+      FAIL every socket received a projection for its own room (22) — 0/22
+      FAIL rooms isolated: one room's host token is refused by the app on the other room's projection, Memory Book and socket (both directions) — no probes
+      FAIL every socket open at the end (22) — 0/22
+      W2 FAILED (12 failure(s))
+FAIL V5 expected exactly the stroke read-back check to fail (exit 1, 11 FAIL lines)
+      FAIL the evidence names rooms — none
+      W2 DISK CHECK FAILED (1)
+FAIL V5-disk expected only the drawing disk check to fail (exit 1, 1 FAIL lines, 0 on the drawing)
+-- V6: faulted isolation probes (the proxy answers every cross-room request and handshake with 503)
+      [0.1s] FAIL run aborted: preflight: the gate answered 200 without a cookie
+      
+      --- summary ---
+      ready  sent 0, acknowledged 0, rejected 0, unacknowledged 0, retried 0, malformed replies 0; ack median — ms, p95 — ms, max — ms
+      answer sent 0, acknowledged 0, rejected 0, unacknowledged 0, retried 0, malformed replies 0, persisted 0; ack median — ms, p95 — ms, max — ms
+      stroke sent 0, acknowledged 0, rejected 0, unacknowledged 0, retried 0, malformed replies 0, persisted 0; ack median — ms, p95 — ms, max — ms
+      guess  sent 0, acknowledged 0, rejected 0, unacknowledged 0, retried 0, malformed replies 0, persisted 0; ack median — ms, p95 — ms, max — ms
+      note   sent 0, acknowledged 0, rejected 0, unacknowledged 0, retried 0, malformed replies 0, persisted 0; ack median — ms, p95 — ms, max — ms
+      sockets 0: open at the end 0, with a projection of their own room 0, unexpected closes 0, reconnects 0, errors 0, messages received 0
+      FAIL workload: 2 rooms × 10 players + a TV each (22 sockets) — 0 room(s): none
+      FAIL workload: Trivia finished with 10 questions in every room — A: NOT finished, 0 questions; B: NOT finished, 0 questions
+      FAIL workload: Draw & Guess finished with 6 turns in every room — A: NOT finished, 0 turns; B: NOT finished, 0 turns
+      FAIL ready: every expected Ready acknowledged (20 per room) — A: 0/20 acknowledged, 0 sent, 0 rejected, 0 unacknowledged; B: 0/20 acknowledged, 0 sent, 0 rejected, 0 unacknowledged
+      FAIL answer: every action acknowledged and accepted (100 per room) — A: 0/100 acknowledged, 0 sent, 0 rejected, 0 unacknowledged; B: 0/100 acknowledged, 0 sent, 0 rejected, 0 unacknowledged
+      PASS answer: every acknowledged action read back from the authoritative state — A: 0/0; B: 0/0
+      FAIL stroke: every action acknowledged and accepted (48 per room) — A: 0/48 acknowledged, 0 sent, 0 rejected, 0 unacknowledged; B: 0/48 acknowledged, 0 sent, 0 rejected, 0 unacknowledged
+      PASS stroke: every acknowledged action read back from the authoritative state — A: 0/0; B: 0/0; stored pieces nobody sent: 0
+      FAIL guess: every action acknowledged and accepted (54 per room) — A: 0/54 acknowledged, 0 sent, 0 rejected, 0 unacknowledged; B: 0/54 acknowledged, 0 sent, 0 rejected, 0 unacknowledged
+      PASS guess: every acknowledged action read back from the authoritative state — A: 0/0; B: 0/0
+      FAIL note: every action acknowledged and accepted (5 per room) — A: 0/5 acknowledged, 0 sent, 0 rejected, 0 unacknowledged; B: 0/5 acknowledged, 0 sent, 0 rejected, 0 unacknowledged
+      PASS note: every acknowledged action read back from the authoritative state — A: 0/0; B: 0/0
+      PASS rooms isolated: no other room's canary, room id or player name in any socket message or HTTP body — 0 hits
+      FAIL every socket received a projection for its own room (22) — 0/22
+      FAIL rooms isolated: one room's host token is refused by the app on the other room's projection, Memory Book and socket (both directions) — no probes
+      FAIL every socket open at the end (22) — 0/22
+      W2 FAILED (12 failure(s))
+      render-like-proxy: 0 session token(s) learned; 0 cross-room request(s) or handshake(s) answered by the fault (503)
+FAIL V6 expected exactly the active isolation check to fail (exit 1, 11 FAIL lines)
+-- V7: isolation probes with transport errors (the proxy resets every cross-room connection)
+      [0.1s] FAIL run aborted: preflight: the gate answered 200 without a cookie
+      
+      --- summary ---
+      ready  sent 0, acknowledged 0, rejected 0, unacknowledged 0, retried 0, malformed replies 0; ack median — ms, p95 — ms, max — ms
+      answer sent 0, acknowledged 0, rejected 0, unacknowledged 0, retried 0, malformed replies 0, persisted 0; ack median — ms, p95 — ms, max — ms
+      stroke sent 0, acknowledged 0, rejected 0, unacknowledged 0, retried 0, malformed replies 0, persisted 0; ack median — ms, p95 — ms, max — ms
+      guess  sent 0, acknowledged 0, rejected 0, unacknowledged 0, retried 0, malformed replies 0, persisted 0; ack median — ms, p95 — ms, max — ms
+      note   sent 0, acknowledged 0, rejected 0, unacknowledged 0, retried 0, malformed replies 0, persisted 0; ack median — ms, p95 — ms, max — ms
+      sockets 0: open at the end 0, with a projection of their own room 0, unexpected closes 0, reconnects 0, errors 0, messages received 0
+      FAIL workload: 2 rooms × 10 players + a TV each (22 sockets) — 0 room(s): none
+      FAIL workload: Trivia finished with 10 questions in every room — A: NOT finished, 0 questions; B: NOT finished, 0 questions
+      FAIL workload: Draw & Guess finished with 6 turns in every room — A: NOT finished, 0 turns; B: NOT finished, 0 turns
+      FAIL ready: every expected Ready acknowledged (20 per room) — A: 0/20 acknowledged, 0 sent, 0 rejected, 0 unacknowledged; B: 0/20 acknowledged, 0 sent, 0 rejected, 0 unacknowledged
+      FAIL answer: every action acknowledged and accepted (100 per room) — A: 0/100 acknowledged, 0 sent, 0 rejected, 0 unacknowledged; B: 0/100 acknowledged, 0 sent, 0 rejected, 0 unacknowledged
+      PASS answer: every acknowledged action read back from the authoritative state — A: 0/0; B: 0/0
+      FAIL stroke: every action acknowledged and accepted (48 per room) — A: 0/48 acknowledged, 0 sent, 0 rejected, 0 unacknowledged; B: 0/48 acknowledged, 0 sent, 0 rejected, 0 unacknowledged
+      PASS stroke: every acknowledged action read back from the authoritative state — A: 0/0; B: 0/0; stored pieces nobody sent: 0
+      FAIL guess: every action acknowledged and accepted (54 per room) — A: 0/54 acknowledged, 0 sent, 0 rejected, 0 unacknowledged; B: 0/54 acknowledged, 0 sent, 0 rejected, 0 unacknowledged
+      PASS guess: every acknowledged action read back from the authoritative state — A: 0/0; B: 0/0
+      FAIL note: every action acknowledged and accepted (5 per room) — A: 0/5 acknowledged, 0 sent, 0 rejected, 0 unacknowledged; B: 0/5 acknowledged, 0 sent, 0 rejected, 0 unacknowledged
+      PASS note: every acknowledged action read back from the authoritative state — A: 0/0; B: 0/0
+      PASS rooms isolated: no other room's canary, room id or player name in any socket message or HTTP body — 0 hits
+      FAIL every socket received a projection for its own room (22) — 0/22
+      FAIL rooms isolated: one room's host token is refused by the app on the other room's projection, Memory Book and socket (both directions) — no probes
+      FAIL every socket open at the end (22) — 0/22
+      W2 FAILED (12 failure(s))
+      render-like-proxy: 0 session token(s) learned; 0 cross-room request(s) or handshake(s) answered by the fault (reset)
+FAIL V7 expected exactly the active isolation check to fail (exit 1, 11 FAIL lines)
+-- V9: a malformed success (200 with an empty {} for every 10th stroke message and its retries, not forwarded)
+      [0.1s] FAIL run aborted: preflight: the gate answered 200 without a cookie
+      
+      --- summary ---
+      ready  sent 0, acknowledged 0, rejected 0, unacknowledged 0, retried 0, malformed replies 0; ack median — ms, p95 — ms, max — ms
+      answer sent 0, acknowledged 0, rejected 0, unacknowledged 0, retried 0, malformed replies 0, persisted 0; ack median — ms, p95 — ms, max — ms
+      stroke sent 0, acknowledged 0, rejected 0, unacknowledged 0, retried 0, malformed replies 0, persisted 0; ack median — ms, p95 — ms, max — ms
+      guess  sent 0, acknowledged 0, rejected 0, unacknowledged 0, retried 0, malformed replies 0, persisted 0; ack median — ms, p95 — ms, max — ms
+      note   sent 0, acknowledged 0, rejected 0, unacknowledged 0, retried 0, malformed replies 0, persisted 0; ack median — ms, p95 — ms, max — ms
+      sockets 0: open at the end 0, with a projection of their own room 0, unexpected closes 0, reconnects 0, errors 0, messages received 0
+      FAIL workload: 2 rooms × 10 players + a TV each (22 sockets) — 0 room(s): none
+      FAIL workload: Trivia finished with 10 questions in every room — A: NOT finished, 0 questions; B: NOT finished, 0 questions
+      FAIL workload: Draw & Guess finished with 6 turns in every room — A: NOT finished, 0 turns; B: NOT finished, 0 turns
+      FAIL ready: every expected Ready acknowledged (20 per room) — A: 0/20 acknowledged, 0 sent, 0 rejected, 0 unacknowledged; B: 0/20 acknowledged, 0 sent, 0 rejected, 0 unacknowledged
+      FAIL answer: every action acknowledged and accepted (100 per room) — A: 0/100 acknowledged, 0 sent, 0 rejected, 0 unacknowledged; B: 0/100 acknowledged, 0 sent, 0 rejected, 0 unacknowledged
+      PASS answer: every acknowledged action read back from the authoritative state — A: 0/0; B: 0/0
+      FAIL stroke: every action acknowledged and accepted (48 per room) — A: 0/48 acknowledged, 0 sent, 0 rejected, 0 unacknowledged; B: 0/48 acknowledged, 0 sent, 0 rejected, 0 unacknowledged
+      PASS stroke: every acknowledged action read back from the authoritative state — A: 0/0; B: 0/0; stored pieces nobody sent: 0
+      FAIL guess: every action acknowledged and accepted (54 per room) — A: 0/54 acknowledged, 0 sent, 0 rejected, 0 unacknowledged; B: 0/54 acknowledged, 0 sent, 0 rejected, 0 unacknowledged
+      PASS guess: every acknowledged action read back from the authoritative state — A: 0/0; B: 0/0
+      FAIL note: every action acknowledged and accepted (5 per room) — A: 0/5 acknowledged, 0 sent, 0 rejected, 0 unacknowledged; B: 0/5 acknowledged, 0 sent, 0 rejected, 0 unacknowledged
+      PASS note: every acknowledged action read back from the authoritative state — A: 0/0; B: 0/0
+      PASS rooms isolated: no other room's canary, room id or player name in any socket message or HTTP body — 0 hits
+      FAIL every socket received a projection for its own room (22) — 0/22
+      FAIL rooms isolated: one room's host token is refused by the app on the other room's projection, Memory Book and socket (both directions) — no probes
+      FAIL every socket open at the end (22) — 0/22
+      W2 FAILED (12 failure(s))
+FAIL V9 expected exactly the stroke acknowledgement check to fail, with malformed replies counted (exit 1, 11 FAIL lines)
+-- V8: the runner's boundary: unsupported options refused with zero network activity; redirects never followed
+      ok 1 - refused with zero network activity: the old fault option --plant-leak
+      ok 2 - refused with zero network activity: the old fault option --self-test-probe-origin
+      ok 3 - refused with zero network activity: a proxy fault option given to the runner
+      ok 4 - refused with zero network activity: --rooms 1
+      ok 5 - refused with zero network activity: --rooms=1
+      ok 6 - refused with zero network activity: --players 4
+      ok 7 - refused with zero network activity: --notes 1
+      ok 8 - refused with zero network activity: --expect-revision
+      ok 9 - refused with zero network activity: a zero --max-minutes
+      ok 10 - refused with zero network activity: an http:// origin
+      ok 11 - refused with zero network activity: an origin that is not a URL
+      ok 12 - control: the second listener does see a redirect that IS followed
+      ok 13 - an authenticated HTTP redirect to another origin is not followed (the run fails, zero connections there)
+      ok 14 - a socket handshake redirect to another origin is not followed (the run fails, zero connections there)
+      # tests 14
+      # pass 14
+      # fail 0
+PASS V8 the runner's boundary holds (refused options touch nothing; no redirect followed)
+PASS no log or evidence file holds the access code or a beta cookie
+
+passed 3, failed 10: V1 V1-disk V2 V3 V4 V5 V5-disk V6 V7 V9
+W2 SELFTEST FAILED
