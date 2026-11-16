@@ -1,0 +1,4 @@
+FAILED: Command failed: docker run -d --name gate-repro-20261116T230922-df4a5e-A --label gate.owner=20261116T230922-df4a5e -p 127.0.0.1:18080:10000 -e MCHEZO_DATA_DIR=/var/data/cgn-w1 -e MCHEZO_PUBLIC_ORIGIN=https://preview.test:18443 -e MCHEZO_TRUST_PROXY=1 --env-file <private-dir>/code.env cgn-render:check
+evidence: <scratch>/gate/dev/ev1/gate-origin-20261116T230922-df4a5e.json
+containers of this run left: unknown; code in the evidence: no
+GATE ORIGIN REPRO UNEXPECTED (run 20261116T230922-df4a5e)

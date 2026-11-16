@@ -1,0 +1,7 @@
+AS EXPECTED case A (origin-preserving forwarder; public origin = the URL's (the release architecture)): admitted; gate Referrer-Policy as received ["same-origin"]; Origin sent by the browser "https://preview.test:18443", received by the app "https://preview.test:18443"; POST 303; app loaded: true; cookie Secure=true HttpOnly=true SameSite=Lax; wrong code first: 401, alert "That code didn’t work. Check it and try again.", cookie set: false
+AS EXPECTED case B (Codespaces-like forwarder (F1 rewrite); public origin = the URL's (the reviewer's configuration)): FOREIGN_ORIGIN; gate Referrer-Policy as received ["same-origin"]; Origin sent by the browser "https://preview.test:18443", received by the app "https://localhost:18443"; POST 403; app loaded: false
+AS EXPECTED case C (the same forwarder; public origin = the rewritten value (route A)): admitted; gate Referrer-Policy as received ["same-origin"]; Origin sent by the browser "https://preview.test:18443", received by the app "https://localhost:18443"; POST 303; app loaded: true; cookie Secure=true HttpOnly=true SameSite=Lax
+AS EXPECTED case D (origin-preserving forwarder that appends Referrer-Policy: no-referrer (the no-referrer hypothesis)): FOREIGN_ORIGIN; gate Referrer-Policy as received ["same-origin","no-referrer"]; Origin sent by the browser "null", received by the app "null"; POST 403; app loaded: false
+evidence: <scratch>/gate/dev/ev2/gate-origin-20261116T230940-45534d.json
+containers of this run left: 0; code in the evidence: no
+GATE ORIGIN REPRO AS EXPECTED (run 20261116T230940-45534d)

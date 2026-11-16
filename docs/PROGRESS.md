@@ -3600,3 +3600,14 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
   - the static checks passed.
 - **Next:** ChatGPT's independent re-review and audit. Native C1–C4 stay pending.
 - **Not done:** no runtime or deploy change, no native device, no hosting operation.
+
+### The beta gate's form refused with `FOREIGN_ORIGIN` (handoff 6932053542; acknowledged in 6932100493, at 6:08 p.m. ET, with a 1 h 30 min estimate)
+- **The verdict: a preview configuration fault, not a runtime defect.** The pinned gate already serves `Referrer-Policy: same-origin` (fix B-13).
+- **The reproduction** (`scripts/beta/gate-origin-repro.mjs`): the real rendered form on the packaged pinned image, under four stand-in forwarders.
+  - **Origin-preserving:** admitted.
+  - **Codespaces-like** (a same-origin `Origin` rewritten to `https://localhost:<port>`, finding F1) with the public origin set to the forwarded URL: **403 `FOREIGN_ORIGIN`**, the reported result.
+  - **Route A's configuration:** admitted.
+  - **An appended `no-referrer`:** `Origin: null`, and 403.
+- **The correction:** route B, or route A only after the probe validates it (`docs/beta/beta-r1-preview-route.md`).
+- **Not changed:** no runtime change, no repair PR.
+- **Evidence:** `docs/evidence/beta-r4-gate-origin/`.
