@@ -30,3 +30,17 @@
 | `route-b-tls-test.mjs.txt`, `route-b-tls-run1.out.txt` | route B's browser half: the packed `456cb0d` in production, a TLS proxy whose certificate a session CA issued, and Chromium on the same machine with that CA trusted only in an NSS database under a throwaway `HOME`. No certificate error is ignored. | **ROUTE B TLS TEST PASSED, 7/7.** **B0 (an empty trust store):** `ERR_CERT_AUTHORITY_INVALID`. **B1:** entry (303), a `Secure`/`HttpOnly`/`Lax` cookie, `/health` = `456cb0d`, the API (201), the WebSocket (projection), and only the browser's own Origin received. |
 
 | `final-focused-before-commit.log` | the focused checks on the final tree, just before the commit: the classifier tests, typecheck, lint | **16/16, tsc exit 0, eslint exit 0** |
+
+## The browser sandbox (handoff 6904212784)
+`sbx-check.mjs.txt` launches Chrome for Testing 153 (the full build) through Playwright. It records, from `/proc`, each Chromium process's command line (`--no-sandbox`), seccomp state and user/PID namespaces.
+
+| File | Run | Result |
+|---|---|---|
+| `sbx-R1-root-default.json` | root, Playwright defaults, as `route-b-tls-test` and every gate driver run | **No sandbox:** `--no-sandbox` on every Chromium process. Renderers have no seccomp filter and share the browser's namespaces. **The route-B browser-half result therefore did not test the browser sandbox.** |
+| `sbx-R2-root-sandbox.json` | root, `chromiumSandbox: true` | Refused: `Running as root without --no-sandbox is not supported`. |
+| `sbx-R3-user-sandbox-userns.json` | uid 65534, `chromiumSandbox: true`, user namespaces available | **Sandboxed:** renderers have `Seccomp: 2` (1 filter) and their own user and PID namespaces. |
+| `sbx-R4b-user-sandbox-userns-denied.json` | uid 1000 inside a user namespace whose `max_user_namespaces` is 1, so Chromium can't create one | **The Codespace's `FATAL … No usable sandbox!` reproduced.** |
+| `sbx-R5b-user-suid-userns-denied.json` | the same, with the setuid helper (`CHROME_DEVEL_SANDBOX`, a setuid-root copy of `chrome_sandbox`) | The same FATAL. **Not** the reviewer's second message: a setuid binary gains nothing inside my user namespace, while the reviewer's helper ran but lacked `CAP_SYS_ADMIN`. |
+| `sbx-R4-…`, `sbx-R5-…`, `sbx-R6-…-INVALID-sysctl-refused.json` | an attempt to turn user namespaces off for the whole VM | **Invalid:** `sysctl user.max_user_namespaces=0` was refused even as root, so these ran with namespaces available. Kept for the record. |
+
+**How R4b and R5b deny user namespaces:** `setpriv --reuid=65534 … unshare --user --map-root-user sh -c 'echo 1 > /proc/sys/user/max_user_namespaces; unshare --user --map-user=1000 …'`. A check beforehand showed that inside it, `unshare --user` fails with "No space left on device".

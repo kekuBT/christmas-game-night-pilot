@@ -2171,3 +2171,12 @@ Handoff 6813167965 (with the Stage 9.2 clearance). Spec: `docs/stage9/stage93.md
   - **What it is not:** the page's completion marker is a hint only. A request that didn't arrive proves nothing.
   - **What a pass is:** evidence for review, covering only the traffic observed. The audit stays on hold until a route has been validated in the Codespace with the original protections intact.
   - **The fallback:** route B keeps the browser's own Origin, and TLS validation through a session CA trusted only in that browser's NSS database. Its browser half is tested here; the remote desktop needs authorization first.
+- **D-BR1R-11 The audit browser keeps an OS sandbox; where Chromium can't have one, the choice is the owner's** (handoff 6904212784).
+  - **The correction:** my route-B browser-half test (D-BR1R-10), like every gate driver, ran Chromium **without** its OS sandbox: Playwright's `--no-sandbox` default, run as root. It tested TLS validation and Origin, not the browser sandbox.
+  - **Measured:** Chromium sandboxes only with unprivileged user namespaces, or with a setuid helper that has `CAP_SYS_ADMIN`. With user namespaces denied it fails exactly as in the Codespace. There is no seccomp-only mode, and `--no-sandbox` is excluded.
+  - **The options** (`docs/beta/beta-r1-preview-route.md`):
+    1. Firefox ESR, whose seccomp-BPF content sandbox remains without user namespaces. Reduced, no rebuild, sourced but not tested here.
+    2. Chromium's full sandbox once the owner approves a container change that permits user namespaces, plus a rebuild.
+    3. The owner's own computer and browser.
+  - **The first step:** read-only diagnostics in the Codespace decide which applies.
+  - **Alternative rejected:** `--no-sandbox`, a privileged container, or `CAP_SYS_ADMIN` without owner approval.

@@ -1,0 +1,27 @@
+// Launches Chromium through Playwright and reports, for every Chromium process it started, the user, whether
+// --no-sandbox is on its command line, its seccomp state and its user/PID namespaces (vs the browser process's).
+// Usage: node sbx-check.mjs <chrome executable> <default|sandbox>
+import { readFileSync, readlinkSync, readdirSync } from "node:fs";
+import { createRequire } from "node:module";
+const { chromium } = createRequire(import.meta.url)("/opt/node-tools/node_modules/playwright/index.js");
+const [exe, mode] = process.argv.slice(2);
+const opts = { executablePath: exe, headless: true, ...(mode === "sandbox" ? { chromiumSandbox: true } : {}) };
+const field = (s, k) => (new RegExp(`^${k}:\\s*(.*)$`, "m").exec(s)?.[1] ?? "?").trim();
+let browser;
+try { browser = await chromium.launch(opts); }
+catch (e) { console.log(JSON.stringify({ mode, uid: process.getuid(), launched: false, error: String(e.message).split("\n").filter((l) => /sandbox|namespace|root|FATAL|errno|zygote|Error/i.test(l)).slice(0, 8) })); process.exit(0); }
+const page = await browser.newPage();
+await page.goto("data:text/html,<p>sandbox check</p>");
+const procs = [];
+for (const pid of readdirSync("/proc").filter((d) => /^\d+$/.test(d))) {
+  try {
+    if (!readlinkSync(`/proc/${pid}/exe`).startsWith(exe.replace(/\/[^/]+$/, ""))) continue;
+    const cmd = readFileSync(`/proc/${pid}/cmdline`, "utf8").split(/[\0 ]+/); // Chromium rewrites its title into one space-joined string
+    const st = readFileSync(`/proc/${pid}/status`, "utf8");
+    procs.push({ type: (cmd.find((a) => a.startsWith("--type=")) ?? "--type=browser").slice(7), noSandboxFlag: cmd.includes("--no-sandbox"), uid: field(st, "Uid").split(/\s+/)[0], seccomp: field(st, "Seccomp"), seccompFilters: field(st, "Seccomp_filters"), userNs: readlinkSync(`/proc/${pid}/ns/user`), pidNs: readlinkSync(`/proc/${pid}/ns/pid`) });
+  } catch { /* gone or not ours */ }
+}
+const br = procs.find((p) => p.type === "browser");
+const summary = procs.map((p) => ({ ...p, ownUserNs: br ? p.userNs !== br.userNs : null, ownPidNs: br ? p.pidNs !== br.pidNs : null }));
+await browser.close();
+console.log(JSON.stringify({ mode, uid: process.getuid(), launched: true, processes: summary }, null, 1));

@@ -147,6 +147,8 @@ A fifth behaviour, `block-foreign`, refuses foreign requests at the forwarder, s
 - **The display:** a remote desktop with a noVNC client on a **private** port (e.g. 6080), opened by the cloud browser as `https://<codespace>-6080.app.github.dev/` with the owner's sign-in. The forwarder carries pixels and input, not the app's requests.
 
 **Tested here: the browser half** (`docs/evidence/beta-r1-preview-route/route-b-tls-run1.out.txt`), with the packed `456cb0d` in production and Chromium on the same machine. No certificate errors are ignored.
+
+**Correction (handoff 6904212784):** that Chromium ran **without its OS sandbox**. Playwright passes `--no-sandbox` unless `chromiumSandbox: true` is set, and I ran as root, where Chromium refuses its sandbox. The run tested TLS validation and the browser's own Origin, **not** the browser sandbox. The same is true of every gate driver; see "The browser sandbox in the Codespace" below.
 - **B0, the control:** with an empty trust store the page is refused, `ERR_CERT_AUTHORITY_INVALID`.
 - **B1, with the session CA trusted in the browser's NSS database:**
   - **Entry:** the code form gets 303.
@@ -223,3 +225,93 @@ A fifth behaviour, `block-foreign`, refuses foreign requests at the forwarder, s
 **One extra run:** the harness timed out once on stale wait text and was rerun.
 
 **One extra test:** route B's browser half with a session CA, added so the fallback's TLS validation is tested rather than assumed.
+
+## The browser sandbox in the Codespace (handoff 6904212784)
+**The reviewer's route-B attempt** used the actual Codespace, no rebuild and no bypass.
+- **What worked:** noVNC (private), the desktop, the TLS proxy, the packed candidate and a session CA.
+- **Where it stopped:** Chromium failed before loading the app, first with `No usable sandbox!`, then (with Debian's setuid `chromium-sandbox`) with `Failed to move to new namespace … Operation not permitted`.
+
+### Was my route-B browser run sandboxed? No (measured)
+`docs/evidence/beta-r1-preview-route/sbx-check.mjs.txt` launches Chromium (Chrome for Testing 153, the full build) through Playwright. It reads each Chromium process's command line, seccomp state and user/PID namespaces from `/proc`.
+
+| Run | User | Launch | Result |
+|---|---|---|---|
+| R1 (`sbx-R1-root-default.json`), as my route-B test ran | root | Playwright defaults | **`--no-sandbox` on the browser, zygote, GPU, utility and renderer processes.** Renderers have no seccomp filter and share the browser's user and PID namespaces: no sandbox. |
+| R2 (`sbx-R2-root-sandbox.json`) | root | `chromiumSandbox: true` | Refused: `Running as root without --no-sandbox is not supported`. |
+| R3 (`sbx-R3-user-sandbox-userns.json`) | 65534 (non-root) | `chromiumSandbox: true`, user namespaces available | **Sandboxed:** renderers and a utility process each have a seccomp-BPF filter (`Seccomp: 2`) and their own user and PID namespaces. |
+| R4b (`sbx-R4b-user-sandbox-userns-denied.json`) | 1000 inside a user namespace whose limit denies further namespaces | `chromiumSandbox: true` | **The reviewer's first failure reproduced:** `FATAL … No usable sandbox! If you are running on Ubuntu 23.10+ or another Linux distro that has disabled unprivileged user namespaces …` |
+| R5b (`sbx-R5b-user-suid-userns-denied.json`) | the same | the same, with the setuid helper offered (`CHROME_DEVEL_SANDBOX`) | The same FATAL. **Not the reviewer's second message:** inside my user namespace a setuid binary gains nothing, whereas in the Codespace the helper ran but couldn't create namespaces. |
+| R4, R5, R6 (`…-INVALID-sysctl-refused.json`) | | | **Invalid:** my attempt to set `user.max_user_namespaces=0` for the whole VM was refused, so namespaces stayed available. Kept for the record. |
+
+### Why both failures happen
+- **Chromium's Linux sandbox has two layers,** and the first is required. It is one of:
+  - **(a) unprivileged user namespaces,** which give the renderers their own user and PID namespaces (R3);
+  - **(b) the setuid helper,** which creates PID and network namespaces as root, and so needs `CAP_SYS_ADMIN`.
+- **On top of that:** a seccomp-BPF filter.
+- **What the container lacks:** it denies (a) (R4b reproduces that message exactly), and its root lacks `CAP_SYS_ADMIN` for (b) (the reviewer's `Operation not permitted`).
+- **No middle ground:** Chromium has no supported "seccomp only" mode. The only other option is `--no-sandbox`, which removes both layers and is excluded.
+
+### Confirm which constraint the Codespace has (read-only, as the non-root `codespace` user)
+```bash
+id -u; uname -r
+cat /proc/sys/user/max_user_namespaces
+cat /proc/sys/kernel/unprivileged_userns_clone 2>/dev/null        # Debian kernels; 0 = denied
+cat /proc/sys/kernel/apparmor_restrict_unprivileged_userns 2>/dev/null   # Ubuntu 23.10+ hosts; 1 = restricted
+grep -E '^(Seccomp|Seccomp_filters|NoNewPrivs|CapEff|CapBnd):' /proc/self/status
+unshare --user --map-root-user true && echo "user namespaces: allowed" || echo "user namespaces: denied"
+```
+**Reading the result:**
+- **`allowed`:** Chromium as `codespace` (not root) with its default sandbox should start. Retry it; no approval is needed.
+- **`denied` with a non-zero `max_user_namespaces`:** the container's own policy (seccomp or capabilities) blocks it. See option 2.
+- **`max_user_namespaces` 0, or a kernel or AppArmor restriction:** it's host policy, outside the owner's control.
+
+### Options
+**Option 1, no rebuild: Firefox ESR, with a reduced but enabled sandbox.** Proposed, **not tested here** (this session can't obtain a Firefox build).
+- **What it keeps:** Firefox's Linux content sandbox is built on seccomp-BPF system-call filtering. User namespaces are an extra layer it uses when available. Without them it still runs its content processes under seccomp-BPF.
+  - **Sources:** Mozilla's sandbox wiki (Security/Sandbox/Specifics); a Mozilla support thread (question 1451388) where `about:support` shows "Seccomp-BPF: true" and "Content Process Sandboxing: true" with "User Namespaces: false"; Bugzilla 1756236 ("only the seccomp part remains").
+  - **What that costs:** weaker than Chromium's full sandbox (no namespace isolation). **Whether that is acceptable is the reviewer's and the owner's call.**
+- **The procedure** (in the existing desktop, as `codespace`; the packages are Debian's, installed like the desktop ones):
+  ```bash
+  sudo apt-get install -y firefox-esr
+  P=$(mktemp -d /tmp/ff-profile-XXXX)                         # throwaway profile
+  certutil -d sql:$P -N --empty-password
+  certutil -d sql:$P -A -t "C,," -n session-ca -i <session CA .pem>   # TLS validation stays on
+  echo 'user_pref("network.dns.localDomains", "beta.test");' > $P/user.js   # beta.test -> loopback, no /etc/hosts change
+  DISPLAY=<the desktop's display> firefox-esr --no-remote --profile $P https://beta.test:<TLS proxy port>/
+  ```
+  - **The app's side:** it runs with `MCHEZO_PUBLIC_ORIGIN=https://beta.test:<TLS proxy port>`, the browser's real origin. Nothing rewrites it, and the exact-origin check is unchanged.
+  - **What's forwarded:** only the noVNC port, and it stays Private.
+- **The precondition, before the audit:** in `about:support`, the Sandbox section must show **Seccomp-BPF (System Call Filtering): true** and **Content Process Sandboxing: true** (a level above 0). If either is false, stop.
+- **Its limitations:**
+  - **Coverage:** Firefox desktop, not the Chromium or Safari engines most phones use.
+  - **Interaction:** through a remote desktop.
+  - **Name resolution:** the `network.dns.localDomains` mapping is untested here. If it doesn't resolve, `*.localhost` names are an alternative to verify.
+
+**Option 2: Chromium with its full sandbox.**
+- **Prerequisite:** the Codespace must allow unprivileged user namespaces for the non-root user (the narrowest change that makes layer (a) work).
+- **Minimum owner approval:**
+  - **A change to the Codespace's container configuration,** for example a devcontainer `runArgs` security option that permits user namespace creation. A seccomp override (such as `seccomp=unconfined`) is broader than needed.
+  - **A rebuild of the Codespace, or a new one.**
+  - **Not needed:** `--privileged`, or `CAP_SYS_ADMIN` (which only the setuid path needs; it's broader again).
+- **Its limitations:**
+  - **Container isolation:** it relaxes it.
+  - **No guarantee:** it only works if GitHub's host permits user namespaces (the diagnostics above show which). Whether Codespaces honours that run option has to be verified after the change.
+  - **Not tested here.**
+
+**Option 3: no Codespace change, with the owner taking part.**
+- **The idea:** the owner's own computer and browser, sandboxed as normal.
+- **How:** VS Code Desktop or `gh codespace ports forward <proxy port>:<proxy port>`, run on that computer with the owner's existing sign-in, forwards the TLS proxy's port to its localhost. A throwaway browser profile trusts the session CA and opens `https://beta.localhost:<port>/`.
+- **Who runs the audit:** the owner, not the cloud browser.
+- **Not tested here:** that this forwarding is TCP-level (so it leaves Origin alone), and the whole procedure.
+
+**Recommendation:** run the read-only diagnostics first (5 minutes).
+- **`allowed`:** retry Chromium as `codespace`, sandboxed.
+- **`denied`:** option 1 is the only no-rebuild path that keeps a browser sandbox (reduced). Option 2 needs the owner's explicit approval of a container-isolation change and a rebuild.
+
+**ETA for the reviewer:**
+- **Diagnostics:** 5 min.
+- **Option 1:** about 30–45 min to install, set up the profile and verify `about:support`, then the audit.
+- **Option 2:** after approval, about 45–60 min for the rebuild and validation. It is uncertain, because host policy may still refuse it.
+
+
+**This answer: estimate vs actual.** Estimated about 1 h (written at 7:58 p.m. ET); actual about 3 min (7:58 to 8:01 p.m. ET, the commit), then the reply.

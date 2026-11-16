@@ -3157,3 +3157,20 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
 - **Next:**
   - **The reviewer:** reviews the repaired probe; with authorization, runs step 1 in the Codespace.
   - **Route B:** needs its prerequisites authorized.
+
+## Beta R1-R: the audit browser's sandbox, handoff 6904212784 (completed; environment answer, docs and evidence only)
+- **Brief:** the reviewer's route-B attempt in the Codespace stopped at Chromium's sandbox: "No usable sandbox!", then the setuid helper's "Operation not permitted". Say whether my run had the sandbox; give a no-rebuild procedure that keeps it, or the minimum approval. Acknowledged in 6904366977.
+- **Estimate:** about 1 h, written at 7:58 p.m. ET.
+- **Found:**
+  - **My route-B browser run had no OS sandbox:** Playwright's `--no-sandbox` default, as root (R1, R2).
+  - **Chromium sandboxes as a non-root user when user namespaces exist** (R3).
+  - **Without them it fails** exactly as in the Codespace (R4b).
+- **Proposed:**
+  - **First:** read-only diagnostics in the Codespace.
+  - **Option 1:** Firefox ESR's seccomp-BPF sandbox (reduced, no rebuild, untested here).
+  - **Option 2:** Chromium's full sandbox after an owner-approved container change and rebuild.
+  - **Option 3:** the owner's own browser.
+  - **Recorded as** D-BR1R-11; `docs/beta/beta-r1-preview-route.md`.
+- **Invalid runs:** three, because a whole-VM sysctl was refused. They are kept and labelled; R4b and R5b replaced them with a per-namespace limit.
+- **No product source changed, and no gate ran.**
+- **Next:** the reviewer runs the diagnostics and chooses an option. Option 2 needs the owner's approval first.
