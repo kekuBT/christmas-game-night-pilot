@@ -98,7 +98,7 @@
 
 ## 4. Links and paths
 `check-doc-links.mjs.txt` checks every relative link, heading anchor and backticked repository path in the release docs. Run on the final docs, this README included (`doc-links-final.out.txt`):
-- **Result:** "DOC LINKS PASSED", with 112 links and paths in 9 files.
+- **Result:** "DOC LINKS PASSED", with 115 links and paths in 9 files (112 before the review 6908455526 update).
 - **External links:** listed, not fetched.
 - **One path is named on purpose although it doesn't exist yet:** `content/approvals.json`. Each doc says so.
 
