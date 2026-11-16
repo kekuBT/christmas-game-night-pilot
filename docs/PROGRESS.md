@@ -3542,3 +3542,10 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
   - 3 new cases: a peer reset on the upgraded socket, an unexpected error that stays visible, and a teardown check that nothing is left open;
   - no process-wide suppressor; the zero-network assertions are unchanged.
 - **Not rerun, as the handoff said, because only the test fixture changed:** the historical gates, the Docker fault matrix, W1 and the normal W2 workload.
+- **Final validation** on a clean checkout of the tested commit `2b17a3ffa5de9d700788e7e39ba5ba817e6fdb2a`:
+  - pinned Node 22.16.0: the isolated socket-redirect case **PASSED 3 of 3** (440 handshakes answered with 307 each; 55, 41 and 60 peer resets handled; 0 connections to the second origin), and the complete boundary suite **PASSED 17/17**;
+  - this machine's Node 22.23.4: the complete boundary suite **PASSED 17/17**;
+  - nothing left over: no containers, no test processes;
+  - static checks: only the fixture and docs changed since `4f08c1a`, runtime unchanged, eslint clean, secret scan empty.
+- **Evidence:** `docs/evidence/beta-r4-w2/repair3/`.
+- **Next:** ChatGPT's verification. Deployment stays on hold.

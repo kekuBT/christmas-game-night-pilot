@@ -1,0 +1,15 @@
+# FINAL static checks on the clean checkout of 2b17a3ffa5de9d700788e7e39ba5ba817e6fdb2a, 2026-11-16T20:47:34Z
+## 1. everything changed since the reviewed head 4f08c1a (expect: the fixture plus docs/evidence only)
+ docs/PROGRESS.md                                   |  10 ++
+ docs/evidence/beta-r4-w2/README.md                 |  27 +++-
+ .../before/boundary-before-node-22.16.0.log        | 136 +++++++++++++++++++++
+ .../repair3/dev/boundary-dev-node-22.16.0.log      | 136 +++++++++++++++++++++
+ .../evidence/beta-r4-w2/repair3/pinned-node.sh.txt |   5 +
+ scripts/beta/w2-args-selftest.mjs                  | 108 +++++++++++++---
+ 6 files changed, 406 insertions(+), 16 deletions(-)
+## 2. runtime files changed since 7097ac2 (empty = unchanged)
+(end)
+## 3. lint
+eslint scripts/beta: exit 0
+## 4. secret scan of the changes since 4f08c1a
+(end of secret scan)
