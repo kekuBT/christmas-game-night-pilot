@@ -3121,3 +3121,20 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
 - **Residual risk:** zod 3 itself is unchanged and `npm audit` still lists the advisory. The records are walked in full (about 10 ms, no issues). The zod 4 migration remains a separate slice.
 - **External blockers:** ChatGPT's private browser audit (Codespaces' forwarded origin), the host, real phones, the owner's sign-off.
 - **Next:** the review of the third-round report on #43. The beta stays held.
+
+## Beta R1-R: a private route for the audit preview, handoff 6903638660 (completed, proposal and local tests)
+- **Brief:** a bounded technical unblock. The reviewer's private Codespaces preview reaches the app with `Origin: https://localhost:3153`, so the production check refuses the gate (6903475177). Find a supported $0 private route that preserves the check, report what was tested versus proposed, and touch no reviewer workspace. Acknowledged in 6903666254. The beta stays on HOLD.
+- **Estimate:** about 2 h 10 min, written at 7:08 p.m. ET.
+- **Delivered:**
+  - **The procedure:** `docs/beta/beta-r1-preview-route.md`. Route A configures the forwarder's rewrite of the app's own origin, conditional on the probe; route B is the fallback; D-BR1R-09.
+  - **The probe:** `scripts/preview/probe-forwarded-origin.mjs`. It is not a gate driver and not product source.
+  - **The evidence:** `docs/evidence/beta-r1-preview-route/README.md`.
+- **Tested here, against a local stand-in forwarder:**
+  - **The probe:** four forwarder behaviours give four verdicts.
+  - **Route A:** with the packed `456cb0d` in production, 10/10. That covers the reviewer's 403 reproduced, entry, API, WebSocket and the refusal of a sibling origin, plus the unsafe case if every Origin were rewritten.
+- **Not tested:**
+  - **GitHub's real forwarder:** that needs the probe run in the Codespace, which only the reviewer can do.
+  - **Route B.**
+- **Failures:** the first probe-test run failed on my harness's own setup (the wrong browser build); rerun with the gates' Chromium.
+- **No product source changed,** so no gate ran. Lint on the new script passed.
+- **Next:** the reviewer runs step 1 (the probe) in the Codespace, then the audit, if route A applies.

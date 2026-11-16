@@ -1,0 +1,8 @@
+tldts 7.5.4 (its bundled Public Suffix List), allowPrivateDomains: true
+example-codespace-3153.app.github.dev    suffix: dev        site (registrable domain): github.dev     private-section suffix: false
+example-codespace-3156.app.github.dev    suffix: dev        site (registrable domain): github.dev     private-section suffix: false
+someone-else-8080.app.github.dev         suffix: dev        site (registrable domain): github.dev     private-section suffix: false
+x.preview.app.github.dev                 suffix: dev        site (registrable domain): github.dev     private-section suffix: false
+x.github.io                              suffix: github.io  site (registrable domain): x.github.io    private-section suffix: true
+x.vercel.app                             suffix: vercel.app site (registrable domain): x.vercel.app   private-section suffix: true
+x.ngrok.io                               suffix: ngrok.io   site (registrable domain): x.ngrok.io     private-section suffix: true

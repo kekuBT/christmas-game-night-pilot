@@ -2153,3 +2153,12 @@ Handoff 6813167965 (with the Stage 9.2 clearance). Spec: `docs/stage9/stage93.md
     - a record whose keys or values can fail.
   - **The inventory:** it also pins the current list of collections, so a new one has to be reviewed.
   - **Why:** the exposure came from two ordinary-looking schemas, and the next one would look ordinary too.
+- **D-BR1R-09 The audit preview's route: configure the forwarder's rewrite of the app's own origin, only after a probe shows nothing else is rewritten to it** (handoff 6903638660; `docs/beta/beta-r1-preview-route.md`).
+  - **What:** the packed candidate runs with `MCHEZO_PUBLIC_ORIGIN` set to the exact value GitHub's forwarder gives the app's own requests (e.g. `https://localhost:3153`). No product source changes.
+  - **The precondition:** `scripts/preview/probe-forwarded-origin.mjs` must report `REWRITTEN_SAME_ORIGIN_ONLY` (or `PRESERVED`) in that Codespace, at the start of each audit session. Under `UNSAFE` or `INCONSISTENT`, the route is not used.
+  - **Why:** every `*.app.github.dev` URL is the same site, so `SameSite=Lax` doesn't separate them. The exact-origin check is the only defense, and it stays meaningful only if foreign Origins reach the app as themselves.
+  - **Alternatives rejected:**
+    - **A preview-only adapter trusting `X-Forwarded-Host` or `Sec-Fetch-Site`:** the first is on every request; the second is absent on WebSocket handshakes in Chromium.
+    - **Allowing localhost origins broadly, or replacing Origin blindly:** it would accept the sibling-origin attack shown in S2.
+    - **`gh codespace ports forward`:** it forwards to the machine running `gh`, not the reviewer's cloud browser.
+  - **The fallback:** route B, a browser inside the Codespace with only its display forwarded. Proposed, not tested here.
