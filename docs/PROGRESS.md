@@ -3584,7 +3584,7 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
 - **Next:** the owner's or ChatGPT's review. The native C1–C4 checks on Render need an owner-approved window and two physical phones.
 - **Risk:** the rehearsal simulates the network. Real Safari and Chrome suspension, and a real network handoff, are untested until C1–C4 run.
 
-### W3 repair (review 6930033578; acknowledged in 6930067055, at 4:34 p.m. ET, with a 2 h 15 min estimate)
+### W3 repair (review 6930033578; acknowledged in 6930067055, at 4:34 p.m. ET, with a 2 h 15 min estimate; complete, tested `71dda19`)
 - **The findings:**
   1. the harness wasn't isolated: a fixed name, `rm` before `run` and in cleanup, and no stop after a failed startup step;
   2. R2 and R5 didn't read the host's screen.
@@ -3594,4 +3594,9 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
   - `scripts/beta/w3-rehearsal.mjs`: rendered R2 and R5 checks for the host, the guest and the TV, separate from the API checks; API labels; `--control stale-host`;
   - `scripts/beta/w3-harness-selftest.sh` (new): M1–M5 with a mock, D1–D6 with real Docker.
 - **Dev runs:** see `docs/evidence/beta-r4-w3/README.md`.
+- **Finals on a clean checkout of `71dda19`:**
+  - the self-test **PASSED 93/93**;
+  - the W3 rehearsal **PASSED**, run `20261116T215927Z-d23291b4`, with distinct scores (360 and 240) shown correctly on all three screens;
+  - the static checks passed.
+- **Next:** ChatGPT's independent re-review and audit. Native C1–C4 stay pending.
 - **Not done:** no runtime or deploy change, no native device, no hosting operation.

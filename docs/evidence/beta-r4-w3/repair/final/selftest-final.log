@@ -1,0 +1,371 @@
+# FINAL self-test on a clean checkout of 71dda19c3c663ad33002ab52bbf3af6d9a72b19a (status 0 lines), 2026-11-16T21:56:42Z
+# command: MCHEZO_CHROMIUM_PATH=/opt/pw-browsers/chromium_headless_shell-1243/chrome-headless-shell-linux64/chrome-headless-shell bash scripts/beta/w3-harness-selftest.sh cgn-render:check --work <scratch>/w3r/final/st
+# containers before: 0
+== w3-harness-selftest 2026-11-16T21:56:42Z, tag 76a2a5, harness <scratch>/w3r/final/repo/scripts/beta/w3-rehearsal.sh (23f6f02648f8b7d7), image cgn-render:check
+-- M1: docker run fails (exit 1)
+     | == w3-rehearsal 2026-11-16T21:56:42Z, run 20261116T215642Z-6b97b7d5, container name w3-svc-20261116T215642Z-6b97b7d5, image mock-image, driver d0c872d9b39481d4, proxy 06b1738ccd75d5f8
+     |    image id: sha256:0000mock
+     |    ports 18443/18480/18080 free
+     |    throwaway code, env file and TLS key in a private directory (mode 700), removed on exit
+     |    FAILED at container: docker run failed: docker: Error response from daemon: mock run failure 
+     | -- cleanup (run 20261116T215642Z-6b97b7d5)
+     |    cleanup #1: private-files
+     |    cleanup #2: nothing owned left to remove
+     |    this run's containers left: 0; this run's processes left: 0; listeners left on 18443/18480/18080: not checked (this run started no listener); private files left: no
+     |    files holding the access code: 0; files holding a beta cookie value: 0
+     | W3 REHEARSAL HARNESS FAILED
+     calls:
+     > docker image inspect --format {{.Id}} mock-image
+     > docker run -d --name w3-svc-20261116T215642Z-6b97b7d5 --label w3.owner=20261116T215642Z-6b97b7d5 -p 127.0.0.1:18080:10000 -e MCHEZO_DATA_DIR=/var/data/cgn-w1 -e MCHEZO_PUBLIC_ORIGIN=https://localhost:18443 -e MCHEZO_TRUST_PROXY=1 --env-file /tmp/w3-private.949iwzBv/code.env mock-image
+     > docker ps -aq --no-trunc --filter label=w3.owner=20261116T215642Z-6b97b7d5
+     > docker ps -aq --filter label=w3.owner=20261116T215642Z-6b97b7d5
+PASS M1 exits non-zero
+PASS M1 the pre-existing w3-svc container survives
+PASS M1 removes only a container its own docker run created
+PASS M1 never deletes by the shared name w3-svc
+PASS M1 leaves none of its own containers behind
+PASS M1 never authorizes (no docker exec)
+PASS M1 never starts the proxy or the driver (no node call)
+PASS M1 does not try the service after the failed start (no health probe)
+-- M2: the image is missing (exit 1)
+     | == w3-rehearsal 2026-11-16T21:56:42Z, run 20261116T215642Z-3ad7434b, container name w3-svc-20261116T215642Z-3ad7434b, image mock-image, driver d0c872d9b39481d4, proxy 06b1738ccd75d5f8
+     |    FAILED at image: the image 'mock-image' is not available locally
+     | -- cleanup (run 20261116T215642Z-3ad7434b)
+     |    cleanup #1: nothing owned left to remove
+     |    cleanup #2: nothing owned left to remove
+     |    this run's containers left: 0; this run's processes left: 0; listeners left on 18443/18480/18080: not checked (this run started no listener); private files left: no
+     |    files holding the access code: 0; files holding a beta cookie value: 0
+     | W3 REHEARSAL HARNESS FAILED
+     calls:
+     > docker image inspect --format {{.Id}} mock-image
+     > docker ps -aq --filter label=w3.owner=20261116T215642Z-3ad7434b
+PASS M2 exits non-zero
+PASS M2 the pre-existing w3-svc container survives
+PASS M2 removes only a container its own docker run created
+PASS M2 never deletes by the shared name w3-svc
+PASS M2 leaves none of its own containers behind
+PASS M2 never authorizes (no docker exec)
+PASS M2 never starts the proxy or the driver (no node call)
+PASS M2 never runs a container
+-- M3: the container exits before it is ready (exit 1)
+     | == w3-rehearsal 2026-11-16T21:56:43Z, run 20261116T215643Z-a22849c5, container name w3-svc-20261116T215643Z-a22849c5, image mock-image, driver d0c872d9b39481d4, proxy 06b1738ccd75d5f8
+     |    image id: sha256:0000mock
+     |    ports 18443/18480/18080 free
+     |    throwaway code, env file and TLS key in a private directory (mode 700), removed on exit
+     |    container a624e0fc6abb (name w3-svc-20261116T215643Z-a22849c5, label w3.owner=20261116T215643Z-a22849c5)
+     |    FAILED at readiness: the container never became ready on /health (state: exited exit=0)
+     | -- cleanup (run 20261116T215643Z-a22849c5)
+     |    cleanup #1: container a624e0fc6abb private-files
+     |    cleanup #2: nothing owned left to remove
+     |    this run's containers left: 0; this run's processes left: 0; listeners left on 18443/18480/18080: 0; private files left: no
+     |    files holding the access code: 0; files holding a beta cookie value: 0
+     | W3 REHEARSAL HARNESS FAILED
+     calls:
+     > docker image inspect --format {{.Id}} mock-image
+     > docker run -d --name w3-svc-20261116T215643Z-a22849c5 --label w3.owner=20261116T215643Z-a22849c5 -p 127.0.0.1:18080:10000 -e MCHEZO_DATA_DIR=/var/data/cgn-w1 -e MCHEZO_PUBLIC_ORIGIN=https://localhost:18443 -e MCHEZO_TRUST_PROXY=1 --env-file /tmp/w3-private.r3VSeK88/code.env mock-image
+     > created a624e0fc6abbff36df7fce98d9b1f765
+     > docker inspect -f {{index .Config.Labels "w3.owner"}} a624e0fc6abbff36df7fce98d9b1f765
+     > docker inspect -f {{.State.Running}} a624e0fc6abbff36df7fce98d9b1f765
+     > docker inspect -f {{.State.Status}} exit={{.State.ExitCode}} a624e0fc6abbff36df7fce98d9b1f765
+     > docker inspect -f {{index .Config.Labels "w3.owner"}} a624e0fc6abbff36df7fce98d9b1f765
+     > docker rm -f -v a624e0fc6abbff36df7fce98d9b1f765
+     > removed a624e0fc6abbff36df7fce98d9b1f765
+     > docker ps -aq --filter label=w3.owner=20261116T215643Z-a22849c5
+PASS M3 exits non-zero
+PASS M3 the pre-existing w3-svc container survives
+PASS M3 removes only a container its own docker run created
+PASS M3 never deletes by the shared name w3-svc
+PASS M3 leaves none of its own containers behind
+PASS M3 never authorizes (no docker exec)
+PASS M3 never starts the proxy or the driver (no node call)
+-- M4: /health reports another revision (exit 1)
+     | == w3-rehearsal 2026-11-16T21:56:44Z, run 20261116T215644Z-e44fa4c2, container name w3-svc-20261116T215644Z-e44fa4c2, image mock-image, driver d0c872d9b39481d4, proxy 06b1738ccd75d5f8
+     |    image id: sha256:0000mock
+     |    ports 18443/18480/18080 free
+     |    throwaway code, env file and TLS key in a private directory (mode 700), removed on exit
+     |    container 8653f9e5f5f7 (name w3-svc-20261116T215644Z-e44fa4c2, label w3.owner=20261116T215644Z-e44fa4c2)
+     |    /health: {"ok":true,"revision":"0000000000000000000000000000000000000000"}
+     |    FAILED at revision: the service reports revision '0000000000000000000000000000000000000000', not the expected 7097ac2bb062925bb296a129f4771f1e68fd522d
+     | -- cleanup (run 20261116T215644Z-e44fa4c2)
+     |    cleanup #1: container 8653f9e5f5f7 private-files
+     |    cleanup #2: nothing owned left to remove
+     |    this run's containers left: 0; this run's processes left: 0; listeners left on 18443/18480/18080: 0; private files left: no
+     |    files holding the access code: 0; files holding a beta cookie value: 0
+     | W3 REHEARSAL HARNESS FAILED
+     calls:
+     > docker image inspect --format {{.Id}} mock-image
+     > docker run -d --name w3-svc-20261116T215644Z-e44fa4c2 --label w3.owner=20261116T215644Z-e44fa4c2 -p 127.0.0.1:18080:10000 -e MCHEZO_DATA_DIR=/var/data/cgn-w1 -e MCHEZO_PUBLIC_ORIGIN=https://localhost:18443 -e MCHEZO_TRUST_PROXY=1 --env-file /tmp/w3-private.2V0EqZyd/code.env mock-image
+     > created 8653f9e5f5f72b06811da1757c946b32
+     > docker inspect -f {{index .Config.Labels "w3.owner"}} 8653f9e5f5f72b06811da1757c946b32
+     > docker inspect -f {{.State.Running}} 8653f9e5f5f72b06811da1757c946b32
+     > curl -sf --max-time 2 -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf --max-time 5 http://127.0.0.1:18080/health
+     > docker inspect -f {{index .Config.Labels "w3.owner"}} 8653f9e5f5f72b06811da1757c946b32
+     > docker rm -f -v 8653f9e5f5f72b06811da1757c946b32
+     > removed 8653f9e5f5f72b06811da1757c946b32
+     > docker ps -aq --filter label=w3.owner=20261116T215644Z-e44fa4c2
+PASS M4 exits non-zero
+PASS M4 the pre-existing w3-svc container survives
+PASS M4 removes only a container its own docker run created
+PASS M4 never deletes by the shared name w3-svc
+PASS M4 leaves none of its own containers behind
+PASS M4 never authorizes (no docker exec)
+PASS M4 never starts the proxy or the driver (no node call)
+-- M5: cgn-authorize fails (exit 1)
+     | == w3-rehearsal 2026-11-16T21:56:44Z, run 20261116T215644Z-cafab630, container name w3-svc-20261116T215644Z-cafab630, image mock-image, driver d0c872d9b39481d4, proxy 06b1738ccd75d5f8
+     |    image id: sha256:0000mock
+     |    ports 18443/18480/18080 free
+     |    throwaway code, env file and TLS key in a private directory (mode 700), removed on exit
+     |    container 35c2a89d2656 (name w3-svc-20261116T215644Z-cafab630, label w3.owner=20261116T215644Z-cafab630)
+     |    /health: {"ok":true,"revision":"7097ac2bb062925bb296a129f4771f1e68fd522d"}
+     |    revision 7097ac2bb062925bb296a129f4771f1e68fd522d is the expected one
+     |    FAILED at authorization: cgn-authorize failed: mock: cgn-authorize failed
+     | -- cleanup (run 20261116T215644Z-cafab630)
+     |    cleanup #1: container 35c2a89d2656 private-files
+     |    cleanup #2: nothing owned left to remove
+     |    this run's containers left: 0; this run's processes left: 0; listeners left on 18443/18480/18080: 0; private files left: no
+     |    files holding the access code: 0; files holding a beta cookie value: 0
+     | W3 REHEARSAL HARNESS FAILED
+     calls:
+     > docker image inspect --format {{.Id}} mock-image
+     > docker run -d --name w3-svc-20261116T215644Z-cafab630 --label w3.owner=20261116T215644Z-cafab630 -p 127.0.0.1:18080:10000 -e MCHEZO_DATA_DIR=/var/data/cgn-w1 -e MCHEZO_PUBLIC_ORIGIN=https://localhost:18443 -e MCHEZO_TRUST_PROXY=1 --env-file /tmp/w3-private.TB3tEawh/code.env mock-image
+     > created 35c2a89d265612ce80aa93ed17c815ae
+     > docker inspect -f {{index .Config.Labels "w3.owner"}} 35c2a89d265612ce80aa93ed17c815ae
+     > docker inspect -f {{.State.Running}} 35c2a89d265612ce80aa93ed17c815ae
+     > curl -sf --max-time 2 -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf --max-time 5 http://127.0.0.1:18080/health
+     > docker exec -i 35c2a89d265612ce80aa93ed17c815ae cgn-authorize /var/data/cgn-w1 https://localhost:18443 1
+     > docker inspect -f {{index .Config.Labels "w3.owner"}} 35c2a89d265612ce80aa93ed17c815ae
+     > docker rm -f -v 35c2a89d265612ce80aa93ed17c815ae
+     > removed 35c2a89d265612ce80aa93ed17c815ae
+     > docker ps -aq --filter label=w3.owner=20261116T215644Z-cafab630
+PASS M5 exits non-zero
+PASS M5 the pre-existing w3-svc container survives
+PASS M5 removes only a container its own docker run created
+PASS M5 never deletes by the shared name w3-svc
+PASS M5 leaves none of its own containers behind
+PASS M5 never starts the proxy or the driver (no node call)
+   sentinel container w3-svc 8d0b0fcba2ab (label w3.selftest=76a2a5)
+   sentinel process 14110: node scripts/beta/render-like-proxy.mjs --https-port 18443 w3-rehearsal.mjs (w3 selftest sentinel) 1200 
+-- D1: a full passing run, with both sentinels present (exit 0, run 20261116T215646Z-bc962ff2)
+     | == w3-rehearsal 2026-11-16T21:56:46Z, run 20261116T215646Z-bc962ff2, container name w3-svc-20261116T215646Z-bc962ff2, image cgn-render:check, driver d0c872d9b39481d4, proxy 06b1738ccd75d5f8
+     |    image id: sha256:7b53109a7d69
+     |    ports 18443/18480/18080 free
+     |    throwaway code, env file and TLS key in a private directory (mode 700), removed on exit
+     |    container 5ccb6415a04f (name w3-svc-20261116T215646Z-bc962ff2, label w3.owner=20261116T215646Z-bc962ff2)
+     |    /health: {"ok":true,"revision":"7097ac2bb062925bb296a129f4771f1e68fd522d"}
+     |    revision 7097ac2bb062925bb296a129f4771f1e68fd522d is the expected one
+     |    AUTHORIZED data_dir=/var/data/cgn-w1 public_origin=https://localhost:18443 trust_proxy=1 (the access code is kept only as a salted hash)
+     |    listeners on 18443/18480/18080 while running (positive control for the cleanup check; expect 3): 3
+     | -- the rehearsal (bounded: timeout 600 s, and the driver's own --max-minutes)
+     |    PASS setup: one active Casual Trivia round with a host, the guest and the TV — {"start":201,"game":true,"seat":true,"tvPlaying":true}
+     |    [3.3s] setup done (run 20261116T215647-857c3e); the round is playing
+     |    PASS R1 question 1 answered and acknowledged before any interruption (locked in, recorded once) — 1 recorded
+     |    [4.2s] R2: the guest's network goes down for 15 s (question 2 on screen, unanswered)
+     |    PASS R2 during the outage the guest's screen says it is reconnecting — Connection lost. Reconnecting… Answers the game confirmed are safe. Taps made now may not arrive.
+     |    PASS R2 during the outage the server marks the guest away (API, read with the host's session) — after 19 ms
+     |    PASS R2 after the network returns: socket reopened, the server marks the guest back (API), the phone usable on question 2 (rendered) — {"socketMs":2,"apiBackMs":61,"usableMs":64}
+     |    PASS R2 the SAME seat and the SAME round (same player id and name, same game, still playing) — {"sameSeat":true,"sameGame":true,"status":"playing"}
+     |    PASS R2 question 1's answer is still recorded, exactly once — 1 recorded
+     |    PASS R2 the host's screen (rendered) still shows the playing round: a Trivia question, no results — Question 1 of 10
+     |    PASS R2 the TV's screen (rendered) still shows the playing round: the featured question, each phone at its own pace — Featured question (Q1 of 10) · each phone goes at its own pace
+     |    PASS R2 both rendered phases agree with the server's status (API): playing — {"server":"playing","host":"Question 1 of 10","tv":"Featured question (Q1 of 10) · each phone goes at its own pace"}
+     |    [19.3s] R2b: a SILENT outage for 15 s: the page isn't told, its socket stays open, traffic stops both ways
+     |    PASS R2b during the silent outage the app's own watchdog noticed (banner: reconnecting) — after 8934 ms
+     |    PASS R2b after the path returns (no online event): socket reopened, the server marks the guest back (API), the phone usable on question 2 (rendered) — {"socketMs":749,"apiBackMs":969,"usableMs":974}
+     |    PASS R2b the same seat and round, question 1 still recorded once — {"sameSeat":true,"sameGame":true,"recorded":1}
+     |    [35.3s] R3: the guest answers question 2; the request reaches the server, its response is lost and the network goes down for 8 s
+     |    PASS R3 the lost-response request reached the server and was accepted — {"status":200}
+     |    PASS R3 while the network was down the phone did not claim the answer was in (it said it couldn't confirm) — the phone said it couldn't confirm the answer ("We couldn’t confirm that — check your connection. If it doesn’t show as in, try again.")
+     |    PASS R3 after the network returns the phone shows question 2's answer as in (the server's record) — after 207 ms
+     |    PASS R3 question 2 recorded exactly once (2 answers in total) — 2 recorded
+     |    PASS R3 replaying the very same request (same clientEventId) is answered from the dedupe and changes nothing — {"status":200,"accepted":true,"recorded":2}
+     |    PASS R3 a different second answer to question 2 is refused (ALREADY_ANSWERED), so nothing can count twice — {"accepted":false,"reason":"ALREADY_ANSWERED"}
+     |    [43.6s] R4: question 3's first response is lost, the network stays up
+     |    PASS R4 the lost first response was recovered by the phone's own retry: shown as in, recorded once (3 answers) — {"shownInMs":1112,"recorded":3}
+     |    [45.0s] R5: the guest finishes through the UI, the host through the API
+     |    PASS R5 the round finished with all 10 of the guest's answers recorded once (server record, API) — {"recorded":10}
+     |    PASS R5 the guest's final score equals the score of the recorded answers, nothing counted twice (server record, API) — {"score":240,"expected":240}
+     |    PASS R5 the TV's screen (rendered) shows the finished round with every recorded score — {"screen":"Game finished · standings","rows":[{"name":"Guest-857c3e","score":"240"},{"name":"Host-857c3e","score":"120"}]}
+     |    PASS R5 the host's screen (rendered) shows the finished round with every recorded score — {"screen":"results","rows":[{"name":"Guest-857c3e","score":"240"},{"name":"You","score":"120"}]}
+     |    PASS R5 the guest's screen (rendered) shows the finished round with every recorded score — {"screen":"results","rows":[{"name":"You","score":"240"},{"name":"Host-857c3e","score":"120"}]}
+     |    evidence: <scratch>/w3r/final/st/D1-76a2a5/run/evidence/w3-20261116T215647-857c3e.json
+     |    W3 REHEARSAL PASSED
+     |    driver exit: 0
+     | -- cleanup (run 20261116T215646Z-bc962ff2)
+     |    cleanup #1: proxy container 5ccb6415a04f private-files
+     |    cleanup #2: nothing owned left to remove
+     |    this run's containers left: 0; this run's processes left: 0; listeners left on 18443/18480/18080: 0; private files left: no
+     |    files holding the access code: 0; files holding a beta cookie value: 0
+     | W3 REHEARSAL HARNESS PASSED
+PASS D1 the run PASSED (exit 0)
+PASS D1 leaves none of its own containers
+PASS D1 leaves none of its own processes
+PASS D1 removed its private files
+PASS D1 cleanup ran again as a no-op
+PASS D1 the sentinel container w3-svc survives
+PASS D1 the sentinel process survives
+   unrelated listener on 127.0.0.1:18443 (pid 14985), connections so far: 0
+-- D2: an unrelated listener already on 18443 (exit 1, run 20261116T215747Z-ae309467)
+     | == w3-rehearsal 2026-11-16T21:57:47Z, run 20261116T215747Z-ae309467, container name w3-svc-20261116T215747Z-ae309467, image cgn-render:check, driver d0c872d9b39481d4, proxy 06b1738ccd75d5f8
+     |    image id: sha256:7b53109a7d69
+     |    FAILED at port preflight: 1 listener(s) already on 18443/18480/18080 (another run or an unrelated service); nothing was started
+     | -- cleanup (run 20261116T215747Z-ae309467)
+     |    cleanup #1: nothing owned left to remove
+     |    cleanup #2: nothing owned left to remove
+     |    this run's containers left: 0; this run's processes left: 0; listeners left on 18443/18480/18080: not checked (this run started no listener); private files left: no
+     |    files holding the access code: 0; files holding a beta cookie value: 0
+     | W3 REHEARSAL HARNESS FAILED
+PASS D2 fails
+PASS D2 fails at the port preflight
+PASS D2 starts no container
+PASS D2 never authorizes and never starts the browser work
+PASS D2 the unrelated listener received no connection
+PASS D2 the unrelated listener is still running
+PASS D2 leaves none of its own containers
+PASS D2 leaves none of its own processes
+PASS D2 removed its private files
+PASS D2 cleanup ran again as a no-op
+PASS D2 the sentinel container w3-svc survives
+PASS D2 the sentinel process survives
+-- D3: a container that never becomes ready (an image that exits at once) (exit 1, run 20261116T215747Z-9327f096)
+     | == w3-rehearsal 2026-11-16T21:57:47Z, run 20261116T215747Z-9327f096, container name w3-svc-20261116T215747Z-9327f096, image public.ecr.aws/docker/library/node@sha256:71bcbb3b215b3fa84b5b167585675072f4c270855e37a599803f1a58141a0716, driver d0c872d9b39481d4, proxy 06b1738ccd75d5f8
+     |    image id: sha256:71bcbb3b215b
+     |    ports 18443/18480/18080 free
+     |    throwaway code, env file and TLS key in a private directory (mode 700), removed on exit
+     |    container 0737bb4adaa3 (name w3-svc-20261116T215747Z-9327f096, label w3.owner=20261116T215747Z-9327f096)
+     |    FAILED at readiness: the container never became ready on /health (state: exited exit=0)
+     | -- cleanup (run 20261116T215747Z-9327f096)
+     |    cleanup #1: container 0737bb4adaa3 private-files
+     |    cleanup #2: nothing owned left to remove
+     |    this run's containers left: 0; this run's processes left: 0; listeners left on 18443/18480/18080: 0; private files left: no
+     |    files holding the access code: 0; files holding a beta cookie value: 0
+     | W3 REHEARSAL HARNESS FAILED
+PASS D3 fails at readiness
+PASS D3 never authorizes and never starts the browser work
+PASS D3 leaves none of its own containers
+PASS D3 leaves none of its own processes
+PASS D3 removed its private files
+PASS D3 cleanup ran again as a no-op
+PASS D3 the sentinel container w3-svc survives
+PASS D3 the sentinel process survives
+-- D4: the service reports an unexpected revision (exit 1, run 20261116T215749Z-696f5b70)
+     | == w3-rehearsal 2026-11-16T21:57:49Z, run 20261116T215749Z-696f5b70, container name w3-svc-20261116T215749Z-696f5b70, image cgn-render:check, driver d0c872d9b39481d4, proxy 06b1738ccd75d5f8
+     |    image id: sha256:7b53109a7d69
+     |    ports 18443/18480/18080 free
+     |    throwaway code, env file and TLS key in a private directory (mode 700), removed on exit
+     |    container c4439f97c401 (name w3-svc-20261116T215749Z-696f5b70, label w3.owner=20261116T215749Z-696f5b70)
+     |    /health: {"ok":true,"revision":"7097ac2bb062925bb296a129f4771f1e68fd522d"}
+     |    FAILED at revision: the service reports revision '7097ac2bb062925bb296a129f4771f1e68fd522d', not the expected 0000000000000000000000000000000000000000
+     | -- cleanup (run 20261116T215749Z-696f5b70)
+     |    cleanup #1: container c4439f97c401 private-files
+     |    cleanup #2: nothing owned left to remove
+     |    this run's containers left: 0; this run's processes left: 0; listeners left on 18443/18480/18080: 0; private files left: no
+     |    files holding the access code: 0; files holding a beta cookie value: 0
+     | W3 REHEARSAL HARNESS FAILED
+PASS D4 fails at the revision check
+PASS D4 never authorizes and never starts the browser work
+PASS D4 leaves none of its own containers
+PASS D4 leaves none of its own processes
+PASS D4 removed its private files
+PASS D4 cleanup ran again as a no-op
+PASS D4 the sentinel container w3-svc survives
+PASS D4 the sentinel process survives
+-- D5: SIGTERM during the browser work (exit 143, run 20261116T215751Z-9619fa30; owned processes just before: 4)
+     | == w3-rehearsal 2026-11-16T21:57:51Z, run 20261116T215751Z-9619fa30, container name w3-svc-20261116T215751Z-9619fa30, image cgn-render:check, driver d0c872d9b39481d4, proxy 06b1738ccd75d5f8
+     |    image id: sha256:7b53109a7d69
+     |    ports 18443/18480/18080 free
+     |    throwaway code, env file and TLS key in a private directory (mode 700), removed on exit
+     |    container 02cfb19d152f (name w3-svc-20261116T215751Z-9619fa30, label w3.owner=20261116T215751Z-9619fa30)
+     |    /health: {"ok":true,"revision":"7097ac2bb062925bb296a129f4771f1e68fd522d"}
+     |    revision 7097ac2bb062925bb296a129f4771f1e68fd522d is the expected one
+     |    AUTHORIZED data_dir=/var/data/cgn-w1 public_origin=https://localhost:18443 trust_proxy=1 (the access code is kept only as a salted hash)
+     |    listeners on 18443/18480/18080 while running (positive control for the cleanup check; expect 3): 3
+     | -- the rehearsal (bounded: timeout 600 s, and the driver's own --max-minutes)
+     |    interrupted (SIGTERM)
+     | -- cleanup (run 20261116T215751Z-9619fa30)
+     |    cleanup #1: driver proxy 1-more-owned-process(es) container 02cfb19d152f private-files
+     |    cleanup #2: nothing owned left to remove
+     |    this run's containers left: 0; this run's processes left: 0; listeners left on 18443/18480/18080: 0; private files left: no
+     |    files holding the access code: 0; files holding a beta cookie value: 0
+     | W3 REHEARSAL HARNESS FAILED
+PASS D5 was interrupted during the browser work (owned processes were running)
+PASS D5 exits 143 and reports the interruption
+PASS D5 keeps the work directory and its logs
+PASS D5 leaves none of its own containers
+PASS D5 leaves none of its own processes
+PASS D5 removed its private files
+PASS D5 cleanup ran again as a no-op
+PASS D5 the sentinel container w3-svc survives
+PASS D5 the sentinel process survives
+-- D6: the stale-host control: the host's page frozen before R5 (exit 1, run 20261116T215807Z-712d53eb)
+     | == w3-rehearsal 2026-11-16T21:58:07Z, run 20261116T215807Z-712d53eb, container name w3-svc-20261116T215807Z-712d53eb, image cgn-render:check, driver d0c872d9b39481d4, proxy 06b1738ccd75d5f8
+     |    image id: sha256:7b53109a7d69
+     |    ports 18443/18480/18080 free
+     |    throwaway code, env file and TLS key in a private directory (mode 700), removed on exit
+     |    container 91c1488be7a4 (name w3-svc-20261116T215807Z-712d53eb, label w3.owner=20261116T215807Z-712d53eb)
+     |    /health: {"ok":true,"revision":"7097ac2bb062925bb296a129f4771f1e68fd522d"}
+     |    revision 7097ac2bb062925bb296a129f4771f1e68fd522d is the expected one
+     |    AUTHORIZED data_dir=/var/data/cgn-w1 public_origin=https://localhost:18443 trust_proxy=1 (the access code is kept only as a salted hash)
+     |    listeners on 18443/18480/18080 while running (positive control for the cleanup check; expect 3): 3
+     | -- the rehearsal (bounded: timeout 600 s, and the driver's own --max-minutes)
+     |    PASS setup: one active Casual Trivia round with a host, the guest and the TV — {"start":201,"game":true,"seat":true,"tvPlaying":true}
+     |    [3.4s] setup done (run 20261116T215808-3f7e42); the round is playing
+     |    PASS R1 question 1 answered and acknowledged before any interruption (locked in, recorded once) — 1 recorded
+     |    [4.2s] R2: the guest's network goes down for 15 s (question 2 on screen, unanswered)
+     |    PASS R2 during the outage the guest's screen says it is reconnecting — Connection lost. Reconnecting… Answers the game confirmed are safe. Taps made now may not arrive.
+     |    PASS R2 during the outage the server marks the guest away (API, read with the host's session) — after 23 ms
+     |    PASS R2 after the network returns: socket reopened, the server marks the guest back (API), the phone usable on question 2 (rendered) — {"socketMs":5,"apiBackMs":64,"usableMs":69}
+     |    PASS R2 the SAME seat and the SAME round (same player id and name, same game, still playing) — {"sameSeat":true,"sameGame":true,"status":"playing"}
+     |    PASS R2 question 1's answer is still recorded, exactly once — 1 recorded
+     |    PASS R2 the host's screen (rendered) still shows the playing round: a Trivia question, no results — Question 1 of 10
+     |    PASS R2 the TV's screen (rendered) still shows the playing round: the featured question, each phone at its own pace — Featured question (Q1 of 10) · each phone goes at its own pace
+     |    PASS R2 both rendered phases agree with the server's status (API): playing — {"server":"playing","host":"Question 1 of 10","tv":"Featured question (Q1 of 10) · each phone goes at its own pace"}
+     |    [19.3s] R2b: a SILENT outage for 15 s: the page isn't told, its socket stays open, traffic stops both ways
+     |    PASS R2b during the silent outage the app's own watchdog noticed (banner: reconnecting) — after 8738 ms
+     |    PASS R2b after the path returns (no online event): socket reopened, the server marks the guest back (API), the phone usable on question 2 (rendered) — {"socketMs":677,"apiBackMs":710,"usableMs":714}
+     |    PASS R2b the same seat and round, question 1 still recorded once — {"sameSeat":true,"sameGame":true,"recorded":1}
+     |    [35.1s] R3: the guest answers question 2; the request reaches the server, its response is lost and the network goes down for 8 s
+     |    PASS R3 the lost-response request reached the server and was accepted — {"status":200}
+     |    PASS R3 while the network was down the phone did not claim the answer was in (it said it couldn't confirm) — the phone said it couldn't confirm the answer ("We couldn’t confirm that — check your connection. If it doesn’t show as in, try again.")
+     |    PASS R3 after the network returns the phone shows question 2's answer as in (the server's record) — after 210 ms
+     |    PASS R3 question 2 recorded exactly once (2 answers in total) — 2 recorded
+     |    PASS R3 replaying the very same request (same clientEventId) is answered from the dedupe and changes nothing — {"status":200,"accepted":true,"recorded":2}
+     |    PASS R3 a different second answer to question 2 is refused (ALREADY_ANSWERED), so nothing can count twice — {"accepted":false,"reason":"ALREADY_ANSWERED"}
+     |    [43.4s] R4: question 3's first response is lost, the network stays up
+     |    PASS R4 the lost first response was recovered by the phone's own retry: shown as in, recorded once (3 answers) — {"shownInMs":1116,"recorded":3}
+     |    [44.8s] CONTROL stale-host: the host's PAGE stops receiving updates now (its API calls, made outside the page, still work)
+     |    [44.8s] R5: the guest finishes through the UI, the host through the API
+     |    PASS R5 the round finished with all 10 of the guest's answers recorded once (server record, API) — {"recorded":10}
+     |    PASS R5 the guest's final score equals the score of the recorded answers, nothing counted twice (server record, API) — {"score":360,"expected":360}
+     |    PASS R5 the TV's screen (rendered) shows the finished round with every recorded score — {"screen":"Game finished · standings","rows":[{"name":"Host-3f7e42","score":"480"},{"name":"Guest-3f7e42","score":"360"}]}
+     |    FAIL R5 the host's screen (rendered) shows the finished round with every recorded score — {"screen":"Question 1 of 10","rows":[]}
+     |    PASS R5 the guest's screen (rendered) shows the finished round with every recorded score — {"screen":"results","rows":[{"name":"Host-3f7e42","score":"480"},{"name":"You","score":"360"}]}
+     |    evidence: <scratch>/w3r/final/st/D6-76a2a5/run/evidence/w3-20261116T215808-3f7e42.json
+     |    CONTROL stale-host: failed checks: R5 the host's screen (rendered) shows the finished round with every recorded score
+     |    W3 REHEARSAL FAILED (1 failure(s))
+     |    driver exit: 1
+     | -- cleanup (run 20261116T215807Z-712d53eb)
+     |    cleanup #1: proxy container 91c1488be7a4 private-files
+     |    cleanup #2: nothing owned left to remove
+     |    this run's containers left: 0; this run's processes left: 0; listeners left on 18443/18480/18080: 0; private files left: no
+     |    files holding the access code: 0; files holding a beta cookie value: 0
+     | W3 REHEARSAL HARNESS FAILED
+PASS D6 the run reports FAILED
+PASS D6 exactly one check failed
+PASS D6 the failed check is the host's rendered R5 check
+PASS D6 the TV's rendered R5 check passed
+PASS D6 the guest's rendered R5 check passed
+PASS D6 the server-record checks passed (the frozen host's API answers still arrived)
+PASS D6 the driver names the control's failed check
+PASS D6 leaves none of its own containers
+PASS D6 leaves none of its own processes
+PASS D6 removed its private files
+PASS D6 cleanup ran again as a no-op
+PASS D6 the sentinel container w3-svc survives
+PASS D6 the sentinel process survives
+   removed this self-test's own sentinel container 8d0b0fcba2ab
+-- 93 passed, 0 failed
+W3 HARNESS SELFTEST PASSED
+selftest exit: 0
+# containers after: 0
