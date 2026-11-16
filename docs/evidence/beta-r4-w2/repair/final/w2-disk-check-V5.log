@@ -1,0 +1,9 @@
+PASS room A: each acknowledged Trivia answer on disk, for its player and question, with its choice — 100/100 matched; 100 stored
+FAIL room A: each acknowledged stroke message's own pieces on disk, batch by batch, in its turn — 45/48 batches matched; stored pieces nobody sent: 0; first problem: stored pieces differ from what was sent
+PASS room A: each acknowledged guesser among its turn's correct guessers on disk — 54/54 matched; 54 stored
+PASS room A: each acknowledged Memory Book note's exact text in the book file — 5/5 acknowledged notes in the book file
+PASS room B: each acknowledged Trivia answer on disk, for its player and question, with its choice — 100/100 matched; 100 stored
+FAIL room B: each acknowledged stroke message's own pieces on disk, batch by batch, in its turn — 42/48 batches matched; stored pieces nobody sent: 0; first problem: stored pieces differ from what was sent
+PASS room B: each acknowledged guesser among its turn's correct guessers on disk — 54/54 matched; 54 stored
+PASS room B: each acknowledged Memory Book note's exact text in the book file — 5/5 acknowledged notes in the book file
+W2 DISK CHECK FAILED (2)

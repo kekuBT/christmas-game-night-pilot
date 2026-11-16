@@ -3496,4 +3496,14 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
     - V8: a reduced or unknown option;
     - V9: an empty 200 `{}` as the acknowledgement.
   - **`docs/beta/render-w2.md`:** the checks and the wording now match what is checked.
+- **A second commit (`889e2fe`)**, after the first final run on `e312fab` (W2 12/12, W1 18/18, static passed): that run's V2 showed proxy 502s counted as "malformed replies 189". "Malformed" now counts only a success status without a well-formed acknowledgement, with `--empty-ack-every` in the proxy and V9 in the self-test.
+- **Final runs** on a clean checkout of the tested commit `889e2fe8cdcf6714cfd82c0fd58f439e09e288f5`:
+  - the W2 self-test **PASSED, 13/13**;
+  - the W1 self-test **PASSED, 18/18**;
+  - the static checks passed: no runtime change; no deploy-file change except `render.yaml`'s already-reviewed comment line from `be5be26`; 0 vitest tests under `scripts/beta`; links and the secret scan clean.
+- **Evidence:** `docs/evidence/beta-r4-w2/README.md` (the repair section) and `docs/evidence/beta-r4-w2/repair/`.
 - **Not done:** no runtime change (`7097ac2`), no deploy-file change (`46f7ff0`), no account operation, no target-host run, no Render metrics.
+- **Next:** ChatGPT's confirmation of the repair. W2 on Render follows W1, with ChatGPT.
+- **Risk:**
+  - The expected counts and the denial text are those of `7097ac2`. A new release that changes them makes W2 fail closed until `W2_SHAPE` or `APP_DENIAL` is updated.
+  - Everything here is local and synthetic, not Render.

@@ -1,0 +1,2 @@
+render-like-proxy LISTENING https=18443 http=18480 backend=127.0.0.1:18080 hops=1 FAULT fail-every=10 action=draw-strokes
+render-like-proxy: 9 intent(s) faulted, 189 request(s) answered by the fault

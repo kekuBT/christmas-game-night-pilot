@@ -27,8 +27,32 @@ No Render, no account, no real data. **This is protocol and load evidence from s
 | Reproduction | Nothing: the unchanged `b38c892` tool, with `--rooms 1` | **W2 PASSED, exit 0:** the defect reproduced, with 11 sockets and both isolation checks passing on no pairs | [dev/repro-before-rooms-1.log](repair/dev/repro-before-rooms-1.log) and its evidence file |
 | Trial 1 | The repaired tool, a full run | PASSED: all 16 checks; both directions refused by the app (401 "Session token required" ×2, close 1008) | [dev/trial-1.log](repair/dev/trial-1.log) and its evidence file |
 | Self-test, dev run | The extended self-test | PASSED, 12/12. Each negative failed on its own check alone. | [dev/w2-selftest-dev1.log](repair/dev/w2-selftest-dev1.log) |
+| Final 1, **superseded** | A clean checkout of `e312fab`. One change since the dev run: a refused handshake now reads `handshake 503`, and V6 asserts that. | W2 self-test PASSED 12/12, W1 self-test PASSED 18/18, static checks passed. **Superseded, by my own reading of its logs:** V2's dropped strokes (proxy 502s) were counted as "malformed replies 189". The verdict was right, but the figure was misleading. | [superseded-e312fab/](repair/superseded-e312fab/) (logs only) |
+| **Final 2** | **A clean checkout of `889e2fe8cdcf6714cfd82c0fd58f439e09e288f5`.** "Malformed" now counts only a success status without a well-formed acknowledgement. The proxy gained `--empty-ack-every`, and the self-test gained V9. | **W2 self-test PASSED, 13/13.** See below. | [final/w2-selftest-final.log](repair/final/w2-selftest-final.log), the 8 evidence files in [final/w2-evidence/](repair/final/w2-evidence/), [final/w2-disk-check-V1.log](repair/final/w2-disk-check-V1.log), [final/w2-disk-check-V5.log](repair/final/w2-disk-check-V5.log), and the proxy logs |
+| **Final 2, W1 self-test** | The same checkout. A regression run, because the proxy changed; its fault options are off by default. The log header names `--mutate-every` and the content length but omits `--empty-ack-every`, which was added after the header was written. | **PASSED, 18/18** | [final/w1-selftest-final.log](repair/final/w1-selftest-final.log) |
+| **Final 2, static checks** | The same checkout | **Passed every step:**<ul><li>no runtime file differs from `7097ac2`;</li><li>no accepted deploy file differs from `46f7ff0`, except `render.yaml`'s comment-only header line from `be5be26`, which was already reviewed;</li><li>eslint and shell syntax pass;</li><li>vitest collects 0 tests under `scripts/beta`;</li><li>22 links, none missing;</li><li>the secret scan finds nothing.</li></ul> | [final/static-final.log](repair/final/static-final.log) |
 
-After the dev run, one more change: the socket leg of a refused handshake now reads `handshake 503` rather than `503`, and V6 asserts that exact detail. The final runs are on the committed files.
+**Final 2, W2 self-test, case by case:**
+- **U:** 37/37 focused tests.
+- **V1:** PASSED, all 16 checks:
+  - 200/200 answers, 96/96 stroke messages, 108/108 guesses, 10/10 notes and 40/40 Ready taps, each acknowledged (0 malformed replies) and read back;
+  - 0 isolation hits;
+  - 22/22 sockets with their own room's projection, and 22/22 open at the end;
+  - both directions refused by the app (401 "Session token required" twice, then close 1008 with the same reason).
+
+  The disk check then PASSED item by item: 100/100 answers, 48/48 batches, 54/54 guessers and 5/5 notes per room.
+- **The negatives, each failing on its own check alone:**
+  - **V2:** stroke acknowledgements, 87/96. The 9 dropped messages were retried; malformed replies 0.
+  - **V3:** stroke read-back, 87/96: exactly the 9 faked batches.
+  - **V4:** passive isolation, 2 hits.
+  - **V5:** stroke read-back, 87/96: exactly the 9 altered batches, with the count right. The disk check failed on the drawing alone, in both rooms ("stored pieces differ from what was sent").
+  - **V6:** active isolation, with 503 on every leg (handshake 503 on the socket).
+  - **V7:** active isolation, with ECONNREFUSED on every leg.
+  - **V9:** stroke acknowledgements, 87/96, with 189 malformed replies counted.
+- **V8:** `--rooms 1`, `--players 4`, `--notes 1` and `--expect-revision` each exited 2, before anything was created.
+- **The secret scan:** no code or cookie in any file.
+
+**One edit to the logs and evidence files:** my local scratch path is replaced with `<scratch>`. Nothing else was changed, and the files were checked for each run's code and for cookie values.
 
 ## Before the repair: the workload, the checks and the negatives
 - **The tool:** `scripts/beta/w2-load.mjs`.
