@@ -3549,3 +3549,71 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
   - static checks: only the fixture and docs changed since `4f08c1a`, runtime unchanged, eslint clean, secret scan empty.
 - **Evidence:** `docs/evidence/beta-r4-w2/repair3/`.
 - **Next:** ChatGPT's verification. Deployment stays on hold.
+
+## Beta R4: W3 reconnect drill preparation (handoff 6929226094; complete, tested `df4f2cf`)
+- **Review 6929226094:** W2 preparation cleared for local readiness. Render W1/W2 and physical-device acceptance haven't run, and deployment stays on hold.
+- **The handoff:** W3 reconnect drill preparation, as one unmerged draft PR stacked on #44 at `2e2257c`:
+  - an operator runbook (host, guest and TV in one active Trivia round; physical iPhone Safari and Android Chrome background and foreground, lock and unlock, and a Wi-Fi to mobile data switch);
+  - one focused local rehearsal against the pinned runtime.
+- **Acknowledged** in 6929252910, at 4:05 p.m. ET, with a 3 h estimate. The PR is **#45**, stacked on #44 at `2e2257c`.
+- **Done:**
+  - **`docs/beta/render-w3.md`, the operator runbook:**
+    - preconditions, and a known starting room and round (host, iPhone Safari, Android Chrome, TV; throwaway names);
+    - what each role shows;
+    - C1 background and foreground, C2 lock and unlock, C3 Wi-Fi to mobile data, C4 an interrupted submission (airplane mode);
+    - the end-of-round score rule (120 × correct);
+    - pass, fail and inconclusive criteria;
+    - an observation budget from the rehearsal (banner within 15 s, usable within 15 s after the network returns, 60 s means fail);
+    - what never enters evidence.
+
+    The native checks stay **pending**.
+  - **`scripts/beta/w3-rehearsal.mjs`** (local only; Chromium host, guest and TV) and **`scripts/beta/w3-rehearsal.sh`** (bounded, self-cleaning, secret scan). The checks:
+    - R1, an acknowledged answer;
+    - R2, an outage the page is told about;
+    - R2b, a silent outage;
+    - R3, an interrupted submission with an outage;
+    - R4, an interrupted submission with the network up;
+    - R5, all answers once and the score consistent.
+- **Dev trials:** trial 1 failed on infrastructure (the Chromium build); trial 2 failed on 8 of my own driver bugs; trials 3 and 4 passed. No runtime defect was found.
+- **Before the finals:** the harness's "listeners left" check couldn't fail here (no `ss` or `netstat`). It now reads `/proc/net/tcp`, with a positive control (`df4f2cf`).
+- **Finals on a clean checkout of `df4f2cf`:**
+  - the rehearsal: **PASSED** twice, runs `20261116T212125-a5d041` and `20261116T212224-5e0187`;
+  - the static checks: passed.
+
+  Evidence: `docs/evidence/beta-r4-w3/`.
+- **Next:** the owner's or ChatGPT's review. The native C1–C4 checks on Render need an owner-approved window and two physical phones.
+- **Risk:** the rehearsal simulates the network. Real Safari and Chrome suspension, and a real network handoff, are untested until C1–C4 run.
+
+### W3 repair (review 6930033578; acknowledged in 6930067055, at 4:34 p.m. ET, with a 2 h 15 min estimate; complete, tested `71dda19`)
+- **The findings:**
+  1. the harness wasn't isolated: a fixed name, `rm` before `run` and in cleanup, and no stop after a failed startup step;
+  2. R2 and R5 didn't read the host's screen.
+- **The reproduction:** a mock-Docker run of the self-test on `d630a94` failed 26 of 36 checks; the pre-existing `w3-svc` was deleted in every case.
+- **The repair:**
+  - `scripts/beta/w3-rehearsal.sh`: run-unique identity and label; label-checked removal of its own container only; a port preflight; every startup step checked, the pinned revision included; ownership-marked processes; private, removed code and key files; idempotent cleanup on exit, INT and TERM;
+  - `scripts/beta/w3-rehearsal.mjs`: rendered R2 and R5 checks for the host, the guest and the TV, separate from the API checks; API labels; `--control stale-host`;
+  - `scripts/beta/w3-harness-selftest.sh` (new): M1–M5 with a mock, D1–D6 with real Docker.
+- **Dev runs:** see `docs/evidence/beta-r4-w3/README.md`.
+- **Finals on a clean checkout of `71dda19`:**
+  - the self-test **PASSED 93/93**;
+  - the W3 rehearsal **PASSED**, run `20261116T215927Z-d23291b4`, with distinct scores (360 and 240) shown correctly on all three screens;
+  - the static checks passed.
+- **Next:** ChatGPT's independent re-review and audit. Native C1–C4 stay pending.
+- **Not done:** no runtime or deploy change, no native device, no hosting operation.
+
+### The beta gate's form refused with `FOREIGN_ORIGIN` (handoff 6932053542; acknowledged in 6932100493, at 6:08 p.m. ET, with a 1 h 30 min estimate)
+- **The verdict: a preview configuration fault, not a runtime defect.** The pinned gate already serves `Referrer-Policy: same-origin` (fix B-13).
+- **The reproduction** (`scripts/beta/gate-origin-repro.mjs`): the real rendered form on the packaged pinned image, under four stand-in forwarders.
+  - **Origin-preserving:** admitted.
+  - **Codespaces-like** (a same-origin `Origin` rewritten to `https://localhost:<port>`, finding F1) with the public origin set to the forwarded URL: **403 `FOREIGN_ORIGIN`**, the reported result.
+  - **Route A's configuration:** admitted.
+  - **An appended `no-referrer`:** `Origin: null`, and 403.
+- **The correction:** route B, or route A only after the probe validates it (`docs/beta/beta-r1-preview-route.md`).
+- **Not changed:** no runtime change, no repair PR.
+- **Evidence:** `docs/evidence/beta-r4-gate-origin/`.
+- **Finals on a clean checkout of `8baa35d`:**
+  - the reproduction **AS EXPECTED**;
+  - `check-beta-gate-https.mjs` **PASSED**: the native form; and foreign, `http`, other-port, localhost and `null` origins refused on the API, the form and WebSocket;
+  - `tests/beta-r1.test.ts` **23/23**;
+  - the static checks passed.
+- **Next:** ChatGPT resumes the audit by a validated route; W3 stays not cleared.

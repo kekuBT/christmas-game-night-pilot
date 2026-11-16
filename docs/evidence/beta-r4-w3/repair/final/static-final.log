@@ -1,0 +1,29 @@
+# FINAL static checks on the clean checkout of 71dda19c3c663ad33002ab52bbf3af6d9a72b19a (status 0 lines), 2026-11-16T22:00:28Z
+## 1. everything changed since the reviewed head d630a94
+ docs/PROGRESS.md                                   |  11 +
+ docs/beta/render-w3.md                             |  29 +-
+ docs/evidence/beta-r4-w3/README.md                 |  66 ++++
+ .../repair/before/mock-selftest-on-d630a94.log     | 406 +++++++++++++++++++++
+ .../beta-r4-w3/repair/dev/mock-selftest-dev1.log   | 146 ++++++++
+ .../beta-r4-w3/repair/dev/selftest-dev1.log        | 367 +++++++++++++++++++
+ .../dev/trial1-w3-20261116T214654-3026cc.json      | 223 +++++++++++
+ docs/evidence/beta-r4-w3/repair/dev/trial1.log     |  50 +++
+ .../dev/trial2-w3-20261116T215020-18241a.json      | 240 ++++++++++++
+ docs/evidence/beta-r4-w3/repair/dev/trial2.log     |  50 +++
+ scripts/beta/w3-harness-selftest.sh                | 261 +++++++++++++
+ scripts/beta/w3-rehearsal.mjs                      | 213 +++++++----
+ scripts/beta/w3-rehearsal.sh                       | 209 ++++++++---
+ 13 files changed, 2157 insertions(+), 114 deletions(-)
+## 2. runtime files changed since 7097ac2 (empty = unchanged)
+(end)
+## 3. deploy files changed since #44's head 2e2257c (empty = unchanged)
+(end)
+## 4. shared helpers and W1/W2 tools changed since 2e2257c (empty = unchanged)
+(end)
+## 5. lint and shell syntax
+eslint scripts/beta: exit 0
+shell syntax: ok
+## 6. relative links in the changed documents
+links: 17 missing: 0
+## 7. secret scan of the changes since d630a94 (private keys, age secret keys, access-code assignments, cookie values, Drive links, scratch paths)
+(end of secret scan)

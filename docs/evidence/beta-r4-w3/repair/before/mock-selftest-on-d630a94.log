@@ -1,0 +1,406 @@
+== w3-harness-selftest 2026-11-16T21:40:52Z, tag ff4b83, harness scripts/beta/w3-rehearsal.sh (f2aa13bf3862746a), image cgn-render:check
+-- M1: docker run fails (exit 1)
+     | == w3-rehearsal 2026-11-16T21:40:52Z, image mock-image (sha256:0000mock), driver ae31eb13dc19f0a8, proxy 06b1738ccd75d5f8
+     | docker: Error response from daemon: mock run failure
+     |    /health: 
+     |    AUTHORIZED data_dir=/var/data/cgn-w1 (mock)
+     |    listeners on 18443/18480/18080 while running (positive control for the cleanup check; expect 3 or more): 0
+     | -- the rehearsal (bounded: timeout 600 s, and the driver's own --max-minutes)
+     |    driver exit: 1
+     | -- cleanup
+     |    container left: 0; listeners left on 18443/18480/18080: 0; processes left: 0 (the throwaway data folder lived in the removed container)
+     |    files holding the access code: 0; files holding a beta cookie value: 0
+     | W3 REHEARSAL HARNESS FAILED
+     calls:
+     > docker image inspect --format {{.Id}} mock-image
+     > docker rm -f -v w3-svc
+     > removed sentinel0000
+     > docker run -d --name w3-svc -p 127.0.0.1:18080:10000 -e MCHEZO_DATA_DIR=/var/data/cgn-w1 -e MCHEZO_PUBLIC_ORIGIN=https://localhost:18443 -e MCHEZO_TRUST_PROXY=1 --env-file <scratch>/w3r/before/work/M1-ff4b83/run/code.env mock-image
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -s http://127.0.0.1:18080/health
+     > docker exec -i w3-svc cgn-authorize /var/data/cgn-w1 https://localhost:18443 1
+     > node <scratch>/wtb1/scripts/beta/render-like-proxy.mjs --https-port 18443 --http-port 18480 --backend 127.0.0.1:18080 --cert <scratch>/w3r/before/work/M1-ff4b83/run/cert.pem --key <scratch>/w3r/before/work/M1-ff4b83/run/key.pem --hops 1
+     > node <scratch>/wtb1/scripts/beta/w3-rehearsal.mjs --origin https://localhost:18443 --code-file <scratch>/w3r/before/work/M1-ff4b83/run/code --evidence <scratch>/w3r/before/work/M1-ff4b83/run/evidence
+     > docker rm -f -v w3-svc
+     > docker ps -aq --filter name=^w3-svc$
+     > docker rm -f -v w3-svc
+PASS M1 exits non-zero
+FAIL M1 the pre-existing w3-svc container survives
+FAIL M1 removes only a container its own docker run created — 1 foreign removal(s)
+FAIL M1 never deletes by the shared name w3-svc
+PASS M1 leaves none of its own containers behind
+FAIL M1 never authorizes (no docker exec)
+FAIL M1 never starts the proxy or the driver (no node call)
+FAIL M1 does not try the service after the failed start (no health probe)
+-- M2: the image is missing (exit 1)
+     | Error: No such image
+     | == w3-rehearsal 2026-11-16T21:41:23Z, image mock-image (), driver ae31eb13dc19f0a8, proxy 06b1738ccd75d5f8
+     |    /health: 
+     |    AUTHORIZED data_dir=/var/data/cgn-w1 (mock)
+     |    listeners on 18443/18480/18080 while running (positive control for the cleanup check; expect 3 or more): 0
+     | -- the rehearsal (bounded: timeout 600 s, and the driver's own --max-minutes)
+     |    driver exit: 1
+     | -- cleanup
+     |    container left: 0; listeners left on 18443/18480/18080: 0; processes left: 0 (the throwaway data folder lived in the removed container)
+     |    files holding the access code: 0; files holding a beta cookie value: 0
+     | W3 REHEARSAL HARNESS FAILED
+     calls:
+     > docker image inspect --format {{.Id}} mock-image
+     > docker rm -f -v w3-svc
+     > removed sentinel0000
+     > docker run -d --name w3-svc -p 127.0.0.1:18080:10000 -e MCHEZO_DATA_DIR=/var/data/cgn-w1 -e MCHEZO_PUBLIC_ORIGIN=https://localhost:18443 -e MCHEZO_TRUST_PROXY=1 --env-file <scratch>/w3r/before/work/M2-ff4b83/run/code.env mock-image
+     > created 35c06037e987b70c8c371766619c3122
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -s http://127.0.0.1:18080/health
+     > docker exec -i w3-svc cgn-authorize /var/data/cgn-w1 https://localhost:18443 1
+     > node <scratch>/wtb1/scripts/beta/render-like-proxy.mjs --https-port 18443 --http-port 18480 --backend 127.0.0.1:18080 --cert <scratch>/w3r/before/work/M2-ff4b83/run/cert.pem --key <scratch>/w3r/before/work/M2-ff4b83/run/key.pem --hops 1
+     > node <scratch>/wtb1/scripts/beta/w3-rehearsal.mjs --origin https://localhost:18443 --code-file <scratch>/w3r/before/work/M2-ff4b83/run/code --evidence <scratch>/w3r/before/work/M2-ff4b83/run/evidence
+     > docker rm -f -v w3-svc
+     > removed 35c06037e987b70c8c371766619c3122
+     > docker ps -aq --filter name=^w3-svc$
+     > docker rm -f -v w3-svc
+PASS M2 exits non-zero
+FAIL M2 the pre-existing w3-svc container survives
+FAIL M2 removes only a container its own docker run created — 1 foreign removal(s)
+FAIL M2 never deletes by the shared name w3-svc
+PASS M2 leaves none of its own containers behind
+FAIL M2 never authorizes (no docker exec)
+FAIL M2 never starts the proxy or the driver (no node call)
+FAIL M2 never runs a container
+-- M3: the container exits before it is ready (exit 1)
+     | == w3-rehearsal 2026-11-16T21:41:53Z, image mock-image (sha256:0000mock), driver ae31eb13dc19f0a8, proxy 06b1738ccd75d5f8
+     |    /health: 
+     |    AUTHORIZED data_dir=/var/data/cgn-w1 (mock)
+     |    listeners on 18443/18480/18080 while running (positive control for the cleanup check; expect 3 or more): 0
+     | -- the rehearsal (bounded: timeout 600 s, and the driver's own --max-minutes)
+     |    driver exit: 1
+     | -- cleanup
+     |    container left: 0; listeners left on 18443/18480/18080: 0; processes left: 0 (the throwaway data folder lived in the removed container)
+     |    files holding the access code: 0; files holding a beta cookie value: 0
+     | W3 REHEARSAL HARNESS FAILED
+     calls:
+     > docker image inspect --format {{.Id}} mock-image
+     > docker rm -f -v w3-svc
+     > removed sentinel0000
+     > docker run -d --name w3-svc -p 127.0.0.1:18080:10000 -e MCHEZO_DATA_DIR=/var/data/cgn-w1 -e MCHEZO_PUBLIC_ORIGIN=https://localhost:18443 -e MCHEZO_TRUST_PROXY=1 --env-file <scratch>/w3r/before/work/M3-ff4b83/run/code.env mock-image
+     > created 97cf1a5515d14a4d3736477421b262f3
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -s http://127.0.0.1:18080/health
+     > docker exec -i w3-svc cgn-authorize /var/data/cgn-w1 https://localhost:18443 1
+     > node <scratch>/wtb1/scripts/beta/render-like-proxy.mjs --https-port 18443 --http-port 18480 --backend 127.0.0.1:18080 --cert <scratch>/w3r/before/work/M3-ff4b83/run/cert.pem --key <scratch>/w3r/before/work/M3-ff4b83/run/key.pem --hops 1
+     > node <scratch>/wtb1/scripts/beta/w3-rehearsal.mjs --origin https://localhost:18443 --code-file <scratch>/w3r/before/work/M3-ff4b83/run/code --evidence <scratch>/w3r/before/work/M3-ff4b83/run/evidence
+     > docker rm -f -v w3-svc
+     > removed 97cf1a5515d14a4d3736477421b262f3
+     > docker ps -aq --filter name=^w3-svc$
+     > docker rm -f -v w3-svc
+PASS M3 exits non-zero
+FAIL M3 the pre-existing w3-svc container survives
+FAIL M3 removes only a container its own docker run created — 1 foreign removal(s)
+FAIL M3 never deletes by the shared name w3-svc
+PASS M3 leaves none of its own containers behind
+FAIL M3 never authorizes (no docker exec)
+FAIL M3 never starts the proxy or the driver (no node call)
+-- M4: /health reports another revision (exit 1)
+     | == w3-rehearsal 2026-11-16T21:42:24Z, image mock-image (sha256:0000mock), driver ae31eb13dc19f0a8, proxy 06b1738ccd75d5f8
+     |    /health: {"ok":true,"revision":"0000000000000000000000000000000000000000"}
+     |    AUTHORIZED data_dir=/var/data/cgn-w1 (mock)
+     |    listeners on 18443/18480/18080 while running (positive control for the cleanup check; expect 3 or more): 0
+     | -- the rehearsal (bounded: timeout 600 s, and the driver's own --max-minutes)
+     |    driver exit: 1
+     | -- cleanup
+     |    container left: 0; listeners left on 18443/18480/18080: 0; processes left: 0 (the throwaway data folder lived in the removed container)
+     |    files holding the access code: 0; files holding a beta cookie value: 0
+     | W3 REHEARSAL HARNESS FAILED
+     calls:
+     > docker image inspect --format {{.Id}} mock-image
+     > docker rm -f -v w3-svc
+     > removed sentinel0000
+     > docker run -d --name w3-svc -p 127.0.0.1:18080:10000 -e MCHEZO_DATA_DIR=/var/data/cgn-w1 -e MCHEZO_PUBLIC_ORIGIN=https://localhost:18443 -e MCHEZO_TRUST_PROXY=1 --env-file <scratch>/w3r/before/work/M4-ff4b83/run/code.env mock-image
+     > created 4223fd8cd0d54eb7dd08cc9e67fd7414
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -s http://127.0.0.1:18080/health
+     > docker exec -i w3-svc cgn-authorize /var/data/cgn-w1 https://localhost:18443 1
+     > node <scratch>/wtb1/scripts/beta/render-like-proxy.mjs --https-port 18443 --http-port 18480 --backend 127.0.0.1:18080 --cert <scratch>/w3r/before/work/M4-ff4b83/run/cert.pem --key <scratch>/w3r/before/work/M4-ff4b83/run/key.pem --hops 1
+     > node <scratch>/wtb1/scripts/beta/w3-rehearsal.mjs --origin https://localhost:18443 --code-file <scratch>/w3r/before/work/M4-ff4b83/run/code --evidence <scratch>/w3r/before/work/M4-ff4b83/run/evidence
+     > docker rm -f -v w3-svc
+     > removed 4223fd8cd0d54eb7dd08cc9e67fd7414
+     > docker ps -aq --filter name=^w3-svc$
+     > docker rm -f -v w3-svc
+PASS M4 exits non-zero
+FAIL M4 the pre-existing w3-svc container survives
+FAIL M4 removes only a container its own docker run created — 1 foreign removal(s)
+FAIL M4 never deletes by the shared name w3-svc
+PASS M4 leaves none of its own containers behind
+FAIL M4 never authorizes (no docker exec)
+FAIL M4 never starts the proxy or the driver (no node call)
+-- M5: cgn-authorize fails (exit 1)
+     | == w3-rehearsal 2026-11-16T21:42:35Z, image mock-image (sha256:0000mock), driver ae31eb13dc19f0a8, proxy 06b1738ccd75d5f8
+     |    /health: {"ok":true,"revision":"7097ac2bb062925bb296a129f4771f1e68fd522d"}
+     |    mock: cgn-authorize failed
+     |    listeners on 18443/18480/18080 while running (positive control for the cleanup check; expect 3 or more): 0
+     | -- the rehearsal (bounded: timeout 600 s, and the driver's own --max-minutes)
+     |    driver exit: 1
+     | -- cleanup
+     |    container left: 0; listeners left on 18443/18480/18080: 0; processes left: 0 (the throwaway data folder lived in the removed container)
+     |    files holding the access code: 0; files holding a beta cookie value: 0
+     | W3 REHEARSAL HARNESS FAILED
+     calls:
+     > docker image inspect --format {{.Id}} mock-image
+     > docker rm -f -v w3-svc
+     > removed sentinel0000
+     > docker run -d --name w3-svc -p 127.0.0.1:18080:10000 -e MCHEZO_DATA_DIR=/var/data/cgn-w1 -e MCHEZO_PUBLIC_ORIGIN=https://localhost:18443 -e MCHEZO_TRUST_PROXY=1 --env-file <scratch>/w3r/before/work/M5-ff4b83/run/code.env mock-image
+     > created 09f3f71a499a3d23767e45f45f63efae
+     > curl -sf -o /dev/null http://127.0.0.1:18080/health
+     > curl -s http://127.0.0.1:18080/health
+     > docker exec -i w3-svc cgn-authorize /var/data/cgn-w1 https://localhost:18443 1
+     > node <scratch>/wtb1/scripts/beta/render-like-proxy.mjs --https-port 18443 --http-port 18480 --backend 127.0.0.1:18080 --cert <scratch>/w3r/before/work/M5-ff4b83/run/cert.pem --key <scratch>/w3r/before/work/M5-ff4b83/run/key.pem --hops 1
+     > node <scratch>/wtb1/scripts/beta/w3-rehearsal.mjs --origin https://localhost:18443 --code-file <scratch>/w3r/before/work/M5-ff4b83/run/code --evidence <scratch>/w3r/before/work/M5-ff4b83/run/evidence
+     > docker rm -f -v w3-svc
+     > removed 09f3f71a499a3d23767e45f45f63efae
+     > docker ps -aq --filter name=^w3-svc$
+     > docker rm -f -v w3-svc
+PASS M5 exits non-zero
+FAIL M5 the pre-existing w3-svc container survives
+FAIL M5 removes only a container its own docker run created — 1 foreign removal(s)
+FAIL M5 never deletes by the shared name w3-svc
+PASS M5 leaves none of its own containers behind
+FAIL M5 never starts the proxy or the driver (no node call)
+-- mock-only: 10 passed, 26 failed
+W3 HARNESS SELFTEST FAILED (mock only)

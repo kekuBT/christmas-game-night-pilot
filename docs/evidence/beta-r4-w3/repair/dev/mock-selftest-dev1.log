@@ -1,0 +1,146 @@
+== w3-harness-selftest 2026-11-16T21:44:03Z, tag c78052, harness <scratch>/wtb1/scripts/beta/w3-rehearsal.sh (23f6f02648f8b7d7), image cgn-render:check
+-- M1: docker run fails (exit 1)
+     | == w3-rehearsal 2026-11-16T21:44:03Z, run 20261116T214403Z-28092f31, container name w3-svc-20261116T214403Z-28092f31, image mock-image, driver ae31eb13dc19f0a8, proxy 06b1738ccd75d5f8
+     |    image id: sha256:0000mock
+     |    ports 18443/18480/18080 free
+     |    throwaway code, env file and TLS key in a private directory (mode 700), removed on exit
+     |    FAILED at container: docker run failed: docker: Error response from daemon: mock run failure 
+     | -- cleanup (run 20261116T214403Z-28092f31)
+     |    cleanup #1: private-files
+     |    cleanup #2: nothing owned left to remove
+     |    this run's containers left: 0; this run's processes left: 0; listeners left on 18443/18480/18080: not checked (this run started no listener); private files left: no
+     |    files holding the access code: 0; files holding a beta cookie value: 0
+     | W3 REHEARSAL HARNESS FAILED
+     calls:
+     > docker image inspect --format {{.Id}} mock-image
+     > docker run -d --name w3-svc-20261116T214403Z-28092f31 --label w3.owner=20261116T214403Z-28092f31 -p 127.0.0.1:18080:10000 -e MCHEZO_DATA_DIR=/var/data/cgn-w1 -e MCHEZO_PUBLIC_ORIGIN=https://localhost:18443 -e MCHEZO_TRUST_PROXY=1 --env-file /tmp/w3-private.bvBP4mVS/code.env mock-image
+     > docker ps -aq --no-trunc --filter label=w3.owner=20261116T214403Z-28092f31
+     > docker ps -aq --filter label=w3.owner=20261116T214403Z-28092f31
+PASS M1 exits non-zero
+PASS M1 the pre-existing w3-svc container survives
+PASS M1 removes only a container its own docker run created
+PASS M1 never deletes by the shared name w3-svc
+PASS M1 leaves none of its own containers behind
+PASS M1 never authorizes (no docker exec)
+PASS M1 never starts the proxy or the driver (no node call)
+PASS M1 does not try the service after the failed start (no health probe)
+-- M2: the image is missing (exit 1)
+     | == w3-rehearsal 2026-11-16T21:44:04Z, run 20261116T214404Z-c3c9bfed, container name w3-svc-20261116T214404Z-c3c9bfed, image mock-image, driver ae31eb13dc19f0a8, proxy 06b1738ccd75d5f8
+     |    FAILED at image: the image 'mock-image' is not available locally
+     | -- cleanup (run 20261116T214404Z-c3c9bfed)
+     |    cleanup #1: nothing owned left to remove
+     |    cleanup #2: nothing owned left to remove
+     |    this run's containers left: 0; this run's processes left: 0; listeners left on 18443/18480/18080: not checked (this run started no listener); private files left: no
+     |    files holding the access code: 0; files holding a beta cookie value: 0
+     | W3 REHEARSAL HARNESS FAILED
+     calls:
+     > docker image inspect --format {{.Id}} mock-image
+     > docker ps -aq --filter label=w3.owner=20261116T214404Z-c3c9bfed
+PASS M2 exits non-zero
+PASS M2 the pre-existing w3-svc container survives
+PASS M2 removes only a container its own docker run created
+PASS M2 never deletes by the shared name w3-svc
+PASS M2 leaves none of its own containers behind
+PASS M2 never authorizes (no docker exec)
+PASS M2 never starts the proxy or the driver (no node call)
+PASS M2 never runs a container
+-- M3: the container exits before it is ready (exit 1)
+     | == w3-rehearsal 2026-11-16T21:44:04Z, run 20261116T214404Z-d69e3039, container name w3-svc-20261116T214404Z-d69e3039, image mock-image, driver ae31eb13dc19f0a8, proxy 06b1738ccd75d5f8
+     |    image id: sha256:0000mock
+     |    ports 18443/18480/18080 free
+     |    throwaway code, env file and TLS key in a private directory (mode 700), removed on exit
+     |    container 5a5a27a13d28 (name w3-svc-20261116T214404Z-d69e3039, label w3.owner=20261116T214404Z-d69e3039)
+     |    FAILED at readiness: the container never became ready on /health (state: exited exit=0)
+     | -- cleanup (run 20261116T214404Z-d69e3039)
+     |    cleanup #1: container 5a5a27a13d28 private-files
+     |    cleanup #2: nothing owned left to remove
+     |    this run's containers left: 0; this run's processes left: 0; listeners left on 18443/18480/18080: 0; private files left: no
+     |    files holding the access code: 0; files holding a beta cookie value: 0
+     | W3 REHEARSAL HARNESS FAILED
+     calls:
+     > docker image inspect --format {{.Id}} mock-image
+     > docker run -d --name w3-svc-20261116T214404Z-d69e3039 --label w3.owner=20261116T214404Z-d69e3039 -p 127.0.0.1:18080:10000 -e MCHEZO_DATA_DIR=/var/data/cgn-w1 -e MCHEZO_PUBLIC_ORIGIN=https://localhost:18443 -e MCHEZO_TRUST_PROXY=1 --env-file /tmp/w3-private.RVQGSulj/code.env mock-image
+     > created 5a5a27a13d28df197917871ebc02a57b
+     > docker inspect -f {{index .Config.Labels "w3.owner"}} 5a5a27a13d28df197917871ebc02a57b
+     > docker inspect -f {{.State.Running}} 5a5a27a13d28df197917871ebc02a57b
+     > docker inspect -f {{.State.Status}} exit={{.State.ExitCode}} 5a5a27a13d28df197917871ebc02a57b
+     > docker inspect -f {{index .Config.Labels "w3.owner"}} 5a5a27a13d28df197917871ebc02a57b
+     > docker rm -f -v 5a5a27a13d28df197917871ebc02a57b
+     > removed 5a5a27a13d28df197917871ebc02a57b
+     > docker ps -aq --filter label=w3.owner=20261116T214404Z-d69e3039
+PASS M3 exits non-zero
+PASS M3 the pre-existing w3-svc container survives
+PASS M3 removes only a container its own docker run created
+PASS M3 never deletes by the shared name w3-svc
+PASS M3 leaves none of its own containers behind
+PASS M3 never authorizes (no docker exec)
+PASS M3 never starts the proxy or the driver (no node call)
+-- M4: /health reports another revision (exit 1)
+     | == w3-rehearsal 2026-11-16T21:44:05Z, run 20261116T214405Z-6aa3a37a, container name w3-svc-20261116T214405Z-6aa3a37a, image mock-image, driver ae31eb13dc19f0a8, proxy 06b1738ccd75d5f8
+     |    image id: sha256:0000mock
+     |    ports 18443/18480/18080 free
+     |    throwaway code, env file and TLS key in a private directory (mode 700), removed on exit
+     |    container 228fb444d188 (name w3-svc-20261116T214405Z-6aa3a37a, label w3.owner=20261116T214405Z-6aa3a37a)
+     |    /health: {"ok":true,"revision":"0000000000000000000000000000000000000000"}
+     |    FAILED at revision: the service reports revision '0000000000000000000000000000000000000000', not the expected 7097ac2bb062925bb296a129f4771f1e68fd522d
+     | -- cleanup (run 20261116T214405Z-6aa3a37a)
+     |    cleanup #1: container 228fb444d188 private-files
+     |    cleanup #2: nothing owned left to remove
+     |    this run's containers left: 0; this run's processes left: 0; listeners left on 18443/18480/18080: 0; private files left: no
+     |    files holding the access code: 0; files holding a beta cookie value: 0
+     | W3 REHEARSAL HARNESS FAILED
+     calls:
+     > docker image inspect --format {{.Id}} mock-image
+     > docker run -d --name w3-svc-20261116T214405Z-6aa3a37a --label w3.owner=20261116T214405Z-6aa3a37a -p 127.0.0.1:18080:10000 -e MCHEZO_DATA_DIR=/var/data/cgn-w1 -e MCHEZO_PUBLIC_ORIGIN=https://localhost:18443 -e MCHEZO_TRUST_PROXY=1 --env-file /tmp/w3-private.JuALYCYq/code.env mock-image
+     > created 228fb444d188d7426a5aedca82c51c87
+     > docker inspect -f {{index .Config.Labels "w3.owner"}} 228fb444d188d7426a5aedca82c51c87
+     > docker inspect -f {{.State.Running}} 228fb444d188d7426a5aedca82c51c87
+     > curl -sf --max-time 2 -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf --max-time 5 http://127.0.0.1:18080/health
+     > docker inspect -f {{index .Config.Labels "w3.owner"}} 228fb444d188d7426a5aedca82c51c87
+     > docker rm -f -v 228fb444d188d7426a5aedca82c51c87
+     > removed 228fb444d188d7426a5aedca82c51c87
+     > docker ps -aq --filter label=w3.owner=20261116T214405Z-6aa3a37a
+PASS M4 exits non-zero
+PASS M4 the pre-existing w3-svc container survives
+PASS M4 removes only a container its own docker run created
+PASS M4 never deletes by the shared name w3-svc
+PASS M4 leaves none of its own containers behind
+PASS M4 never authorizes (no docker exec)
+PASS M4 never starts the proxy or the driver (no node call)
+-- M5: cgn-authorize fails (exit 1)
+     | == w3-rehearsal 2026-11-16T21:44:06Z, run 20261116T214406Z-1248e52f, container name w3-svc-20261116T214406Z-1248e52f, image mock-image, driver ae31eb13dc19f0a8, proxy 06b1738ccd75d5f8
+     |    image id: sha256:0000mock
+     |    ports 18443/18480/18080 free
+     |    throwaway code, env file and TLS key in a private directory (mode 700), removed on exit
+     |    container 8213cf3fb4c9 (name w3-svc-20261116T214406Z-1248e52f, label w3.owner=20261116T214406Z-1248e52f)
+     |    /health: {"ok":true,"revision":"7097ac2bb062925bb296a129f4771f1e68fd522d"}
+     |    revision 7097ac2bb062925bb296a129f4771f1e68fd522d is the expected one
+     |    FAILED at authorization: cgn-authorize failed: mock: cgn-authorize failed
+     | -- cleanup (run 20261116T214406Z-1248e52f)
+     |    cleanup #1: container 8213cf3fb4c9 private-files
+     |    cleanup #2: nothing owned left to remove
+     |    this run's containers left: 0; this run's processes left: 0; listeners left on 18443/18480/18080: 0; private files left: no
+     |    files holding the access code: 0; files holding a beta cookie value: 0
+     | W3 REHEARSAL HARNESS FAILED
+     calls:
+     > docker image inspect --format {{.Id}} mock-image
+     > docker run -d --name w3-svc-20261116T214406Z-1248e52f --label w3.owner=20261116T214406Z-1248e52f -p 127.0.0.1:18080:10000 -e MCHEZO_DATA_DIR=/var/data/cgn-w1 -e MCHEZO_PUBLIC_ORIGIN=https://localhost:18443 -e MCHEZO_TRUST_PROXY=1 --env-file /tmp/w3-private.2nFibwQ1/code.env mock-image
+     > created 8213cf3fb4c94a60496b412a429625c5
+     > docker inspect -f {{index .Config.Labels "w3.owner"}} 8213cf3fb4c94a60496b412a429625c5
+     > docker inspect -f {{.State.Running}} 8213cf3fb4c94a60496b412a429625c5
+     > curl -sf --max-time 2 -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf --max-time 5 http://127.0.0.1:18080/health
+     > docker exec -i 8213cf3fb4c94a60496b412a429625c5 cgn-authorize /var/data/cgn-w1 https://localhost:18443 1
+     > docker inspect -f {{index .Config.Labels "w3.owner"}} 8213cf3fb4c94a60496b412a429625c5
+     > docker rm -f -v 8213cf3fb4c94a60496b412a429625c5
+     > removed 8213cf3fb4c94a60496b412a429625c5
+     > docker ps -aq --filter label=w3.owner=20261116T214406Z-1248e52f
+PASS M5 exits non-zero
+PASS M5 the pre-existing w3-svc container survives
+PASS M5 removes only a container its own docker run created
+PASS M5 never deletes by the shared name w3-svc
+PASS M5 leaves none of its own containers behind
+PASS M5 never starts the proxy or the driver (no node call)
+-- mock-only: 36 passed, 0 failed
+W3 HARNESS SELFTEST PASSED (mock only)

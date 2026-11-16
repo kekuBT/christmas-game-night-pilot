@@ -1,0 +1,38 @@
+# FINAL focused gate regression on a clean checkout of 8baa35dc7c02b1a492d63f216bd36ddb510bd04d, 2026-11-16T23:12:57Z
+# command: node scripts/check-beta-gate-https.mjs
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+PASS P the release is packed and installed (runtime packages only) — 8baa35dc7c02b1a492d63f216bd36ddb510bd04d
+PASS T the packed server runs in production behind the TLS proxy, public origin https://beta.test:<port> — Listening on 127.0.0.1; public origin https://beta.test:40105.
+PASS H1 320px: over HTTPS, a page load without the cookie gets the gate (401) at beta.test — https://beta.test:40105/?join=ABCD
+PASS H1 320px: it fits the screen (no sideways scroll; the card is inside the viewport) — {"scroll":320,"width":320,"left":13,"right":307}
+PASS H1 320px: the code field is labelled, and the field and button are at least 44 px tall — field 47, button 48
+PASS H2 320px: the code form posts with the page's own origin and is answered by the gate (401), not refused as another site — {"status":401,"code":"","origin":"https://beta.test:<port>"}
+PASS H2 320px: a wrong code is refused with a plain message (role=alert), and the page still fits — That code didn’t work. Check it and try again.
+PASS H2 320px: no cookie is set, and the site is still gated
+PASS H1 390px: over HTTPS, a page load without the cookie gets the gate (401) at beta.test — https://beta.test:40105/?join=ABCD
+PASS H1 390px: it fits the screen (no sideways scroll; the card is inside the viewport) — {"scroll":390,"width":390,"left":16,"right":374}
+PASS H1 390px: the code field is labelled, and the field and button are at least 44 px tall — field 47, button 48
+PASS H2 390px: the code form posts with the page's own origin and is answered by the gate (401), not refused as another site — {"status":401,"code":"","origin":"https://beta.test:<port>"}
+PASS H2 390px: a wrong code is refused with a plain message (role=alert), and the page still fits — That code didn’t work. Check it and try again.
+PASS H2 390px: no cookie is set, and the site is still gated
+PASS H3 the right code is accepted (303) on a post carrying the page's own origin — {"status":303,"code":"","origin":"https://beta.test:<port>"}
+PASS H3 the right code returns to the page that was asked for, over HTTPS, query kept — https://beta.test:40105/?join=ABCD
+PASS H3 the cookie is Secure, HttpOnly and SameSite=Lax, host-only for beta.test, and isn't the code — {"secure":true,"httpOnly":true,"sameSite":"Lax","domain":"beta.test","path":"/"}
+PASS H3 the app loads after the gate
+PASS H4 after entry: the same-origin API creates a room and a wss:// socket opens with a live update — {"status":201,"url":"wss://beta.test:40105/?roomId=…&audience=tv","ws":"open, live update received"}
+PASS H4 the app's own live connection is wss:// to the public origin, and the lobby loads — ["wss://beta.test:40105/?…","wss://beta.test:40105/?…"]
+PASS H5 a browser without the cookie: the API refuses (401 BETA_ACCESS_REQUIRED) and the wss:// socket is refused — {"status":401,"code":"BETA_ACCESS_REQUIRED","ws":"refused"}
+PASS H6 control, Origin https://beta.test:<port>: the API answers 201, the code form signs in (303 + cookie), the wss:// handshake opens — 201 / 303 / open
+PASS H6 foreign Origin https://evil.test, with a valid cookie: API 403 FOREIGN_ORIGIN, code form 403 with no cookie, wss:// handshake 403 — 403 FOREIGN_ORIGIN / 403 no cookie / 403
+PASS H6 foreign Origin http://beta.test:<port>, with a valid cookie: API 403 FOREIGN_ORIGIN, code form 403 with no cookie, wss:// handshake 403 — 403 FOREIGN_ORIGIN / 403 no cookie / 403
+PASS H6 foreign Origin https://beta.test:40106, with a valid cookie: API 403 FOREIGN_ORIGIN, code form 403 with no cookie, wss:// handshake 403 — 403 FOREIGN_ORIGIN / 403 no cookie / 403
+PASS H6 foreign Origin https://localhost:<port>, with a valid cookie: API 403 FOREIGN_ORIGIN, code form 403 with no cookie, wss:// handshake 403 — 403 FOREIGN_ORIGIN / 403 no cookie / 403
+PASS H6 foreign Origin null, with a valid cookie: API 403 FOREIGN_ORIGIN, code form 403 with no cookie, wss:// handshake 403 — 403 FOREIGN_ORIGIN / 403 no cookie / 403
+PASS the server never printed the access code
+cleanup: server stopped (0), proxy closed, 3 temporary dir(s) removed
+HTTPS BETA GATE PASSED
+exit: 0
