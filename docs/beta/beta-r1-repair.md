@@ -294,6 +294,11 @@ The times come from the runs' own timestamps (the isolated sweep started at 6:23
   - **An 80-character answer** (the content schema's limit) at 320 and 390.
   - **150% and 200% zoom:** Next question is reachable by scrolling and works; nothing overlaps.
   - **Geography and Math Mayhem** at 320×480, and the sat-out ring.
+  - **Math Mayhem's open flow** (scope answer 6905044291), through the player's own projection, which shows a prompt only once it is opened:
+    - question 2 isn't opened on the locked screen, nor 3.5 s later;
+    - after Next question on a hidden page it still isn't opened (the visibility guard);
+    - once shown, it opens;
+    - its answer is timed from that open (402 ms locally, 498 ms in the gate).
   - **A journey with host 390×844, guest 320×480 and a TV spectator,** on the driver's own server with the test-only 0.2 clock scale (Trivia's 6 minutes become 72 s):
     - **The TV during play:** no answers in its projection or on screen, Reveal included.
     - **Lock and advance,** independently for each player.
@@ -302,6 +307,12 @@ The times come from the runs' own timestamps (the isolated sweep started at 6:23
     - **The server's deadline ends the game:** time ran out, and the guest's 2 answers are scored alone.
     - **The TV's finished review.**
     - **Play again:** both seats kept, nobody ready, and the TV on the new game with no answers.
-- **`LockedAnswer.test.tsx`:** 6 tests on the rendered structure.
+- **`LockedAnswer.test.tsx`:** 6 tests on the rendered structure, including Trivia's TV shortcut on the nonfinal screen.
+- **The scope answer (6905044291, received 9:50 p.m. ET):** it confirmed Geography and Math Mayhem. Only the rendering of the locked answer, continuation and waiting is shared. Each game keeps:
+  - its submission, lock, progression and results;
+  - **Math:** its elapsed-time line and solo flow;
+  - **Trivia:** its TV shortcut;
+  - **Geography:** its prompt and flag handling.
+  **One rendering difference in solo Math:** after the last answer it now says "All your answers are in." instead of offering the enabled "Waiting for the game to finish". The solo flow is otherwise unchanged; check-solo passes 80/80.
 - **The existing drivers the change touches,** run on the working tree: 242/242 checks over seven drivers (`round4/README.md`).
 - **Typecheck and lint:** exit 0.

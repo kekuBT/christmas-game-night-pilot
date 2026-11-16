@@ -1,0 +1,150 @@
+$ node scripts/check-locked-answer.mjs http://localhost:45795
+# timeout 600s | worker w2 | server http://localhost:45795 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/r5full2/test-results/20261116-025903-c955613d-17498/server-data/w2)
+
+[+3.4s] PASS 320x480 setup: a two-player Casual Trivia game starts — {"status":201}
+[+5.1s] PASS 320x480 host L1 Next question is enabled and fully inside the initial viewport — {"next":{"top":186,"bottom":242,"left":15,"right":305,"enabled":true,"hitIsButton":true},"viewport":[320,480]}
+[+5.1s] PASS 320x480 host L1 nothing covers it (the element at its centre is the button) — {"top":186,"bottom":242,"left":15,"right":305,"enabled":true,"hitIsButton":true}
+[+5.1s] PASS 320x480 host L2 it comes before the room's progress — true
+[+5.1s] PASS 320x480 host L2 nothing says to wait for everyone — QUESTION 1 OF 10 · YOUR ANSWER Atacama LOCKED IN Keep going — you don’t need to wait for anyone. 9 questions left. Next question Time left in this game: 6:00 HO
+[+5.1s] PASS 320x480 host L3 no seat token or label overlaps text or a control — []
+[+5.1s] PASS 320x480 host L4 no sideways scroll
+[+6.0s] PASS 320x480 guest L1 Next question is enabled and fully inside the initial viewport — {"next":{"top":186,"bottom":242,"left":15,"right":305,"enabled":true,"hitIsButton":true},"viewport":[320,480]}
+[+6.0s] PASS 320x480 guest L1 nothing covers it (the element at its centre is the button) — {"top":186,"bottom":242,"left":15,"right":305,"enabled":true,"hitIsButton":true}
+[+6.0s] PASS 320x480 guest L2 it comes before the room's progress — true
+[+6.0s] PASS 320x480 guest L2 nothing says to wait for everyone — QUESTION 1 OF 10 · YOUR ANSWER Atacama LOCKED IN Keep going — you don’t need to wait for anyone. 9 questions left. Next question Time left in this game: 5:59 HO
+[+6.0s] PASS 320x480 guest L3 no seat token or label overlaps text or a control — []
+[+6.0s] PASS 320x480 guest L4 no sideways scroll
+[+6.3s] PASS 320x480 T with an 80-character answer, Next question is still inside the initial viewport and uncovered — {"next":{"top":260,"bottom":316,"left":15,"right":305,"enabled":true,"hitIsButton":true},"viewport":[320,480]}
+[+6.3s] PASS 320x480 T the LOCKED IN stamp stays clear of the long answer — 0px²
+[+6.3s] PASS 320x480 T no overlap and no sideways scroll with the long answer — []
+[+6.4s] PASS 320x480 host L1 Next question opens question 2
+[+22.7s] PASS 320x480 host F setup: the rest answered, ending on the final screen
+[+22.7s] PASS 320x480 host F after the final answer: no enabled continuation control — {"next":null,"enabled":[],"text":"QUESTION 10 OF 10 · YOUR LAST ANSWER 13 LOCKED IN ALL YOUR ANSWERS ARE IN K You BF Bartholomew 1/2 have finished Everyon"}
+[+22.7s] PASS 320x480 host F it says all their answers are in — QUESTION 10 OF 10 · YOUR LAST ANSWER 13 LOCKED IN ALL YOUR ANSWERS ARE IN K You BF Bartholomew 1/2 have finished Everyone goes at their own pace. 1 of 2 has finished; 2 of 2 have started. The reveal p
+[+22.7s] PASS 320x480 host F no seat token or label overlaps text or a control — []
+[+22.7s] PASS 320x480 host F no sideways scroll
+[+24.7s] PASS 390x844 setup: a two-player Casual Trivia game starts — {"status":201}
+[+26.5s] PASS 390x844 host L1 Next question is enabled and fully inside the initial viewport — {"next":{"top":192,"bottom":252,"left":18,"right":372,"enabled":true,"hitIsButton":true},"viewport":[390,844]}
+[+26.5s] PASS 390x844 host L1 nothing covers it (the element at its centre is the button) — {"top":192,"bottom":252,"left":18,"right":372,"enabled":true,"hitIsButton":true}
+[+26.5s] PASS 390x844 host L2 it comes before the room's progress — true
+[+26.5s] PASS 390x844 host L2 nothing says to wait for everyone — QUESTION 1 OF 10 · YOUR ANSWER Mont Blanc LOCKED IN Keep going — you don’t need to wait for anyone. 9 questions left. Next question Time left in this game: 6:00
+[+26.5s] PASS 390x844 host L3 no seat token or label overlaps text or a control — []
+[+26.5s] PASS 390x844 host L4 no sideways scroll
+[+27.4s] PASS 390x844 guest L1 Next question is enabled and fully inside the initial viewport — {"next":{"top":192,"bottom":252,"left":18,"right":372,"enabled":true,"hitIsButton":true},"viewport":[390,844]}
+[+27.4s] PASS 390x844 guest L1 nothing covers it (the element at its centre is the button) — {"top":192,"bottom":252,"left":18,"right":372,"enabled":true,"hitIsButton":true}
+[+27.4s] PASS 390x844 guest L2 it comes before the room's progress — true
+[+27.4s] PASS 390x844 guest L2 nothing says to wait for everyone — QUESTION 1 OF 10 · YOUR ANSWER Mont Blanc LOCKED IN Keep going — you don’t need to wait for anyone. 9 questions left. Next question Time left in this game: 5:59
+[+27.4s] PASS 390x844 guest L3 no seat token or label overlaps text or a control — []
+[+27.4s] PASS 390x844 guest L4 no sideways scroll
+[+27.6s] PASS 390x844 T with an 80-character answer, Next question is still inside the initial viewport and uncovered — {"next":{"top":282,"bottom":342,"left":18,"right":372,"enabled":true,"hitIsButton":true},"viewport":[390,844]}
+[+27.6s] PASS 390x844 T the LOCKED IN stamp stays clear of the long answer — 0px²
+[+27.6s] PASS 390x844 T no overlap and no sideways scroll with the long answer — []
+[+27.7s] PASS 390x844 host L1 Next question opens question 2
+[+43.9s] PASS 390x844 host F setup: the rest answered, ending on the final screen
+[+44.0s] PASS 390x844 host F after the final answer: no enabled continuation control — {"next":null,"enabled":[],"text":"QUESTION 10 OF 10 · YOUR LAST ANSWER Enid Blyton LOCKED IN ALL YOUR ANSWERS ARE IN K You BF Bartholomew 1/2 have finishe"}
+[+44.0s] PASS 390x844 host F it says all their answers are in — QUESTION 10 OF 10 · YOUR LAST ANSWER Enid Blyton LOCKED IN ALL YOUR ANSWERS ARE IN K You BF Bartholomew 1/2 have finished Everyone goes at their own pace. 1 of 2 has finished; 2 of 2 have started. The
+[+44.0s] PASS 390x844 host F no seat token or label overlaps text or a control — []
+[+44.0s] PASS 390x844 host F no sideways scroll
+[+45.9s] PASS 1440x900 setup: a two-player Casual Trivia game starts — {"status":201}
+[+47.7s] PASS 1440x900 host L1 Next question is enabled and fully inside the initial viewport — {"next":{"top":195,"bottom":255,"left":500,"right":940,"enabled":true,"hitIsButton":true},"viewport":[1440,900]}
+[+47.7s] PASS 1440x900 host L1 nothing covers it (the element at its centre is the button) — {"top":195,"bottom":255,"left":500,"right":940,"enabled":true,"hitIsButton":true}
+[+47.7s] PASS 1440x900 host L2 it comes before the room's progress — true
+[+47.7s] PASS 1440x900 host L2 nothing says to wait for everyone — QUESTION 1 OF 10 · YOUR ANSWER Almond LOCKED IN Keep going — you don’t need to wait for anyone. 9 questions left. Next question Time left in this game: 6:00 HOW
+[+47.7s] PASS 1440x900 host L3 no seat token or label overlaps text or a control — []
+[+47.7s] PASS 1440x900 host L4 no sideways scroll
+[+48.6s] PASS 1440x900 guest L1 Next question is enabled and fully inside the initial viewport — {"next":{"top":195,"bottom":255,"left":500,"right":940,"enabled":true,"hitIsButton":true},"viewport":[1440,900]}
+[+48.6s] PASS 1440x900 guest L1 nothing covers it (the element at its centre is the button) — {"top":195,"bottom":255,"left":500,"right":940,"enabled":true,"hitIsButton":true}
+[+48.6s] PASS 1440x900 guest L2 it comes before the room's progress — true
+[+48.6s] PASS 1440x900 guest L2 nothing says to wait for everyone — QUESTION 1 OF 10 · YOUR ANSWER Almond LOCKED IN Keep going — you don’t need to wait for anyone. 9 questions left. Next question Time left in this game: 5:59 HOW
+[+48.6s] PASS 1440x900 guest L3 no seat token or label overlaps text or a control — []
+[+48.6s] PASS 1440x900 guest L4 no sideways scroll
+[+48.7s] PASS 1440x900 host L1 Next question opens question 2
+[+52.3s] PASS zoom150 Z no sideways scroll
+[+52.3s] PASS zoom150 Z no seat token or label overlaps text or a control — []
+[+52.3s] PASS zoom150 Z Next question comes before the room's progress
+[+52.4s] PASS zoom150 Z Next question is reachable by scrolling and uncovered — {"top":225,"bottom":281,"left":14,"right":246,"enabled":true,"hitIsButton":true}
+[+52.4s] PASS zoom150 Z Next question opens question 2
+[+56.6s] PASS zoom200 Z no sideways scroll
+[+56.6s] PASS zoom200 Z no seat token or label overlaps text or a control — []
+[+56.6s] PASS zoom200 Z Next question comes before the room's progress
+[+56.7s] PASS zoom200 Z Next question is reachable by scrolling and uncovered — {"top":246,"bottom":302,"left":14,"right":181,"enabled":true,"hitIsButton":true}
+[+56.7s] PASS zoom200 Z Next question opens question 2
+[+58.7s] PASS geography 320x480 setup: a two-player casual game starts — {"status":201}
+[+60.9s] PASS geography 320x480 host L1 Next question is enabled and fully inside the initial viewport — {"next":{"top":186,"bottom":242,"left":15,"right":305,"enabled":true,"hitIsButton":true},"viewport":[320,480]}
+[+60.9s] PASS geography 320x480 host L1 nothing covers it (the element at its centre is the button) — {"top":186,"bottom":242,"left":15,"right":305,"enabled":true,"hitIsButton":true}
+[+60.9s] PASS geography 320x480 host L2 it comes before the room's progress — true
+[+60.9s] PASS geography 320x480 host L2 nothing says to wait for everyone — QUESTION 1 OF 8 · YOUR ANSWER Patras LOCKED IN Keep going — you don’t need to wait for anyone. 7 questions left. Next question Time left in this game: 6:00 HOW 
+[+60.9s] PASS geography 320x480 host L3 no seat token or label overlaps text or a control — []
+[+60.9s] PASS geography 320x480 host L4 no sideways scroll
+[+61.0s] PASS geography 320x480 host L1 Next question opens question 2
+[+73.5s] PASS geography 320x480 host F setup: the rest answered, ending on the final screen
+[+73.6s] PASS geography 320x480 host F after the final answer: no enabled continuation control — {"next":null,"enabled":[],"text":"QUESTION 8 OF 8 · YOUR LAST ANSWER Rabat LOCKED IN ALL YOUR ANSWERS ARE IN K You BF Bartholomew 1/2 have finished Everyo"}
+[+73.6s] PASS geography 320x480 host F it says all their answers are in — QUESTION 8 OF 8 · YOUR LAST ANSWER Rabat LOCKED IN ALL YOUR ANSWERS ARE IN K You BF Bartholomew 1/2 have finished Everyone goes at their own pace. 1 of 2 has finished; 1 of 2 has started. The reveal p
+[+73.6s] PASS geography 320x480 host F no seat token or label overlaps text or a control — []
+[+73.6s] PASS geography 320x480 host F no sideways scroll
+[+75.5s] PASS math-mayhem 320x480 setup: a two-player casual game starts — {"status":201}
+[+77.8s] PASS math-mayhem 320x480 host L1 Next question is enabled and fully inside the initial viewport — {"next":{"top":275,"bottom":331,"left":15,"right":305,"enabled":true,"hitIsButton":true},"viewport":[320,480]}
+[+77.8s] PASS math-mayhem 320x480 host L1 nothing covers it (the element at its centre is the button) — {"top":275,"bottom":331,"left":15,"right":305,"enabled":true,"hitIsButton":true}
+[+77.8s] PASS math-mayhem 320x480 host L2 it comes before the room's progress — true
+[+77.8s] PASS math-mayhem 320x480 host L2 nothing says to wait for everyone — QUESTION 1 OF 10 · YOUR ANSWER 91 LOCKED IN Answered in 0.9 s — timed by the game from when it sent this question to your phone (+20 within 5 s, +10 within 10 s
+[+77.8s] PASS math-mayhem 320x480 host L3 no seat token or label overlaps text or a control — []
+[+77.8s] PASS math-mayhem 320x480 host L4 no sideways scroll
+[+77.8s] PASS math-mayhem M on the locked screen, question 2 is not opened
+[+81.3s] PASS math-mayhem M still not opened 3.5 s later (nothing opens it from the locked screen)
+[+84.8s] PASS math-mayhem M after Next question on a hidden page, question 2 is still not opened (the visibility guard)
+[+85.1s] PASS math-mayhem M once the page is shown, question 2 opens and its prompt appears
+[+85.4s] PASS math-mayhem M question 2's time runs from that open, not from the lock or Next (the 7 s before it don't count) — 502 ms timed; 276 ms since the prompt appeared
+[+86.2s] PASS math-mayhem 320x480 host L1 Next question opens question 3
+[+100.3s] PASS math-mayhem 320x480 host F setup: the rest answered, ending on the final screen
+[+100.3s] PASS math-mayhem 320x480 host F after the final answer: no enabled continuation control — {"next":null,"enabled":[],"text":"QUESTION 10 OF 10 · YOUR LAST ANSWER 13 LOCKED IN Answered in 0.9 s — timed by the game from when it sent this question "}
+[+100.3s] PASS math-mayhem 320x480 host F it says all their answers are in — QUESTION 10 OF 10 · YOUR LAST ANSWER 13 LOCKED IN Answered in 0.9 s — timed by the game from when it sent this question to your phone (+20 within 5 s, +10 within 10 s, if correct). ALL YOUR ANSWERS AR
+[+100.3s] PASS math-mayhem 320x480 host F no seat token or label overlaps text or a control — []
+[+100.3s] PASS math-mayhem 320x480 host F no sideways scroll
+[+104.5s] PASS sat-out ring 320x480 L3 no seat token or label overlaps text (the guest is the lower seat) — []
+[+107.9s] PASS B setup: Casual Trivia starts with the TV watching — {"status":201}
+[+108.4s] PASS B1 the TV shows the playing game
+[+108.4s] PASS B1 while playing, the TV's projection carries no answers — {"status":"playing","leaks":false}
+[+108.8s] PASS B1 while playing, the TV shows no answer (Reveal says it plays when the game finishes) — mchezo Trivia Showdown Featured question (Q1 of 10) · each phone goes at its own pace Join 3DEFCL The reveal plays here when the game finishes. Question Reveal 
+[+109.8s] PASS B2 host 390x844 L1 Next question is enabled and fully inside the initial viewport — {"next":{"top":192,"bottom":252,"left":18,"right":372,"enabled":true,"hitIsButton":true},"viewport":[390,844]}
+[+109.8s] PASS B2 host 390x844 L1 nothing covers it (the element at its centre is the button) — {"top":192,"bottom":252,"left":18,"right":372,"enabled":true,"hitIsButton":true}
+[+109.8s] PASS B2 host 390x844 L2 it comes before the room's progress — true
+[+109.8s] PASS B2 host 390x844 L2 nothing says to wait for everyone — QUESTION 1 OF 10 · YOUR ANSWER 7 LOCKED IN Keep going — you don’t need to wait for anyone. 9 questions left. Next question Time left in this game: 1:12 HOW THE 
+[+109.8s] PASS B2 host 390x844 L3 no seat token or label overlaps text or a control — []
+[+109.8s] PASS B2 host 390x844 L4 no sideways scroll
+[+109.8s] PASS B2 the host moves on to question 2 by themself
+[+110.7s] PASS B2 guest 320x480 L1 Next question is enabled and fully inside the initial viewport — {"next":{"top":186,"bottom":242,"left":15,"right":305,"enabled":true,"hitIsButton":true},"viewport":[320,480]}
+[+110.7s] PASS B2 guest 320x480 L1 nothing covers it (the element at its centre is the button) — {"top":186,"bottom":242,"left":15,"right":305,"enabled":true,"hitIsButton":true}
+[+110.7s] PASS B2 guest 320x480 L2 it comes before the room's progress — true
+[+110.7s] PASS B2 guest 320x480 L2 nothing says to wait for everyone — QUESTION 1 OF 10 · YOUR ANSWER 7 LOCKED IN Keep going — you don’t need to wait for anyone. 9 questions left. Next question Time left in this game: 1:11 HOW THE 
+[+110.7s] PASS B2 guest 320x480 L3 no seat token or label overlaps text or a control — []
+[+110.7s] PASS B2 guest 320x480 L4 no sideways scroll
+[+110.8s] PASS B2 after a reload on the locked view, the guest resumes at question 2
+[+110.8s] PASS B2 the guest keeps the same seat — player-2
+[+112.0s] PASS B2 the guest's second answer locks (nonfinal screen)
+[+127.5s] PASS B3 host: the rest answered, ending on the final screen
+[+127.5s] PASS B3 host 390x844 F after the final answer: no enabled continuation control — {"next":null,"enabled":[],"text":"QUESTION 10 OF 10 · YOUR LAST ANSWER 45 LOCKED IN ALL YOUR ANSWERS ARE IN K You A Amina 1/2 have finished Everyone goes "}
+[+127.5s] PASS B3 host 390x844 F it says all their answers are in — QUESTION 10 OF 10 · YOUR LAST ANSWER 45 LOCKED IN ALL YOUR ANSWERS ARE IN K You A Amina 1/2 have finished Everyone goes at their own pace. 1 of 2 has finished; 2 of 2 have started. The reveal plays ri
+[+127.5s] PASS B3 host 390x844 F no seat token or label overlaps text or a control — []
+[+127.5s] PASS B3 host 390x844 F no sideways scroll
+[+127.9s] PASS B3 after a reload the host still sees all their answers are in, with no question
+[+127.9s] PASS B3 after the reload there is no continuation control
+[+127.9s]      (the game's server deadline is 52 s away, at scale 0.2, test-only)
+[+181.0s] PASS B4 the host's phone reaches the results with no host action
+[+181.0s] PASS B4 the guest's phone reaches the results too
+[+181.0s] PASS B4 the server ended it at its deadline — {"status":"finished","outcome":{"reason":"deadline","endedAt":1794798914133,"countsOfficially":false,"participation":{"player-1":{"done":10,"of":10,"actions":10},"player-2":{"done":2,"of":10,"actions":2}}}}
+[+181.0s] PASS B4 the guest scored only their 2 answers (0, 120 or 240) — {"player-1":120,"player-2":0}
+[+181.0s] PASS B4 the guest's results say time ran out — TRIVIA SHOWDOWN · CASUAL Keku wins Trivia Showdown K Keku Just for fun. Bragging rights only. You came 2nd of 2 0 pts No points this time. The next game is a fresh start. WHAT’S NEXT Next game: Everyd
+[+181.1s] PASS B5 the TV shows the finished game
+[+181.2s] PASS B6 the host has Play again
+[+181.5s] PASS B6 host: the new game's briefing (seat kept)
+[+181.5s] PASS B6 guest: the new game's briefing (seat kept)
+[+181.5s] PASS B6 a new Trivia game in its briefing — [["trivia","finished"],["trivia","briefing"]]
+[+181.5s] PASS B6 readiness reset: nobody is ready yet
+[+181.8s] PASS B6 the TV follows to the new game
+[+181.8s] PASS B6 the new game's TV projection carries no answers — playing
+[+181.8s] PASS B6 the TV shows no answer for the new game
+[+182.3s] 
+[+182.3s] LOCKED ANSWER CHECK PASSED
+[+182.3s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":19,"pages":19,"peakOpenPages":3}
+
+# PASS (exit 0) in 182.3s | cpu 13.4s, peak memory 370 MB

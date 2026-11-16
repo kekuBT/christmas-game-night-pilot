@@ -45,7 +45,9 @@ Each gate ran from a fresh clone of the exact commit (`scripts/gate.mjs`, three 
 |---|---|---|
 | targeted `20261116-022947-5525dedb-4704` | `5525ded` (the repair) | **FAILED (exit 1), 11/12.** One check in the new driver: "320x480 T the LOCKED IN stamp stays clear of the long answer — 61px²". Every other check of all 12 steps passed, check-locked-answer's other checks included. |
 | targeted `20261116-024127-34996cf4-7748` | `34996cf` (driver fix only; product identical to `5525ded`) | **PASSED (exit 0), 12/12:** check-locked-answer, answer-helper, math, geography, audit-fixes, mchezo, answer-race, solo, session-flow and tv-lifecycle, plus the build and the browser preflight. |
-| full (see below) | `34996cf` | (filled in when it finishes) |
+| full `20261116-024847-34996cf4-10213` | `34996cf` | **CANCELLED (exit 130), by me, after 1 min 59 s:** 6 passed, 3 cancelled, 102 not run. The scope answer 6905044291 arrived and asked for one more Math check, which changes the candidate. The gate cancelled cleanly on SIGTERM, with no process left behind. |
+| targeted `20261116-025541-c955613d-16045` | `c955613` (adds the Math open-flow checks and a unit-test pin; product identical to `5525ded`) | **PASSED (exit 0), 8/8:** check-locked-answer, math, math-timing, geography, solo and answer-helper, plus the build and the browser preflight. |
+| full FULL_RUN_ID | `c955613` | FULL_VERDICT |
 
 **Why the first targeted run failed, measured before changing anything:** `stamp-probe.mjs.txt` and `stamp-probe-after-gate-failure.out.txt`.
 - **The probe:** the same build at 320×480, four locks. It sets the 80-character answer and samples the stamp and answer every 40 ms for 1.4 s.
@@ -53,10 +55,17 @@ Each gate ran from a fresh clone of the exact commit (`scripts/gate.mjs`, three 
 - **So:** the driver measured mid-animation, while the gate loaded the machine. The existing A-01 check (check-audit-fixes) measures after the stamp lands for the same reason.
 - **The fix, driver only (`34996cf`):** after each lock and after setting the long answer, wait until the stamp's animation is no longer running. The local rerun is `after-local-run4-settled-stamp.log`: 136/136, 0 px² at 320 and 390.
 
-**Screenshots from the tested candidate:** `after-34996cf/`, taken by the passing targeted run's check-locked-answer.
+**Screenshots from the final candidate:** `after-c955613/`, taken by the passing targeted run `20261116-025541-c955613d-16045`'s check-locked-answer.
 - the nonfinal and final screens at 320×480, 390×844 and 1440×900;
 - an 80-character answer at 320 and 390;
 - 150% and 200% zoom;
 - Geography and Math Mayhem at 320;
 - the sat-out ring;
 - the journey: the TV playing (Reveal withheld), the host's final screen, the guest's results (time ran out), the TV's finished review, and the TV after Play again.
+
+## The Math open flow (scope answer 6905044291)
+`after-local-run5-math-open-flow.log` (local), then the gate runs above. The check uses the player's own projection with the current protocol, which shows a Math prompt only once its question has been opened.
+- **On the locked screen:** question 2 isn't opened, nor 3.5 s later (longer than the open retry's 3 s).
+- **After Next question on a page that reports itself hidden:** still not opened, the visibility guard. The page's visibility is overridden the way check-math-timing does it.
+- **Once the page is shown:** question 2 opens and its prompt appears.
+- **Its answer is timed from that open:** 402 ms locally and 498 ms in the gate. The 7 s on the locked and hidden screens don't count.

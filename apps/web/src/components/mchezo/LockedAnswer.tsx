@@ -62,7 +62,8 @@ export function LockedAnswer(p: LockedAnswerProps) {
       {p.note}
       <section className="mz-locked__go" aria-label="Keep going">
         <p className="mz-locked__lead" role="status" data-testid="mz-locked-lead">Keep going — you don’t need to wait for anyone. {left}.</p>
-        <Keycap block data-testid={p.nextTestId ?? "mz-next-question"} onClick={p.onNext}>Next question</Keycap>
+        {/* The neutral keycap this screen always used: carrying on is now first, not a new colour (W8). */}
+        <Keycap block variant="neutral" data-testid={p.nextTestId ?? "mz-next-question"} onClick={p.onNext}>Next question</Keycap>
         {p.publicGame && <GameClock game={p.publicGame} />}
       </section>
       {!p.solo && (

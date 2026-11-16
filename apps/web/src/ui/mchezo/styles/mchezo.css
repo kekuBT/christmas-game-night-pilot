@@ -243,8 +243,8 @@
 .mz-locked__go { display: flex; flex-direction: column; gap: 10px; margin-top: 14px; }
 .mz-locked__go .mz-game-clock { text-align: center; }
 .mz-locked__lead { margin: 0; text-align: center; font-size: 16px; font-weight: 700; line-height: 1.35; color: var(--mz-text); text-wrap: balance; }
-/* The room's progress is secondary: set apart below the action. */
-.mz-locked__room { margin-top: 22px; padding-top: 6px; border-top: 1px solid var(--mz-line); }
+/* The room's progress is secondary: set apart below the action by space alone (no new colour on Everyday, W8). */
+.mz-locked__room { margin-top: 28px; }
 /* R5: the bottom seat's token and its name label hang below the ring (token centre at 94%, then
    half a token and a label), so the ring keeps room under itself; the label used to sit on the
    paragraph below. Every caller of the shared waiting ring gets the same room. */

@@ -2189,9 +2189,16 @@ Handoff 6813167965 (with the Stage 9.2 clearance). Spec: `docs/stage9/stage93.md
     4. then "How the room is doing": the same counts-only ring, set apart below.
   - **The last answer:** the screen is labelled "All your answers are in". It keeps the card and the room's wait, with no continuation control. The old enabled "Waiting for the game to finish" keycap is gone; after a reload the existing "All your answers are in" view shows, as before.
   - **The shared ring:** `.mz-wait` keeps 46 px under itself for the bottom seat's token and label. Every caller gets the same room.
-  - **Unchanged:** the server's deadline, scoring, answer immutability, counts-only progress, private projections and the post-finish reveal. Nothing auto-advances; the next question (and Math Mayhem's per-question timing) still opens only on Next question.
+  - **Unchanged:** the server's deadline, scoring, answer immutability, counts-only progress, private projections and the post-finish reveal. Nothing auto-advances. The next question, and Math Mayhem's per-question timing, still opens only through each game's existing open flow after Next question (checked in the browser, visibility guard included).
+  - **Shared rendering only** (scope answer 6905044291): each game keeps its submission, lock, progression and results, and passes its own parts in:
+    - **Math:** its answer-time line, its solo mode and its `mz-math-next` test id;
+    - **Trivia:** its TV shortcut.
+    Solo Math's last answer now reads "All your answers are in." in place of the old keycap; the solo flow is otherwise unchanged.
   - **The drivers:** the shared answer helper and four drivers stop expecting the old keycap. A locked view without Next question now fails loudly instead of being clicked through.
+  - **No new colour on Everyday** (full gate `20261116-025903-c955613d-17498`, W8). The first version gave Next question the orange brand keycap and a divider line above the room's progress. Those were the screen's only two new styles. They are back to the screen's own neutral keycap, and spacing alone sets the room apart.
+  - **W8_INTENDED** in `check-warm-ivory.mjs` lists the locked screen's re-keyed elements (it gained test ids). Under the guard's rule, each must still reuse a style the base screen had: 44 such changes, 0 new styles, 0 missing.
   - **Alternatives rejected:**
     - A sticky Next question over the old layout: it still says to wait, and it covers content at enlarged text.
+    - Re-recording the Everyday baseline: it would accept the two new styles without a review. Keeping the screen's own styles keeps W8's promise.
     - Auto-advancing: excluded by the review.
     - Fixing Trivia alone: it would leave the same defect in Geography and Math Mayhem.
