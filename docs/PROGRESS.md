@@ -3859,3 +3859,20 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
   - W4 self-test, 81/81;
   - the round-5 drill, 19/19.
 - **Next:** the new report on #49, linked on #5 and #48.
+- **Reported** in 6941116920 (repair 2); linked on #5 and #48.
+- **Review 6941129590: W6 local preparation CLEARED.** The non-blocking observation is that the TV entry screen's optional spectator action sits lower than the name field. W7 was handed off in the same comment.
+
+## Beta R4: W7 rollback preparation (handoff 6941129590; in progress)
+- **Acknowledged** in 6941405417 at 2:14 a.m. ET. The estimate is about 2 h, plus 1 h of contingency.
+- **The branch** is `claude/beta-r4-w7-rollback`, from #49's head `d2b1242`, as a stacked draft PR.
+- **The scope** (local only, $0, throwaway fixtures):
+  - the predecessor artifact and its data-format compatibility;
+  - the revert-commit path through the same artifact gate, inside a W5 backup/receipt window under the W6 guard;
+  - the provider one-click rollback modelled as stale environment values;
+  - the denials;
+  - the runbook `docs/beta/render-w7.md`.
+- **Unchanged:** the runtime and the canonical release pins stay `7097ac2`. There is no Render operation, no production data and no owner key.
+- **The predecessor:** there is NO audited predecessor artifact. `7097ac2` (archive `a693c543…`) is the first audited archive of this route, so the actual predecessor-artifact check cannot pass. To test the protocol, a clearly labelled LOCAL SURROGATE is built from `f93e9cb`, the commit before the R5 UI changes (`docs/evidence/beta-r4-w7/runners/build-predecessor.sh`):
+  - archive SHA-256 `e34c6c1c…16210`;
+  - inventory 144 files, SHA-256 `338e6931…d1d3`;
+  - the differences from `7097ac2`: only the web bundle (`apps/web/dist`), with the server, content and packages identical (`git diff f93e9cb 7097ac2 -- src package.json package-lock.json` is empty).
