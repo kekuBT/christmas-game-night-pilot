@@ -1,0 +1,117 @@
+== w6-rehearsal 2026-11-17T05:22:38Z, run 20261117T052238Z-48824f02, image cgn-render:check
+   scripts: w6-rehearsal.sh a430fd546ff1589c, w6-check.mjs 075adc94de6e6603, w5-seed.mjs 660df9e1e4b1005d
+   throwaway code, a DISPOSABLE test identity (receiving side), TLS key and the runbook's probe in a private folder (mode 700), removed on exit
+PASS service A ready on /var/data/cgn-w1, /health on the pinned revision
+   AUTHORIZED data_dir=/var/data/cgn-w1 public_origin=https://localhost:18643 trust_proxy=1 (the access code is kept only as a salted hash)
+PASS maintenance on: the PUBLIC /health answers 503
+PASS the image's cgn-backup is byte-identical to the reviewed deploy/render/cgn-backup.sh
+PASS the image's cgn-entrypoint is byte-identical to the reviewed deploy/render/cgn-entrypoint.sh
+PASS the image's cgn-authorize is byte-identical to the reviewed deploy/render/cgn-authorize.sh
+   datatool (in the pinned image): cd5ec360591a928bc5943766dcf174eac31739be59a4f9edff2965af99555adb
+   SEED {"roomId":"room-mwk8xbua-67510","warmGameId":"game-1","secondGameId":"game-2","entryId":"book-1","entrySources":["evt-11"],"hostPlayerId":"player-1","guestPlayerId":"player-2","questions":["trv-scie-015","trv-ever-099","trv-scie-123","trv-geog-034","trv-scie-014","trv-scie-010","trv-spor-084","trv-math-094","trv-food-076","trv-scie-124"],"acked":[{"who":"guest","playerId":"player-2","questionId":"trv-scie-015","ackAt":"2026-11-17T05:22:40.488Z"},{"who":"guest","playerId":"player-2","questionId":"trv-ever-099","ackAt":"2026-11-17T05:22:40.491Z"},{"who":"host","playerId":"player-1","questionId":"trv-scie-015","ackAt":"2026-11-17T05:22:40.494Z"}]}
+   [B1] cgn-backup: stopping the server (pid 10)
+   [B1] cgn-backup: server stopped
+   [B1] backup OK: 1 room(s), 1 Memory Book(s), 3 file(s), verified
+   [B1] verify OK: 3 file(s) match the manifest of 2026-11-17T05:22:40.793Z
+   [B1] cgn-backup: hold released
+   [B1] BACKUP_OK /var/data/backups/cgn-20261117T052240Z.tar.age sha256=36317a9539df260784a427195ba721b0e8b9380f9f95ef7b22f0e4f865ca6d07 files=4 server_stopped_s=0
+PASS B1 (the backup to restore): cgn-backup exit 0, exactly one BACKUP_OK
+   PASS the room answers after the backup, with the host's existing seat (no rejoin) — HTTP 200
+   PASS the guest's existing seat still works (no rejoin) — HTTP 200
+   PASS the approved "W5 seed" entry is still there and approved — HTTP 200
+   PASS a NEW answer after the backup is acknowledged (the original service resumed) — HTTP 200 accepted=true
+   RESUME OK (0 failed)
+PASS the original service moved on after B1 (a new acknowledged answer): the current data differs from B1
+   [B2] cgn-backup: stopping the server (pid 143)
+   [B2] cgn-backup: server stopped
+   [B2] backup OK: 1 room(s), 1 Memory Book(s), 3 file(s), verified
+   [B2] verify OK: 3 file(s) match the manifest of 2026-11-17T05:22:42.573Z
+   [B2] cgn-backup: hold released
+   [B2] BACKUP_OK /var/data/backups/cgn-20261117T052242Z.tar.age sha256=5e9f5ce97b1027ac4cbe824f5333023000cd538983f17aed3518d6a0ab661524 files=4 server_stopped_s=0
+   [chain b2] RECEIPT_OK <work>/w6-20261117T052238Z-48824f02/chain-b2/fetched/cgn-20261117T052242Z.tar.age sha256=5e9f5ce97b1027ac4cbe824f5333023000cd538983f17aed3518d6a0ab661524 files=4 copy=<private>/receive-b2/20261117T052242Z
+PASS B2 (a FRESH same-window backup of the CURRENT data): BACKUP_OK, then RECEIPT_OK on its fetched-back copy
+-- N1: a receipt must exist for EXACTLY the backup being restored, or nothing is uploaded
+   [chain b1-changed] RECEIPT_FAILED: the archive's SHA-256 is d1b5736a4c2374038d872c7fc81e11a148f0ace1b1bc5ab92adcf74e6cc268a7, not the expected 36317a9539df260784a427195ba721b0e8b9380f9f95ef7b22f0e4f865ca6d07
+PASS N1a a changed fetched copy: RECEIPT_FAILED, no receipt record, the upload gate refuses
+PASS N1b B2's receipt offered for B1: the upload gate refuses (another backup's hash)
+PASS N1 nothing was uploaded by the refused cases (no staging folder)
+   [chain b1] RECEIPT_OK <work>/w6-20261117T052238Z-48824f02/chain-b1/fetched/cgn-20261117T052240Z.tar.age sha256=36317a9539df260784a427195ba721b0e8b9380f9f95ef7b22f0e4f865ca6d07 files=4 copy=<private>/receive-b1/20261117T052240Z
+PASS B1 received: RECEIPT_OK on its fetched-back copy, with the hash from B1's BACKUP_OK line
+-- N2: an invalid or incomplete staged copy is refused by datatool verify; nothing is restored
+PASS N2 a(n) incomplete staged copy: datatool verify refuses (exit 1), and no restore target exists
+PASS N2 a(n) changed staged copy: datatool verify refuses (exit 1), and no restore target exists
+PASS the verified copy uploaded as the service user (LOCAL SURROGATE for scp -s): every file owned by cgn
+   [verify] verify OK: 3 file(s) match the manifest of 2026-11-17T05:22:40.793Z
+PASS datatool verify on the instance accepts the uploaded copy
+   [restore] restore OK: 1 room(s), 1 Memory Book(s) restored and verified. Next, as the user the server runs as: datatool check --data /var/data/cgn-w6
+PASS datatool restore into a NEW folder (/var/data/cgn-w6), as the service user
+   [check] check OK: 1 room(s), 1 Memory Book(s); owned by this user (uid 10001) and private; the lock and a test write worked. A server run by this user can use it.
+PASS datatool check on /var/data/cgn-w6, as the service user
+PASS the restored folder is the service user's and private (every file cgn, folder 700)
+   PASS the restored folder holds exactly B1's data files (the manifest aside) — 3 file(s)
+   PASS the score ledger is identical to B1's — 16 event(s)
+   PASS the second game keeps its answers where the pinned runtime stores them (extra.answers)
+   PASS the guest's pre-backup answer to trv-scie-015 is restored with its submitted value
+   PASS the guest's pre-backup answer to trv-ever-099 is restored with its submitted value
+   PASS the host's pre-backup answer to trv-scie-015 is restored with its submitted value
+   PASS the post-backup answer is ABSENT (the restore is B1's point in time)
+   PASS the approved "W5 seed" entry is restored, linked to the warm-up game's finish
+   RESTORED OK (0 failed)
+PASS the restored folder holds B1's state exactly (files, ledger, answer values, approved entry; not the later answer)
+-- N3: an occupied target is refused; what is there stays
+PASS N3 datatool restore into an occupied folder refuses (exit 1), and its file is unchanged
+-- N4: a start on the target WITHOUT authorizing it: refused (exit 78); recovery onto the original
+PASS N4 the guard refuses the unauthorized target: exit 78, a REFUSED line, and no server started
+PASS N4 recovery: the original comes back on the pinned revision, its files unchanged by the refused attempt
+-- CUTOVER: maintenance on; preflight; authorize the target; graceful stop; one writer; start; private probe; reopen
+   preflight: B2 receipt for this window: yes; target checked: yes; target differs from the original: yes
+PASS preflight: a same-window B2 receipt, a checked target, a separate folder
+PASS cgn-authorize records the target (from the live instance, before the switch)
+   stop: docker stop exit 0; state exited, exit code 0, OOM-killed false
+PASS the original writer stopped gracefully (exit 0)
+PASS single writer: the old container removed and confirmed gone, no container on the volume before the start
+PASS startup evidence: the entrypoint says the environment matches the authorized configuration
+-- N5: a revision mismatch at the reopen gate: the ingress stays in maintenance
+   [reopen gate] private probe: PROBE 2026-11-17T05:22:49.236Z UP 7097ac2bb062925bb296a129f4771f1e68fd522d; expected 0000000000000000000000000000000000000000
+PASS N5 the reopen gate refuses a revision that isn't the expected one, and the PUBLIC side stays 503
+   [reopen gate] private probe: PROBE 2026-11-17T05:22:49.490Z UP 7097ac2bb062925bb296a129f4771f1e68fd522d; expected 7097ac2bb062925bb296a129f4771f1e68fd522d
+PASS the reopen gate: private probe UP on the pinned revision, then the ingress reopens (PUBLIC /health 200)
+   PASS the access gate admits the throwaway code
+   PASS the original HOST seat works, with no rejoin — HTTP 200
+   PASS the original GUEST seat works, with no rejoin — HTTP 200
+   PASS the approved "W5 seed" entry is there
+   PASS a repeated answer to an already-restored answer is refused (ALREADY_ANSWERED) — HTTP 200 ALREADY_ANSWERED
+   PASS …and the restored answer keeps its submitted value
+   PASS a NEW answer on the restored data is acknowledged — HTTP 200
+   PASS a replay of the same event id records nothing twice (one answer, its value) — HTTP 200 accepted=true reason=
+   PASS the host has exactly its pre-backup answer and the new one — 2
+   LIVE restored OK (0 failed)
+PASS through the reopened ingress: the original seats, the approved entry, a repeated answer refused, a replay not doubled
+PASS the original folder is preserved: its fingerprint after the switch equals the one taken at the stop
+-- FALLBACK: the same cutover back to the retained original folder
+PASS fallback: authorize the original from the live instance, graceful stop, one writer
+   [reopen gate] private probe: PROBE 2026-11-17T05:22:51.882Z UP 7097ac2bb062925bb296a129f4771f1e68fd522d; expected 7097ac2bb062925bb296a129f4771f1e68fd522d
+   PASS the access gate admits the throwaway code
+   PASS the original HOST seat works, with no rejoin — HTTP 200
+   PASS the original GUEST seat works, with no rejoin — HTTP 200
+   PASS the approved "W5 seed" entry is there
+   PASS the retained folder's later state is back: the post-backup answer, with its value
+   PASS the host's pre-backup answer keeps its submitted value
+   LIVE fallback OK (0 failed)
+PASS the fallback serves the retained folder's later state (the post-backup answer), the seats and the approved entry
+-- N6: the target fails to start AFTER it was authorized (a target that breaks after its check)
+   [N6 target] exited 2; last log lines: cgn-entrypoint: the environment matches the authorized configuration This user (uid 10001) can't use the data directory /var/data/cgn-w6-n6: the directory is not readable and writable (EACCES). The directory and every file in it must belong to the user the server runs as (mode 0700, files 0600). Aft
+PASS N6 the broken target fails to start (the server exits; the container ends, as a crash-looping instance would)
+PASS N6 FINDING reproduced: the original is now refused too (exit 78), because the record names the broken target
+PASS N6 the original folder is untouched by the failed start and the refusal
+   N6 recovery here: a LOCAL-ONLY one-off container re-authorizes the original. Render offers no one-off job with the disk, and a refusing or crashing instance gives no SSH: this step has NO Render equivalent yet (reported as a finding).
+   [reopen gate] private probe: PROBE 2026-11-17T05:22:56.174Z UP 7097ac2bb062925bb296a129f4771f1e68fd522d; expected 7097ac2bb062925bb296a129f4771f1e68fd522d
+PASS N6 local-only recovery: re-authorized, the original serves the pinned revision again, and the ingress reopens
+PASS at the end: exactly one container on the volume (no competing writer)
+-- cleanup (run 20261117T052238Z-48824f02)
+   cleanup #1: proxy (docker could not list this run's containers) container cbcd8260d404 (docker could not list this run's volumes) volume w6-data-20261117T052238Z-48824f02 private-files(code,keys,sessions,decrypted-copies)
+   cleanup #2: (docker could not list this run's containers) (docker could not list this run's volumes)
+   this run's containers left: UNVERIFIED (docker could not list this run's containers); volumes left: UNVERIFIED (docker could not list this run's volumes); processes left: 0; listeners left on 18680/18643/18644: 0; private files left: no
+   files (the kept run folder and this run's own log) holding the access code, a session token, a gate cookie or an age secret key: 0
+   checks: 39 passed, 0 failed
+W6 REHEARSAL FAILED

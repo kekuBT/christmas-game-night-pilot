@@ -113,7 +113,26 @@ The candidate recoveries and the interim rules are in [render-w6.md](../../beta/
 | [dev3.log](dev/dev3.log) | `20261117T051730Z-28d3ae74` | W6 REHEARSAL PASSED, 39/39. This is after two output fixes: the full `AUTHORIZED` line, and a no-overwrite copy in place of `cp -n`. |
 | [selftest-dev2.log](dev/selftest-dev2.log) | tag `2d0e7a` | W6 SELFTEST PASSED, 13/13, with the new T2 check that the run's own log is in its leak scan |
 
-**The final** on the clean candidate is in `final/`, recorded below once it has run.
+**The final: one clean detached checkout of `b4bba0994f725825ca190c7241c95df2ff2511e1`, status 0 lines, run at 05:22Z.** Both runs below are on that one revision. The `node_modules` link is untracked and ignored.
+
+| Log | Run | Verdict |
+|---|---|---|
+| [static-final.log](final/static-final.log) | `runners/w6-static.sh`, about 10 s | **W6 STATIC CHECKS PASSED.** Nothing outside `docs/` and `scripts/beta/w6-*` changed; the runtime, `w5-seed.mjs` and `deploy/` are unchanged (from `d2e7edf` and from `2e2257c`); the pin is intact; the three pinned scripts match `pins/scripts.sha256`. Also: eslint; `bash -n` on 13 files; `node --check`; 8 relative links, 0 missing; the secret scan found nothing. |
+| [selftest-final.log](final/selftest-final.log) | tag `de127f`, 46 s | **W6 SELFTEST PASSED, 13/13** |
+| [T1-rehearsal.log](final/T1-rehearsal.log) | `20261117T052218Z-68cb538d` | **FAILED at preflight, as expected:** a listener was already on 18680. Nothing started, nothing left. |
+| [T2-rehearsal.log](final/T2-rehearsal.log) | `20261117T052219Z-200994c2`, about 18 s | **W6 REHEARSAL PASSED, 39/39**, with N1–N6. Its own log was in the leak scan: 0 hits. |
+| [T3-rehearsal.log](final/T3-rehearsal.log) | `20261117T052238Z-48824f02` | **FAILED, as expected:** 39/39 checks, but the inventory was UNVERIFIED (the docker shim), so the run is never read as clean. Real docker confirmed the removal. |
+| [T4-rehearsal.log](final/T4-rehearsal.log) | `20261117T052258Z-3cecf71a` | **FAILED, as expected:** SIGTERM after seeding, exit 143. The cleanup ran, and nothing was left. |
+
+**`final/T2-evidence/`** holds T2's run evidence:
+- `provenance.json`: the image id, and the `datatool` and `cgn-receive` hashes;
+- `seed.json`: ids only, no tokens or values;
+- `B1-backup-session.txt` and `B2-backup-session.txt`: the `cgn-backup` sessions;
+- `b1.receipt` and `b2.receipt`: each `BACKUP_OK` hash with its `RECEIPT_OK`;
+- the original's fingerprint at the stop and after the switch (equal);
+- `summary.json`.
+
+The encrypted archives and the decrypted copies aren't published. The decrypted copies and the disposable identity were removed with the run.
 
 ## Limits
 **What this doesn't prove:**

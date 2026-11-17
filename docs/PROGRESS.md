@@ -3798,3 +3798,7 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
     - the selftest PASSED, 12/12, then 13/13 after the log leak-scan check was added.
 - **Finding F-W6-01 (OPEN, reproduced as case N6):** once `cgn-authorize` names the target, a failed start on it leaves the original refused by the guard (exit 78). Re-authorizing needs SSH on a running instance, and Render has no one-off job with the disk. So there is no supported recovery on Render. Locally, a one-off container recovered it. Nothing reviewed was changed. The options are listed for the owner in `render-w6.md`.
 - **Next:** the final on a clean checkout (static checks plus `w6-selftest.sh`), then the new report on #49.
+- **The final** on one clean checkout of the candidate `b4bba09`:
+  - the static checks **PASSED**;
+  - `w6-selftest.sh` **PASSED**, 13/13. The rehearsal `20261117T052219Z-200994c2` passed 39/39, with N1–N6 and F-W6-01 reproduced.
+- **Next:** the new report on #49. W6 on Render, the snapshot exercise, F-W6-01's decision and W7 stay with the owner.

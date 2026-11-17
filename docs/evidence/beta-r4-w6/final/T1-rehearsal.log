@@ -1,0 +1,10 @@
+== w6-rehearsal 2026-11-17T05:22:18Z, run 20261117T052218Z-68cb538d, image cgn-render:check
+   scripts: w6-rehearsal.sh a430fd546ff1589c, w6-check.mjs 075adc94de6e6603, w5-seed.mjs 660df9e1e4b1005d
+   FAILED at preflight: 1 listener(s) already on 18680/18643/18644; nothing was started
+-- cleanup (run 20261117T052218Z-68cb538d)
+   cleanup #1: nothing owned left to remove
+   cleanup #2: nothing owned left to remove
+   this run's containers left: 0; volumes left: 0; processes left: 0; listeners left on 18680/18643/18644: not checked (this run started no listener); private files left: no
+   files (the kept run folder and this run's own log) holding the access code, a session token, a gate cookie or an age secret key: 0
+   checks: 0 passed, 1 failed
+W6 REHEARSAL FAILED
