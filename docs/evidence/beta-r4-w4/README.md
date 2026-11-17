@@ -135,3 +135,19 @@ Labels: **rendered** is a page's own DOM; **API** is the server's record over HT
 - **The one-writer lock is per network namespace.** So L checks it inside the running container. Across containers, what separates writers is the order (stop before start), which the harness follows and Render's disk-backed deploys follow (`docs/beta/beta-r1-architecture.md`, `beta-r4-hosting-proposal.md`).
 - **The browser** is `chrome-headless-shell` 1243, through `MCHEZO_CHROMIUM_PATH`. The harness ran on this machine's Node v22.23.4; the server ran inside the pinned image.
 - **An observation, out of scope:** the TV leaderboard shows a player's negative change (e.g. `−120`) in the gain colour, where the phone's list shows it neutrally.
+
+## The independent verdict (recorded for handoff 6937786587; no run above is re-attributed)
+- **Review 6937786587:** W4 **LOCAL PREPARATION accepted**, together with the integrated stack (#47 + #46, tested `0c42ed6`).
+- **ChatGPT's independent exact-pin live audit, `w4-live-7097ac2`** (6936797118, edited at 04:06Z). ChatGPT ran it; it is not developer evidence.
+  - **How it ran:** a private Codespace, on a clean detached checkout of `7097ac2bb062925bb296a129f4771f1e68fd522d`, built there. `/health` showed the exact pin before and after each transition. Firefox through a private noVNC display, on loopback HTTPS and disposable data.
+  - **What it observed:**
+    - a host, a private-window guest at 390×844, and a TV;
+    - a first round finished 120/120, and the "W4 seed" entry added through Room menu → Memory Book → Add from last finished game, then approved;
+    - **R1:** a graceful `SIGTERM` (exit 0), then the same build restarted;
+    - **R2:** a graceful `SIGTERM`, the old process confirmed gone, then a replacement from a separate directory on the same data, with all 108 compiled files hash-identical to the pinned build;
+    - the guest and TV showing connection loss, then recovering without a rejoin; acknowledged answers surviving; a tap around the restart recorded once;
+    - the final natural deadline: persisted answers host 1 and guest 3, scores 120 and 360 agreeing on host, guest and TV; no duplicated score; the approved seed still linked to its 120/120 result.
+  - **Its limits:** an independently rebuilt exact-SHA runtime with real process transitions. It is not the promotion archive, not a Docker replacement, not a Render deploy or restart, and not physical iPhone Safari or Android Chrome. No synchronized stopwatch measured all three screens; the Render 30-second budget is unmeasured.
+  - **Its product observation:** at a timeout result, the direct "Save a memory" action wasn't visible; the menu path worked. `docs/beta/render-w4.md` now gives that verified path, with direct saving optional.
+- **The developer's local Docker runs above keep their own attribution:** `3eb05bc`'s self-test (81/81), and the earlier ones.
+- **Still pending:** the real Render D1/D2, native-device checks, W5–W8 and launch. The pin stays `7097ac2`.

@@ -1,6 +1,10 @@
 # W4 on Render: the restart drill (Beta R4, handoff 6933392621; review 6935165862)
 
 **Status: prepared. The real W4 is PENDING.** Nothing here has run on Render.
+- **Local preparation: accepted** (review 6937786587). That includes ChatGPT's independent exact-pin live audit, `w4-live-7097ac2` (6936797118).
+  - **What it observed:** two real graceful process transitions (a restart, then a replacement on the same data); host, guest and TV recovering without a rejoin; exact answer counts; final scores of 120 and 360 agreeing on every screen; the approved Memory Book seed preserved.
+  - **Its limits:** an independently rebuilt exact-SHA runtime with real process transitions. It is not the promotion archive, not a Docker replacement, not a Render deploy or restart, and not physical Safari or Android; Firefox at 390×844 is emulation. The 30-second budget on Render is unmeasured.
+  - **The developer's local Docker evidence below is separate,** and keeps its own attribution.
 - **The local rehearsal below** proves the restart mechanics of the pinned artifact on this machine's Docker: a stop and start of the same container, and a fresh container on the same data. **It is not a Render deploy, and not a dashboard restart.**
 - **What W4 is:** the proposal's row (`beta-r4-hosting-proposal.md`): "a manual deploy, and a dashboard restart, each mid-game". The pass condition is "the room restored; acknowledged answers kept; sockets back".
 - **Who runs it:**
@@ -16,7 +20,7 @@
    - the copy is transferred off Render to the owner's chosen storage;
    - `cgn-receive` on the receiving device ends with **`RECEIPT_OK`**.
 
-   **Without both lines from this same window, don't deploy or restart.** The steps are in `deploy/render/README.md` and are W5's.
+   **Without both lines from this same window, don't deploy or restart.** The steps are W5's: [render-w5.md](render-w5.md).
 3. **Maintenance mode:** **on** outside the window. The operator turns it **off** for the drill, records the times, and turns it back **on** at the end.
 4. **The exact revision and data folder:**
    - `/health` reports `"revision":"7097ac2bb062925bb296a129f4771f1e68fd522d"`;
@@ -36,10 +40,14 @@
 ## Start from a known room and round
 1. **Admit every screen** with the throwaway code: the host's, at least one guest's, and the TV's.
 2. **Set up the room:** the host hosts (`W4 Host`); each guest joins (`W4 Guest 1`, …); the TV joins as a spectator.
-3. **Seed a Memory Book note:**
+3. **Seed a Memory Book note.** This is the UI path verified in ChatGPT's independent exact-pin live audit (6936797118):
    - play one short Trivia round to the end;
-   - the host saves a note on its results ("Save a memory", text `W4 seed`);
-   - the note shows in the Memory Book.
+   - from its result, return to the lobby: **Pick another game**, then dismiss the picker;
+   - **Room menu → Memory Book**; enter `W4 seed`; **Add from last finished game**;
+   - **Approve** it, if export eligibility is being checked;
+   - the note shows in the Memory Book, linked to that round's result.
+
+   **Saving straight from the result screen** ("Save a memory") is **optional**: at a timeout result in the audited journey it wasn't visible, and that path hasn't been independently verified.
 4. **Start a second Trivia round.**
    - Each phone answers question 1 and shows `Answer locked in`. Those answers are **acknowledged**: the server confirmed them.
    - Note who answered what, **in words**: never the correct answer.

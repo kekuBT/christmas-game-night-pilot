@@ -1,0 +1,96 @@
+== w5-rehearsal 2026-11-17T04:21:42Z, run 20261117T042142Z-d78b4e5f, image cgn-render:check
+   scripts: w5-rehearsal.sh 8f396647eb19a635, w5-seed.mjs 3c53ce90f714c1ce
+   image id: sha256:7b53109a7d69
+   throwaway access code and two DISPOSABLE test age identities (the receiving side's, and a wrong one) in a private directory (mode 700), removed on exit
+   the test recipient (public, disposable): age1lwq7fzsud9kljx9km5nevpzmzgffjyte0zd26jh9lzzmsztfhytq59h285
+   data volume w5-data-20261117T042142Z-d78b4e5f (label w5.owner=20261117T042142Z-d78b4e5f): throwaway data, removed on exit
+   container 2be1d4dad244 (name w5-svc-20261117T042142Z-d78b4e5f, label w5.owner=20261117T042142Z-d78b4e5f)
+PASS the service is ready and /health reports the pinned revision 7097ac2bb062925bb296a129f4771f1e68fd522d
+   authorized: AUTHORIZED data_dir=/var/data/cgn-w1 public_origin=https://localhost:18543 trust_proxy=1 (the access code is kept only a
+   cgn-backup: repository accca1784e22570e30731e888890dad10d194da99d57809abe3244ae80ccc63c, in the image accca1784e22570e30731e888890dad10d194da99d57809abe3244ae80ccc63c
+   cgn-entrypoint: repository 6c623dd08bbf77ca556099d4f678f3900606d5e760f3231ab59cbc592b4b6157, in the image 6c623dd08bbf77ca556099d4f678f3900606d5e760f3231ab59cbc592b4b6157
+   cgn-receive (run from the repository, unchanged): 2fb3fe903f28707751485460689c4175ed7ea7cf682b505dec8bb74f41b084cd
+   age: in the image v1.2.1 (encrypts); on the receiving side 1.1.1 (decrypts)
+PASS the image's cgn-backup is byte-identical to the reviewed deploy/render/cgn-backup.sh
+PASS the image's cgn-entrypoint is byte-identical to the reviewed deploy/render/cgn-entrypoint.sh
+-- seed: synthetic room, a finished game, an APPROVED Memory Book entry, acknowledged answers (w5-seed.mjs)
+   SEED {"roomId":"room-mwk6qy8b-628916","warmGameId":"game-1","secondGameId":"game-2","entryId":"book-1","entrySources":["evt-11"],"hostPlayerId":"player-1","guestPlayerId":"player-2","questions":["trv-tech-111","trv-scie-007","trv-lang-056","trv-spac-018","trv-lite-051","trv-scie-123","trv-scie-008","trv-scie-005","trv-scie-010","trv-hist-128"],"acked":[{"who":"guest","playerId":"player-2","questionId":"trv-tech-111","ackAt":"2026-11-17T04:21:43.697Z"},{"who":"guest","playerId":"player-2","questionId":"trv-scie-007","ackAt":"2026-11-17T04:21:43.700Z"},{"who":"host","playerId":"player-1","questionId":"trv-tech-111","ackAt":"2026-11-17T04:21:43.703Z"}]}
+PASS the synthetic state was seeded and every seeded write acknowledged
+-- SOURCE: the reviewed cgn-backup, unchanged, inside the container, with no service environment (as an SSH session)
+   | cgn-backup: stopping the server (pid 9)
+   | cgn-backup: server stopped
+   | backup OK: 1 room(s), 1 Memory Book(s), 3 file(s), verified
+   | verify OK: 3 file(s) match the manifest of 2026-11-17T04:21:44.654Z
+   | cgn-backup: hold released
+   | BACKUP_OK /var/data/backups/cgn-20261117T042144Z.tar.age sha256=955d89c0ecadb34cda172dad495f47e41870f973a78313f4150fb077cd5123e0 files=4 server_stopped_s=0
+   cgn-backup exit 0 after 381 ms
+PASS cgn-backup exited 0 with exactly one BACKUP_OK line
+   expected SHA-256, taken ONLY from the session's BACKUP_OK line (the control channel): 955d89c0ecadb34cda172dad495f47e41870f973a78313f4150fb077cd5123e0
+PASS the hold stopped the writer: cgn-backup stopped the server, copied under the data lock, and released the hold
+   server pid before 9, after 144; /health polled 29 times from the start of the backup: unavailable from +184 ms to +1395 ms (1211 ms); BACKUP_OK says server_stopped_s=0
+PASS the writer was excluded during the copy: /health was refused while the server was stopped, and a NEW server process came back
+PASS the original service resumed on its own: ready, pinned revision 7097ac2bb062925bb296a129f4771f1e68fd522d
+PASS no second writer: the data volume's only user before and after is the one service container
+   PASS the room answers after the backup, with the host's existing seat (no rejoin) — HTTP 200
+   PASS the guest's existing seat still works (no rejoin) — HTTP 200
+   PASS the approved "W5 seed" entry is still there and approved — HTTP 200
+   PASS a NEW answer after the backup is acknowledged (the original service resumed) — HTTP 200 accepted=true
+   RESUME OK (0 failed)
+PASS after the backup: the same seats, the approved entry, and a new acknowledged answer (w5-seed.mjs resume)
+PASS the source archive on the volume (the 'Render disk') hashes to the BACKUP_OK value
+-- CHAIN (positive): transport [LOCAL SURROGATE for scp -s] -> upload [LOCAL SURROGATE storage] -> fetch back -> cgn-receive on the fetched copy -> promotion
+   [chain positive] transport=ok upload=ok fetch=ok receipt=ok promotion=ok; receipt record written: yes
+      | RECEIPT_OK <work>/w5-20261117T042142Z-d78b4e5f/chain-positive/fetched/cgn-20261117T042144Z.tar.age sha256=955d89c0ecadb34cda172dad495f47e41870f973a78313f4150fb077cd5123e0 files=4 copy=<private>/receive-positive/20261117T042144Z
+PASS positive: every stage ran and passed, RECEIPT_OK on the FETCHED-BACK archive, and the receipt record was written
+PASS positive: every pre-existing file (the sentinels) is unchanged
+-- the RECEIVED copy (decrypted from the fetched-back archive, in the private folder): w5-seed.mjs check-copy
+   PASS the received copy's manifest records a stopped server (serverWasRunning: false)
+   PASS the received copy holds the seeded room's file
+   PASS the received copy holds the seeded room's Memory Book file
+   PASS the warm-up game is in the copy, finished
+   PASS the second game is in the copy
+   PASS the copy's ledger holds the warm-up game's finish event
+   PASS the second game's record in the copy holds exactly the 3 pre-backup answers — found 3 in 2 answer map(s)
+   PASS the guest's acknowledged pre-backup answer to trv-tech-111 is in the received copy
+   PASS the guest's acknowledged pre-backup answer to trv-scie-007 is in the received copy
+   PASS the host's acknowledged pre-backup answer to trv-tech-111 is in the received copy
+   PASS the host's POST-backup answer to trv-scie-007 is NOT in the copy (the copy is the stop point)
+   PASS the "W5 seed" Memory Book entry is in the received copy
+   PASS the entry is APPROVED in the received copy
+   PASS the entry's note reads "W5 seed"
+   PASS the entry is linked to the warm-up game's finish event
+   COPY OK: 2 data file(s); 3 pre-backup answers checked; 0 failed
+PASS the received copy holds the acknowledged pre-backup state (room, approved entry linked to its game, three answers) and not the post-backup answer
+-- NEGATIVES: the same chain, one fault each; each must stop non-zero at the expected stage, with no RECEIPT_OK, no receipt record, no later stage, and every pre-existing file unchanged
+   [chain wrong-hash] transport=ok upload=ok fetch=ok receipt=FAILED(exit 1) promotion=not-run; receipt record written: no
+      | RECEIPT_FAILED: the archive's SHA-256 is 955d89c0ecadb34cda172dad495f47e41870f973a78313f4150fb077cd5123e0, not the expected 992e9fbdd335784134abe76d15ae6f2b4985116ee6615177cb6643e3c8b1e3ef
+PASS negative wrong-hash: stops as 'transport=ok upload=ok fetch=ok receipt=FAILED(exit 1) promotion=not-run', no RECEIPT_OK, no receipt record, pre-existing files unchanged
+   [chain changed-bytes] transport=ok upload=ok fetch=ok receipt=FAILED(exit 1) promotion=not-run; receipt record written: no
+      | RECEIPT_FAILED: the archive's SHA-256 is fbe18f374b908bbacb59c50cf6abf2c5ecb0940575d944af450e4097a9f9b970, not the expected 955d89c0ecadb34cda172dad495f47e41870f973a78313f4150fb077cd5123e0
+PASS negative changed-bytes: stops as 'transport=ok upload=ok fetch=ok receipt=FAILED(exit 1) promotion=not-run', no RECEIPT_OK, no receipt record, pre-existing files unchanged
+   [chain truncated] transport=ok upload=ok fetch=ok receipt=FAILED(exit 1) promotion=not-run; receipt record written: no
+      | RECEIPT_FAILED: the archive's SHA-256 is be72714193bcf67a1d84a17710880d6db419dfb3f065bddcee3e14f1121e5d07, not the expected 955d89c0ecadb34cda172dad495f47e41870f973a78313f4150fb077cd5123e0
+PASS negative truncated: stops as 'transport=ok upload=ok fetch=ok receipt=FAILED(exit 1) promotion=not-run', no RECEIPT_OK, no receipt record, pre-existing files unchanged
+   [chain wrong-key] transport=ok upload=ok fetch=ok receipt=FAILED(exit 1) promotion=not-run; receipt record written: no
+      | age: error: no identity matched any of the recipients
+      | age: report unexpected or unhelpful errors at https://filippo.io/age/report
+      | RECEIPT_FAILED: decryption failed (wrong key, or a damaged archive)
+PASS negative wrong-key: stops as 'transport=ok upload=ok fetch=ok receipt=FAILED(exit 1) promotion=not-run', no RECEIPT_OK, no receipt record, pre-existing files unchanged
+   [chain missing-transfer] transport=FAILED(no such archive on the source, or the copy failed) upload=not-run fetch=not-run receipt=not-run promotion=not-run; receipt record written: no
+PASS negative missing-transfer: stops as 'transport=FAILED(no such archive on the source, or the copy failed) upload=not-run fetch=not-run receipt=not-run promotion=not-run', no RECEIPT_OK, no receipt record, pre-existing files unchanged
+   [chain missing-download] transport=ok upload=ok fetch=FAILED(not in storage) receipt=not-run promotion=not-run; receipt record written: no
+PASS negative missing-download: stops as 'transport=ok upload=ok fetch=FAILED(not in storage) receipt=not-run promotion=not-run', no RECEIPT_OK, no receipt record, pre-existing files unchanged
+   [chain nonempty-work] transport=ok upload=ok fetch=ok receipt=FAILED(exit 1) promotion=not-run; receipt record written: no
+      | RECEIPT_FAILED: the work folder <private>/receive-nonempty-work is not empty
+PASS negative nonempty-work: stops as 'transport=ok upload=ok fetch=ok receipt=FAILED(exit 1) promotion=not-run', no RECEIPT_OK, no receipt record, pre-existing files unchanged
+   [chain occupied-fetch] transport=ok upload=ok fetch=REFUSED(destination exists) receipt=not-run promotion=not-run; receipt record written: no
+PASS negative occupied-fetch: stops as 'transport=ok upload=ok fetch=REFUSED(destination exists) receipt=not-run promotion=not-run', no RECEIPT_OK, no receipt record, pre-existing files unchanged
+PASS the source archive is unchanged after every chain (still the BACKUP_OK hash)
+PASS the original service is still serving the pinned revision at the end
+-- cleanup (run 20261117T042142Z-d78b4e5f)
+   cleanup #1: container 2be1d4dad244 volume w5-data-20261117T042142Z-d78b4e5f private-files(code,keys,sessions,decrypted-copies)
+   cleanup #2: nothing owned left to remove
+   this run's containers left: 0; volumes left: 0; processes left: 0; listeners left on 18580: 0; private files left: no
+   files in the kept run folder holding the access code, a session token, a gate cookie or an age secret key: 0
+   checks: 24 passed, 0 failed
+W5 REHEARSAL PASSED

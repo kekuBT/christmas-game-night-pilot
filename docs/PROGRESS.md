@@ -3740,3 +3740,16 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
   4. The W4 seed-memory path, corrected to the verified UI.
   5. The independent W4 verdict, recorded.
 - **Unchanged:** the runtime and the release/deploy pins stay `7097ac2`. There is no account operation, no public port, no spending, and no W6.
+- **Built:**
+  - `scripts/beta/w5-rehearsal.sh`, the local chain: the pinned image; the reviewed `cgn-backup` and `cgn-receive` unchanged; surrogates for transport and storage; the receipt on the fetched-back copy; a promotion only after `RECEIPT_OK`; eight chain negatives; the checker's own negatives; verified cleanup;
+  - `scripts/beta/w5-seed.mjs`, the synthetic state with an approved Memory Book entry, the resume checks and the received-copy checks;
+  - `scripts/beta/w5-selftest.sh`, with sentinels, a port in use, an unlistable inventory and an interruption;
+  - `docs/beta/render-w5.md`, the operator runbook;
+  - the W4 seed-memory path, corrected in `render-w4.md`;
+  - the independent W4 verdict, recorded in the W4 evidence README.
+- **The dev runs** (in `docs/evidence/beta-r4-w5/`):
+  - dev 1 **FAILED**: the copy reader missed Trivia's answers;
+  - dev 2 and 3 passed, 24/24 and 27/27;
+  - self-test dev 1 **FAILED** on its own bugs;
+  - self-test dev 2 passed, 12/12.
+- **Next:** the final on a clean checkout of the committed candidate, the evidence, and the report on #48.
