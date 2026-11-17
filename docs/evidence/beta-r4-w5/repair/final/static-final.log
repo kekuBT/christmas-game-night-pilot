@@ -1,0 +1,44 @@
+# W5 static checks on the clean checkout of 7e9d3c7882c6cb210779785aec1bce93674035fb (status 0 lines), 2026-11-17T04:41:54Z
+## 1. everything changed since #47's head a4bfdf925aebe3fd9801a9ad32aeb8452ec1e623
+ .../beta-r4-w5/final/T2-evidence/provenance.json   |   1 +
+ .../beta-r4-w5/final/T2-evidence/seed.json         |   1 +
+ .../beta-r4-w5/final/T2-evidence/stop-timing.json  |   1 +
+ .../beta-r4-w5/final/T2-evidence/summary.json      |   1 +
+ docs/evidence/beta-r4-w5/final/T2-rehearsal.log    | 100 +++++
+ docs/evidence/beta-r4-w5/final/T3-rehearsal.log    | 100 +++++
+ docs/evidence/beta-r4-w5/final/T4-rehearsal.log    |  27 ++
+ docs/evidence/beta-r4-w5/final/selftest-final.log  |  68 +++
+ docs/evidence/beta-r4-w5/final/static-final.log    |  38 ++
+ docs/evidence/beta-r4-w5/final/static-run1.log     |  39 ++
+ .../beta-r4-w5/repair/dev/rehearsal-dev1.log       | 117 +++++
+ .../beta-r4-w5/repair/dev/selftest-dev1.log        |  71 +++
+ docs/evidence/beta-r4-w5/repair/repro/README.md    |  16 +
+ .../beta-r4-w5/repair/repro/make-fixture.mjs.txt   |  11 +
+ docs/evidence/beta-r4-w5/repair/repro/repro.log    |   9 +
+ docs/evidence/beta-r4-w5/runners/w5-static.sh      |  40 ++
+ scripts/beta/w5-rehearsal.sh                       | 479 +++++++++++++++++++++
+ scripts/beta/w5-seed.mjs                           | 235 ++++++++++
+ scripts/beta/w5-selftest.sh                        | 101 +++++
+ 33 files changed, 2342 insertions(+), 12 deletions(-)
+PASS nothing outside docs/ and scripts/beta/w5-* (empty)
+PASS the runtime (apps/, src/), tests, manifests and other scripts unchanged (empty)
+PASS deploy/ unchanged from a4bfdf925aebe3fd9801a9ad32aeb8452ec1e623 (empty)
+PASS deploy/ unchanged from 2e2257c (the accepted deployment scripts) (empty)
+PASS the artifact gate's REVISION is still the pin
+## 2. the reviewed deploy-side scripts (hashes, unchanged)
+accca1784e22570e30731e888890dad10d194da99d57809abe3244ae80ccc63c  deploy/render/cgn-backup.sh
+6c623dd08bbf77ca556099d4f678f3900606d5e760f3231ab59cbc592b4b6157  deploy/render/cgn-entrypoint.sh
+2fb3fe903f28707751485460689c4175ed7ea7cf682b505dec8bb74f41b084cd  deploy/render/operator/cgn-receive.sh
+6c623dd08bbf77ca556099d4f678f3900606d5e760f3231ab59cbc592b4b6157  cgn-entrypoint.sh
+accca1784e22570e30731e888890dad10d194da99d57809abe3244ae80ccc63c  cgn-backup.sh
+PASS cgn-backup.sh matches its pin in deploy/render/pins/scripts.sha256
+## 3. lint and syntax
+PASS eslint scripts/beta (exit 0)
+PASS bash -n scripts/beta/*.sh (10 files) and node --check w5-seed.mjs
+## 4. relative links in the changed documents
+links: 54 missing: 0
+PASS no missing relative link
+## 5. secret scan of the changes since a4bfdf925aebe3fd9801a9ad32aeb8452ec1e623
+PASS no secret-shaped value (a real age secret key, a private key, an access code, a gate cookie, a token) or local scratch path in the added lines
+## verdict
+W5 STATIC CHECKS PASSED

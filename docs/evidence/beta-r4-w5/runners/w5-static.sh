@@ -27,13 +27,14 @@ node --check scripts/beta/w5-seed.mjs || s=1
 ok "bash -n scripts/beta/*.sh ($(ls scripts/beta/*.sh | wc -l) files) and node --check w5-seed.mjs" "$s"
 echo "## 4. relative links in the changed documents"
 n=0; miss=0
-for d in docs/beta/render-w5.md docs/beta/render-w4.md docs/evidence/beta-r4-w5/README.md docs/evidence/beta-r4-w4/README.md; do
+for d in docs/beta/render-w5.md docs/beta/render-w4.md docs/evidence/beta-r4-w5/README.md docs/evidence/beta-r4-w5/repair/repro/README.md docs/evidence/beta-r4-w4/README.md; do
   dir=$(dirname "$d")
   while IFS= read -r l; do t=${l%%#*}; [ -z "$t" ] && continue; n=$((n + 1)); [ -e "$dir/$t" ] || { echo "missing: $d -> $l"; miss=$((miss + 1)); }; done < <(grep -oE '\]\([^)#: ]+(#[^) ]*)?\)' "$d" | sed -E 's/^\]\(//; s/\)$//' | grep -v '^https\?:')
 done
 echo "links: $n missing: $miss"; ok "no missing relative link" "$([ $miss = 0 ] && echo 0 || echo 1)"
 echo "## 5. secret scan of the changes since $BASE"
-hits=$(git diff "$BASE" "$C" | grep '^+' | grep -nE 'AGE-SECRET-KEY-1[0-9A-Z]{50,}|BEGIN [A-Z ]*PRIVATE KEY|MCHEZO_BETA_ACCESS_CODE=[0-9a-f]{8,}|cgn_beta=[A-Za-z0-9_-]{8}|ghp_[A-Za-z0-9]{20,}|github_pat_|rnd_[A-Za-z0-9]{16,}|/tmp/claude')
+# The scanner's own committed copy (its pattern definitions) is excluded by exact path; nothing else is.
+hits=$(git diff "$BASE" "$C" -- . ':!docs/evidence/beta-r4-w5/runners/w5-static.sh' | grep '^+' | grep -nE 'AGE-SECRET-KEY-1[0-9A-Z]{50,}|BEGIN [A-Z ]*PRIVATE KEY|MCHEZO_BETA_ACCESS_CODE=[0-9a-f]{8,}|cgn_beta=[A-Za-z0-9_-]{8}|ghp_[A-Za-z0-9]{20,}|github_pat_|rnd_[A-Za-z0-9]{16,}|/tmp/claude')
 printf '%s\n' "$hits" | sed '/^$/d' | head
 ok "no secret-shaped value (a real age secret key, a private key, an access code, a gate cookie, a token) or local scratch path in the added lines" "$([ -z "$hits" ] && echo 0 || echo 1)"
 echo "## verdict"

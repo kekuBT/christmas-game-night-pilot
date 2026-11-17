@@ -1,0 +1,31 @@
+== w5-rehearsal 2026-11-17T04:41:35Z, run 20261117T044135Z-8984a5b3, image cgn-render:check
+   scripts: w5-rehearsal.sh f154d1745f79ee2c, w5-seed.mjs 660df9e1e4b1005d
+   image id: sha256:7b53109a7d69
+   throwaway access code and two DISPOSABLE test age identities (the receiving side's, and a wrong one) in a private directory (mode 700), removed on exit
+   the test recipient (public, disposable): age13vugs9f3kktcjkttj4787h6jlu433ye7jvgr7tsj9h56hcrknd3sscrmrv
+   data volume w5-data-20261117T044135Z-8984a5b3 (label w5.owner=20261117T044135Z-8984a5b3): throwaway data, removed on exit
+   container 51da3277385e (name w5-svc-20261117T044135Z-8984a5b3, label w5.owner=20261117T044135Z-8984a5b3)
+PASS the service is ready and /health reports the pinned revision 7097ac2bb062925bb296a129f4771f1e68fd522d
+   authorized: AUTHORIZED data_dir=/var/data/cgn-w1 public_origin=https://localhost:18543 trust_proxy=1 (the access code is kept only a
+   render-like-proxy LISTENING https=18543 http=18544 backend=127.0.0.1:18580 hops=1 MAINTENANCE (a LOCAL stand-in for Render's maintenance mode on the PUBLIC side)
+PASS maintenance on: the PUBLIC /health answers 503 while the service is up
+   private probe (the runbook's text, sha256 0e82ceb2eb590109…, inside the container, no service environment): PROBE 2026-11-17T04:41:36.992Z UP 7097ac2bb062925bb296a129f4771f1e68fd522d
+PASS the runbook's private probe, inside the instance with no service environment, reports UP on the pinned revision while the PUBLIC side answers 503
+   cgn-backup: repository accca1784e22570e30731e888890dad10d194da99d57809abe3244ae80ccc63c, in the image accca1784e22570e30731e888890dad10d194da99d57809abe3244ae80ccc63c
+   cgn-entrypoint: repository 6c623dd08bbf77ca556099d4f678f3900606d5e760f3231ab59cbc592b4b6157, in the image 6c623dd08bbf77ca556099d4f678f3900606d5e760f3231ab59cbc592b4b6157
+   cgn-receive (run from the repository, unchanged): 2fb3fe903f28707751485460689c4175ed7ea7cf682b505dec8bb74f41b084cd
+   age: in the image v1.2.1 (encrypts); on the receiving side 1.1.1 (decrypts)
+PASS the image's cgn-backup is byte-identical to the reviewed deploy/render/cgn-backup.sh
+PASS the image's cgn-entrypoint is byte-identical to the reviewed deploy/render/cgn-entrypoint.sh
+-- seed: synthetic room, a finished game, an APPROVED Memory Book entry, acknowledged answers (w5-seed.mjs)
+   SEED {"roomId":"room-mwk7gjf5-34897","warmGameId":"game-1","secondGameId":"game-2","entryId":"book-1","entrySources":["evt-11"],"hostPlayerId":"player-1","guestPlayerId":"player-2","questions":["trv-food-079","trv-natu-066","trv-legacy-06","trv-ever-097","trv-legacy-08","trv-lite-045","trv-spac-020","trv-natu-069","trv-ever-098","trv-scie-011"],"acked":[{"who":"guest","playerId":"player-2","questionId":"trv-food-079","ackAt":"2026-11-17T04:41:37.557Z"},{"who":"guest","playerId":"player-2","questionId":"trv-natu-066","ackAt":"2026-11-17T04:41:37.563Z"},{"who":"host","playerId":"player-1","questionId":"trv-food-079","ackAt":"2026-11-17T04:41:37.566Z"}]}
+PASS the synthetic state was seeded and every seeded write acknowledged
+-- SOURCE: the reviewed cgn-backup, unchanged, inside the container, with no service environment (as an SSH session)
+   interrupted (SIGTERM)
+-- cleanup (run 20261117T044135Z-8984a5b3)
+   cleanup #1: maintenance-proxy container 51da3277385e volume w5-data-20261117T044135Z-8984a5b3 private-files(code,keys,sessions,decrypted-copies)
+   cleanup #2: nothing owned left to remove
+   this run's containers left: 0; volumes left: 0; processes left: 0; listeners left on 18580/18543/18544: 0; private files left: no
+   files in the kept run folder holding the access code, a session token, a gate cookie or an age secret key: 0
+   checks: 6 passed, 0 failed
+W5 REHEARSAL FAILED

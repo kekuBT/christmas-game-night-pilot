@@ -1,0 +1,8 @@
+{"case":"wrong-hash","stages":"transport=ok upload=ok fetch=ok receipt=FAILED(exit 1) promotion=not-run","receiptRecord":"no","keptUnchanged":1}
+{"case":"changed-bytes","stages":"transport=ok upload=ok fetch=ok receipt=FAILED(exit 1) promotion=not-run","receiptRecord":"no","keptUnchanged":1}
+{"case":"truncated","stages":"transport=ok upload=ok fetch=ok receipt=FAILED(exit 1) promotion=not-run","receiptRecord":"no","keptUnchanged":1}
+{"case":"wrong-key","stages":"transport=ok upload=ok fetch=ok receipt=FAILED(exit 1) promotion=not-run","receiptRecord":"no","keptUnchanged":1}
+{"case":"missing-transfer","stages":"transport=FAILED(no such archive on the source, or the copy failed) upload=not-run fetch=not-run receipt=not-run promotion=not-run","receiptRecord":"no","keptUnchanged":1}
+{"case":"missing-download","stages":"transport=ok upload=ok fetch=FAILED(not in storage) receipt=not-run promotion=not-run","receiptRecord":"no","keptUnchanged":1}
+{"case":"nonempty-work","stages":"transport=ok upload=ok fetch=ok receipt=FAILED(exit 1) promotion=not-run","receiptRecord":"no","keptUnchanged":1}
+{"case":"occupied-fetch","stages":"transport=ok upload=ok fetch=REFUSED(destination exists) receipt=not-run promotion=not-run","receiptRecord":"no","keptUnchanged":1}

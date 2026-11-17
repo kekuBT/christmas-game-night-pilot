@@ -3730,7 +3730,7 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
   - **Its limits:** an independently rebuilt exact-SHA runtime with real process transitions. It is not the promotion archive, not a Docker replacement, not Render, and not physical Safari or Android; Firefox at 390×844 is emulation. The Render 30-second budget is unmeasured.
   - The pin is still `7097ac2`. `72e9d8b` is reviewed but not packaged or promoted. No merge or deployment is authorized.
 
-## Beta R4: W5 backup and independent receipt preparation (handoff 6937786587; complete, tested `63f9dc5`)
+## Beta R4: W5 backup and independent receipt preparation (handoff 6937786587; repaired per review 6938403611, tested `7e9d3c7`)
 - **Acknowledged** in 6938068379 at 11:16 p.m. ET. The estimate is about 3 h 25 min, with 45 min of contingency.
 - **The branch** is `claude/beta-r4-w5-receipt`, from #47's head `a4bfdf9`, as a stacked draft PR. Unmerged.
 - **The scope:**
@@ -3768,3 +3768,7 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
     3. exact submitted values, kept private, checked in the pinned shape, plus a same-keys/different-value negative.
   - **The rehearsal** runs the runbook's own probe text in the container and puts a `--maintenance` proxy in front.
   - **Dev runs:** the rehearsal passed 33/33, and the self-test 12/12. The reproduction shows `63f9dc5`'s checker accepting a changed value, and the repair rejecting it.
+- **The repair final on a clean checkout of `7e9d3c7`:**
+  - the static checks **PASSED** on their second run (run 1 FAILED on the scanner matching its own committed pattern file, kept);
+  - `w5-selftest.sh` **PASSED**, 12/12. The rehearsal `20261117T044108Z-b7f2585b` passed 33/33: public 503 on all 71 samples; the private probe `UP`, then `DOWN` for 1,122 ms, then `UP`; `RECEIPT_OK`; the exact values; `change-pre-value` failing only on the value.
+- **Next:** the new report on #48. W5 clearance and W6 stay held.

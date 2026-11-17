@@ -145,3 +145,27 @@ Reported first in 6938393714 (tested `63f9dc5`). The review found three problems
 | Self-test dev 1 | PASSED, 12/12 (T2 33/33) | [repair/dev/selftest-dev1.log](repair/dev/selftest-dev1.log) |
 
 The final on the committed repair candidate follows.
+
+### The repair final, on ONE clean SHA: `7e9d3c7882c6cb210779785aec1bce93674035fb`
+A clean detached checkout, with `git status --porcelain` at 0 lines before and after, and 0 Docker containers and volumes before and after. The candidate was pushed before testing. The steps ran one after another.
+
+| Step | Run | Verdict | Log |
+|---|---|---|---|
+| Static, run 1 | 04:41Z | **FAILED, 1 check, a false positive again:** the scanner's own copy, committed in the previous evidence commit (`runners/w5-static.sh`), contains its pattern `/tmp/claude` as text. The candidate is unchanged. The scan now excludes exactly that file. | [repair/final/static-run1.log](repair/final/static-run1.log) |
+| Static, final | 04:42Z | **W5 STATIC CHECKS PASSED (exit 0):**<ul><li>nothing outside `docs/` and `scripts/beta/w5-*` changed since `a4bfdf9`;</li><li>the runtime and `deploy/` unchanged;</li><li>the pin `7097ac2`, and `cgn-backup.sh` matching its pin;</li><li>eslint, `bash -n` and `node --check`;</li><li>54 links, 0 missing;</li><li>no secret-shaped value.</li></ul> | [repair/final/static-final.log](repair/final/static-final.log) |
+| `bash scripts/beta/w5-selftest.sh cgn-render:check --work <scratch>/w5r/st-final` | 04:41:05–04:41:39Z | **W5 SELFTEST PASSED (exit 0), 12/12** (T1 refused at preflight; T3 UNVERIFIED and FAILED as required; T4 exit 143; the sentinels intact throughout) | [repair/final/selftest-final.log](repair/final/selftest-final.log), [T1](repair/final/T1-rehearsal.log), [T3](repair/final/T3-rehearsal.log), [T4](repair/final/T4-rehearsal.log) |
+| ↳ **T2 the rehearsal** | run **`20261117T044108Z-b7f2585b`** | **W5 REHEARSAL PASSED, 33/33** | [repair/final/T2-rehearsal.log](repair/final/T2-rehearsal.log), [repair/final/T2-evidence/](repair/final/T2-evidence/) |
+
+**T2 in numbers:**
+- **Maintenance on (the local proxy):** the public `/health` answered 503 before the backup, and on **71 of 71** samples across it.
+- **The private probe:** the runbook's text (sha256 `0e82ceb2eb590109…`), inside the container with no service environment. It reported `UP 7097ac2…` while the public side answered 503.
+- **The private watch:** `WATCH down from 04:41:11.262Z, back at 04:41:12.384Z (1122 ms); 78 samples; UP 7097ac2…`.
+- **The source:** `BACKUP_OK … sha256=18b485e0c04baf8099e589414b42c0811c318142795cf91ba699ce3107124ae4 files=4 server_stopped_s=0`.
+  - `cgn-backup` took 371 ms.
+  - The external loopback monitor saw `/health` unavailable for 1,110 ms.
+  - The server pid went from 10 to 184.
+- **The receipt:** `RECEIPT_OK` on the fetched-back file, with the same hash.
+- **The received copy:** the three answers in the pinned shape, each **equal to its submitted value**; the post-backup answer absent.
+- **The checker negatives:** all four fail, and `change-pre-value` fails on **exactly one** line, the value.
+- **The chain negatives:** all eight held.
+- **No value is published:** the published `seed.json` holds ids only, with no values.
