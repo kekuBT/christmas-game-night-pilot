@@ -1,0 +1,56 @@
+# FINAL static checks on the clean checkout of 618f179329bedee04ffc5b7884f603d4c45c88dc (status 0 lines), 2026-11-17T00:33:50Z
+## 1. everything changed since #45's head 8b511b3
+ docs/PROGRESS.md                                   |  11 +
+ docs/beta/render-w4.md                             | 149 +++++++++
+ docs/evidence/beta-r4-w4/README.md                 |  56 ++++
+ .../dev/control1-w4-20261117T002132-240359.json    | 145 +++++++++
+ docs/evidence/beta-r4-w4/dev/control1.log          |  44 +++
+ .../dev/control2-w4-20261117T002410-d18aa2.json    | 157 ++++++++++
+ docs/evidence/beta-r4-w4/dev/control2.log          |  46 +++
+ .../beta-r4-w4/dev/mock1-w3-mock-cases-on-w4.log   | 178 +++++++++++
+ docs/evidence/beta-r4-w4/dev/selftest-dev1.log     | 209 +++++++++++++
+ .../dev/trial1-w4-20261117T001753-7f255a.json      | 233 ++++++++++++++
+ docs/evidence/beta-r4-w4/dev/trial1.log            |  50 +++
+ .../dev/trial2-w4-20261117T002100-48423c.json      | 232 ++++++++++++++
+ docs/evidence/beta-r4-w4/dev/trial2.log            |  51 ++++
+ .../dev/trial3-w4-20261117T002337-b3bdb2.json      | 242 +++++++++++++++
+ docs/evidence/beta-r4-w4/dev/trial3.log            |  53 ++++
+ .../beta-r4-w4/dev/trial4-screens/final-guest.png  | Bin 0 -> 57792 bytes
+ .../beta-r4-w4/dev/trial4-screens/final-host.png   | Bin 0 -> 57631 bytes
+ .../beta-r4-w4/dev/trial4-screens/final-tv.png     | Bin 0 -> 123518 bytes
+ .../beta-r4-w4/dev/trial4-screens/r2-guest.png     | Bin 0 -> 58332 bytes
+ .../beta-r4-w4/dev/trial4-screens/r2-host.png      | Bin 0 -> 78066 bytes
+ .../beta-r4-w4/dev/trial4-screens/r2-tv.png        | Bin 0 -> 128282 bytes
+ .../dev/trial4-w4-20261117T002916-0b47fa.json      | 250 +++++++++++++++
+ docs/evidence/beta-r4-w4/dev/trial4.log            |  53 ++++
+ scripts/beta/w3-harness-selftest.sh                |   2 +-
+ scripts/beta/w4-rehearsal.mjs                      | 334 +++++++++++++++++++++
+ scripts/beta/w4-rehearsal.sh                       | 254 ++++++++++++++++
+ scripts/beta/w4-selftest.sh                        | 117 ++++++++
+ 27 files changed, 2865 insertions(+), 1 deletion(-)
+## 2. runtime files changed since 7097ac2 (empty = unchanged)
+(end)
+## 3. deploy files changed since 2e2257c (empty = unchanged)
+(end)
+## 4. shared helpers and W1/W2/W3 tools changed since 8b511b3 (expect only the W3 self-test's one-line mock change)
+diff --git a/scripts/beta/w3-harness-selftest.sh b/scripts/beta/w3-harness-selftest.sh
+index 477fd06..d7c2451 100755
+--- a/scripts/beta/w3-harness-selftest.sh
++++ b/scripts/beta/w3-harness-selftest.sh
+@@ -73,7 +73,7 @@ case "$1" in
+     rc=0; for t in "$@"; do if c=$(find_c "$t"); then cid=$(sed -n 1p "$c"); rm -f "$c"; printf 'removed %s\n' "$cid" >> "$MOCK_LOG"; echo "$t"; else echo "Error: No such container: $t" >&2; rc=1; fi; done; exit $rc ;;
+   inspect) shift; fmt=""; [ "${1:-}" = -f ] && { fmt=$2; shift 2; }
+     c=$(find_c "${1:-}") || { echo "Error: No such object: ${1:-}" >&2; exit 1; }
+-    case "$fmt" in *w3.owner*) l=$(sed -n 3p "$c"); echo "${l#w3.owner=}" ;; *State.Running*) echo "${MOCK_RUNNING:-true}" ;; *State.Status*) echo "exited exit=0" ;; *) echo "{}" ;; esac; exit 0 ;;
++    case "$fmt" in *.owner*) l=$(sed -n 3p "$c"); echo "${l#*=}" ;; *State.Running*) echo "${MOCK_RUNNING:-true}" ;; *State.Status*) echo "exited exit=0" ;; *) echo "{}" ;; esac; exit 0 ;;
+   port) echo "127.0.0.1:18080"; exit 0 ;;
+   exec) cat > /dev/null; [ "${MOCK_EXEC:-ok}" = fail ] && { echo "mock: cgn-authorize failed"; exit 1; }; echo "AUTHORIZED data_dir=/var/data/cgn-w1 (mock)"; exit 0 ;;
+   ps) want=""; prev=""; for a in "$@"; do [ "$prev" = --filter ] && want=$a; prev=$a; done
+(end)
+## 5. lint and shell syntax
+eslint scripts/beta: exit 0
+shell syntax: ok
+## 6. relative links in the changed documents
+links: 11 missing: 0
+## 7. secret scan of the changes since 8b511b3
+(end of secret scan)

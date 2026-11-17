@@ -3618,7 +3618,7 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
   - the static checks passed.
 - **Next:** ChatGPT resumes the audit by a validated route; W3 stays not cleared.
 
-## Beta R4: W4 restart preparation (handoff 6933392621; in progress)
+## Beta R4: W4 restart preparation (handoff 6933392621; complete, tested `618f179`)
 - **The handoff:** W4 restart preparation and an isolated local rehearsal, as one unmerged draft PR stacked on #45 at `8b511b3`.
 - **Acknowledged** in 6933406957, at 7:12 p.m. ET, with a 2 h 15 min estimate.
 - **W3 local preparation was cleared** in 6933392621. Native C1–C4, Render W1–W8 and the go/no-go stay pending.
@@ -3628,3 +3628,7 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
   - `scripts/beta/w4-selftest.sh` (K1–K5 with sentinels).
 - **The finding:** a tap made during a restart shows `Request failed (502)`, not the friendly wording. It is never shown as in and never saved. A bounded client repair is proposed, not made: the pin is unchanged.
 - **Dev runs:** see `docs/evidence/beta-r4-w4/README.md`. They include trial 1's wrong expectation and control 1's stale rendered check, both fixed.
+- **Finals on a clean checkout of `618f179`:**
+  - `w4-selftest.sh` **PASSED**: K1–K5, the sentinels kept; the rehearsal run is `20261117T003140Z-d06ba320`;
+  - the static checks passed.
+- **Next:** ChatGPT's independent review. The real D1 and D2 on Render stay pending, behind a same-window `BACKUP_OK` and `RECEIPT_OK`.
