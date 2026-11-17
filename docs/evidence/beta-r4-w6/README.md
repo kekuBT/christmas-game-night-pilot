@@ -1,6 +1,32 @@
-# Beta R4 W6: restore of a received backup, local preparation (handoff 6938602366; repair review 6939462697)
+# Beta R4 W6: restore of a received backup, local preparation (handoff 6938602366; repair reviews 6939462697 and 6940435060)
 
 **Preparation only.** The real W6 is **PENDING**: nothing here ran on Render, over SSH, against the owner's storage, with the owner's keys, or as a Render disk snapshot. The runbook is [render-w6.md](../../beta/render-w6.md).
+
+## Repair 2 (review 6940435060): F-W6-02, abort during a backup pause
+**The finding:** while a backup hold paused the PENDING writer (`serving=none`), `--abort` succeeded, because it only refused a writer serving the pending folder. When the hold ended, the entrypoint relaunched the server on the folder the record had just revoked, because it validated the record only once, at boot.
+
+**The repair** (the guard pair, the pins and the deploy README; nothing else in `deploy/`):
+- **`cgn-authorize --abort`** now needs affirmative evidence that the **approved** folder is being served on this instance: the server's pid file and its own environment. Unknown, paused, down or pending is refused, with the record unchanged.
+- **`cgn-entrypoint`** runs the full check (record, folder, origin, proxy, code) in one function **before every server launch**, including each resume after a hold. A folder no longer authorized is refused (78) before a writer starts. The instance remembers how it started: one that started with a record refuses for good once the record is gone; a first install may resume while there is still no record.
+- **`scripts/beta/w6-hold-selftest.sh` (new; 12 checks):** S static; H0 a real `cgn-backup` and resume; H1 abort and commit refused while the pending writer is held; H2 the pending writer resumed; H3 the legitimate abort; H4–H6 and H8 refused resumes; H7 a first install's resume. The guard self-test's G5 expectation follows the new abort message.
+
+**Reproduced first, on the `516bacb` image** (in [`repair2/dev/`](repair2/dev/)):
+
+| Log | Run | Verdict |
+|---|---|---|
+| [hold-repro0-void-docker-down.log](repair2/dev/hold-repro0-void-docker-down.log) | `20261117T062852Z-0082d223` | **VOID:** the local docker daemon had stopped; it was restarted. |
+| [hold-repro1-516bacb.log](repair2/dev/hold-repro1-516bacb.log) | `20261117T062908Z-97b91838` | **FAILED 2/12.** It reproduces the finding (abort accepted at `serving=none`; H4–H6 and H8 resume a revoked folder: "Listening 1 -> 2"). Two bugs in the test itself muddied it: the health helper printed "down" twice, so "held" was never seen, and H0's folder had no data for `cgn-backup`. |
+| [hold-repro2-516bacb.log](repair2/dev/hold-repro2-516bacb.log) | `20261117T063855Z-8c8d104f` | **FAILED 3/12: the clean reproduction.** H1: `ABORTED` while held at `serving=none`. H4, H5, H6 and H8: the supervisor resumes a writer on a folder the record no longer authorizes. H0 and H2 fail only on the missing re-validation line. H7 (a first install) passes. |
+
+**Then on the fix** (dev image `cgn-render:w6r2`):
+
+| Log | Run | Verdict |
+|---|---|---|
+| [hold-dev1.log](repair2/dev/hold-dev1.log) | `20261117T064301Z-4f2fb2cc` | W6 HOLD SELFTEST PASSED, 12/12 |
+| [guard-dev1.log](repair2/dev/guard-dev1.log) | `20261117T064329Z-09048d43` | W6 GUARD SELFTEST PASSED, 37/37 |
+| [reh-dev1.log](repair2/dev/reh-dev1.log) | `20261117T064420Z-2c9b48f7` | W6 REHEARSAL PASSED, 46/46 (N6, N7, the reopen gate, the three ledger negative controls) |
+
+**The final** of repair 2 is recorded below once it has run on the clean candidate (`runners/w6r-final.sh`, now with the hold self-test as step 3b).
 
 ## The repair (review 6939462697)
 **Review 6939462697 found two problems in the first candidate:**

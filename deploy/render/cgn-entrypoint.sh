@@ -1,6 +1,6 @@
 #!/bin/sh
-# cgn-entrypoint: PROPOSED deploy file for the Render route (Beta R4, reviews 6917441687, 6918277617, 6918922306 and
-# 6939462697). Not part of the runtime.
+# cgn-entrypoint: PROPOSED deploy file for the Render route (Beta R4, reviews 6917441687, 6918277617, 6918922306,
+# 6939462697 and 6940435060). Not part of the runtime.
 # PID 1 in the container. It runs the unchanged game server, passes Render's SIGTERM on to it, and keeps the
 # container up (and with it the disk and SSH) while cgn-backup has stopped the server on purpose.
 #
@@ -65,26 +65,39 @@ read_record() {
   return 0
 }
 # --- end record reader ---
-if [ -e "$CONF" ] || [ -L "$CONF" ]; then
-  read_record "$CONF" || refuse "the authorized configuration at $CONF is unusable ($WHY)"
-  if [ "${MCHEZO_DATA_DIR:-}" = "$R_data_dir" ]; then
-    selected="the APPROVED data folder $R_data_dir"
-  elif [ -n "$R_pending_data_dir" ] && [ "${MCHEZO_DATA_DIR:-}" = "$R_pending_data_dir" ]; then
-    selected="the PENDING data folder $R_pending_data_dir (not committed: the approved folder stays $R_data_dir; commit or abort before reopening)"
-  elif [ -n "$R_pending_data_dir" ]; then
-    refuse "MCHEZO_DATA_DIR is not the authorized data folder, nor the pending one (a rollback brings back old environment values)"
+# guard: the environment against the CURRENT record, before EVERY server launch (review 6940435060, F-W6-02), so a
+# writer paused by a backup hold is never resumed on a folder the record no longer authorizes. MODE remembers how this
+# instance started: "record" (refused for good once the record is gone) or "first-install" (no record and no data at
+# boot: it may resume while there is still no record; once a record appears, it is enforced like any other).
+MODE=""
+guard() {
+  if [ -e "$CONF" ] || [ -L "$CONF" ]; then
+    read_record "$CONF" || refuse "the authorized configuration at $CONF is unusable ($WHY)"
+    if [ "${MCHEZO_DATA_DIR:-}" = "$R_data_dir" ]; then
+      selected="the APPROVED data folder $R_data_dir"
+    elif [ -n "$R_pending_data_dir" ] && [ "${MCHEZO_DATA_DIR:-}" = "$R_pending_data_dir" ]; then
+      selected="the PENDING data folder $R_pending_data_dir (not committed: the approved folder stays $R_data_dir; commit or abort before reopening)"
+    elif [ -n "$R_pending_data_dir" ]; then
+      refuse "MCHEZO_DATA_DIR is not the authorized data folder, nor the pending one (a rollback brings back old environment values)"
+    else
+      refuse "MCHEZO_DATA_DIR is not the authorized data folder (a rollback brings back old environment values)"
+    fi
+    [ "${MCHEZO_PUBLIC_ORIGIN:-}" = "$R_public_origin" ] || refuse "MCHEZO_PUBLIC_ORIGIN is not the authorized origin"
+    [ "${MCHEZO_TRUST_PROXY:-unset}" = "$R_trust_proxy" ] || refuse "MCHEZO_TRUST_PROXY is not the authorized proxy count"
+    [ "$(printf '%s:%s' "$R_code_salt" "${MCHEZO_BETA_ACCESS_CODE:-}" | sha256sum | cut -d' ' -f1)" = "$R_code_sha256" ] || refuse "the access code is not the authorized one"
+    MODE=record
+    echo "cgn-entrypoint: the environment matches the authorized configuration: $selected" >&2
+  elif [ "$MODE" = record ]; then
+    refuse "the authorized configuration at $CONF is gone (this instance started with one); the server is not started again"
+  elif [ "$MODE" = first-install ]; then
+    echo "cgn-entrypoint: WARNING first install: still no authorized configuration; run cgn-authorize after the acceptance checks" >&2
+  elif [ -n "$(ls -A "${MCHEZO_DATA_DIR:-/nonexistent}" 2>/dev/null)" ]; then
+    refuse "data exists in ${MCHEZO_DATA_DIR:-?} but no authorized configuration is recorded at $CONF"
   else
-    refuse "MCHEZO_DATA_DIR is not the authorized data folder (a rollback brings back old environment values)"
+    MODE=first-install
+    echo "cgn-entrypoint: WARNING first install: no authorized configuration yet and no data; run cgn-authorize after the acceptance checks" >&2
   fi
-  [ "${MCHEZO_PUBLIC_ORIGIN:-}" = "$R_public_origin" ] || refuse "MCHEZO_PUBLIC_ORIGIN is not the authorized origin"
-  [ "${MCHEZO_TRUST_PROXY:-unset}" = "$R_trust_proxy" ] || refuse "MCHEZO_TRUST_PROXY is not the authorized proxy count"
-  [ "$(printf '%s:%s' "$R_code_salt" "${MCHEZO_BETA_ACCESS_CODE:-}" | sha256sum | cut -d' ' -f1)" = "$R_code_sha256" ] || refuse "the access code is not the authorized one"
-  echo "cgn-entrypoint: the environment matches the authorized configuration: $selected" >&2
-elif [ -n "$(ls -A "${MCHEZO_DATA_DIR:-/nonexistent}" 2>/dev/null)" ]; then
-  refuse "data exists in ${MCHEZO_DATA_DIR:-?} but no authorized configuration is recorded at $CONF"
-else
-  echo "cgn-entrypoint: WARNING first install: no authorized configuration yet and no data; run cgn-authorize after the acceptance checks" >&2
-fi
+}
 mkdir -p "$RUN"
 child=0
 # True if any process carries the run token in its environment (CGN_BACKUP_RUN, set by cgn-backup for everything it runs).
@@ -128,6 +141,7 @@ while :; do
     sleep 1 & wait $!
     continue
   fi
+  guard   # every launch, including the first and each resume after a hold: refuses (78) before any writer starts
   (cd "$APP" && exec node dist/server/serve.js) &
   child=$!
   echo "$child" > "$RUN/server.pid"

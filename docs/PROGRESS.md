@@ -3832,3 +3832,20 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
   - the W4 self-test, 81/81;
   - the round-5 focused backup drill, 19/19.
 - **Next:** the new report on #49. On Render, the hosted validation of the switch, the real W6, the snapshot and W7 stay with the owner.
+- **Reported** in 6940429646; linked on #5 and #48.
+- **Review 6940435060: W6 still BLOCKED.**
+  - **F-W6-02:** while a backup hold paused the pending writer, `--abort` succeeded, and the entrypoint then resumed the revoked folder.
+  - **Confirmed by the review:** the N6 recovery and the persisted-score checks.
+
+## Beta R4: W6 repair 2, F-W6-02 (review 6940435060; in progress)
+- **Acknowledged** in 6940594073 at 1:27 a.m. ET. The estimate is about 60 min, plus 30 min of contingency.
+- **Reproduced first** on the `516bacb` image with a new `scripts/beta/w6-hold-selftest.sh`:
+  - run 1 was VOID (the docker daemon was down);
+  - run 2 had test bugs;
+  - run 3 was the clean reproduction: abort accepted at `serving=none`, and the revoked folder resumed in H4–H6 and H8.
+- **The fix:**
+  - `cgn-authorize --abort` runs only with affirmative evidence that the APPROVED folder is being served on this instance.
+  - `cgn-entrypoint` re-validates the record before every server launch, each resume after a hold included. A revoked folder is refused (78) before any writer starts. A first install may resume while there is still no record.
+  - The pins and the deploy README are updated.
+- **Dev results:** the hold self-test 12/12, the guard self-test 37/37, the rehearsal 46/46.
+- **Docs:** the runbook's abort rule and recovery step, the hold self-test, the proposal's guard text, and the evidence README's repair-2 section. `runners/w6r-final.sh` adds the hold self-test as step 3b.

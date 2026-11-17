@@ -1,9 +1,9 @@
 #!/bin/bash
 # W6 REPAIR static checks (review 6939462697), run inside a clean checkout of the candidate.
-#   bash w6r-static.sh <checkout dir>
+#   bash w6r-static.sh <checkout dir> [base: the reviewed head; d3f74de for repair 1, 47aa9af for repair 2]
 set -uo pipefail
 cd "$1" || exit 2
-C=$(git rev-parse HEAD); BASE=d3f74de4e5f8e78f04f8aa2fed14fc4cac1ccf0f; PIN=7097ac2bb062925bb296a129f4771f1e68fd522d
+C=$(git rev-parse HEAD); BASE=${2:-d3f74de4e5f8e78f04f8aa2fed14fc4cac1ccf0f}; PIN=7097ac2bb062925bb296a129f4771f1e68fd522d   # base: the reviewed head
 bad=0
 empty() { local out; out=$("${@:2}" 2>&1); local rc=$?; if [ $rc = 0 ] && [ -z "$out" ]; then echo "PASS $1 (empty)"; else echo "FAIL $1 (rc $rc)"; printf '%s\n' "$out" | sed 's/^/     /'; bad=1; fi; }
 ok() { if [ "$2" = 0 ]; then echo "PASS $1"; else echo "FAIL $1"; bad=1; fi; }

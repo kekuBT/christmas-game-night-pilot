@@ -1,0 +1,49 @@
+== w6-hold-selftest 2026-11-17T06:43:01Z, run 20261117T064301Z-4f2fb2cc, image cgn-render:w6r2 (sha256:cbaf9bacca48)
+   scripts: cgn-authorize.sh e46f23e7539eed81, cgn-entrypoint.sh 1cc5a4362d9bc416, this file 94e8d4a1d6692d35
+-- S: static
+PASS S the image's cgn-authorize and cgn-entrypoint are byte-identical to deploy/render
+-- setup: the approved folder A, authorized
+   first start: up 7097ac2bb062925bb296a129f4771f1e68fd522d
+   AUTHORIZED data_dir=/var/data/w6h-a public_origin=https://cgn-w6h.test trust_proxy=1 (the access code is kept only as a salted hash)
+   room 201
+-- H0: a valid approved backup and resume (the real cgn-backup)
+   [H0] cgn-backup: hold released
+   [H0] BACKUP_OK /var/data/backups/cgn-20261117T064304Z.tar.age sha256=88a6ff280d3f1c06c24bc76563a73f6e52a7d3005008baadd68b2d517bc43232 files=2 server_stopped_s=0
+PASS H0 cgn-backup gives BACKUP_OK, the approved writer resumes, and the entrypoint validated the record again before relaunching it
+-- H1: F-W6-02, the PENDING writer paused by a hold
+   PREPARED pending_data_dir=/var/data/w6h-b approved_data_dir=/var/data/w6h-a (the approved folder still starts with its own MCHEZO_DATA_DIR; start /var/data/w6h-b, check it, then commit or abort before reopening)
+   pending start: up 7097ac2bb062925bb296a129f4771f1e68fd522d; cgn-entrypoint: the environment matches the authorized configuration: the PENDING data folder /var/data/w6h-b (not committed: the approved folder stays /var/data/w6h-a; commit or abort before reopening) 
+   hold: held; STATUS data_dir=/var/data/w6h-a public_origin=https://cgn-w6h.test trust_proxy=1 pending_data_dir=/var/data/w6h-b serving=none
+   abort: rc 1: AUTHORIZE_FAILED: the server on this instance is not running on the approved folder /var/data/w6h-a (it is not running, or paused): redeploy with the approved folder, check it, then abort from that instance
+   commit: rc 1: AUTHORIZE_FAILED: the server on this instance is not running on /var/data/w6h-b: commit only from the instance serving it, after its checks
+PASS H1 while the pending writer is paused (serving=none), --abort is REFUSED and the record is byte-identical
+PASS H1 while it is paused, --commit is REFUSED too, and the record is byte-identical
+-- H2: the hold released while the switch is still pending
+PASS H2 the pending writer resumes, validated again as PENDING before its relaunch
+-- H3: a legitimate abort, from the approved original after an ordinary restart
+   ABORTED pending_data_dir=/var/data/w6h-b (no longer authorized); the approved folder stays /var/data/w6h-a
+PASS H3 an ordinary restart serves the approved original; --abort from it succeeds; the aborted folder is refused (78)
+-- H4: the approved folder becomes unauthorized while its writer is stopped
+   during the hold: AUTHORIZED data_dir=/var/data/w6h-c public_origin=https://cgn-w6h.test trust_proxy=1 (the access code is kept only as a salted hash)
+   after the release: exited 78; cgn-entrypoint: the environment matches the authorized configuration: the APPROVED data folder /var/data/w6h-a cgn-entrypoint: server stopped for a backup (exit 0); holding until the backup ends cgn-entrypoint: REFUSED: MCHEZO_DATA_DIR is not the authorized data folder (a rollback brings back old environment values) 
+PASS H4 the supervisor REFUSES to resume the writer on a folder no longer authorized: exit 78, a REFUSED line, no new server
+-- H5: a PENDING folder revoked while its writer is stopped (a controlled edit of the record)
+   PREPARED pending_data_dir=/var/data/w6h-b approved_data_dir=/var/data/w6h-c (the approved folder still starts with its own MCHEZO_DATA_DIR; start /var/data/w6h-b, check it, then commit or abort before reopening)
+   pending start: up 7097ac2bb062925bb296a129f4771f1e68fd522d
+   record during the hold: STATUS data_dir=/var/data/w6h-c public_origin=https://cgn-w6h.test trust_proxy=1 pending_data_dir=none serving=none
+   after the release: exited 78; cgn-entrypoint: the environment matches the authorized configuration: the PENDING data folder /var/data/w6h-b (not committed: the approved folder stays /var/data/w6h-c; commit or abort before reopening) cgn-entrypoint: server stopped for a backup (exit 0); holding until the backup ends cgn-entrypoint: REFUSED: MCHEZO_DATA_DIR is not the authorized data folder (a rollback brings back old environment values) 
+PASS H5 the supervisor REFUSES to resume the revoked pending writer: exit 78, a REFUSED line, no new server
+-- H6: the record removed while an authorized writer is stopped
+   after the release: exited 78; cgn-entrypoint: the environment matches the authorized configuration: the APPROVED data folder /var/data/w6h-c cgn-entrypoint: server stopped for a backup (exit 0); holding until the backup ends cgn-entrypoint: REFUSED: the authorized configuration at /var/data/cgn-authorized.conf is gone (this instance started with one); the server is not started again 
+PASS H6 the supervisor REFUSES to resume once the record it started with is gone: exit 78, a REFUSED line, no new server
+-- H7: a first install (no record, no data) paused and resumed
+   first install: up 7097ac2bb062925bb296a129f4771f1e68fd522d; cgn-entrypoint: WARNING first install: no authorized configuration yet and no data; run cgn-authorize after the acceptance checks 
+PASS H7 a first install resumes after a hold while there is still no record
+-- H8: a first install given a record for ANOTHER folder while stopped
+   during the hold: AUTHORIZED data_dir=/var/data/w6h-elsewhere public_origin=https://cgn-w6h.test trust_proxy=1 (the access code is kept only as a salted hash)
+   after the release: exited 78; cgn-entrypoint: server stopped for a backup (exit 0); holding until the backup ends cgn-entrypoint: WARNING first install: still no authorized configuration; run cgn-authorize after the acceptance checks cgn-entrypoint: server stopped for a backup (exit 0); holding until the backup ends cgn-entrypoint: REFUSED: MCHEZO_DATA_DIR is not the authorized data folder (a rollback brings back old environment values) 
+PASS H8 the supervisor REFUSES to resume a first install whose new record names another folder: exit 78, no new server
+-- cleanup (run 20261117T064301Z-4f2fb2cc)
+PASS only this run's own containers and volumes were removed: containers left 0, volumes left 0; the sentinels are intact
+== 12 passed, 0 failed
+W6 HOLD SELFTEST PASSED

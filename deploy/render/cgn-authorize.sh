@@ -1,6 +1,6 @@
 #!/bin/sh
-# cgn-authorize: PROPOSED deploy file for the Render route (Beta R4, reviews 6917441687 and 6939462697). Not part of
-# the runtime.
+# cgn-authorize: PROPOSED deploy file for the Render route (Beta R4, reviews 6917441687, 6939462697 and 6940435060).
+# Not part of the runtime.
 # Records, on the disk, the configuration the owner approved. cgn-entrypoint refuses to start the server under any
 # other data folder, public origin, proxy count or access code. Render's one-click rollback brings back an old
 # deploy's environment values but never rolls the disk back, so a rollback to old values fails closed instead of
@@ -19,8 +19,9 @@
 #                                   redeploy with the original environment (no SSH to the failed instance needed).
 #   cgn-authorize --commit <dir>    from the instance that is serving <dir> (checked): <dir> becomes the approved
 #                                   folder; the previous one is refused from then on.
-#   cgn-authorize --abort <dir>     from an instance NOT serving <dir> (checked): the pending entry is removed; <dir> is
-#                                   refused from then on. The approved folder is unchanged.
+#   cgn-authorize --abort <dir>     only from the instance serving the APPROVED folder (checked, review 6940435060): the
+#                                   pending entry is removed; <dir> is refused from then on. The approved folder is
+#                                   unchanged. A writer that is unknown, paused, down or pending refuses the abort.
 #   cgn-authorize --status          prints the record (never the code or its hash); exit 1 if there is none or it is
 #                                   unusable.
 # Every change holds an exclusive lock (flock on <record>.lock, released if the process dies), writes a new file next to
@@ -143,7 +144,10 @@ case "${1:-}" in
     lock; need_record
     [ -n "$R_pending_data_dir" ] || fail "no folder switch is pending"
     [ "$2" = "$R_pending_data_dir" ] || fail "$2 is not the pending folder ($R_pending_data_dir)"
-    [ "$(serving_dir)" != "$2" ] || fail "the server on this instance is running on $2: redeploy with the approved folder first"
+    # Review 6940435060 (F-W6-02): only with affirmative evidence that the APPROVED folder is being served here. A writer
+    # that is unknown, paused by a backup hold, down, or on the pending folder fails closed: the record is unchanged.
+    sv=$(serving_dir)
+    [ "$sv" = "$R_data_dir" ] || fail "the server on this instance is not running on the approved folder $R_data_dir (it is ${sv:-not running, or paused}): redeploy with the approved folder, check it, then abort from that instance"
     write_record "$R_data_dir" "$R_public_origin" "$R_trust_proxy" "$R_code_salt" "$R_code_sha256"
     echo "ABORTED pending_data_dir=$2 (no longer authorized); the approved folder stays $R_data_dir"
     exit 0 ;;

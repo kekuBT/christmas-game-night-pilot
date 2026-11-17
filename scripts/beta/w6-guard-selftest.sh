@@ -170,7 +170,7 @@ chk "G5 the pending folder starts, logged PENDING; --status names it as served" 
 dk restart -t 30 "$cur" >/dev/null 2>&1; o=$(outcome "$cur")
 chk "G5 a restart before commit: still the PENDING folder" "$([ "$o" = "up $PIN" ] && dk logs "$cur" 2>&1 | grep -c "the PENDING data folder $B" | grep -qx 2 && echo 0 || echo 1)" "$o"
 ab=$(SSH cgn-authorize --abort "$B"); r=$?
-chk "G5 --abort is refused from the instance serving the pending folder" "$([ $r = 1 ] && printf '%s' "$ab" | grep -q 'is running on' && echo 0 || echo 1)" "$ab"
+chk "G5 --abort is refused from the instance serving the pending folder" "$([ $r = 1 ] && printf '%s' "$ab" | grep -q 'is not running on the approved folder' && echo 0 || echo 1)" "$ab"
 
 echo "-- G6: abort"
 stop "$cur"; cur=$(start back-to-approved "$A"); o=$(outcome "$cur")

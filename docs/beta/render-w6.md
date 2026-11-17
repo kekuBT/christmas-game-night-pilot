@@ -1,4 +1,4 @@
-# W6 on Render: restoring a received backup (Beta R4, handoff 6938602366; repair review 6939462697)
+# W6 on Render: restoring a received backup (Beta R4, handoff 6938602366; repair reviews 6939462697 and 6940435060)
 
 **Status: prepared; the recoverable switch is rehearsed locally. The real W6 is PENDING.** Nothing here has run on Render, over SSH, against the owner's storage or keys, or as a Render disk snapshot.
 - **The local rehearsal** (below) proves the restore and the switch mechanics on this machine, with the pinned runtime `7097ac2`. The transport, the storage and the ingress are **explicitly labelled local surrogates**.
@@ -24,7 +24,7 @@
 |---|---|---|
 | `cgn-authorize --prepare <dir>` | the running instance | Names `<dir>` as the one pending folder. **The approved folder keeps starting with its own `MCHEZO_DATA_DIR`.** Refused if another switch is pending, or if `<dir>` is the approved folder, is nested with it, is missing, or isn't the service user's. |
 | `cgn-authorize --commit <dir>` | **only** the instance serving `<dir>` (checked) | `<dir>` becomes the approved folder. **From then on, the previous folder is refused.** |
-| `cgn-authorize --abort <dir>` | **only** an instance NOT serving `<dir>` (checked) | Removes the pending entry. **From then on, `<dir>` is refused.** The approved folder is unchanged. |
+| `cgn-authorize --abort <dir>` | **only** the instance serving the **approved** folder (checked; review 6940435060) | Removes the pending entry. **From then on, `<dir>` is refused.** The approved folder is unchanged. **Refused (the record unchanged)** if this instance's writer is unknown, paused by a backup hold, down, or on the pending folder. |
 | `cgn-authorize --status` | the running instance | Prints the approved folder, the pending one (or `none`) and the folder this instance serves. It never prints the code or its hash. |
 
 **At start, the entrypoint** (`MCHEZO_DATA_DIR` selects explicitly which folder starts):
@@ -33,6 +33,8 @@
 - **anything else is refused (exit 78):** an unrelated folder; a mismatched origin, proxy count or code; or an unusable record (malformed, or a STALE pending entry).
 
 **Every record change** holds a lock, writes a new file, flushes it and renames it into place. An interrupted change leaves the old record or the new one, never a mix.
+
+**The entrypoint checks the record again before every server launch**, including each resume after a backup hold (review 6940435060, F-W6-02). A writer paused by a hold is never resumed on a folder the record no longer authorizes: after an abort, a commit, a new whole configuration or a removed record, the resume is refused (78) before a writer starts. A first install (no record, no data at boot) may resume while there is still no record. Once a record exists, it is enforced.
 
 **Why this fixes F-W6-01:**
 - A failed start on the pending folder no longer touches what the approved folder needs.
@@ -83,7 +85,7 @@ The receiving identity stays on the receiving device. The plaintext copy is uplo
 **The recovery, from step 8 or 9 (before the commit):**
 1. Maintenance stays on.
 2. **Set `MCHEZO_DATA_DIR` back to `<CURRENT>` and save** (an ordinary redeploy). The approved folder starts. This needs no SSH to the failed instance.
-3. On the recovered instance: `cgn-authorize --abort <TARGET>`, then `--status` shows `pending_data_dir=none serving=<CURRENT>`.
+3. On the recovered instance, once `--status` shows `serving=<CURRENT>` (not during a backup): `cgn-authorize --abort <TARGET>`. Then `--status` shows `pending_data_dir=none serving=<CURRENT>`. The abort is refused anywhere else.
 4. The probe. Reopen only if the window should go on; otherwise end the window.
 
 `<TARGET>` is refused from then on. A new attempt starts again at step 7 (with a new target folder, or the same one after its check).
@@ -124,6 +126,7 @@ In every case: `<CURRENT>` is never written by these steps; nothing is overwritt
 | 4 | `restore` refuses | `<TARGET>` occupied, or the copy refused | a new `<TARGET>` name, or stop |
 | 5 | `check` refuses | ownership, privacy, lock or write problem | stop; no preparation |
 | 7 | `AUTHORIZE_FAILED` | a switch already pending, a wrong folder, or another change in progress | `--status`; commit or abort the earlier switch first, or stop |
+| recovery 3 | `--abort` refused: not running on the approved folder | this instance isn't serving `<CURRENT>` (still the pending one, paused by a backup, or down) | redeploy with `<CURRENT>`, wait for `--status` to show `serving=<CURRENT>`, then abort |
 | 8 | the server exits on `<TARGET>` | the pending folder can't be served | **the recovery:** redeploy with `<CURRENT>`, then `--abort` |
 | 8 | `REFUSED` (exit 78) | the environment matches neither folder, or the record is unusable | redeploy with `<CURRENT>`; don't force it |
 | 9 | the wrong data, or the probe not `UP` on the pin | not the intended restore | **the recovery** |
@@ -133,7 +136,7 @@ In every case: `<CURRENT>` is never written by these steps; nothing is overwritt
 **An unusable record** (damaged outside these tools, since every change is atomic) refuses every start, by design (fail closed). Its recovery is a Render snapshot or a reviewed fix; that is outside this procedure.
 
 ## The local rehearsal (preparation only)
-`scripts/beta/w6-rehearsal.sh <image tag> [work dir]`, run by `scripts/beta/w6-selftest.sh <image tag>`. The guard on its own is tested by `scripts/beta/w6-guard-selftest.sh <image tag>`. The evidence is in `docs/evidence/beta-r4-w6/`.
+`scripts/beta/w6-rehearsal.sh <image tag> [work dir]`, run by `scripts/beta/w6-selftest.sh <image tag>`. The guard on its own is tested by `scripts/beta/w6-guard-selftest.sh <image tag>`, and across backup holds by `scripts/beta/w6-hold-selftest.sh <image tag>`. The evidence is in `docs/evidence/beta-r4-w6/`.
 
 | Real step | In the rehearsal |
 |---|---|
@@ -167,6 +170,14 @@ In every case: `<CURRENT>` is never written by these steps; nothing is overwritt
 - a failed pending start undone by an ordinary restart;
 - interrupted record changes (a leftover partial file, a change killed while it waited, a lock holder killed, a lock held too long);
 - ten unusable records.
+
+**The hold self-test covers** (review 6940435060):
+- a valid approved backup and resume, validated again;
+- the pending writer paused by a hold: `--abort` and `--commit` refused, the record byte-identical;
+- the pending writer resumed (validated again);
+- the legitimate abort from the approved original;
+- refused resumes (78, no writer) once the folder is no longer authorized while stopped: the approved folder replaced; the pending one revoked; the record removed; a first install given a record for another folder;
+- a first install resuming with still no record.
 
 **What it does not prove:**
 - SSH or `scp`, the cloud storage or the owner's keys;
