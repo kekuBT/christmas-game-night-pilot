@@ -1,0 +1,56 @@
+# W6 repair static checks on the clean checkout of 516bacb408038bff8f975d5b9a1d1eec1b2d76d8 (status 0 lines), 2026-11-17T06:06:02Z
+## 1. everything changed since the reviewed head d3f74de4e5f8e78f04f8aa2fed14fc4cac1ccf0f
+ deploy/render/README.md                            |   6 +-
+ deploy/render/cgn-authorize.sh                     | 164 ++++++-
+ deploy/render/cgn-entrypoint.sh                    |  73 ++-
+ deploy/render/pins/scripts.sha256                  |   4 +-
+ docs/PROGRESS.md                                   |  21 +
+ docs/beta/beta-r4-hosting-proposal.md              |   5 +-
+ docs/beta/render-w6.md                             | 184 +++++---
+ docs/evidence/beta-r4-w6/README.md                 |  52 ++-
+ .../beta-r4-w6/repair/dev/c2-control-dev.log       |  10 +
+ .../beta-r4-w6/repair/dev/focused-dev1.log         | 281 ++++++++++++
+ docs/evidence/beta-r4-w6/repair/dev/guard-dev1.log |  60 +++
+ docs/evidence/beta-r4-w6/repair/dev/guard-dev2.log |  58 +++
+ docs/evidence/beta-r4-w6/repair/dev/guard-dev3.log |  58 +++
+ .../beta-r4-w6/repair/dev/image-checks-dev1.log    |  66 +++
+ .../beta-r4-w6/repair/dev/image-checks-dev2.log    |  66 +++
+ docs/evidence/beta-r4-w6/repair/dev/reh-dev1.log   | 171 +++++++
+ .../dev/w4-selftest-dev1-void-no-browser.log       | 354 ++++++++++++++
+ .../beta-r4-w6/repair/dev/w4-selftest-dev2.log     | 509 +++++++++++++++++++++
+ .../beta-r4-w6/repair/dev/w5-selftest-dev.log      |  71 +++
+ .../beta-r4-w6/repair/dev/w6-selftest-dev1.log     |  85 ++++
+ .../beta-r4-w6/runners/image-checks-w6r.diff       |  23 +
+ .../beta-r4-w6/runners/image-checks-w6r.sh         | 201 ++++++++
+ docs/evidence/beta-r4-w6/runners/w6r-final.sh      |  39 ++
+ docs/evidence/beta-r4-w6/runners/w6r-static.sh     |  44 ++
+ scripts/beta/w6-check.mjs                          |  78 +++-
+ scripts/beta/w6-guard-selftest.sh                  | 251 ++++++++++
+ scripts/beta/w6-rehearsal.sh                       | 168 ++++---
+ scripts/beta/w6-selftest.sh                        |  12 +-
+ 28 files changed, 2937 insertions(+), 177 deletions(-)
+PASS nothing outside docs/, scripts/beta/w6-*, and deploy/render's two guard scripts, their pins and README (empty)
+PASS the runtime (apps/, src/), tests, manifests and other scripts unchanged (empty)
+PASS the reused W5 seed (scripts/beta/w5-seed.mjs) unchanged (empty)
+PASS cgn-backup.sh, operator/cgn-receive.sh, the Dockerfile, .dockerignore, the artifact gate, render.yaml and the other pins unchanged (empty)
+PASS the artifact gate's REVISION is still the pin
+## 2. the deploy-side scripts and their pins
+accca1784e22570e30731e888890dad10d194da99d57809abe3244ae80ccc63c  deploy/render/cgn-backup.sh
+0bc9b3fd2f4a7fbbf3a6b97b1a2d2f69707460d465ff42c997ea10e656a79d8c  deploy/render/cgn-entrypoint.sh
+501d1b5f9af82ff24994ca2063dfeb833716b1b79c4a724c5e355223250a7648  deploy/render/cgn-authorize.sh
+2fb3fe903f28707751485460689c4175ed7ea7cf682b505dec8bb74f41b084cd  deploy/render/operator/cgn-receive.sh
+0bc9b3fd2f4a7fbbf3a6b97b1a2d2f69707460d465ff42c997ea10e656a79d8c  cgn-entrypoint.sh
+accca1784e22570e30731e888890dad10d194da99d57809abe3244ae80ccc63c  cgn-backup.sh
+501d1b5f9af82ff24994ca2063dfeb833716b1b79c4a724c5e355223250a7648  cgn-authorize.sh
+PASS cgn-backup.sh, cgn-entrypoint.sh and cgn-authorize.sh match their pins in deploy/render/pins/scripts.sha256
+PASS the record reader block is identical in cgn-authorize.sh and cgn-entrypoint.sh
+## 3. lint and syntax
+PASS eslint scripts/beta (exit 0)
+PASS bash -n on scripts/beta and the runners, sh -n on the deploy scripts, node --check w5-seed.mjs and w6-check.mjs
+## 4. relative links in the changed documents
+links: 46 missing: 0
+PASS no missing relative link
+## 5. secret scan of the changes since d3f74de4e5f8e78f04f8aa2fed14fc4cac1ccf0f
+PASS no secret-shaped value (a real age secret key, a private key, an access code, a gate cookie, a token) or local scratch path in the added lines
+## verdict
+W6 REPAIR STATIC CHECKS PASSED

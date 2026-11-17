@@ -36,7 +36,25 @@ The repair has these parts:
 | [w5-selftest-dev.log](repair/dev/w5-selftest-dev.log) | tag `604d22` | W5 SELFTEST PASSED, 12/12 |
 | [w6-selftest-dev1.log](repair/dev/w6-selftest-dev1.log) | tag `6db388` | W6 SELFTEST PASSED, 13/13 |
 
-**The final** is recorded below once it has run on the clean candidate (`runners/w6r-final.sh`).
+**The final: one clean detached checkout of `516bacb408038bff8f975d5b9a1d1eec1b2d76d8`, status 0 lines before and after, 06:06–06:15Z** ([`repair/final/`](repair/final/), [summary](repair/final/summary.txt)).
+- Every run below is on that one revision, by [`runners/w6r-final.sh`](runners/w6r-final.sh).
+- The image under test was built from that checkout's `deploy/render`: `cgn-render:check` = `sha256:28120cbbf21c…`.
+
+| Step | Log | Run | Verdict |
+|---|---|---|---|
+| 1 | [1-static.log](repair/final/1-static.log) | `runners/w6r-static.sh`, 2 s | **W6 REPAIR STATIC CHECKS PASSED.**<ul><li>**Scope:** nothing changed outside `docs/`, `scripts/beta/w6-*`, the two guard scripts, their pins and the deploy README. Unchanged: the runtime, `w5-seed.mjs`, `cgn-backup`, `cgn-receive`, the Dockerfile, the gate, `render.yaml` and the other pins.</li><li>**Pins:** the release pin is intact; the three scripts match `pins/scripts.sha256`; the record reader is identical in both scripts.</li><li>**Lint and links:** eslint; syntax (bash, sh, node); 46 relative links, 0 missing.</li><li>**Secret scan:** nothing found.</li></ul> |
+| 2 | [2-image-checks.log](repair/final/2-image-checks.log) | `runners/image-checks-w6r.sh`, 60 s | **IMAGE CHECKS PASSED, 30/30.** The artifact gate builds and its negatives (G1–G12); the container checks (C1–C11): the five guard refusals, `SIGTERM` exit 0, the restart, `cgn-backup` → `RECEIPT_OK`, a root-owned disk failing closed. |
+| 3 | [3-guard-selftest.log](repair/final/3-guard-selftest.log) | `20261117T060704Z-5ecf8d35`, 52 s | **W6 GUARD SELFTEST PASSED, 37/37** |
+| 4 | [4-w6-selftest.log](repair/final/4-w6-selftest.log) | tag `82645a`, 56 s | **W6 SELFTEST PASSED, 13/13.** T2 is the rehearsal [`20261117T060758Z-df3e00a5`](repair/final/w6-T2-rehearsal.log): **46/46**, with its own log in the leak scan (0). T1, T3 and T4 failed as each must. |
+| 5 | [5-w5-selftest.log](repair/final/5-w5-selftest.log) | tag `18f555`, 35 s | **W5 SELFTEST PASSED, 12/12** (the receipt chain and its controls) |
+| 6 | [6-w4-selftest.log](repair/final/6-w4-selftest.log) | tag `e37401`, 249 s, `MCHEZO_CHROMIUM_PATH` set | **W4 SELFTEST PASSED, 81/81** (the restart, the guard probe, the stops and the controls) |
+| 7 | [7-backup-drill.log](repair/final/7-backup-drill.log) | the round-5 focused negatives on this checkout's deploy scripts, natively, 99 s | **FOCUSED PASSED, 19/19** (the hold, signals, killed runs, reconciliation) |
+
+**[`repair/final/T2-evidence/`](repair/final/T2-evidence/)** holds the final rehearsal's evidence:
+- `record-states.txt`: the record after each action. It holds no code or hash.
+- B1, B2 and B3's `cgn-backup` sessions, and their receipts;
+- the original's fingerprints at the stop and after the switch;
+- `seed.json` (ids only), `provenance.json` and `summary.json`.
 
 
 ## The first candidate `b4bba09` (reviewed in 6939462697; kept as it was)

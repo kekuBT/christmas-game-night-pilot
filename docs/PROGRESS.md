@@ -3823,3 +3823,12 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
   - `w6-rehearsal.sh` and `w6-check.mjs`: the prepare / commit cutover; the reopen gate on the record; the round played to its end; persisted exact scores with three negative controls; the return with B3; N6 recovered by an ordinary restart; N7. That's 46 checks.
   - **Regressions:** the round-5 focused backup drill (19/19 on the new scripts); the image checks (30/30 with C2 reading `pins/scripts.sha256`; the old harness's fixed hashes fail C2 by design, and that run is kept); the W4 and W5 self-tests.
 - **Docs:** `docs/beta/render-w6.md` (the switch, the procedure, the recovery, the later return, the Render steps for a throwaway hosted window); the proposal's guard text; `docs/evidence/beta-r4-w6/README.md`.
+- **The final** on one clean checkout of the candidate `516bacb` (`docs/evidence/beta-r4-w6/runners/w6r-final.sh`, 06:06–06:15Z), every step PASSED:
+  - the static checks;
+  - the image checks, 30/30;
+  - the guard self-test, 37/37;
+  - the W6 self-test, 13/13 (its rehearsal 46/46);
+  - the W5 self-test, 12/12;
+  - the W4 self-test, 81/81;
+  - the round-5 focused backup drill, 19/19.
+- **Next:** the new report on #49. On Render, the hosted validation of the switch, the real W6, the snapshot and W7 stay with the owner.
