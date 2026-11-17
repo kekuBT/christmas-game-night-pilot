@@ -130,6 +130,7 @@ Retrying is safe: each tap carries its own request ID, and the server records an
     - meaningful app errors.
 
   It changes the runtime, so it needs its own candidate review. **The release pin is unchanged until then.**
+- **The repair candidate** is on the stacked draft branch `claude/beta-r4-c502-uncertain-delivery` (decision D-BR4-C502-01; evidence in `docs/evidence/beta-r4-c502/`). **Until a candidate built from it is reviewed and pinned, the release in W4 still shows `Request failed (502)`,** so expect that wording in D1 and D2.
 
 ## The local rehearsal (W4, prepared)
 ```

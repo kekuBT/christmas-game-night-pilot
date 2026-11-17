@@ -3,7 +3,8 @@
  */
 import { randomUUID } from "node:crypto";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { sendIntent } from "../apps/web/src/components/intentRetry.js";
+import { describeIntentFailure, isUnconfirmedIntermediaryFailure, sendIntent } from "../apps/web/src/components/intentRetry.js";
+import { NOT_DELIVERED, humanError } from "../apps/web/src/ui/mchezo/lib/errors.js";
 import { RoomEngine } from "../src/server/room.js";
 import { Harness, myGame, waitFor, type Json } from "./helpers/harness.js";
 
@@ -103,6 +104,88 @@ describe("client intent retry (apps/web/src/components/intentRetry.ts)", () => {
     const send = vi.fn().mockRejectedValue(new TypeError("Failed to fetch"));
     await expect(sendIntent(send, noSleep)).rejects.toThrow("Failed to fetch");
     expect(send).toHaveBeenCalledTimes(3);
+  });
+});
+
+// Beta R4 (review 6935165862): a 502/503/504 from a proxy or the host's edge
+// (the game restarting behind it) is UNCONFIRMED, not a failure the player
+// should read as "Request failed (502)". The phone says it couldn't confirm
+// it (NOT_DELIVERED), which never claims the server didn't receive it; the
+// screen then shows the server's own state. Typed app errors stay themselves.
+describe("an exhausted intermediary 502/503/504 is unconfirmed (apps/web/src/components/intentRetry.ts)", () => {
+  const noSleep = { sleep: async () => {} };
+  /** The phone's send: one fixed request (one body, one clientEventId), answered by `answer`. */
+  function phone(answer: (attempt: number) => { status: number; body: unknown }) {
+    const body = JSON.stringify({ intent: { clientEventId: randomUUID(), action: "trivia-answer" } });
+    const sent: string[] = [];
+    const send = vi.fn(async () => { sent.push(body); return answer(sent.length); });
+    return { send, sent };
+  }
+  /** What the App shows for a send that ended with an HTTP error: humanError of the thrown message. */
+  const shown = (res: { status: number; body: unknown }) => humanError(describeIntentFailure(res));
+
+  it.each([502, 503, 504])("server down, nothing committed: three %i answers from the proxy (no app body) are unconfirmed, one event id throughout", async (status) => {
+    const { send, sent } = phone(() => ({ status, body: {} })); // a proxy's HTML page parses to {}
+    const res = await sendIntent(send, noSleep);
+    expect(res.status).toBe(status);
+    expect(send).toHaveBeenCalledTimes(3); // the retry count is unchanged
+    expect(new Set(sent).size).toBe(1); // every retry is the identical request: one clientEventId
+    expect(isUnconfirmedIntermediaryFailure(res)).toBe(true);
+    expect(shown(res)).toBe(NOT_DELIVERED);
+    expect(shown(res)).not.toMatch(/Request failed|502|503|504/);
+  });
+
+  it("committed, reply lost: a 502 then the server's deduped original answer is a plain success", async () => {
+    // The first try reached the server and was recorded, but the proxy lost the reply;
+    // the retry (same clientEventId) gets the original result back from the server's dedupe.
+    const { send, sent } = phone((n) => (n === 1 ? { status: 502, body: {} } : { status: 200, body: { accepted: true } }));
+    const res = await sendIntent(send, noSleep);
+    expect(res).toEqual({ status: 200, body: { accepted: true } });
+    expect(send).toHaveBeenCalledTimes(2);
+    expect(new Set(sent).size).toBe(1);
+    expect(isUnconfirmedIntermediaryFailure(res)).toBe(false);
+  });
+
+  it("committed, every reply lost: the wording says it couldn't confirm, never that it wasn't received", async () => {
+    // The server recorded the first try; every reply was replaced by the proxy's 502.
+    const { send } = phone(() => ({ status: 502, body: {} }));
+    const res = await sendIntent(send, noSleep);
+    expect(shown(res)).toBe(NOT_DELIVERED);
+    expect(NOT_DELIVERED).toMatch(/couldn’t confirm/);
+    expect(NOT_DELIVERED).toMatch(/If it doesn’t show as in, try again/); // the screen's state decides
+    expect(NOT_DELIVERED).not.toMatch(/not received|didn’t reach|wasn’t sent|failed|not saved/i);
+  });
+
+  it("a typed app error on a 5xx stays itself: the app's own body is authoritative", () => {
+    for (const status of [502, 503, 504]) {
+      const res = { status, body: { error: "Display name already taken" } };
+      expect(isUnconfirmedIntermediaryFailure(res)).toBe(false);
+      expect(shown(res)).toBe("That name is taken in this room — pick another.");
+    }
+    expect(isUnconfirmedIntermediaryFailure({ status: 503, body: { code: "MAINTENANCE" } })).toBe(false);
+    expect(isUnconfirmedIntermediaryFailure({ status: 502, body: { reason: "PHASE_CLOSED" } })).toBe(false);
+  });
+
+  it("meaningful app errors keep their wording: 4xx errors are not retried and not reworded", async () => {
+    const { send } = phone(() => ({ status: 401, body: { error: "Unknown player slot" } }));
+    const res = await sendIntent(send, noSleep);
+    expect(send).toHaveBeenCalledTimes(1);
+    expect(isUnconfirmedIntermediaryFailure(res)).toBe(false);
+    expect(shown(res)).toBe("We could not bring you back into your seat — rejoin with the room code.");
+    expect(shown({ status: 409, body: { error: "A game is already in progress" } })).toBe("A game is already running — finish it or wait for the host.");
+  });
+
+  it("other statuses are unchanged: a bare 500 or 4xx still says what it was", () => {
+    expect(isUnconfirmedIntermediaryFailure({ status: 500, body: {} })).toBe(false);
+    expect(describeIntentFailure({ status: 500, body: {} })).toBe("Request failed (500)");
+    expect(describeIntentFailure({ status: 404, body: {} })).toBe("Request failed (404)");
+    expect(isUnconfirmedIntermediaryFailure({ status: 200, body: { accepted: false, reason: "ALREADY_ANSWERED" } })).toBe(false);
+  });
+
+  it("a non-object or empty-string body is not an app error", () => {
+    expect(isUnconfirmedIntermediaryFailure({ status: 502, body: "<html>Bad Gateway</html>" })).toBe(true);
+    expect(isUnconfirmedIntermediaryFailure({ status: 504, body: null })).toBe(true);
+    expect(isUnconfirmedIntermediaryFailure({ status: 503, body: { error: "  " } })).toBe(true);
   });
 });
 

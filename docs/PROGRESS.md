@@ -3663,3 +3663,17 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
   - `w4-selftest.sh` **PASSED**, 79/79: K0, K0M, and K1–K8 with the sentinels kept. The rehearsal run is `20261117T020006Z-c4032f58`.
   - The static checks passed.
 - **Next:** the report on #46, then the separate stacked client-repair PR. ChatGPT's independent verification follows. The real D1 and D2 stay pending.
+
+## Beta R4: uncertain delivery after an intermediary 5xx (review 6935165862 item 4; in progress, a separate stacked draft PR)
+- **The client fix:** a tap whose retries all end on a 502, 503 or 504 with no app error now shows "We couldn’t confirm that…" instead of `Request failed (502)`. Typed app errors keep their wording; the retries, event ids, pending state and exactly-once scoring are unchanged.
+  - The code is in `intentRetry.ts` and `App.tsx` `sendAction`.
+  - The decision is D-BR4-C502-01.
+- **The tests:**
+  - unit cases in `tests/correctness.test.ts`;
+  - a browser driver, `scripts/check-uncertain-delivery.mjs`, covering server down, committed and reply lost, a typed app error on a 5xx, and a real app rejection.
+- **The negative control:** on the unrepaired client the driver fails, 6 failures, all on the wording.
+- **The pin `7097ac2` is unchanged** until a candidate review.
+- **Next:**
+  1. the full gate on the clean SHA;
+  2. the report on the new PR, linked to #46 and #5.
+

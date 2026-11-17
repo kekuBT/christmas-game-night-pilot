@@ -2330,3 +2330,18 @@ Handoff 6813167965 (with the Stage 9.2 clearance). Spec: `docs/stage9/stage93.md
   - **Alternatives rejected:**
     - `set -e` in the blocks: it doesn't stop on failures inside `if` conditions or `&&` lists, and it would end the operator's interactive shell.
     - One long script: the operator's settings edit has to happen by hand between the parts, and the code mustn't pass through a script's arguments or logs.
+
+## Beta R4: uncertain delivery after an intermediary 5xx (review 6935165862, item 4; separate stacked draft PR)
+- **D-BR4-C502-01 An exhausted 502, 503 or 504 with no error of the app's own is "couldn't confirm", not `Request failed (502)`.**
+  - **Why:** the W4 rehearsal showed the raw text for a tap made while the server restarted behind a proxy.
+    - The server itself never answers 502, 503 or 504, so such an answer comes from an intermediary.
+    - The action may or may not have been recorded: a restart can lose the reply to a committed action.
+    - So the phone uses the existing `NOT_DELIVERED` wording, which never claims either way, and the screen then shows the server's state.
+  - **What decides it:** `isUnconfirmedIntermediaryFailure` in `apps/web/src/components/intentRetry.ts`: the status is 502, 503 or 504, **and** the body has no non-empty `error`, `code` or `reason` string. A typed app error is authoritative and keeps its wording.
+  - **Unchanged:** the retries, the event id, the pending state, the server's dedupe and exactly-once scoring.
+  - **Alternatives rejected:**
+    - **Mapping every 5xx:** a 500 is a real error and should say so.
+    - **"Not received" wording:** false in the committed, reply-lost case.
+    - **Changing the server or the retry count:** out of scope, and not needed.
+  - **The release pin `7097ac2` is unchanged** until an explicit candidate review.
+
