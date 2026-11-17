@@ -1,0 +1,53 @@
+run started 2026-11-17T19:02:04Z on a clean checkout of 91abd93b3d173619cc3205caef8c62d839b8cbcf (tracked changes: 0); node v22.16.0
+
+== C0: MCHEZO_PUBLIC_ORIGIN=https://cs-example-3157.app.github.dev, requests sent directly
+PASS C0 setup: the admitted origin https://cs-example-3157.app.github.dev signs in (303) and creates a room -> 303 / 201
+   cookie set by the admitted origin: Path=/; HttpOnly; SameSite=Lax; Secure
+PASS C0 own, as received (http://localhost:3157), with a valid cookie: refused by the runtime on all three (API 403 FOREIGN_ORIGIN, form 403 with no cookie, WS 403) -> API 403 FOREIGN_ORIGIN / form 403 no cookie / WS 403
+PASS C0 the address-bar origin (https://cs-example-3157.app.github.dev): admitted on all three -> API 201 / form 303 (Path=/; HttpOnly; SameSite=Lax; Secure) / WS open
+PASS C0 the sibling port (as received) (https://cs-example-3158.app.github.dev), with a valid cookie: refused by the runtime on all three (API 403 FOREIGN_ORIGIN, form 403 with no cookie, WS 403) -> API 403 FOREIGN_ORIGIN / form 403 no cookie / WS 403
+PASS C0 null (sandboxed frame) (null), with a valid cookie: refused by the runtime on all three (API 403 FOREIGN_ORIGIN, form 403 with no cookie, WS 403) -> API 403 FOREIGN_ORIGIN / form 403 no cookie / WS 403
+PASS C0 scheme swapped (https://localhost:3157), with a valid cookie: refused by the runtime on all three (API 403 FOREIGN_ORIGIN, form 403 with no cookie, WS 403) -> API 403 FOREIGN_ORIGIN / form 403 no cookie / WS 403
+PASS C0 another loopback port (http://localhost:3158), with a valid cookie: refused by the runtime on all three (API 403 FOREIGN_ORIGIN, form 403 with no cookie, WS 403) -> API 403 FOREIGN_ORIGIN / form 403 no cookie / WS 403
+PASS C0 foreign (https://evil.example), with a valid cookie: refused by the runtime on all three (API 403 FOREIGN_ORIGIN, form 403 with no cookie, WS 403) -> API 403 FOREIGN_ORIGIN / form 403 no cookie / WS 403
+PASS C0 foreign, with spoofed X-Forwarded-*/Referer/Sec-Fetch-Site (https://evil.example), with a valid cookie: refused by the runtime on all three (API 403 FOREIGN_ORIGIN, form 403 with no cookie, WS 403) -> API 403 FOREIGN_ORIGIN / form 403 no cookie / WS 403
+PASS C0 missing: production lets a request without an Origin past the origin check (the beta cookie still decides) -> API 201 / form 303 (Path=/; HttpOnly; SameSite=Lax; Secure) / WS open
+PASS C0 the admitted origin without the beta cookie: API 401 BETA_ACCESS_REQUIRED, WS refused -> API 401 BETA_ACCESS_REQUIRED / WS 401
+PASS C0 the server never printed the access code
+
+== C1: MCHEZO_PUBLIC_ORIGIN=http://localhost:3157, requests sent directly
+PASS C1 setup: the admitted origin http://localhost:3157 signs in (303) and creates a room -> 303 / 201
+   cookie set by the admitted origin: Path=/; HttpOnly; SameSite=Lax
+PASS C1 own, as received (http://localhost:3157): admitted on all three -> API 201 / form 303 (Path=/; HttpOnly; SameSite=Lax) / WS open
+PASS C1 the address-bar origin (https://cs-example-3157.app.github.dev), with a valid cookie: refused by the runtime on all three (API 403 FOREIGN_ORIGIN, form 403 with no cookie, WS 403) -> API 403 FOREIGN_ORIGIN / form 403 no cookie / WS 403
+PASS C1 the sibling port (as received) (https://cs-example-3158.app.github.dev), with a valid cookie: refused by the runtime on all three (API 403 FOREIGN_ORIGIN, form 403 with no cookie, WS 403) -> API 403 FOREIGN_ORIGIN / form 403 no cookie / WS 403
+PASS C1 null (sandboxed frame) (null), with a valid cookie: refused by the runtime on all three (API 403 FOREIGN_ORIGIN, form 403 with no cookie, WS 403) -> API 403 FOREIGN_ORIGIN / form 403 no cookie / WS 403
+PASS C1 scheme swapped (https://localhost:3157), with a valid cookie: refused by the runtime on all three (API 403 FOREIGN_ORIGIN, form 403 with no cookie, WS 403) -> API 403 FOREIGN_ORIGIN / form 403 no cookie / WS 403
+PASS C1 another loopback port (http://localhost:3158), with a valid cookie: refused by the runtime on all three (API 403 FOREIGN_ORIGIN, form 403 with no cookie, WS 403) -> API 403 FOREIGN_ORIGIN / form 403 no cookie / WS 403
+PASS C1 foreign (https://evil.example), with a valid cookie: refused by the runtime on all three (API 403 FOREIGN_ORIGIN, form 403 with no cookie, WS 403) -> API 403 FOREIGN_ORIGIN / form 403 no cookie / WS 403
+PASS C1 foreign, with spoofed X-Forwarded-*/Referer/Sec-Fetch-Site (https://evil.example), with a valid cookie: refused by the runtime on all three (API 403 FOREIGN_ORIGIN, form 403 with no cookie, WS 403) -> API 403 FOREIGN_ORIGIN / form 403 no cookie / WS 403
+PASS C1 missing: production lets a request without an Origin past the origin check (the beta cookie still decides) -> API 201 / form 303 (Path=/; HttpOnly; SameSite=Lax) / WS open
+PASS C1 the admitted origin without the beta cookie: API 401 BETA_ACCESS_REQUIRED, WS refused -> API 401 BETA_ACCESS_REQUIRED / WS 401
+PASS C1 the server never printed the access code
+
+== C2: MCHEZO_PUBLIC_ORIGIN=https://cs-example-3157.app.github.dev, behind the adapter model (http://localhost:3157 -> https://cs-example-3157.app.github.dev)
+PASS C2 setup: the admitted origin http://localhost:3157 signs in (303) and creates a room -> 303 / 201
+   cookie set by the admitted origin: Path=/; HttpOnly; SameSite=Lax; Secure
+PASS C2 own, as received (http://localhost:3157): admitted on all three -> API 201 / form 303 (Path=/; HttpOnly; SameSite=Lax; Secure) / WS open
+PASS C2 the address-bar origin (https://cs-example-3157.app.github.dev) arriving unrewritten: the adapter refuses it on all three (403 ORIGIN_NOT_REWRITTEN; WS 403) -> API 403 ORIGIN_NOT_REWRITTEN / form 403 no cookie / WS 403
+PASS C2 the sibling port (as received) (https://cs-example-3158.app.github.dev), with a valid cookie: refused by the runtime on all three (API 403 FOREIGN_ORIGIN, form 403 with no cookie, WS 403) -> API 403 FOREIGN_ORIGIN / form 403 no cookie / WS 403
+PASS C2 null (sandboxed frame) (null), with a valid cookie: refused by the runtime on all three (API 403 FOREIGN_ORIGIN, form 403 with no cookie, WS 403) -> API 403 FOREIGN_ORIGIN / form 403 no cookie / WS 403
+PASS C2 scheme swapped (https://localhost:3157), with a valid cookie: refused by the runtime on all three (API 403 FOREIGN_ORIGIN, form 403 with no cookie, WS 403) -> API 403 FOREIGN_ORIGIN / form 403 no cookie / WS 403
+PASS C2 another loopback port (http://localhost:3158), with a valid cookie: refused by the runtime on all three (API 403 FOREIGN_ORIGIN, form 403 with no cookie, WS 403) -> API 403 FOREIGN_ORIGIN / form 403 no cookie / WS 403
+PASS C2 foreign (https://evil.example), with a valid cookie: refused by the runtime on all three (API 403 FOREIGN_ORIGIN, form 403 with no cookie, WS 403) -> API 403 FOREIGN_ORIGIN / form 403 no cookie / WS 403
+PASS C2 foreign, with spoofed X-Forwarded-*/Referer/Sec-Fetch-Site (https://evil.example), with a valid cookie: refused by the runtime on all three (API 403 FOREIGN_ORIGIN, form 403 with no cookie, WS 403) -> API 403 FOREIGN_ORIGIN / form 403 no cookie / WS 403
+PASS C2 missing: the adapter refuses POST and WS without an Origin (403 ORIGIN_REQUIRED) -> API 403 ORIGIN_REQUIRED / form 403 no cookie / WS 403
+PASS C2 the admitted origin without the beta cookie: API 401 BETA_ACCESS_REQUIRED, WS refused -> API 401 BETA_ACCESS_REQUIRED / WS 401
+PASS C2 the server never printed the access code
+PASS C0's cookie (the address-bar origin, https) is Secure -> Path=/; HttpOnly; SameSite=Lax; Secure
+PASS C1's cookie (http://localhost:3157) is NOT Secure: the cost of the config-only route -> Path=/; HttpOnly; SameSite=Lax
+PASS C2's cookie (behind the adapter model, public origin https) is Secure -> Path=/; HttpOnly; SameSite=Lax; Secure
+
+ORIGIN CASES: every check passed (exit 0)
+exit 0
+run ended 2026-11-17T19:02:06Z

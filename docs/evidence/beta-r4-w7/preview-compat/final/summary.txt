@@ -1,0 +1,17 @@
+Handoff 6957705907: the origin-case reproduction (repro-origin-cases.mjs), every run in order.
+
+run1  clean checkout of ba33d03  FAILED (infrastructure), before any check: the tsx command's IPC pipe
+      hit EADDRINUSE under the long temp path. Kept unchanged: run1-ba33d03-FAILED-infra.log.
+      The fix (91abd93): start the server with `node --import tsx`, and remove its data folder if a start fails.
+run2  clean checkout of 91abd93  PASSED (exit 0): 39 PASS, 0 FAIL. Node v22.16.0. run2-91abd93.log.
+      The real runtime (src/server, NODE_ENV=production, gated, 127.0.0.1); headers as received in the Codespace (6957543881).
+      C0  public origin = the address bar, direct      -> the own requests (http://localhost:3157) refused, 403 FOREIGN_ORIGIN on all three
+      C1  public origin = http://localhost:3157, direct -> own admitted; the cookie is NOT Secure
+      C2  public origin = the address bar, behind the adapter MODEL -> own admitted; the cookie is Secure;
+          the address-bar value arriving unrewritten gets 403 ORIGIN_NOT_REWRITTEN; no Origin on POST/WS gets 403 ORIGIN_REQUIRED
+      All three configurations: the sibling, null, the scheme-swapped value, another loopback port, a foreign origin, and a
+      foreign origin with spoofed X-Forwarded-*/Referer/Sec-Fetch-Site are each refused (403 FOREIGN_ORIGIN, form 403
+      with no cookie, WS 403). The admitted value without the beta cookie gets API 401 and WS 401.
+      No server was left running, the data folders were removed, and the synthetic code appears nowhere in the log.
+
+The verdict covers 91abd93 only. It is local evidence, not a Codespace run or independent testing.
