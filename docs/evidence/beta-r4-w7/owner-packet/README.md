@@ -29,6 +29,11 @@ That log was taken before two fixes to the test itself, so two of its lines aren
 
 The tool's identity there (`sha256 2c4e6aef…`) is the `902407d` script.
 
+## `final-c37f813/`: the first repair (review 6955337359), superseded
+This repair passed its own checks. Review 6955682854 then found that its `cleanup` kept stale ownership after a successful removal, so a retry deleted a replacement folder.
+- **The reproduction:** [runners/repro-cleanup-retry.sh](runners/repro-cleanup-retry.sh) runs a real `prepare`, a cleanup, replacements with sentinels, and a second cleanup.
+- **The result against the `c37f813` tool** (`repro-before-fix-c37f813.log`): **REPRO FAILED.** The retry deleted all 34 replacements.
+
 ## `final-<sha>/`: the repaired tool, on one clean checkout
 See that folder's `summary.txt`. It holds the self-test, the local run (whose browser step must launch, and whose plain-`http` verdict must be exactly `UNSUITABLE`), and the W7 static checks on the change.
 

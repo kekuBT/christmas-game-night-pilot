@@ -24,7 +24,7 @@ out=$($T start "$W" current 2>&1); rc=$?; echo "$out" | tail -1; [ $rc != 0 ] &&
 mv "$W/evidence/probe-report.json" "$W/evidence/probe-report-local-http.json"
 echo "-- 6 phase A: current"; $T start "$W" current; ok $? "start current: /health = 988c535"
 out=$($T start "$W" previous 2>&1); rc=$?; echo "$out" | tail -1; [ $rc != 0 ] && grep -q "already running" <<< "$out"; ok $? "a second writer is refused (one writer)"
-mkdir -m 700 "$SP/r4p5/priv"; cp "$W/secret/code" "$SP/r4p5/priv/code"
+NS=$(ls -d "$W"/w7op-* | head -1); echo "run folder: ${NS##*/}"; mkdir -m 700 "$SP/r4p5/priv"; cp "$NS/secret/code" "$SP/r4p5/priv/code"
 W5_OWNER=w7op node "$REPO/scripts/beta/w5-seed.mjs" seed http://127.0.0.1:3157 "$SP/r4p5/priv"; ok $? "synthetic room seeded on current (finished game, approved entry, 3 acknowledged answers)"
 echo "-- 7 pause P1 -> rollback"; $T stop "$W"; ok $? "stop current"
 $T backup "$W" before-rollback; ok $? "backup + verify by both releases"
@@ -37,8 +37,10 @@ $T check "$W" current; ok $? "the current release's datatool check accepts what 
 $T start "$W" current; ok $? "start current again: /health = 988c535"
 W5_OWNER=w7op node "$REPO/scripts/beta/w6-check.mjs" live http://127.0.0.1:3157 "$SP/r4p5/priv" fallback; ok $? "after the return (read-only): seats work, the approved entry is there, and the action made on the previous release is present with its value"
 $T status "$W"; $T stop "$W"; ok $? "stop"
-echo "-- 9 cleanup and leak scan"; code=$(cat "$W/secret/code"); $T cleanup "$W"; ok $? "cleanup"
-[ ! -e "$W/data" ] && [ ! -e "$W/secret" ] && [ ! -e "$W/backups" ]; ok $? "data, code and backups deleted"
+echo "-- 9 cleanup, a retry with a replacement, and the leak scan"; code=$(cat "$NS/secret/code"); $T cleanup "$W"; ok $? "cleanup"
+[ ! -e "$NS" ] && grep -q "^retired " "$W/.w7op-owner"; ok $? "the run folder (data, code, backups, builds) is gone and the record is retired"
+mkdir -p "$NS/data"; echo "another task" > "$NS/data/replacement-sentinel"; $T cleanup "$W"; rc=$?
+[ $rc = 0 ] && [ -f "$NS/data/replacement-sentinel" ]; ok $? "a cleanup retry leaves a replacement folder with the same name untouched (exit $rc)"; rm -rf "$NS"
 hits=$(grep -rlF -- "$code" "$W" "$SP/r4p5/probe.out" 2>/dev/null | grep -v "/priv/" || true); [ -z "$hits" ]; ok $? "the code appears in no evidence, log or release file ($([ -z "$hits" ] && echo 0 || echo "$hits") files)"
 rm -rf "$SP/r4p5/priv"
 echo "== verdict: $([ $BAD = 0 ] && echo 'LOCAL RUN PASSED' || echo 'LOCAL RUN FAILED') ($(date -u +%FT%TZ))"; exit $BAD

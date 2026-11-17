@@ -3978,3 +3978,22 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
 - **The repair** (D-R4W7-02) is in `scripts/beta/w7-owner-preview.sh`: the ownership record, registration before creation, guarded commands, a cleanup limited to recorded names with no symlinks, and the Codespace test-flag refusal. The report gate now runs before the release check.
 - **The evidence correction:** the `902407d` run's browser step never launched (verdict `INCOMPLETE`), so 6955277111's "driven HTTP probe returned UNSUITABLE" was false. The original log is kept. The driver now uses the preinstalled Chromium and fails loudly, and the runner requires the exact `UNSUITABLE` verdict.
 - **Readiness:** ChatGPT's dashboard check (6955289084) is recorded. The workspace is Hobby and empty, and the pipeline limit is $0, which caps only pipeline purchases. The payment method and region are still unverified.
+- **Reported in 6955651595** (the operator-tool safeguards, tested `c37f813`, head `f62ce36`).
+
+## Beta R4 W7: one exclusive run folder for the operator tool (review 6955682854)
+- **Acknowledged** in 6955720590 at 12:29 p.m. ET. The estimate is about 45 min.
+- **The failing reproduction first:** `runners/repro-cleanup-retry.sh` (a real `prepare`, a cleanup, replacements, a second cleanup). Against the `c37f813` tool it reports **REPRO FAILED**: 34 of 34 replacements deleted.
+- **The repair** (D-R4W7-03) is in `scripts/beta/w7-owner-preview.sh`:
+  - one exclusive run folder `w7op-<token>`, created with `mkdir`, holding a token file, with its device:inode:birth time recorded;
+  - identity checks on every command;
+  - a cleanup that removes the code first, then the rest, then the token file, and retires the record last;
+  - a retry after cleanup is a no-op;
+  - nothing outside the folder is created or taken over.
+- **`w7-owner-selftest.sh`, now S1–S11 (61 checks), adds:**
+  - a replaced run folder, including one with a copied token file and a reused inode;
+  - a symlinked run folder;
+  - a retry with replacements, and a retired run refused;
+  - an interrupted cleanup followed by a retry;
+  - pre-existing shared-name folders never adopted.
+
+  The loops that took arguments now pass them in the right order, and each refusal is checked for its reason.

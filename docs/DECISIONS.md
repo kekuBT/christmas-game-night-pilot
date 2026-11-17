@@ -2380,3 +2380,16 @@ Handoff 6813167965 (with the Stage 9.2 clearance). Spec: `docs/stage9/stage93.md
     - **checking only for `src/.git`** (the defect itself);
     - **refusing the whole cleanup on one bad entry:** that would strand the code;
     - **a local-test flag that's merely ignored in a Codespace:** a silent mode change is worse than a refusal.
+- **D-R4W7-03 One exclusive run folder, identified, then retired** (review 6955682854; it supersedes D-R4W7-02's per-entry inventory).
+  - **The folder:** `prepare` creates `<work>/w7op-<token>` with a plain `mkdir`. It writes a token file inside it, and records the folder's device:inode:birth time. Every resource of the run lives inside it.
+  - **The checks:** every command verifies that identity first.
+  - **`cleanup`:** it removes the code, then the rest, then the token file and the folder. Only then does it retire the record. A retired record removes nothing.
+  - **Why:**
+    - a per-entry list kept stale ownership after a removal, so a retry deleted replacements (34 of 34 in the reproduction);
+    - `mkdir -p` of shared names could take over a pre-existing folder;
+    - an inode number alone is reused when a folder is recreated, and a birth time isn't.
+  - **Alternatives rejected:**
+    - **removing `own` lines one by one:** a crash between a removal and its line still leaves a window;
+    - **an inode alone:** reuse was observed;
+    - **trusting the token file alone:** it can be copied.
+  - **Where birth time is unavailable,** a filesystem reports 0. Identity then rests on device:inode plus the token file.

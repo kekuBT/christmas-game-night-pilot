@@ -79,18 +79,22 @@ $T start "$W" current           # refuses without a passing probe; waits for /he
 ```
 
 **Only after `start` prints `READY`,** with `/health` on the expected revision:
-- give the owner the address, and the code from `$W/secret/code`;
+- give the owner the address, and the code from `<run folder>/secret/code` (`prepare` prints the run folder's path);
 - send them privately, in the coordinating chat, **never on GitHub**;
 - keep the code out of every log and screenshot.
 
 **Every start and stop goes into `$W/evidence/phases.log`:** the revision, the origin, the data folder, the pid, and the startup's `[restore] …` line.
 
-**What the tool may touch** (review 6955337359):
-- **The record:** `prepare` first writes `$W/.w7op-owner`, mode 600. It holds a marker, the canonical root and a token. Every resource is registered in it **before** it is created, so an interrupted `prepare` can still be cleaned up.
-- **Every other command refuses a folder without that record,** or one whose record is a symlink, belongs to another user, isn't mode 600, or names another root.
-- **`cleanup` removes only the recorded entries named** `secret`, `data`, `backups`, `probe`, `run`, `compat-<label>`, `co-<sha>` and `rel-<sha>`.
-  - **It never touches** a symlink, `src/`, `evidence/`, the record, or anything unrecorded.
-  - **Anything unexpected is reported as `REFUSED`,** with a non-zero exit. The safe entries, the code first, are still removed.
+**What the tool may touch** (reviews 6955337359 and 6955682854; D-R4W7-02, D-R4W7-03):
+- **The record:** `prepare` first writes `$W/.w7op-owner`, mode 600, holding a marker, the canonical root and a token.
+- **One run folder:** `prepare` then creates `$W/w7op-<token>` with a plain `mkdir`, which fails if anything is already there.
+  - A token file goes inside it, and its identity (device, inode and birth time) is recorded.
+  - **Everything the run creates lives in that folder:** the code, the data, backups, the probe, builds and compatibility copies. Nothing outside it is created or taken over, apart from `evidence/`, which is kept.
+- **Every other command checks the record and the run folder's identity first.** It refuses a run folder that is missing, a symlink, someone else's, replaced (even when the inode number is reused), or a run already cleaned up.
+- **`cleanup`:**
+  - **The order:** it removes the code first, then everything else in the run folder, then the token file and the folder.
+  - **It retires the record only after that.** A retry after success removes nothing, so a replacement made under the same name is never touched.
+  - **An interrupted cleanup can be retried,** because the identity survives until the very end.
 - **`W7OP_LOCAL_TEST=1` is refused outright** whenever any Codespaces variable is set. In a Codespace, the probe gate always applies.
 
 ## 4. The owner's checklist (phase A, current)
