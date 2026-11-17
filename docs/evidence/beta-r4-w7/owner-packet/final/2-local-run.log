@@ -1,0 +1,122 @@
+== local run, 2026-11-17T17:09:44Z; packet checkout 902407d6e7ee7a85a78ab69c38fff7e919f0ce3f; script sha256 2c4e6aef561076c8
+-- 1 inspect
+w7op: where: not a Codespace
+w7op: node: v22.16.0 (the audited builds used v22.16.0)
+w7op: port 3157: free
+w7op: port 3158: free
+w7op: node servers running (pid, command), read-only:
+  none
+w7op: disk: 2.2G free
+w7op: inspect changes nothing.
+PASS inspect (read-only)
+-- 2 outside a Codespace without the test flag
+w7op: STOP: not in a Codespace (set W7OP_LOCAL_TEST=1 only for a developer's local test)
+PASS refused outside a Codespace
+-- 3 prepare (both releases)
+w7op: building previous (7097ac2bb062925bb296a129f4771f1e68fd522d); this takes a few minutes
+w7op: previous: inventory matches (144 files, fe6d74f8df7280a52102f70ab1d356428e810dfa614f45b53a60596d8e89a61c)
+w7op: building current (988c53558bbbcc1545fe0ca32882f30c1970794b); this takes a few minutes
+w7op: current: inventory matches (144 files, 4f58b3239f04f9ea074c15993371effee6fac1295dd8124924ea00fefb19daef)
+w7op: prepared. Identities: <scratch>/r4p5/work/evidence/identity.txt. The code is in <scratch>/r4p5/work/secret/code (mode 600): give it to the owner privately, never on GitHub.
+PASS prepare: both inventories match
+# W7 owner test: release identities (LOCAL TEST (not a Codespace)), 2026-11-17T17:09:45Z
+node v22.16.0, npm 10.9.2
+packet checkout 902407d6e7ee7a85a78ab69c38fff7e919f0ce3f
+previous: revision 7097ac2bb062925bb296a129f4771f1e68fd522d; release.json {
+  "revision": "7097ac2bb062925bb296a129f4771f1e68fd522d",
+  "builtAt": "2026-11-17T17:10:03.146Z",
+  "node": "v22.16.0"
+}; inventory 144 files, SHA-256 fe6d74f8df7280a52102f70ab1d356428e810dfa614f45b53a60596d8e89a61c (expected fe6d74f8df7280a52102f70ab1d356428e810dfa614f45b53a60596d8e89a61c)
+current: revision 988c53558bbbcc1545fe0ca32882f30c1970794b; release.json {
+  "revision": "988c53558bbbcc1545fe0ca32882f30c1970794b",
+  "builtAt": "2026-11-17T17:10:23.433Z",
+  "node": "v22.16.0"
+}; inventory 144 files, SHA-256 4f58b3239f04f9ea074c15993371effee6fac1295dd8124924ea00fefb19daef (expected 4f58b3239f04f9ea074c15993371effee6fac1295dd8124924ea00fefb19daef)
+-- 4 prepare again
+w7op: STOP: <scratch>/r4p5/work must hold only src/ (found: co-7097ac2bb062925bb296a129f4771f1e68fd522d co-988c53558bbbcc1545fe0ca32882f30c1970794b data evidence rel-7097ac2bb062925bb296a129f4771f1e68fd522d rel-988c53558bbbcc1545fe0ca32882f30c1970794b run secret); use a new folder, never another test's
+PASS a second prepare into the same folder is refused
+-- 5 the probe, driven by headless Chromium on loopback http (expected: a refusal verdict)
+drive failed: browserType.launch: Executable doesn't exist at /opt/pw-browsers/chromium_headless_shell-1248/chrome-headless-shell-linux64/chrome-headless-shell
+╔════════════════════════════════════════════════════════════╗
+║ Looks like Playwright was just installed or updated.       ║
+║ Please run the following command to download new browsers: ║
+║                                                            ║
+║     npx playwright install                                 ║
+║                                                            ║
+║ <3 Playwright Team                                         ║
+╚════════════════════════════════════════════════════════════╝
+PASS the probe stopped on SIGINT and freed 3157
+probe verdict: INCOMPLETE
+w7op: STOP: the probe report's verdict is INCOMPLETE: route A can't be used (no HTTP allowance, no workaround). Report it.
+PASS start refused BECAUSE of the probe verdict INCOMPLETE (no HTTP allowance)
+-- 6 phase A: current
+w7op: LOCAL TEST: origin http://127.0.0.1:3157 (no probe; never valid in a Codespace)
+== start current at 2026-11-17T17:10:28Z: /health revision 988c53558bbbcc1545fe0ca32882f30c1970794b; origin http://127.0.0.1:3157; data <scratch>/r4p5/work/data; pid 6834
+Listening on 127.0.0.1; public origin http://127.0.0.1:3157.
+w7op: READY (local test): http://127.0.0.1:3157/
+PASS start current: /health = 988c535
+w7op: STOP: a server from this folder is already running (stop it first: one writer)
+PASS a second writer is refused (one writer)
+SEED {"roomId":"room-mwky7kdo-2594","warmGameId":"game-1","secondGameId":"game-2","entryId":"book-1","entrySources":["evt-11"],"hostPlayerId":"player-1","guestPlayerId":"player-2","questions":["trv-arts-062","trv-legacy-06","trv-legacy-12","trv-lite-045","trv-math-093","trv-hist-036","trv-scie-007","trv-scie-123","trv-spor-083","trv-arts-059"],"acked":[{"who":"guest","playerId":"player-2","questionId":"trv-arts-062","ackAt":"2026-11-17T17:10:28.726Z"},{"who":"guest","playerId":"player-2","questionId":"trv-legacy-06","ackAt":"2026-11-17T17:10:28.732Z"},{"who":"host","playerId":"player-1","questionId":"trv-arts-062","ackAt":"2026-11-17T17:10:28.737Z"}]}
+PASS synthetic room seeded on current (finished game, approved entry, 3 acknowledged answers)
+-- 7 pause P1 -> rollback
+== stop current at 2026-11-17T17:10:30Z: pid 6834 exited; port 3157 free
+PASS stop current
+== backup before-rollback at 2026-11-17T17:10:30Z
+backup OK: 1 room(s), 1 Memory Book(s), 3 file(s), verified
+verify OK: 3 file(s) match the manifest of 2026-11-17T17:10:30.368Z
+verify OK: 3 file(s) match the manifest of 2026-11-17T17:10:30.368Z
+receipt (local surrogate: no off-host transfer): manifest SHA-256 1feee403d3df40efd725771ab9f36a33cf210ffdf5b3e57f98f001ce05ce4ca1
+PASS backup + verify by both releases
+== compat before-rollback at 2026-11-17T17:10:30Z: the PREVIOUS release (7097ac2bb062925bb296a129f4771f1e68fd522d) reads the backup
+verify OK: 3 file(s) match the manifest of 2026-11-17T17:10:30.368Z
+restore OK: 1 room(s), 1 Memory Book(s) restored and verified. Next, as the user the server runs as: datatool check --data <scratch>/r4p5/work/compat-before-rollback
+check OK: 1 room(s), 1 Memory Book(s); owned by this user (uid 0) and private; the lock and a test write worked. A server run by this user can use it.
+PASS the previous release verifies, restores and checks the copy
+w7op: LOCAL TEST: origin http://127.0.0.1:3157 (no probe; never valid in a Codespace)
+== start previous at 2026-11-17T17:10:31Z: /health revision 7097ac2bb062925bb296a129f4771f1e68fd522d; origin http://127.0.0.1:3157; data <scratch>/r4p5/work/data; pid 7037
+[restore] 1 room(s) restored, 0 not loaded (data: <scratch>/r4p5/work/data)
+Listening on 127.0.0.1; public origin http://127.0.0.1:3157.
+w7op: READY (local test): http://127.0.0.1:3157/
+PASS start previous: /health = 7097ac2
+PASS the room answers after the backup, with the host's existing seat (no rejoin) — HTTP 200
+PASS the guest's existing seat still works (no rejoin) — HTTP 200
+PASS the approved "W5 seed" entry is still there and approved — HTTP 200
+PASS a NEW answer after the backup is acknowledged (the original service resumed) — HTTP 200 accepted=true
+RESUME OK (0 failed)
+PASS on previous: same seats, approved entry, answers kept; ONE new answer acknowledged
+-- 8 return
+== stop previous at 2026-11-17T17:10:33Z: pid 7037 exited; port 3157 free
+PASS stop previous
+== backup before-return at 2026-11-17T17:10:33Z
+backup OK: 1 room(s), 1 Memory Book(s), 3 file(s), verified
+verify OK: 3 file(s) match the manifest of 2026-11-17T17:10:33.231Z
+verify OK: 3 file(s) match the manifest of 2026-11-17T17:10:33.231Z
+receipt (local surrogate: no off-host transfer): manifest SHA-256 ae2094464a449ed04506b33734871ddd899feaa29bb7ca16ed7114858de37213
+PASS backup before the return
+== check by current at 2026-11-17T17:10:33Z
+check OK: 1 room(s), 1 Memory Book(s); owned by this user (uid 0) and private; the lock and a test write worked. A server run by this user can use it.
+PASS the current release's datatool check accepts what the previous one wrote
+w7op: LOCAL TEST: origin http://127.0.0.1:3157 (no probe; never valid in a Codespace)
+== start current at 2026-11-17T17:10:34Z: /health revision 988c53558bbbcc1545fe0ca32882f30c1970794b; origin http://127.0.0.1:3157; data <scratch>/r4p5/work/data; pid 7199
+[restore] 1 room(s) restored, 0 not loaded (data: <scratch>/r4p5/work/data)
+Listening on 127.0.0.1; public origin http://127.0.0.1:3157.
+w7op: READY (local test): http://127.0.0.1:3157/
+PASS start current again: /health = 988c535
+PASS the access gate admits the throwaway code
+PASS the original HOST seat works, with no rejoin — HTTP 200
+PASS the original GUEST seat works, with no rejoin — HTTP 200
+PASS the approved "W5 seed" entry is there
+PASS the retained folder's later state is back: the post-backup answer, with its value
+PASS the host's pre-backup answer keeps its submitted value
+LIVE fallback OK (0 failed)
+PASS after the return (read-only): seats work, the approved entry is there, and the action made on the previous release is present with its value
+w7op: running: current (pid 7199); /health: {"ok":true,"revision":"988c53558bbbcc1545fe0ca32882f30c1970794b"}
+== stop current at 2026-11-17T17:10:35Z: pid 7199 exited; port 3157 free
+PASS stop
+-- 9 cleanup and leak scan
+w7op: deleted the synthetic data, backups, copies, the code and the build checkouts; kept <scratch>/r4p5/work/evidence and the release folders
+PASS cleanup
+PASS data, code and backups deleted
+PASS the code appears in no evidence, log or release file (0 files)
+== verdict: LOCAL RUN PASSED (2026-11-17T17:10:43Z)
