@@ -3940,3 +3940,14 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
   - Render documents no bandwidth spend limit;
   - Render doesn't document passing `Origin` through: it is expected, and W1 checks it.
 - **Unchanged:** no runtime, security, deploy or pin change. W7 stays OPEN, and there is no W8.
+- **Reported in 6954353201** (the readiness matrix and Render execution proposal, head `2b26520`, docs only). Linked on #5 in 6954358089.
+
+## Beta R4: readiness proposal documentation corrections (review 6954485280; docs only)
+- **Acknowledged** in 6954497172 at 11:42 a.m. ET. The estimate is about 20 min.
+- **The changes,** to `docs/beta/beta-r4-readiness.md` (revision 2) and `docs/beta/render-w7.md`:
+  1. **The order follows dependencies.** B-W7-01 (the second release's gate, package, private archive audit and compatibility proof, and the forward and revert commits) blocks promotion and W7's release-pair test, not hosted W1–W6 on `7097ac2`. Starting W1–W6 earlier is a proposal only, conditional on the owner's execution approval and on the outstanding private W7 audit. Any change to where that audit happens is pending the owner.
+  2. **The one-click check: the synthetic-phase exception** (the architect's decision). It runs on the single planned service, only while no family data or real code has ever been on it. The exception ends once real data has existed. Recovery and cleanup are stated in both documents.
+  3. **The cost wording:** the $7.25 Render baseline plus up to $10 Codespaces, before Render overages and tax. That is not a ceiling. Pipeline purchases stop only at the configured limit, whose minimum is unverified.
+  4. **§5 keeps its uncertainty:** the owner's address bar and the error-page explanation are hypotheses. No new navigation is asserted as permitted, and the audit isn't relocated. ChatGPT owns the browser restriction, and the owner owns any audit-location exception.
+  5. **The $0 statement** is narrowed to the existing application on Render's free web-service tier. Report 6954353201's mangled log links are repaired.
+- **Unchanged:** no runtime, security, deploy or pin change. W7 stays OPEN, and there is no W8.

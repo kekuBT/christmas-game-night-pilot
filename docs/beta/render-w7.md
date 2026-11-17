@@ -24,7 +24,7 @@
     4. a pins-only forward commit, and its revert prepared in advance;
     5. the local checks under test pins;
     6. the real predecessor check on the audited `a693c543…`, where that archive is kept.
-  - **The owner-gated hosted operation:** the forward deploy, then W7's rollback and return, and separately the deliberate one-click check on a throwaway service. Any new resource needs approval too.
+  - **The owner-gated hosted operation:** the forward deploy, then W7's rollback and return, and separately the deliberate one-click check. That check runs on the single planned service, and only in its synthetic-data phase ([the exception below](#the-synthetic-phase-exception)). Any new resource needs approval too.
   - Until then, a W7 on Render could only "roll back" to the release that is already running, which proves nothing.
 - **For the local rehearsal only,** a clearly labelled **LOCAL SURROGATE** stands in for the predecessor, built from `f93e9cba8613859be9891706ead1c60157c73de2`, the commit before the R5 UI changes. Its identity and build:
   - built by [build-predecessor.sh](../evidence/beta-r4-w7/runners/build-predecessor.sh), the same procedure as the R2 rebuild (Node 22.16.0, `npm ci`, `pack.mjs`);
@@ -116,8 +116,18 @@ Every step happens in maintenance (Render's maintenance mode on), and each must 
 
 Each start was refused (78). The record stayed byte-identical, the data folder's files were unchanged, and maintenance stayed closed.
 
-**The provider-specific steps for a future authorized throwaway window** (only on a throwaway service with a throwaway disk, access code and `age` identity; never the family's service):
-1. **A configuration change to cross:** on the throwaway service, `cgn-authorize` new values (for example, a rotated throwaway code). Then save the environment, which redeploys. The checks pass on the new values.
+### The synthetic-phase exception
+The architect's decision is in review [6954485280](https://github.com/kekuBT/christmas-game-night-pilot/pull/50#issuecomment-6954485280). Execution still needs the owner's approval. It replaces this runbook's earlier "a throwaway service, never the family's service", without a second service or its cost.
+- **The condition:** the deliberate one-click check may run on **the single planned service**, but only while that service and its disk **have never held family data or a real access code.** That means:
+  - the data folder is the throwaway `/var/data/cgn-w1`;
+  - the access code and the `age` identity are throwaway ones;
+  - `/var/data/cgn` has never been authorized.
+- **Once real data or a real code has existed on the service, the exception ends for good.** A later one-click check would need a separate throwaway service. That is a new resource with its own approval, and none is proposed.
+- **Recovery:** step 6 below. An ordinary manual deploy of the current commit, with the current environment; the record, the folder, the synthetic room and the reopen gate exactly as before; auto-deploy still off.
+- **Cleanup:** step 7 below, and the synthetic data at the go/no-go.
+
+**The provider-specific steps for a future authorized window.** They run only under the exception above, with a throwaway access code and `age` identity.
+1. **A configuration change to cross:** on the service, still in its synthetic phase, `cgn-authorize` new values (for example, a rotated throwaway code). Then save the environment, which redeploys. The checks pass on the new values.
 2. **Maintenance on.** A backup and its receipt (procedure step 3), as before any rollback.
 3. **The deliberate one-click rollback,** from the dashboard, to the deploy **before** the change.
 4. **Expect:**
@@ -138,10 +148,16 @@ Each start was refused (78). The record stayed byte-identical, the data folder's
    - the reopen gate passes.
 
    Check that auto-deploy is still off afterwards.
-7. **Remove the throwaway service and its disk** at the end of the window, and record that they're gone.
+7. **Cleanup.** The service and its disk stay: W8 still runs on them with synthetic data. Record the refused deploy, which stays in the service's deploy history. **At the go/no-go,** once the real folder is authorized and serving:
+   - delete `/var/data/cgn-w1` and its backups on the disk;
+   - delete the off-Render backups encrypted to the throwaway `age` identity, then destroy that identity;
+   - the throwaway code has already been replaced by the real one.
+
+   Render's daily snapshots from the synthetic phase hold only synthetic data, and expire after seven days.
 
 **Remaining prerequisites for that window:**
-- the owner's approval of the window and of any spend: the throwaway service and its disk are paid resources, and the target is $0;
+- the owner's approval of the window (the execution decision). No second service or disk is created, so there's no spend beyond the approved $7.25 baseline;
+- the exception's condition, checked first: no real data or real code has ever been on the service;
 - a throwaway access code and `age` identity created for it;
 - B-W7-01 for the revert-commit half (a second audited release);
 - the hosted validation of the W6 switch, which is still open.
@@ -185,5 +201,5 @@ Evidence: [docs/evidence/beta-r4-w7/](../evidence/beta-r4-w7/).
 
 ## Pending
 - **B-W7-01,** a second audited release, before any real W7.
-- **The real W7** (the revert-commit deploy and the deliberate one-click check), in owner-approved windows.
+- **The real W7** (the revert-commit deploy and the deliberate one-click check), in owner-approved windows. The one-click check runs only under the synthetic-phase exception.
 - Render, production data, owner keys and provider-side execution all stay gated on separate owner approval.

@@ -1,0 +1,34 @@
+== checks on the working tree (base 2b26520), 2026-11-17T16:51:16Z
+-- relative links, with anchors
+links: 30, missing: 0
+-- tables: every row has its header's column count
+table rows with a wrong column count: 0
+-- commands and paths named in the changes
+present: deploy/render/cgn-authorize.sh
+present: deploy/render/cgn-entrypoint.sh
+present: deploy/render/cgn-artifact-gate.sh
+present: scripts/beta/w7-rehearsal.sh
+present: cgn-authorize --status
+present: datatool check
+present: /var/data/cgn-w1 and /var/data/cgn in deploy/render/README.md
+present: W7_CURRENT_REVISION / W7_PREVIOUS_REVISION
+src diff 7097ac2..72e9d8b: 0 file(s)
+-- the review's five points: stale wording gone
+PASS: no 'up to 17.25' total
+PASS: no automatic move of the audit to a hosted window
+PASS: no unconditional new-navigation step
+PASS: no 'stop at the spend limit instead of being billed'
+PASS: no 'throwaway service ... never the family' rule left as a requirement
+PASS: no unqualified '$0 is possible only by dropping persistence'
+PASS: the exception is stated in both documents
+-- secret scan of the changes since 2b26520
+no secret-shaped value or scratch path in the added lines
+-- scope
+M  docs/PROGRESS.md
+M  docs/beta/beta-r4-readiness.md
+M  docs/beta/render-w7.md
+AM docs/evidence/beta-r4-hosting/readiness-checks-2026-11-17-r2.log
+A  docs/evidence/beta-r4-hosting/readiness-checks-r2.sh
+only docs/ changed
+-- verdict
+DOC CHECKS PASSED
