@@ -75,13 +75,18 @@
 
 ```bash
 W=/workspaces/w7-owner-YYYYMMDD                       # new, empty
-git clone --branch claude/beta-r4-w7-rollback --single-branch https://github.com/kekuBT/christmas-game-night-pilot "$W/src"
-git -C "$W/src" checkout --detach <this packet's commit, named in the report>
+git clone --branch claude/beta-r4-w7-rollback --single-branch https://github.com/kekuBT/christmas-game-night-pilot "$W/src" \
+  && git -C "$W/src" checkout --detach <this packet's commit, named in the report> \
+  && bash "$W/src/scripts/beta/w7-owner-selftest.sh"   # about 1 min; must end PASSED
 T="bash $W/src/scripts/beta/w7-owner-preview.sh"
-bash "$W/src/scripts/beta/w7-owner-selftest.sh"   # about 1 min: the tool's own safeguards, in a private temp folder
-$T inspect                      # read-only
-$T prepare "$W"                 # builds both phases; STOPS unless both inventories match (section 1)
-$T probe "$W"                   # Gate R (section 2); Ctrl-C after the owner's target page shows its verdict
+$T inspect                      # read-only, on its own
+```
+**Then, if the self-test passed and `inspect` shows nothing in the way:**
+```bash
+$T prepare "$W" && $T probe "$W"   # builds both phases (stops unless both inventories match), then Gate R; Ctrl-C after the verdict
+```
+**Only when the verdict passes** (section 2), on its own:
+```bash
 $T start "$W" current           # refuses without a passing probe; waits for /health = 988c535; prints READY + the address
 ```
 
@@ -132,11 +137,11 @@ All of it is **LOCAL SURROGATE** (section 1). Leave the three tabs open througho
 | Step | Who | What | Pass |
 |---|---|---|---|
 | **P1** | Owner (phase A) | **Before the rollback,** take a screenshot of: the seats (names on host, guest and TV); the **completed standings**; the **saved entry** `W7 owner seed`. Make sure O5's rematch was **finished**. Then say "P1 done". | — |
-| R1 | Operator | `$T stop "$W"`, then `$T backup "$W" before-rollback` (both releases verify it). Then `$T compat "$W" before-rollback`: the previous release verifies, restores and checks the copy. Then `$T start "$W" previous`. | `backup OK` + `verify OK` ×2; `restore OK`, `check OK`; `/health` = `7097ac2…`; `[restore] N room(s) restored, 0 not loaded`. **Any failure: STOP the rollback, and don't start the previous release.** Then say "P2 ready" and give the revision. |
+| R1 | Operator | One chain: `$T stop "$W" && $T backup "$W" before-rollback && $T compat "$W" before-rollback && $T start "$W" previous`. The backup is verified by both releases; `compat` has the previous release verify, restore and check the copy. A failure stops the chain before `start` (`echo $?` isn't `0`). | `backup OK` + `verify OK` ×2; `restore OK`, `check OK`; `/health` = `7097ac2…`; `[restore] N room(s) restored, 0 not loaded`. **Any failure: STOP the rollback, and don't start the previous release.** Then say "P2 ready" and give the revision. |
 | **P2** | Owner (phase B: the previous release) | The tabs reconnect by themselves (if not, reload each **once**). Check that seats, standings and the saved entry match P1. Then make **one new action:** Memory Book → `W7 rollback note` → **Add from last finished game** → **Approve**. | Same seats with no rejoin. The standings equal P1's, and the entry is there. The new note shows once. |
-| R2 | Operator | `$T stop "$W"`; `$T backup "$W" before-return`; `$T check "$W" current` (the current release accepts what the previous one wrote); `$T start "$W" current`. | `check OK`; `/health` = `988c535…`. Then say "P3 ready". |
+| R2 | Operator | One chain: `$T stop "$W" && $T backup "$W" before-return && $T check "$W" current && $T start "$W" current`. `check` confirms the current release accepts what the previous one wrote. A failure stops the chain before `start`. | `check OK`; `/health` = `988c535…`. Then say "P3 ready". |
 | **P3** | Owner (phase C: the return) | The tabs reconnect. Check the seats and standings, `W7 owner seed`, and `W7 rollback note`. | Everything as P2, and **`W7 rollback note` exactly once**: it survived the return once, not twice and not lost. No score changed. |
-| End | Operator | `$T stop "$W"`, then `$T cleanup "$W"`. That deletes the synthetic data, backups, copies and the code, and keeps `$W/evidence`. Then stop the Codespace. | — |
+| End | Operator | `$T stop "$W" && $T cleanup "$W"`. That deletes the synthetic data, backups, copies and the code, and keeps `$W/evidence`. Then stop the Codespace. | — |
 
 **This shows:** a browser session across a rollback and a return, between two locally built releases, on synthetic data.
 

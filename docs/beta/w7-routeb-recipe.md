@@ -22,11 +22,11 @@
 ## 0. The prerequisites (read-only; report any that is missing, don't install)
 ```bash
 W=/workspaces/w7-routeb-YYYYMMDD            # new and empty: never the main checkout, /workspaces/mchezo-w7-live.SXcNNq, or another test's folder
-git clone --branch claude/beta-r4-w7-rollback --single-branch https://github.com/kekuBT/christmas-game-night-pilot "$W/src"
-git -C "$W/src" checkout --detach <the tested commit named in the report>
+git clone --branch claude/beta-r4-w7-rollback --single-branch https://github.com/kekuBT/christmas-game-night-pilot "$W/src" \
+  && git -C "$W/src" checkout --detach <the tested commit named in the report> \
+  && bash "$W/src/scripts/beta/w7-owner-selftest.sh"   # about 1 min; must end PASSED
 T="bash $W/src/scripts/beta/w7-owner-preview.sh"
-bash "$W/src/scripts/beta/w7-owner-selftest.sh"     # about 1 min: the tool's own safeguards
-$T inspect                                          # read-only; see "route B prerequisites"
+$T inspect                                          # read-only, on its own; see "route B prerequisites"
 ```
 **`inspect` must show:**
 - `openssl` and `certutil` present (`certutil` comes in `libnss3-tools`);
@@ -42,15 +42,21 @@ $T inspect                                          # read-only; see "route B pr
 
 **In Firefox:** `about:support` → Sandbox must show Seccomp-BPF **true** and content process sandboxing **true**, at a level above 0. If either is false, stop. This is Route B's existing precondition.
 
+**Every copyable sequence below is ONE `&&` chain** (review 6958719378):
+- the first failing step ends the chain with a non-zero exit, and nothing after it runs, `bstart` included;
+- run `echo $?` after each chain, and go on only if it prints `0`;
+- inspection steps (`inspect`, `status`, `pgrep`) stay on their own lines.
+
 ## 1. Build, set up the session CA, and start phase A (current)
 ```bash
-$T prepare "$W"           # builds both releases; STOPS unless both inventories match (evidence/identity.txt)
-$T routeb "$W"            # session CA -> one certificate for beta.localhost; deletes the CA key; host/guest/tv profiles trust only it
-$T bstart "$W" current    # app on 127.0.0.1:3171, TLS proxy on 127.0.0.1:3173; waits for /health = 988c535 through the CA; prints READY
+$T prepare "$W" && $T routeb "$W" && $T bstart "$W" current
 ```
+- **`prepare`** builds both releases, and fails unless both inventories match (`evidence/identity.txt`).
+- **`routeb`** makes the session CA and one certificate for `beta.localhost`, deletes the CA key, and makes the host, guest and TV profiles trusting only that CA.
+- **`bstart`** runs the app on 127.0.0.1:3171 and the TLS proxy on 127.0.0.1:3173. It waits for `/health` = `988c535` through the CA, then prints READY.
 **In the desktop's terminal** (`DISPLAY` set to the desktop's display), one Firefox per device:
 ```bash
-$T firefox "$W" host;  $T firefox "$W" guest;  $T firefox "$W" tv
+$T firefox "$W" host && $T firefox "$W" guest && $T firefox "$W" tv
 ```
 **The revision:**
 - open `https://beta.localhost:3173/health` in each profile;
@@ -68,15 +74,15 @@ $T firefox "$W" host;  $T firefox "$W" guest;  $T firefox "$W" tv
 - **Phase A:** O1–O7 in the three profiles. Then P1, the screenshots of seats, standings and the saved entry.
 - **R1:**
   ```bash
-  $T stop "$W"; $T backup "$W" before-rollback; $T compat "$W" before-rollback; $T bstart "$W" previous
+  $T stop "$W" && $T backup "$W" before-rollback && $T compat "$W" before-rollback && $T bstart "$W" previous
   ```
-  `/health` must be `7097ac2…`, behind the **same origin**. **Any failure: STOP the rollback.**
+  `/health` must be `7097ac2…`, behind the **same origin**. **Any failure stops the chain before `bstart`** (`echo $?` isn't `0`): STOP the rollback and report it.
 - **P2:** the same three Firefox windows reconnect; reload once if needed. Each profile keeps its cookie and its seat, because the origin is the same. Check the seats, standings and entry against P1, then add `W7 rollback note`.
 - **R2:**
   ```bash
-  $T stop "$W"; $T backup "$W" before-return; $T check "$W" current; $T bstart "$W" current
+  $T stop "$W" && $T backup "$W" before-return && $T check "$W" current && $T bstart "$W" current
   ```
-  `/health` must be `988c535…`.
+  `/health` must be `988c535…`. Any failure stops the chain before `bstart`: STOP and report it.
 - **P3:** as in P2, with `W7 rollback note` exactly once.
 
 **Profile reuse:**

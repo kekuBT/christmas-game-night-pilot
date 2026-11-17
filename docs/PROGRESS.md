@@ -4049,3 +4049,9 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
 - **Validation:** `docs/evidence/beta-r4-w7/routeb/`, its local runner and its driver. Chromium stands in for Firefox, through copies of the profiles' NSS databases; this container has no Firefox. The existing self-test (70 checks) is rerun as well.
 - **Unchanged:** Route A's refusal, the runtime and the pins. Nothing ran in the Codespace. W7 and B-W7-01 stay OPEN.
 
+- **Review 6958719378, P1:** the recipe's rollback and return snippets were `;` lists, so `bstart` ran even after a failed `backup`, `compat` or `check`.
+  - **Acknowledged** in 6958735491 at 2:34 p.m. ET. The estimate is about 20 min.
+  - **The repair:** every dependent sequence in `w7-routeb-recipe.md` and `w7-owner-test-packet.md` is now one `&&` chain, and each fenced block holds at most one state-changing line. Inspection steps stay on their own.
+  - **The check:** `routeb/runners/snippet-check.py` reads the documents themselves and runs each chain against a stub operator, failing every step in turn.
+    - against the unrepaired `31f68a2` documents: 11 FAIL;
+    - against the repaired ones: all PASS.
