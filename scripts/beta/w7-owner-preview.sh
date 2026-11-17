@@ -12,6 +12,13 @@
 #   bash w7-owner-preview.sh check <work> current|previous   that release's datatool check on the live folder (stopped)
 #   bash w7-owner-preview.sh status <work>
 #   bash w7-owner-preview.sh cleanup <work>              stop; remove this run's folder; retire the record
+# Route B (handoff 6957990858: Firefox ESR in the private noVNC desktop; the app's own HTTPS origin end to end):
+#   bash w7-owner-preview.sh routeb <work>               a session CA and the beta.localhost certificate, and the host,
+#                                                        guest and TV Firefox profiles trusting only that CA
+#   bash w7-owner-preview.sh bstart <work> current|previous   the app on 127.0.0.1:3171 behind the TLS proxy on
+#                                                        127.0.0.1:3173, origin https://beta.localhost:3173 (both releases)
+#   bash w7-owner-preview.sh firefox <work> host|guest|tv     that profile's Firefox, in the desktop (needs DISPLAY)
+#   stop, backup, compat, check, status and cleanup work for both routes.
 #
 # Phases (fixed here, never chosen on the command line):
 #   current   988c53558bbbcc1545fe0ca32882f30c1970794b  the runtime review candidate; a local, UNAUDITED pack
@@ -38,8 +45,13 @@
 # refused before anything else whenever any Codespaces variable is set. In a Codespace the app starts only with the
 # exact https origin of a passing probe report (REWRITTEN_SAME_ORIGIN_ONLY or PRESERVED). It listens on 127.0.0.1 only,
 # never changes a port's visibility, never touches another checkout, process or folder, and never prints the code.
+# Route B never uses the probe or a forwarded app port: the browser runs inside the Codespace (only the noVNC display is
+# forwarded), the app's public origin is the browser's real one, and the session CA's key is deleted as soon as it has
+# issued the one server certificate, so nothing else can ever be issued under it. Its files live in the run folder
+# (tls/, profiles/), so cleanup removes them; cleanup stops only processes whose command line names this run folder.
 set -uo pipefail
 APP_PORT=3157; OTHER_PORT=3158
+B_HOST=beta.localhost; B_APP=3171; B_TLS=3173; B_HTTP=3174; B_ORIGIN="https://$B_HOST:$B_TLS"
 CUR=988c53558bbbcc1545fe0ca32882f30c1970794b
 PREV=7097ac2bb062925bb296a129f4771f1e68fd522d
 CUR_INV=4f58b3239f04f9ea074c15993371effee6fac1295dd8124924ea00fefb19daef
@@ -83,7 +95,16 @@ owned() { record_ok "${1:-}"; [ -z "$(field retired)" ] || die "this run was cle
 node_of() { echo "$NS/rel-$(rev_of "$1")"; }
 pid_alive() { [ -f "$NS/run/server.pid" ] && kill -0 "$(cat "$NS/run/server.pid")" 2>/dev/null; }
 owned_pid() { local p; p=$(cat "$NS/run/server.pid"); tr '\0' ' ' < "/proc/$p/cmdline" 2>/dev/null | grep -q -- "$NS/rel-" ; }
-health() { curl -s --max-time 2 "http://127.0.0.1:$APP_PORT/health"; }
+routeb_on() { [ "$(cat "$NS/run/route" 2>/dev/null)" = b ]; }
+health() { if routeb_on; then curl -s --max-time 2 --cacert "$NS/tls/ca.pem" --resolve "$B_HOST:$B_TLS:127.0.0.1" "$B_ORIGIN/health"; else curl -s --max-time 2 "http://127.0.0.1:$APP_PORT/health"; fi; }
+cmd_has() { tr '\0' ' ' < "/proc/$1/cmdline" 2>/dev/null | grep -qF -- "$2"; }   # does pid $1's command line contain $2
+stop_pidfile() { # stop the process in run/<file> only if its command line names <must>; the file goes when it's gone
+  local f="$NS/run/$1" p; [ -f "$f" ] || return 0; p=$(cat "$f")
+  if kill -0 "$p" 2>/dev/null; then cmd_has "$p" "$2" || die "pid $p (run/$1) isn't this run's process; not touching it"
+    kill -TERM "$p"; for _ in $(seq 1 40); do kill -0 "$p" 2>/dev/null || break; sleep 0.5; done
+    kill -0 "$p" 2>/dev/null && { kill -KILL "$p"; sleep 0.5; }; kill -0 "$p" 2>/dev/null && die "pid $p (run/$1) didn't stop"; fi
+  rm -f "$f"; }
+revision_of() { node -e 'let d="";process.stdin.on("data",c=>d+=c).on("end",()=>{try{process.stdout.write(JSON.parse(d).revision)}catch{}})'; }
 mk() { mkdir -m "${2:-755}" "$NS/$1" || die "could not create $NS/$1 (it must not exist yet)"; }
 
 cmd=${1:-}; shift || true
@@ -94,6 +115,12 @@ inspect)
   say "node servers running (pid, command), read-only:"; pgrep -af 'dist/server/serve.js|probe-forwarded-origin' || echo "  none"
   say "disk: $(df -h --output=avail "${HOME:-/}" 2>/dev/null | tail -1 | tr -d ' ') free"
   if in_codespace; then say "the forwarded address of $APP_PORT will be https://$CODESPACE_NAME-$APP_PORT.$GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN (give it to the owner only after start shows the expected revision)"; fi
+  say "route B prerequisites (read-only):"
+  for t in openssl certutil; do if command -v "$t" >/dev/null; then say "  $t: $(command -v "$t")"; else say "  $t: MISSING (certutil is in Debian/Ubuntu libnss3-tools)"; fi; done
+  ff=$(command -v firefox-esr || command -v firefox || true); say "  Firefox: ${ff:-MISSING} $([ -n "$ff" ] && "$ff" --version 2>/dev/null | head -1)"
+  if [ -n "${DISPLAY:-}" ]; then say "  DISPLAY: $DISPLAY"; else say "  DISPLAY: not set in this shell (set it to the display of the noVNC desktop, e.g. :1)"; fi
+  say "  desktop/VNC processes: $(pgrep -af 'novnc|websockify|Xvnc|Xtigervnc|x11vnc|fluxbox' | cut -c1-60 | tr '\n' ';' | head -c 300)"
+  for p in $B_APP $B_TLS $B_HTTP; do if listening "$p"; then say "  port $p: IN USE"; else say "  port $p: free"; fi; done
   say "inspect changes nothing." ;;
 prepare)
   where >/dev/null; root_of "${1:-}"
@@ -161,12 +188,14 @@ start)
   echo "$phase" > "$NS/run/phase"
   if in_codespace; then say "READY for the owner: https://$CODESPACE_NAME-$APP_PORT.$GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN/ (port $APP_PORT must show Private)"; else say "READY (local test): http://127.0.0.1:$APP_PORT/"; fi ;;
 stop)
-  owned "${1:-}"; pid_alive || { say "no server from this folder is running"; exit 0; }
+  owned "${1:-}"; stop_pidfile proxy.pid "$NS/tls/srv.pem"
+  pid_alive || { rm -f "$NS/run/server.pid" "$NS/run/phase" "$NS/run/route"; say "no server from this folder is running"; exit 0; }
   owned_pid || die "pid $(cat "$NS/run/server.pid") isn't this folder's server; not touching it"
+  port=$APP_PORT; routeb_on && port=$B_APP
   p=$(cat "$NS/run/server.pid"); kill -TERM "$p"; for _ in $(seq 1 40); do kill -0 "$p" 2>/dev/null || break; sleep 0.5; done
   kill -0 "$p" 2>/dev/null && die "pid $p didn't stop after SIGTERM in 20 s"
-  listening $APP_PORT && die "port $APP_PORT is still in use after the stop"
-  echo "== stop $(cat "$NS/run/phase" 2>/dev/null) at $(date -u +%FT%TZ): pid $p exited; port $APP_PORT free" | tee -a "$W/evidence/phases.log"; rm -f "$NS/run/server.pid" "$NS/run/phase" ;;
+  listening $port && die "port $port is still in use after the stop"
+  echo "== stop $(cat "$NS/run/phase" 2>/dev/null) at $(date -u +%FT%TZ): pid $p exited; port $port free$(routeb_on && echo "; TLS proxy stopped")" | tee -a "$W/evidence/phases.log"; rm -f "$NS/run/server.pid" "$NS/run/phase" "$NS/run/route" ;;
 backup)
   owned "${1:-}"; label=${2:-}; [[ $label =~ ^[a-z0-9-]+$ ]] || die "give a label (a-z, 0-9, -)"
   pid_alive && die "stop the server first: the backup is taken with the writer stopped"
@@ -192,8 +221,74 @@ check)
   { echo "== check by $phase at $(date -u +%FT%TZ)"; node "$(node_of "$phase")/dist/server/datatool.js" check --data "$NS/data"; } 2>&1 | tee -a "$W/evidence/phases.log"; [ "${PIPESTATUS[0]}" = 0 ] || die "check by $phase failed" ;;
 status)
   owned "${1:-}"
-  if pid_alive; then say "running: $(cat "$NS/run/phase") (pid $(cat "$NS/run/server.pid")); /health: $(health)"; else say "no server from this folder is running"; fi
+  if pid_alive; then say "running: $(cat "$NS/run/phase")$(routeb_on && echo " (route B, $B_ORIGIN)") (pid $(cat "$NS/run/server.pid")); /health: $(health)"; else say "no server from this folder is running"; fi
+  for f in "$NS"/run/firefox-*.pid; do [ -f "$f" ] && kill -0 "$(cat "$f")" 2>/dev/null && say "Firefox $(basename "$f" .pid | cut -c9-): pid $(cat "$f")"; done
   if listening $APP_PORT && ! pid_alive; then say "port $APP_PORT is in use by something else"; fi ;;
+routeb)
+  where >/dev/null; owned "${1:-}"
+  miss=; for t in openssl certutil; do command -v "$t" >/dev/null || miss="$miss $t"; done
+  [ -z "$miss" ] || die "route B needs:$miss (report it; this tool installs nothing)"
+  [ -e "$NS/tls" ] || [ -e "$NS/profiles" ] && die "route B is already set up in this run folder"
+  mk tls 700; mk profiles 700; T="$NS/tls"
+  { openssl req -x509 -newkey rsa:2048 -nodes -keyout "$T/ca.key" -out "$T/ca.pem" -days 2 -subj "/CN=w7op session CA ${TOKEN:0:8}" \
+      -addext basicConstraints=critical,CA:TRUE,pathlen:0 -addext keyUsage=critical,keyCertSign,cRLSign \
+    && openssl req -newkey rsa:2048 -nodes -keyout "$T/srv.key" -out "$T/srv.csr" -subj "/CN=$B_HOST" \
+    && printf 'subjectAltName=DNS:%s\nbasicConstraints=critical,CA:FALSE\nextendedKeyUsage=serverAuth\nkeyUsage=critical,digitalSignature,keyEncipherment\n' "$B_HOST" > "$T/srv.ext" \
+    && openssl x509 -req -in "$T/srv.csr" -CA "$T/ca.pem" -CAkey "$T/ca.key" -CAcreateserial -out "$T/srv.pem" -days 2 -extfile "$T/srv.ext"; } > "$NS/run/routeb-setup.log" 2>&1 \
+    || die "could not make the session CA or the certificate (see $NS/run/routeb-setup.log)"
+  rm -f -- "$T/ca.key" "$T/ca.srl" "$T/srv.csr"; [ -e "$T/ca.key" ] && die "could not delete the CA key"
+  chmod 600 "$T/srv.key"; openssl verify -CAfile "$T/ca.pem" "$T/srv.pem" >/dev/null || die "the certificate doesn't verify against the session CA"
+  for role in host guest tv; do
+    P="$NS/profiles/$role"; mkdir -m 700 "$P" || die "could not create $P"
+    certutil -d "sql:$P" -N --empty-password && certutil -d "sql:$P" -A -t "C,," -n "w7op session CA" -i "$T/ca.pem" || die "could not trust the CA in the $role profile"
+    { echo "user_pref(\"network.dns.localDomains\", \"$B_HOST\");"   # beta.localhost -> loopback, no /etc/hosts change
+      echo 'user_pref("browser.shell.checkDefaultBrowser", false);'; echo 'user_pref("datareporting.policy.dataSubmissionEnabled", false);'
+      echo 'user_pref("toolkit.telemetry.reportingpolicy.firstRun", false);'; echo 'user_pref("browser.aboutwelcome.enabled", false);'
+      echo "user_pref(\"browser.startup.homepage\", \"$B_ORIGIN/\");"; } > "$P/user.js"
+  done
+  fp=$(openssl x509 -in "$T/ca.pem" -noout -fingerprint -sha256 | cut -d= -f2)
+  { echo "== route B set up at $(date -u +%FT%TZ): origin $B_ORIGIN; session CA SHA-256 $fp (its key deleted after issuing one certificate)"
+    openssl x509 -in "$T/srv.pem" -noout -subject -ext subjectAltName -enddate | tr '\n' ' '; echo
+    echo "profiles host, guest, tv: the session CA is their only added trust"; } | tee -a "$W/evidence/phases.log" ;;
+bstart)
+  where >/dev/null; owned "${1:-}"; phase=${2:-}; s=$(rev_of "$phase"); R=$(node_of "$phase")
+  pid_alive && die "a server from this folder is already running (stop it first: one writer)"
+  [ -f "$NS/run/proxy.pid" ] && kill -0 "$(cat "$NS/run/proxy.pid")" 2>/dev/null && die "this run's TLS proxy is still running (stop first)"
+  [ -f "$NS/tls/srv.pem" ] && [ -f "$NS/tls/srv.key" ] && [ -d "$NS/profiles/host" ] || die "route B isn't set up (run: routeb $W)"
+  [ -f "$R/dist/server/serve.js" ] || die "$phase isn't prepared"
+  [ -d "$NS/data" ] && [ ! -L "$NS/data" ] && [ -d "$NS/run" ] && [ ! -L "$NS/run" ] || die "the run folder has no data or run folder"
+  for p in $B_APP $B_TLS $B_HTTP; do listening "$p" && die "port $p is in use by something else"; done
+  ts=$(date -u +%Y%m%dT%H%M%SZ); log="$NS/run/server-$phase-$ts.log"; plog="$NS/run/proxy-$phase-$ts.log"
+  echo b > "$NS/run/route"
+  ( cd "$R" && export NODE_ENV=production PORT=$B_APP MCHEZO_LISTEN_HOST=127.0.0.1 MCHEZO_PUBLIC_ORIGIN="$B_ORIGIN" \
+      MCHEZO_DATA_DIR="$NS/data" MCHEZO_BETA_ACCESS_CODE="$(cat "$NS/secret/code")" && \
+      exec nohup node "$R/dist/server/serve.js" > "$log" 2>&1 < /dev/null ) &
+  echo $! > "$NS/run/server.pid"
+  cert="$NS/tls/srv.pem"; if local_test && [ "${W7OP_TEST_BSTART_FAIL:-}" = proxy ]; then cert="$NS/tls/missing-for-test.pem"; echo "w7op: TEST FAILURE of the proxy (local test only)" >&2; fi
+  ( exec nohup node "$W/src/scripts/beta/render-like-proxy.mjs" --https-port $B_TLS --http-port $B_HTTP --backend 127.0.0.1:$B_APP \
+      --cert "$cert" --key "$NS/tls/srv.key" > "$plog" 2>&1 < /dev/null ) &
+  echo $! > "$NS/run/proxy.pid"
+  got=; for _ in $(seq 1 40); do got=$(health | revision_of); [ -n "$got" ] && break; sleep 0.5; done
+  if [ "$got" != "$s" ]; then
+    stop_pidfile proxy.pid "$NS/tls/"; pid_alive && owned_pid && { kill -TERM "$(cat "$NS/run/server.pid")"; for _ in $(seq 1 40); do pid_alive || break; sleep 0.5; done; }
+    pid_alive || rm -f "$NS/run/server.pid" "$NS/run/route"
+    echo "== bstart $phase FAILED at $(date -u +%FT%TZ): /health through $B_ORIGIN said '${got:-nothing}', expected $s; this run's app and proxy stopped; logs kept: ${log##*/}, ${plog##*/}" | tee -a "$W/evidence/phases.log"
+    die "route B start failed; stopped only this run's app and proxy (logs: $log, $plog)"
+  fi
+  owned_pid || die "the recorded pid isn't the server just started"
+  cmd_has "$(cat "$NS/run/proxy.pid")" "$NS/tls/srv.pem" || die "the recorded proxy pid isn't this run's proxy"
+  { echo "== bstart $phase at $(date -u +%FT%TZ): /health through $B_ORIGIN (session CA verified) revision $got; data $NS/data; app pid $(cat "$NS/run/server.pid") on 127.0.0.1:$B_APP; proxy pid $(cat "$NS/run/proxy.pid") on 127.0.0.1:$B_TLS"; grep -E '^\[restore\]|Listening on' "$log"; } | tee -a "$W/evidence/phases.log"
+  echo "$phase" > "$NS/run/phase"
+  say "READY: in the desktop, the host, guest and TV profiles open $B_ORIGIN/ (firefox $W host|guest|tv). Nothing is forwarded but the desktop." ;;
+firefox)
+  where >/dev/null; owned "${1:-}"; role=${2:-}; case $role in host|guest|tv) ;; *) die "role must be host, guest or tv";; esac
+  P="$NS/profiles/$role"; [ -d "$P" ] && [ ! -L "$P" ] || die "no $role profile (run: routeb $W)"
+  ff=$(command -v firefox-esr || command -v firefox || true); [ -n "$ff" ] || die "no firefox-esr or firefox on PATH (report it; this tool installs nothing)"
+  [ -n "${DISPLAY:-}" ] || die "DISPLAY isn't set: run this in the noVNC desktop's terminal, or export DISPLAY first"
+  f="$NS/run/firefox-$role.pid"; [ -f "$f" ] && kill -0 "$(cat "$f")" 2>/dev/null && die "the $role Firefox is already running (pid $(cat "$f"))"
+  ( exec nohup "$ff" --no-remote --new-instance --profile "$P" "$B_ORIGIN/" > "$NS/run/firefox-$role.log" 2>&1 < /dev/null ) &
+  echo $! > "$f"; sleep 1; kill -0 "$(cat "$f")" 2>/dev/null || die "Firefox exited at once (see $NS/run/firefox-$role.log)"
+  say "Firefox ($role) pid $(cat "$f"), profile $P. Phone size: Ctrl+Shift+M (Responsive Design Mode), 390 x 844, touch on." ;;
 cleanup)
   record_ok "${1:-}"
   if [ -n "$(field retired)" ]; then say "this run was already cleaned up at $(field retired); nothing removed, nothing else touched"; exit 0; fi
@@ -213,8 +308,13 @@ cleanup)
     say "removed the run folder $NS, proven by its recorded identity (its token file was already gone), and retired the record"; exit 0
   fi
   ns_ok
-  if pid_alive; then bash "$0" stop "$W" || die "the server didn't stop; nothing removed"; fi
+  if pid_alive || [ -f "$NS/run/proxy.pid" ]; then bash "$0" stop "$W" || die "the server didn't stop; nothing removed"; fi
+  for f in "$NS"/run/firefox-*.pid; do [ -f "$f" ] || continue; stop_pidfile "$(basename "$f")" "$NS/profiles/"; done
+  for p in $(pgrep -f -- "$NS/profiles/" || true); do cmd_has "$p" "--profile $NS/profiles/" && kill -TERM "$p" 2>/dev/null; done
+  sleep 1; left=$(for p in $(pgrep -f -- "--profile $NS/profiles/" || true); do cmd_has "$p" "--profile $NS/profiles/" && echo "$p"; done)
+  [ -z "$left" ] || die "Firefox processes using this run's profiles are still running ($(echo $left)); close them, then retry cleanup. Nothing removed"
   rm -rf --one-file-system -- "$NS/secret"; [ -e "$NS/secret" ] && die "could not remove $NS/secret; nothing else removed"; say "removed the code ($NS/secret)"
+  rm -rf --one-file-system -- "$NS/tls"; [ -e "$NS/tls" ] && die "could not remove $NS/tls (the server key); nothing else removed"; say "removed the TLS key and certificates ($NS/tls)"
   if local_test && [ "${W7OP_TEST_INTERRUPT_CLEANUP:-}" = after-secret ]; then echo "w7op: TEST INTERRUPTION after the code (local test only)" >&2; exit 3; fi
   while IFS= read -r e; do [[ $e =~ ^co-[0-9a-f]{40}$ ]] && [ -d "$NS/$e" ] && [ ! -L "$NS/$e" ] && git -C "$W/src" worktree remove --force --force "$NS/$e" 2>/dev/null; done < <(sed -n 's/^wt //p' "$W/$REC")
   find "$NS" -mindepth 1 -maxdepth 1 ! -name "$TOKF" -exec rm -rf --one-file-system -- {} +
@@ -227,5 +327,5 @@ cleanup)
   git -C "$W/src" worktree prune
   echo "retired $(date -u +%FT%TZ)" >> "$W/$REC"
   say "removed the run folder $NS and retired the record; kept $W/evidence, src/ and the record; nothing outside the run folder was touched" ;;
-*) sed -n 2,15p "$0"; exit 2 ;;
+*) sed -n 2,22p "$0"; exit 2 ;;
 esac

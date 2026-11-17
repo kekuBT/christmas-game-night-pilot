@@ -2403,3 +2403,16 @@ Handoff 6813167965 (with the Stage 9.2 clearance). Spec: `docs/stage9/stage93.md
     - **moving the token file outside the run folder before the `rmdir`:** it leaves another file to clean up;
     - **trusting the token file alone when there's no identity:** it can be copied;
     - **a recursive delete without the token file:** only an empty folder is safe to remove on identity alone.
+- **D-R4W7-05 W7's browser route is Route B, with an explicit operator entry** (review and handoff 6957990858).
+  - **What:** `w7-owner-preview.sh` gains `routeb`, `bstart` and `firefox`. `stop`, `status` and `cleanup` cover them.
+    - **The origin:** both pinned releases run on 127.0.0.1:3171, behind `render-like-proxy.mjs` (it passes Host and Origin unchanged) on 127.0.0.1:3173, with `MCHEZO_PUBLIC_ORIGIN=https://beta.localhost:3173`.
+    - **The certificate:** a session CA issues one 2-day certificate for `beta.localhost`, and its key is deleted at once.
+    - **The trust:** only the run's host, guest and TV Firefox profiles trust the CA.
+    - **Where it all lives:** in the run folder, so the existing ownership checks and cleanup apply. Cleanup stops only processes whose command line names this run folder.
+  - **Why:** the reviewer rejected the origin adapter, which depends on an undocumented forwarder distinction. Route B keeps the browser's genuine origin and normal certificate checks, and it worked in this Codespace before (6904986723).
+  - **Unchanged:** Route A's `start` and its `UNSUITABLE` refusal; the inventories; one writer; the runtime.
+  - **Alternatives rejected:**
+    - **a separate Route B script:** it would duplicate the ownership and cleanup machinery;
+    - **reusing ports 3157 and 3158:** they are already forwarded;
+    - **keeping the CA key for re-issue:** a new session gets a new run folder and a new CA.
+

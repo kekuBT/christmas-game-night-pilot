@@ -1,5 +1,12 @@
 # W7: the owner-run browser test packet (handoff 6954764073)
 
+> **The route was changed (review and handoff 6957990858). Use [w7-routeb-recipe.md](w7-routeb-recipe.md).**
+> - **Why:** Gate R failed twice in the owner's browser, `UNSUITABLE` (6957040472, then 6957543881).
+> - **The new route:** ChatGPT tests hands-on over Route B, the existing private Firefox ESR / noVNC desktop, with the app's genuine HTTPS origin.
+> - **What carries over from this packet:** §1 (phases and identities), §4 (O1–O7) and §5 (P1–P3), with `bstart` in place of `start`.
+> - **What it replaces:** §2 (Gate R) and the owner's role.
+> - **Route A is unchanged:** it still refuses an `UNSUITABLE` probe.
+
 **What this is:** one bounded test for **this checkpoint only**.
 - **The test:** the owner tests hands-on in a browser, and ChatGPT reviews the results.
 - **What it replaces:** ChatGPT's independent interactive audit. The owner accepted that substitution.

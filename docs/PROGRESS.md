@@ -4035,3 +4035,17 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
   - **Rejected:** C1 (the configuration-only route; the cookie isn't `Secure`); a runtime change (it would touch both pinned releases); the HTTPS port protocol (a hypothesis only). Route B stays the fallback.
 - **Validation:** `repro-origin-cases.mjs` sends the real runtime, in production mode, the as-received cases under C0, C1 and C2 (an adapter model). Its runs are in `preview-compat/final/`.
 - **Not implemented:** the adapter, the probe verdict and the `start` change all wait for the review. Nothing ran in the Codespace. W7 and B-W7-01 stay OPEN.
+
+## Beta R4 W7: the Route B operator recipe (review and handoff 6957990858)
+- **The review:**
+  - the compatibility diagnosis (6957956131) was accepted;
+  - the adapter was **rejected** and stays unimplemented;
+  - W7's browser route is Route B, the existing private Firefox ESR / noVNC desktop, with ChatGPT as the hands-on tester.
+- **Acknowledged** in 6958007461 at 2:05 p.m. ET. The estimate is about 90 min.
+- **Added** (D-R4W7-05):
+  - `routeb`, `bstart` and `firefox` in `scripts/beta/w7-owner-preview.sh`, with route-aware `stop`, `status` and `cleanup`;
+  - the recipe, `docs/beta/w7-routeb-recipe.md`;
+  - a banner on the owner packet pointing to it.
+- **Validation:** `docs/evidence/beta-r4-w7/routeb/`, its local runner and its driver. Chromium stands in for Firefox, through copies of the profiles' NSS databases; this container has no Firefox. The existing self-test (70 checks) is rerun as well.
+- **Unchanged:** Route A's refusal, the runtime and the pins. Nothing ran in the Codespace. W7 and B-W7-01 stay OPEN.
+
