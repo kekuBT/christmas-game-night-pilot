@@ -1,0 +1,23 @@
+--- <scratch>/r4final/harness/image-checks.sh	2026-11-16 15:28:55.899975877 +0000
++++ image-checks.sh	2026-11-17 05:56:51.087141311 +0000
+@@ -1,5 +1,8 @@
+ #!/bin/bash
+-# Beta R4 packaging (handoff 6919813048): LOCAL checks of the proposed Render image. Disposable data only; no Render,
++# Beta R4 packaging (handoff 6919813048): LOCAL checks of the proposed Render image.
++# W6 repair copy (review 6939462697): identical to docs/evidence/beta-r4-render-package/harness/image-checks.sh.txt except
++# that C2 takes the three scripts' expected hashes from <deploy/render>/pins/scripts.sha256 (and checks the deploy files
++# against it) instead of the round-5 hashes written into the check. Disposable data only; no Render,
+ # no account, no network beyond localhost and the package registries the build itself uses.
+ #   bash image-checks.sh <deploy/render folder> <local rebuild archive of 7097ac2> <work dir>
+ # Needs: docker (BuildKit), node 22, age, curl, and build.sh / assemble.sh / api.mjs next to this script.
+@@ -113,8 +116,8 @@
+ want_s="$(cd "$SRC" && sha256sum cgn-entrypoint.sh | cut -d' ' -f1)"
+ check "C2 inside: uid 10001, bash, ~/.ssh 700, /var/data 700 cgn, /app read-only, age v1.2.1, Node v22.16.0, scripts = reviewed, INSTALLED_OK" \
+   "$(echo "$inside" | grep -q '^uid=10001 gid=10001 shell=/bin/bash home=/home/cgn' && echo "$inside" | grep -q '^ssh=700 cgn data=700 cgn$' && echo "$inside" | grep -q '^app=read-only$' && echo "$inside" | grep -q '^age=v1.2.1 node=v22.16.0$' \
+-     && echo "$inside" | grep -q "^cgn-entrypoint=6c623dd08bbf77ca556099d4f678f3900606d5e760f3231ab59cbc592b4b6157$" && echo "$inside" | grep -q "^cgn-backup=accca1784e22570e30731e888890dad10d194da99d57809abe3244ae80ccc63c$" \
+-     && echo "$inside" | grep -q "^cgn-authorize=b77c398e3fa65edef5d8915bb7e6f60ecff4fa5c023a1a98cb93b5cda4e20773$" && echo "$inside" | grep -q '^INSTALLED_OK'; echo $?)"
++     && for f in cgn-entrypoint cgn-backup cgn-authorize; do echo "$inside" | grep -q "^$f=$(sed -n "s/^\([0-9a-f]\{64\}\)  $f.sh\$/\1/p" "$SRC/pins/scripts.sha256")\$" || exit 1; done \
++     && (cd "$SRC" && sha256sum -c --status pins/scripts.sha256) && echo "$inside" | grep -q '^INSTALLED_OK'; echo $?)"
+ 
+ # Throwaway secrets for this run, in files (never printed): an access code and an age key pair standing in for the owner's.
+ od -An -N18 -tx1 /dev/urandom | tr -d ' \n' > "$SECRETS/code"; chmod 600 "$SECRETS/code"

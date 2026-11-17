@@ -1,0 +1,60 @@
+== w6-guard-selftest 2026-11-17T05:45:12Z, run 20261117T054512Z-cc0d0902, image cgn-render:w6r (sha256:bf5c81328b03)
+   scripts: cgn-authorize.sh 782249ed5dcb2167, cgn-entrypoint.sh 5147e7b2245ea207, this file 145ca22e17cef139
+-- G0: static
+PASS G0 the image's cgn-authorize and cgn-entrypoint are byte-identical to deploy/render, and the record reader block is identical in both (35 lines)
+-- G1: an existing single-configuration record (the previous cgn-authorize, d2e7edf)
+   first install: up 7097ac2bb062925bb296a129f4771f1e68fd522d; cgn-entrypoint: WARNING first install: no authorized configuration yet and no data; run cgn-authorize after the acceptance checks 
+   the previous cgn-authorize: AUTHORIZED data_dir=/var/data/w6g-a public_origin=https://cgn-w6g.test trust_proxy=1 (the access code is kept only as a salted hash)
+PASS G1 a record written by the previous cgn-authorize (5 lines) starts the approved folder, and --status reads it
+PASS G1 --status never prints the code, its salt or its hash
+-- G2: --prepare refusals leave the record unchanged
+PASS G2 --prepare refuses a relative path, a trailing '/', the approved folder, a nested folder either way, a missing folder and a folder of another user; the record is unchanged
+-- G3: one pending folder
+   PREPARED pending_data_dir=/var/data/w6g-b approved_data_dir=/var/data/w6g-a (the approved folder still starts with its own MCHEZO_DATA_DIR; start /var/data/w6g-b, check it, then commit or abort before reopening)
+FAIL G3 --prepare records one pending folder (the approved one unchanged) — PREPARED pending_data_dir=/var/data/w6g-b approved_data_dir=/var/data/w6g-a (the approved folder still starts with its own MCHEZO_DATA_DIR; start /var/data/w6g-b, check it, then commit or abort before reopening)
+FAIL G3 while pending, a second --prepare and a whole re-authorization are refused, and the record is unchanged — AUTHORIZE_FAILED: the record at /var/data/cgn-authorized.conf is unusable (a pending entry without its pair); nothing was changed | AUTHORIZED data_dir=/var/data/w6g-a public_origin=https://cgn-w6g.test trust_proxy=1 (the access code is kept only as a salted hash)
+-- G4: while pending
+PASS G4 the APPROVED folder still starts while a switch is pending (an ordinary restart)
+FAIL G4 unrelated: refused (exit 78) and no server started — exited 78; cgn-entrypoint: REFUSED: MCHEZO_DATA_DIR is not the authorized data folder (a rollback brings back old environment values) 
+FAIL G4 pending-origin: refused (exit 78) and no server started — exited 78; cgn-entrypoint: REFUSED: MCHEZO_DATA_DIR is not the authorized data folder (a rollback brings back old environment values) 
+FAIL G4 pending-proxy: refused (exit 78) and no server started — exited 78; cgn-entrypoint: REFUSED: MCHEZO_DATA_DIR is not the authorized data folder (a rollback brings back old environment values) 
+FAIL G4 pending-code: refused (exit 78) and no server started — exited 78; cgn-entrypoint: REFUSED: MCHEZO_DATA_DIR is not the authorized data folder (a rollback brings back old environment values) 
+-- G5: the pending start, and a restart before commit
+FAIL G5 the pending folder starts, logged PENDING; --status names it as served — exited 78; cgn-entrypoint: REFUSED: MCHEZO_DATA_DIR is not the authorized data folder (a rollback brings back old environment values) 
+FAIL G5 a restart before commit: still the PENDING folder — exited 78
+FAIL G5 --abort is refused from the instance serving the pending folder — Error response from daemon: container 43359d30e8e3fcd9f60247391a4db929d8dfa7a95370bc297743c803b487d00c is not running
+-- G6: abort
+FAIL G6 an ordinary redeploy with the original environment starts the approved folder; --abort from it — up 7097ac2bb062925bb296a129f4771f1e68fd522d; AUTHORIZE_FAILED: no folder switch is pending
+PASS G6 after the abort: the aborted folder is refused (78), and --commit has nothing to commit
+-- G7: a failed pending start, undone by an ordinary redeploy
+   PREPARED pending_data_dir=/var/data/w6g-d approved_data_dir=/var/data/w6g-a (the approved folder still starts with its own MCHEZO_DATA_DIR; start /var/data/w6g-d, check it, then commit or abort before reopening)
+FAIL G7 the broken pending folder fails to start (the server exits non-zero) — exited 78; cgn-entrypoint: REFUSED: the authorized configuration at /var/data/cgn-authorized.conf is unusable (a pending entry without its pair) 
+FAIL G7 recovery is an ORDINARY redeploy with the original environment: the approved folder starts, and the record is byte-identical to the one --prepare wrote (no edit after the failure, no special container) — exited 78
+   Error response from daemon: container be4c785cb6bea1af465adaf3d7d7f6f411d73744850fd0adda52693ce929bc45 is not running
+-- G8: commit
+FAIL G8 --commit is refused from an instance not serving the pending folder, and for another folder — Error response from daemon: container be4c785cb6bea1af465adaf3d7d7f6f411d73744850fd0adda52693ce929bc45 is not running | Error response from daemon: container fa579ff61adbc337944b5355527dc92016bb7e88cc26e1ef9898131fbc47e0ed is not running
+FAIL G8 --commit from the instance serving it: the record now approves it, with no pending entry and the original five lines — Error response from daemon: container fa579ff61adbc337944b5355527dc92016bb7e88cc26e1ef9898131fbc47e0ed is not running
+FAIL G8 after the commit, booting the PRIOR folder is refused (78) — exited 78; cgn-entrypoint: REFUSED: the authorized configuration at /var/data/cgn-authorized.conf is unusable (a pending entry without its pair) 
+FAIL G8 the committed folder starts as APPROVED — exited 78
+-- G9: interrupted record changes
+FAIL G9 a leftover partial file (an interrupted change) is ignored by the entrypoint and removed by the next change — exited 78; Error response from daemon: container 9c0448e3b66839f8dee16cd5c82ed979b25ae2afaaf173999a091a941e9eed03 is not running
+FAIL G9 a change killed while it waited for the lock leaves the record exactly as it was — waiter pid none
+FAIL G9 a lock held past 10 s refuses the change, and the record is unchanged — 0 s: Error response from daemon: container 9c0448e3b66839f8dee16cd5c82ed979b25ae2afaaf173999a091a941e9eed03 is not running
+Error response from daemon: container 9c0448e3b66839f8dee16cd5c82ed979b25ae2afaaf173999a091a941e9eed03 is not running
+FAIL G9 the lock holder killed mid-change: the lock is released, and the waiting change completes — holder none: 
+-- M1-M10: unusable records (a separate fixture volume; nothing in it is data)
+Error response from daemon: container 9c0448e3b66839f8dee16cd5c82ed979b25ae2afaaf173999a091a941e9eed03 is not running
+FAIL M1 truncated (no code_sha256): the start exits 78 with the reason; --status says UNUSABLE (exit 1); --prepare is refused — exited 78; cgn-entrypoint: REFUSED: the authorized configuration at /var/data/cgn-authorized.conf is unusable (a line without '=') ; STATUS UNUSABLE: a line without '='
+FAIL M2 an unknown key: the start exits 78 with the reason; --status says UNUSABLE (exit 1); --prepare is refused — exited 78; cgn-entrypoint: REFUSED: the authorized configuration at /var/data/cgn-authorized.conf is unusable (a line without '=') ; STATUS UNUSABLE: a line without '='
+FAIL M3 a repeated key: the start exits 78 with the reason; --status says UNUSABLE (exit 1); --prepare is refused — exited 78; cgn-entrypoint: REFUSED: the authorized configuration at /var/data/cgn-authorized.conf is unusable (a line without '=') ; STATUS UNUSABLE: a line without '='
+PASS M4 a line without '=': the start exits 78 with the reason; --status says UNUSABLE (exit 1); --prepare is refused
+FAIL M5 a STALE pending entry: the start exits 78 with the reason; --status says UNUSABLE (exit 1); --prepare is refused — exited 78; cgn-entrypoint: REFUSED: the authorized configuration at /var/data/cgn-authorized.conf is unusable (a line without '=') ; STATUS UNUSABLE: a line without '='
+FAIL M6 a pending entry without its pair: the start exits 78 with the reason; --status says UNUSABLE (exit 1); --prepare is refused — exited 78; cgn-entrypoint: REFUSED: the authorized configuration at /var/data/cgn-authorized.conf is unusable (a line without '=') ; STATUS UNUSABLE: a line without '='
+PASS M7 an empty file: the start exits 78 with the reason; --status says UNUSABLE (exit 1); --prepare is refused
+PASS M8 a symbolic link: the start exits 78 with the reason; --status says UNUSABLE (exit 1); --prepare is refused
+PASS M9 a folder: the start exits 78 with the reason; --status says UNUSABLE (exit 1); --prepare is refused
+FAIL M10 a non-hex salt: the start exits 78 with the reason; --status says UNUSABLE (exit 1); --prepare is refused — exited 78; cgn-entrypoint: REFUSED: the authorized configuration at /var/data/cgn-authorized.conf is unusable (a line without '=') ; STATUS UNUSABLE: a line without '='
+-- cleanup (run 20261117T054512Z-cc0d0902)
+PASS only this run's own containers and volumes were removed: containers left 0, volumes left 0; the sentinels are intact
+== 11 passed, 26 failed
+W6 GUARD SELFTEST FAILED

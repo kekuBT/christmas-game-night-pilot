@@ -1,8 +1,46 @@
-# Beta R4 W6: restore of a received backup, local preparation (handoff 6938602366)
+# Beta R4 W6: restore of a received backup, local preparation (handoff 6938602366; repair review 6939462697)
 
 **Preparation only.** The real W6 is **PENDING**: nothing here ran on Render, over SSH, against the owner's storage, with the owner's keys, or as a Render disk snapshot. The runbook is [render-w6.md](../../beta/render-w6.md).
 
-## What was built
+## The repair (review 6939462697)
+**Review 6939462697 found two problems in the first candidate:**
+- **the blocker F-W6-01:** after a failed start on the switched folder, the original was refused too;
+- **a coverage gap:** duplicate scoring after recovery was checked only on the answer map.
+
+The repair has these parts:
+
+| Part | What it does |
+|---|---|
+| `deploy/render/cgn-authorize.sh`, `cgn-entrypoint.sh` and `pins/scripts.sha256` | **The data-folder switch is now prepare / commit-or-abort.**<ul><li>The record holds the approved configuration, plus at most ONE pending folder. The pending folder shares the origin, proxy count and code, and carries the approved folder it was prepared against.</li><li>`MCHEZO_DATA_DIR` selects which folder starts: the approved one, or the pending one (logged `PENDING`). Anything else, and any unusable record (malformed, or a STALE pending entry), is refused (78).</li><li>`--commit` runs only from the instance serving the pending folder; `--abort` only from one that isn't. After a commit the old folder is refused; after an abort the pending one is.</li><li>Every change is locked (flock) and atomic (write, flush, rename, flush).</li><li>A record with no pending entry is the earlier format, unchanged.</li></ul>`cgn-backup.sh`, `operator/cgn-receive.sh`, the Dockerfile, the artifact gate, the runtime and the release pin `7097ac2` are unchanged. |
+| `scripts/beta/w6-guard-selftest.sh` (new) | **The guard on its own,** in the image under test, with the real server, on run-owned volumes, with sentinels: G0–G9 and M1–M10. |
+| `scripts/beta/w6-rehearsal.sh`, `w6-check.mjs`, `w6-selftest.sh` | **The rehearsal now:**<ul><li>switches by `--prepare`, a PENDING start, a private check that the restored copy is served, `--commit` in maintenance, and a reopen gate that also needs the record approving the expected folder with nothing pending;</li><li>plays the restored round to its end, replays an event after the finish, and checks the **persisted** scores (one finish, one score event per player, equal to the recorded and the recomputed score), with three negative controls of its own;</li><li>returns to the original with a new backup B3 and its receipt;</li><li>N6: a failed pending start recovered by an **ordinary** start with the original environment, the record unchanged since `--prepare`, then `--abort`;</li><li>N7: the prior folder refused after the commit.</li></ul> |
+| `docs/beta/render-w6.md`, `beta-r4-hosting-proposal.md` | The runbook and the proposal's guard text. They add the Render steps still to validate in a throwaway hosted window, and the players' cutoff notice plus a reload before acceptance (from the independent audit). |
+
+**F-W6-01 locally:** the original now starts by an ordinary restart after the failed pending start. That is rehearsed (N6, G7). **On Render it stays to be validated** in a throwaway hosted window (see the runbook). Render's behaviour after a failed stop-before-start deploy isn't verified here.
+
+### Repair runs
+**Development runs** (in [`repair/dev/`](repair/dev/)). All are on the uncommitted working tree; failures are kept.
+
+| Log | Run | Verdict |
+|---|---|---|
+| [guard-dev1.log](repair/dev/guard-dev1.log) | `20261117T054512Z-cc0d0902` | **FAILED, 11/37.** My bug: a pending entry was always read as "without its pair". The pattern I checked both keys with shared a space between them, so a valid record with a pending folder was unusable, failing closed. Fixed in the reader (both scripts). |
+| [guard-dev2.log](repair/dev/guard-dev2.log) | `20261117T054604Z-13534c04` | **FAILED, 36/37.** The test's bug: the image has no `kill` binary, so the test never killed the lock holder (or the earlier waiter). The kills now run through `sh -c` and are confirmed gone. |
+| [guard-dev3.log](repair/dev/guard-dev3.log) | `20261117T054737Z-de5c89f9` | W6 GUARD SELFTEST PASSED, 37/37 |
+| [reh-dev1.log](repair/dev/reh-dev1.log) | `20261117T055159Z-2e417359` | W6 REHEARSAL PASSED, 46/46 (image `cgn-render:w6r`, a dev build) |
+| [focused-dev1.log](repair/dev/focused-dev1.log) | the round-5 focused drill on the new scripts, natively | FOCUSED PASSED, 19/19 (P0, X1–X4, H0–H5, K1a/b, K2a/b, K3) |
+| [image-checks-dev1.log](repair/dev/image-checks-dev1.log) | the committed image-checks harness, unchanged | **FAILED, 29/30, as expected:** its C2 has the round-5 script hashes written in. Kept. |
+| [image-checks-dev2.log](repair/dev/image-checks-dev2.log) | [`runners/image-checks-w6r.sh`](runners/image-checks-w6r.sh): C2 reads `pins/scripts.sha256` ([the diff](runners/image-checks-w6r.diff)) | IMAGE CHECKS PASSED, 30/30 |
+| [c2-control-dev.log](repair/dev/c2-control-dev.log) | the adapted C2 condition against the new image and against the previous one | PASS on the new image; FAIL on the previous image (`7b53109a7d69`), as required |
+| [w4-selftest-dev1-void-no-browser.log](repair/dev/w4-selftest-dev1-void-no-browser.log) | tag `88fd14` | **VOID, FAILED 57/81:** I didn't set `MCHEZO_CHROMIUM_PATH`, so the driver stopped with `MCHEZO_INFRA_ERROR` (the pinned Playwright's browser build isn't installed here). This is the same setting the W3 and W4 evidence records. |
+| [w4-selftest-dev2.log](repair/dev/w4-selftest-dev2.log) | tag `d381aa`, with `MCHEZO_CHROMIUM_PATH` set | W4 SELFTEST PASSED, 81/81, in 247 s |
+| [w5-selftest-dev.log](repair/dev/w5-selftest-dev.log) | tag `604d22` | W5 SELFTEST PASSED, 12/12 |
+| [w6-selftest-dev1.log](repair/dev/w6-selftest-dev1.log) | tag `6db388` | W6 SELFTEST PASSED, 13/13 |
+
+**The final** is recorded below once it has run on the clean candidate (`runners/w6r-final.sh`).
+
+
+## The first candidate `b4bba09` (reviewed in 6939462697; kept as it was)
+### What was built
 | File | What it is |
 |---|---|
 | `scripts/beta/w6-rehearsal.sh` | **The local W6 rehearsal.** It runs the pinned image (runtime `7097ac2`) on a run-owned volume, with a throwaway code and a disposable receiving identity. Every step below runs with the reviewed scripts **unchanged**: `cgn-backup`, `cgn-receive`, `cgn-authorize`, `cgn-entrypoint` and `datatool` `verify`/`restore`/`check`. |
@@ -24,7 +62,7 @@
 
 The rehearsal checks that the image's `cgn-backup`, `cgn-entrypoint` and `cgn-authorize` are byte-identical to the reviewed `deploy/render` files.
 
-## What a rehearsal run does and checks
+### What a rehearsal run does and checks
 Ports 18680 (the backend), 18643 and 18644 (the proxy), on the label `w6.owner=<run id>`. The original folder is `/var/data/cgn-w1`; the target is `/var/data/cgn-w6`.
 
 1. **Setup:** service A is ready on the pinned revision; maintenance is on (the public `/health` gives 503); the script hashes match.
@@ -83,7 +121,7 @@ Ports 18680 (the backend), 18643 and 18644 (the proxy), on the label `w6.owner=<
 19. **N6, finding F-W6-01** (below).
 20. **At the end,** exactly one container is on the volume. The cleanup leaves no container, volume, process, listener or private file of the run. The leak scan covers the kept run folder **and the run's own log**.
 
-## Finding F-W6-01: no supported recovery on Render if the switched start fails (OPEN)
+### Finding F-W6-01 as reported then (now repaired; see above)
 **Where:** a reviewed design gap in the guard pair (`cgn-authorize`, `cgn-entrypoint`) combined with Render's platform limits. It is **not** a defect in a script's behaviour: each script does what was reviewed. Per the handoff, it is reported with a reproduction, and nothing reviewed was changed.
 
 **The reproduction** (`w6-rehearsal.sh`, case N6, in every run below):
@@ -99,9 +137,9 @@ Ports 18680 (the backend), 18643 and 18644 (the proxy), on the label `w6.owner=<
 - so step 5's state can't be undone with the reviewed tools;
 - locally it took a one-off container (`docker run --entrypoint cgn-authorize`).
 
-The candidate recoveries and the interim rules are in [render-w6.md](../../beta/render-w6.md#finding-f-w6-01-no-supported-recovery-on-render-if-the-switched-start-fails-open). **All of them need an owner decision.**
+The candidate recoveries were in [the runbook at `b4bba09`](https://github.com/kekuBT/christmas-game-night-pilot/blob/b4bba0994f725825ca190c7241c95df2ff2511e1/docs/beta/render-w6.md). Review 6939462697 chose a prepare / commit-or-abort switch, built in the repair above.
 
-## The runs
+### The runs
 **Development runs** (in `dev/`). All are on the uncommitted working tree, before the candidate; the script hashes are in each log's header.
 
 | Log | Run | Verdict |
@@ -134,7 +172,7 @@ The candidate recoveries and the interim rules are in [render-w6.md](../../beta/
 
 The encrypted archives and the decrypted copies aren't published. The decrypted copies and the disposable identity were removed with the run.
 
-## Limits
+### Limits
 **What this doesn't prove:**
 - SSH or `scp`, the owner's cloud storage or keys;
 - Render's redeploy, health checks, maintenance mode, or its behaviour after a failed stop-before-start deploy;

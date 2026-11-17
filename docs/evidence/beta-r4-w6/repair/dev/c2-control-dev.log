@@ -1,0 +1,10 @@
+image cgn-render:check (sha256:3224ee81a69c):
+  cgn-entrypoint=0bc9b3fd2f4a7fbbf3a6b97b1a2d2f69707460d465ff42c997ea10e656a79d8c
+  cgn-backup=accca1784e22570e30731e888890dad10d194da99d57809abe3244ae80ccc63c
+  cgn-authorize=501d1b5f9af82ff24994ca2063dfeb833716b1b79c4a724c5e355223250a7648
+  the adapted C2 script condition against pins/scripts.sha256: PASS
+image cgn-render:pre-w6r (sha256:7b53109a7d69):
+  cgn-entrypoint=6c623dd08bbf77ca556099d4f678f3900606d5e760f3231ab59cbc592b4b6157
+  cgn-backup=accca1784e22570e30731e888890dad10d194da99d57809abe3244ae80ccc63c
+  cgn-authorize=b77c398e3fa65edef5d8915bb7e6f60ecff4fa5c023a1a98cb93b5cda4e20773
+  the adapted C2 script condition against pins/scripts.sha256: FAIL (as required for the old image)

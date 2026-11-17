@@ -1,0 +1,66 @@
+== image-checks 2026-11-17T05:55:08Z
+deploy files:
+902e4bcc1acfc0924f17790c8f1b4a86b97e20883a57b19806aaa280b8b3a8ff  Dockerfile
+1628c0c42cd169d0fd361692da80688dd81cb28039c7f7feed491945b81115ad  .dockerignore
+5205fca2c1a81f184750679222435a2f442381129474e23f6ffd90413c82dd30  cgn-artifact-gate.sh
+0bc9b3fd2f4a7fbbf3a6b97b1a2d2f69707460d465ff42c997ea10e656a79d8c  cgn-entrypoint.sh
+accca1784e22570e30731e888890dad10d194da99d57809abe3244ae80ccc63c  cgn-backup.sh
+501d1b5f9af82ff24994ca2063dfeb833716b1b79c4a724c5e355223250a7648  cgn-authorize.sh
+2fb3fe903f28707751485460689c4175ed7ea7cf682b505dec8bb74f41b084cd  operator/cgn-receive.sh
+0c18a6e03a583dabf5db816837afc00a474a11f950bafc0345837a345c17659b  pins/age.sha256
+9301e8b3f4db910d24a302161021a2a9321d83afc80e37531a7e77d65c1708f0  pins/archive.sha256
+fe6d74f8df7280a52102f70ab1d356428e810dfa614f45b53a60596d8e89a61c  pins/release-7097ac2.inventory.sha256
+115ef168c2a809291dd68a2eb777f6277dbbc2e8f49e52557a826c3c449f2624  pins/scripts.sha256
+archive (local rebuild): e57380943f7bf8c0e9e83da565b4fcc4eb4d2f3ec0a3802ea5a9acb2ce95fe52
+docker 29.9.2, base images: sha256:048ed02c5fd52e86fda6fbd2f6a76cf0d4492fd6c6fee9e2c463ed5108da0e34
+TEST PIN: pins/archive.sha256 now names the local archive (e57380943f7bf8c0...), not the audited a693c543...
+PASS B0 the image builds from the local rebuild (test pin): gate ARTIFACT_GATE_OK, image INSTALLED_OK, age OK — ARTIFACT_GATE_OK archive=e57380943f7bf8c0e9e83da565b4fcc4eb4d2f3ec0a3802ea5a9acb2ce95fe52 revision=7097ac2bb062925bb296a129f4771f1e68fd522d inventory=fe6d74f8df7280a52102f70ab1d356428e810dfa614f45b53a60596d8e89a61c deps="ws@8.22.1 zod@3.25.76"
+PASS G1 the PRODUCTION pin (the audited a693c543...) refuses the local rebuild — build exit 1; WARNING: 1 computed checksum did NOT match
+PASS G2 one changed file in the package (re-pinned archive): refused by the inventory — build exit 1; ARTIFACT_GATE_FAILED: the inventory differs from the pinned one: 129c129 < 6a0ab15a6dbaa9ac6afa58bb8925da01c617112515c403a647b7e35746418df2  ./dist/server/serve.js --- > 46b1b83aad092f11e0204459427467
+PASS G3 release.json naming another revision: refused — build exit 1; ARTIFACT_GATE_FAILED: release.json is not the pinned release
+PASS G4 release.json marked -dirty: refused — build exit 1; ARTIFACT_GATE_FAILED: release.json is not the pinned release
+PASS G5 a symbolic link in the archive: refused before unpacking — build exit 1; ARTIFACT_GATE_FAILED: the archive holds entries that are neither files nor folders (types: l)
+PASS G6 node_modules shipped in the archive: refused — build exit 1; ARTIFACT_GATE_FAILED: the archive holds node_modules (it must not: they come from npm ci)
+PASS G7 one extra file in the package: refused — build exit 1; ARTIFACT_GATE_FAILED: the package holds 146 files, not 144 plus release.json
+PASS G8 a changed cgn-backup.sh: refused as not the reviewed script — build exit 1; WARNING: 1 computed checksum did NOT match
+PASS G9 a second file in artifact/: kept out of the build by .dockerignore, and refused by the gate itself — build 0; direct run exit 1: ARTIFACT_GATE_FAILED: artifact/ must hold exactly mchezo-7097ac2.tgz (it holds: mchezo-7097ac2.tgz second.tgz 
+PASS G10 a wrong age pin: the age stage fails — build exit 1; age: FAILED
+PASS G11 the same package inside one top-level folder is accepted (ARTIFACT_GATE_OK)
+PASS G12 a secret file in the build context's root is not in the image (.dockerignore; named COPYs only) — build 0, canary in the filesystem: 0, in the history: 0
+PASS C1 the image runs as cgn:cgn with CMD cgn-entrypoint, production defaults, port 10000, and no secret in its config — cgn:cgn ['/usr/local/bin/cgn-entrypoint'] ['CGN_APP_DIR', 'CGN_AUTHORIZED_CONFIG', 'CGN_BACKUP_ROOT', 'CGN_RUN_DIR', 'MCHEZO_LISTEN_HOST', 'NODE_ENV', 'NODE_VERSION', 'PATH', 'PORT', 'YARN_VERSION']
+    uid=10001 gid=10001 shell=/bin/bash home=/home/cgn pw=
+    ssh=700 cgn data=700 cgn
+    app=read-only
+    age=v1.2.1 node=v22.16.0
+    cgn-entrypoint=0bc9b3fd2f4a7fbbf3a6b97b1a2d2f69707460d465ff42c997ea10e656a79d8c
+    cgn-backup=accca1784e22570e30731e888890dad10d194da99d57809abe3244ae80ccc63c
+    cgn-authorize=501d1b5f9af82ff24994ca2063dfeb833716b1b79c4a724c5e355223250a7648
+    INSTALLED_OK revision=7097ac2bb062925bb296a129f4771f1e68fd522d inventory=fe6d74f8df7280a52102f70ab1d356428e810dfa614f45b53a60596d8e89a61c deps="ws@8.22.1 zod@3.25.76" node=v22.16.0
+FAIL C2 inside: uid 10001, bash, ~/.ssh 700, /var/data 700 cgn, /app read-only, age v1.2.1, Node v22.16.0, scripts = reviewed, INSTALLED_OK
+PASS C3 first install: health 200 with the pinned revision; the API refuses without the cookie (401); PID 1 is cgn-entrypoint; the server runs as uid 10001; the log says first install — {"ok":true,"revision":"7097ac2bb062925bb296a129f4771f1e68fd522d"}; /games 401; pid1=/bin/sh /usr/local/bin/cgn-entrypoint ;server uid=10001;
+PASS C4 cgn-authorize over exec (as SSH would): AUTHORIZED, the record is 600 cgn, five lines, and the code isn't in it — AUTHORIZED data_dir=/var/data/cgn-w1 public_origin=https://cgn-w1.test trust_proxy=1 (the access code is kept only as a salted hash)
+PASS C5 the gate signs in (303 + a cookie flagged HttpOnly, Secure, SameSite), and a room is created and its host joined — {"status":303,"cookie":true,"flags":["HttpOnly","Max-Age","Path","SameSite","Secure"]} {"create":201,"join":201,"roomId":"room-mwka4kkv-772624"}
+PASS C6 SIGTERM (docker stop, as Render's deploy or restart): the server closes, the entrypoint exits 0, well inside 30 s — exit 0 after 245 ms
+PASS C7 restart with the authorized configuration: the guard accepts it, and the room and its host are restored from the volume — {"status":200,"roomId":"room-mwka4kkv-772624","name":"Image check room","players":["Ada"]}
+PASS C8a a rollback to the old (other) data folder exits 78 and never starts the server — exit 78: REFUSED: MCHEZO_DATA_DIR is not the authorized data folder (a rollback brings back old environment values)
+PASS C8b an older access code exits 78 — exit 78: REFUSED: the access code is not the authorized one
+PASS C8c another proxy count exits 78 — exit 78: REFUSED: MCHEZO_TRUST_PROXY is not the authorized proxy count
+PASS C8d another public origin exits 78 — exit 78: REFUSED: MCHEZO_PUBLIC_ORIGIN is not the authorized origin
+PASS C8e data present but the record removed exits 78 — exit 78: REFUSED: data exists in /var/data/cgn-w1 but no authorized configuration is recorded at /var/data/cgn-authorized.conf
+    cgn-backup: stopping the server (pid 13)
+    cgn-backup: server stopped
+    backup OK: 1 room(s), 0 Memory Book(s), 2 file(s), verified
+    verify OK: 2 file(s) match the manifest of 2026-11-17T05:56:21.948Z
+    cgn-backup: hold released
+    BACKUP_OK /var/data/backups/cgn-20261117T055621Z.tar.age sha256=a78c5c1d804cd08204717a87f0fc0e5234df076506df88a07f7bed8108bd4abb files=3 server_stopped_s=1
+PASS C9 cgn-backup with no service environment (read from the running server): BACKUP_OK, the server back with a new pid, and cgn-receive off the container gives RECEIPT_OK — RECEIPT_OK <work>/received/cgn-20261117T055621Z.tar.age sha256=a78c5c1d804cd08204717a87f0fc0e5234df076506df88a07f7bed8108bd4abb files=3 copy=<work>/received/work/20261117T055621Z
+PASS C9 after the backup the room still answers — {"status":200,"roomId":"room-mwka4kkv-772624","name":"Image check room","players":["Ada"]}
+    cgn-entrypoint: WARNING first install: no authorized configuration yet and no data; run cgn-authorize after the acceptance checks
+    This user (uid 10001) can't use the data directory /var/data/cgn-w1: it can't be created (EACCES). The directory and every file in it must belong to the user the server runs as (mode 0700, files 0600). After a restore as root, restore again with "datatool restore --owner <service user>" (or chown -R <service user> the folder), then run "datatool check --data <dir>" as that user. Nothing was changed.
+    cgn-entrypoint: server exited (2) with no hold; exiting so the platform restarts the instance
+PASS C10 a root-owned /var/data: the server never serves, and the container exits non-zero with the reason (fail closed) — exit 2
+PASS C11 'installed' refuses an extra package and a changed file — ARTIFACT_GATE_FAILED: node_modules holds something outside ws and zod: ./evil/in | ARTIFACT_GATE_FAILED: the inventory differs from the pinned 
+PASS the access code was never printed by the container
+
+passed 29, failed 1: C2 inside: uid 10001, bash, ~/.ssh 700, /var/data 700 cgn, /app read-only, age v1.2.1, Node v22.16.0, scripts = reviewed, INSTALLED_OK
+IMAGE CHECKS FAILED

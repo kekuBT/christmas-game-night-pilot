@@ -3802,3 +3802,24 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
   - the static checks **PASSED**;
   - `w6-selftest.sh` **PASSED**, 13/13. The rehearsal `20261117T052219Z-200994c2` passed 39/39, with N1–N6 and F-W6-01 reproduced.
 - **Next:** the new report on #49. W6 on Render, the snapshot exercise, F-W6-01's decision and W7 stay with the owner.
+- **Reported** in 6939452610; linked on #5 and #48.
+- **Review 6939462697: W6 BLOCKED.**
+  - **The blocker F-W6-01:** the original couldn't start after a failed target boot. ChatGPT reproduced it independently.
+  - **A coverage gap:** duplicate scoring after recovery was checked only on the answer map.
+  - **The independent audit's observation:** a cached note list after reconnect. The runbook now has a reload step and a cutoff notice to players.
+  - **The scoped repair:** a prepare / commit / abort switch of the data folder, with N6 recovering by an ordinary restart.
+
+## Beta R4: W6 repair, a recoverable data-folder switch (review 6939462697; in progress)
+- **Acknowledged** in 6939714464 at 12:38 a.m. ET. The estimate is about 2 h, plus 1 h of contingency.
+- **The guard** (`deploy/render/cgn-authorize.sh` and `cgn-entrypoint.sh`; their pins in `pins/scripts.sha256`; `deploy/render/README.md`):
+  - The record holds the approved configuration, plus at most ONE pending folder. The pending folder shares the origin, proxy count and code, and carries its base folder.
+  - `--prepare`, `--commit` (only from the instance serving the folder), `--abort` (only from one not serving it), and `--status`.
+  - The entrypoint starts the approved or the pending folder (logged `PENDING`) and refuses anything else, including unusable or stale records (78).
+  - Every change is locked (flock) and atomic.
+  - A record with no pending entry keeps the old format.
+  - `cgn-backup.sh`, `cgn-receive.sh`, the Dockerfile, the artifact gate, the runtime and the release pin are unchanged.
+- **Tests:**
+  - `scripts/beta/w6-guard-selftest.sh` (new): G0–G9 and M1–M10, 37 checks.
+  - `w6-rehearsal.sh` and `w6-check.mjs`: the prepare / commit cutover; the reopen gate on the record; the round played to its end; persisted exact scores with three negative controls; the return with B3; N6 recovered by an ordinary restart; N7. That's 46 checks.
+  - **Regressions:** the round-5 focused backup drill (19/19 on the new scripts); the image checks (30/30 with C2 reading `pins/scripts.sha256`; the old harness's fixed hashes fail C2 by design, and that run is kept); the W4 and W5 self-tests.
+- **Docs:** `docs/beta/render-w6.md` (the switch, the procedure, the recovery, the later return, the Render steps for a throwaway hosted window); the proposal's guard text; `docs/evidence/beta-r4-w6/README.md`.

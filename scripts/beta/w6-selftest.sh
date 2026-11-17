@@ -1,11 +1,13 @@
 #!/bin/bash
-# Beta R4 W6 (handoff 6938602366): the self-test of the local W6 restore rehearsal (scripts/beta/w6-rehearsal.sh): the rehearsal
-# itself, and the isolation rules around it, with SENTINELS of another owner that must survive every case.
+# Beta R4 W6 (handoff 6938602366, repair review 6939462697): the self-test of the local W6 restore rehearsal
+# (scripts/beta/w6-rehearsal.sh): the rehearsal itself, and the isolation rules around it, with SENTINELS of another
+# owner that must survive every case.
 #   T0  static: bash -n on the W6 shell scripts, node --check on w5-seed.mjs and w6-check.mjs
 #   T1  a port already in use: the rehearsal must FAIL at its preflight and start nothing
-#   T2  the restore rehearsal (B1 and B2 with their receipts, N1-N3, verify/restore/check, N4, the cutover with N5,
-#       the recovered state, the fallback, and the N6 finding reproduction): W6 REHEARSAL PASSED, and its own log was in
-#       its leak scan
+#   T2  the restore rehearsal (B1 and B2 with their receipts, N1-N3, verify/restore/check, N4, the prepare/commit
+#       cutover with N5, the recovered state and the finished round, the persisted scores with their negative
+#       controls, the return with B3 and N7, and N6's failed pending start undone by an ordinary restart): W6
+#       REHEARSAL PASSED, and its own log was in its leak scan
 #   T3  an inventory docker cannot give (a docker shim on PATH answers exit 124, no output, to every listing filtered by
 #       this run's label): the run must report UNVERIFIED and FAIL, never read it as 0; real docker then confirms the
 #       run's container and volume were removed all the same (they were tracked by id)

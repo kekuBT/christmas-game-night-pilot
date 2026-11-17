@@ -1,5 +1,6 @@
 #!/bin/bash
-# Beta R4 W6 (handoff 6938602366): the LOCAL rehearsal of a W6 restore, bounded and self-cleaning. Preparation only:
+# Beta R4 W6 (handoff 6938602366, repair review 6939462697): the LOCAL rehearsal of a W6 restore, bounded and
+# self-cleaning. Preparation only:
 # nothing here is Render, SSH, cloud storage, a Render disk snapshot, or the owner's keys.
 #
 #   SOURCE      the packaged pinned image (runtime 7097ac2) in production mode on a THROWAWAY Docker volume owned by
@@ -14,22 +15,27 @@
 #   UPLOAD      LOCAL SURROGATE for `scp -s` of the verified copy: a tar stream into the container as the service user,
 #               into a new staging folder. Then, on the instance: datatool verify, datatool restore into a NEW folder
 #               (/var/data/cgn-w6), datatool check as the service user.
-#   CUTOVER     single writer: maintenance on; cgn-authorize the target (reviewed, unchanged); graceful stop (exit 0),
-#               the original folder fingerprinted, the container removed and confirmed gone, no container on the
-#               volume; a new container on the target; the entrypoint's "matches the authorized configuration"; the
-#               private probe (render-w5.md's text) UP on the pinned revision; only then the ingress reopens. Then the
-#               original seats, answers (exact values), ledger and approved entry; duplicate scoring refused; the original
-#               folder's fingerprint unchanged while the target serves.
-#   FALLBACK    the same cutover back to the retained original folder; its later state is served again.
+#   CUTOVER     (review 6939462697) maintenance on; preflight; cgn-authorize --prepare the target (the ONE pending
+#               folder; the original stays approved); graceful stop (exit 0), the original folder fingerprinted, the
+#               container removed and confirmed gone, no container on the volume; a new container on the target, which
+#               the entrypoint starts as PENDING; still in maintenance, the private side shows the restored copy is what
+#               is served; then --commit from the instance serving it. The reopen gate needs the private probe UP on the
+#               pinned revision AND the record approving the target with nothing pending, served; only then the ingress
+#               reopens. Then the original seats, answers (exact values), approved entry; duplicate scoring refused; the
+#               round played to its end; the original folder's fingerprint unchanged while the target serves.
+#   SCORES      after B3 and a graceful stop, the AUTHORITATIVE persisted state: one finish, one score event per player,
+#               each equal to the recorded and the recomputed score; the check's own negative controls must FAIL.
+#   RETURN      a later return to the original after gameplay resumed: B3 (a new backup of the current data) with its
+#               RECEIPT_OK, then --prepare the original, the pending start, the private check, --commit, the reopen gate.
 #   NEGATIVES   N1 a changed fetched copy (no receipt) and a receipt for another backup: nothing is uploaded.
 #               N2 an incomplete and a changed staged copy: datatool verify refuses; no restore, no target.
 #               N3 an occupied target: datatool restore refuses; the file there unchanged.
-#               N4 an authorization mismatch after the stop: exit 78, no server; recovery onto the original.
-#               N5 a revision mismatch at the reopen gate: the ingress stays in maintenance.
-#               N6 a start failure AFTER the target was authorized (a target that breaks after its check): the original
-#                  is then refused too (the record names the target). Recovery needs a fresh cgn-authorize of the
-#                  original from a live instance; here it is done by a LOCAL-ONLY one-off container, which Render does
-#                  not offer. This is reported as a finding, not hidden.
+#               N4 a start on a folder that is neither approved nor pending: exit 78, no server; recovery onto the original.
+#               N5 the reopen gate refuses a switch still pending, and a revision mismatch: the ingress stays in maintenance.
+#               N6 a pending folder that breaks AFTER its preparation fails to start; recovery is an ORDINARY start with
+#                  the original environment (no special container, no edit to the record after the failure), then
+#                  --abort, then the reopen gate.
+#               N7 after the commit, a start on the prior folder is refused (78).
 # Isolation follows the reviewed W4/W5 rules (labels w6.owner=<run id>, removal only after the label reads back and
 # confirmed gone, one container on the volume at a time, private material in a mode-700 folder removed on exit, cleanup
 # twice, an unlistable inventory UNVERIFIED and FAILING the run). Ports 18680 (the service), 18643/18644 (the proxy).
@@ -198,12 +204,20 @@ probe_in() {   # the runbook's private probe inside container $1 (placed there f
   timeout 30 docker exec -i "$1" sh -c 'cat > /tmp/cgn-probe.mjs' < "$PRIV/cgn-probe.mjs" || return 1
   timeout 30 docker exec "$1" env -i PATH=/usr/local/bin:/usr/bin:/bin HOME=/home/cgn node /tmp/cgn-probe.mjs check 2>&1
 }
-# The reopen gate: the private probe must say UP on the expected revision; only then does the ingress leave maintenance.
-reopen_gate() {   # reopen_gate <cid> <expected revision>: 0 reopened; 1 refused (the ingress stays in maintenance)
-  local p; p=$(probe_in "$1") || true
+# The reopen gate (review 6939462697): the private probe must say UP on the expected revision, AND the record must
+# approve the expected folder with NOTHING pending, served by this instance; only then does the ingress leave maintenance.
+reopen_gate() {   # reopen_gate <cid> <expected revision> <expected folder>: 0 reopened; 1 refused (stays in maintenance)
+  local p st; p=$(probe_in "$1") || true
+  st=$(dk exec "$1" env -i PATH=/usr/local/bin:/usr/bin:/bin HOME=/home/cgn cgn-authorize --status 2>&1) || true
   echo "   [reopen gate] private probe: $p; expected $2"
+  echo "   [reopen gate] record: $st; expected data_dir=$3, nothing pending, served $3"
   printf '%s\n' "$p" | grep -q "^PROBE .* UP $2\$" || return 1
+  printf '%s\n' "$st" | grep -q "^STATUS data_dir=$3 .* pending_data_dir=none serving=$3\$" || return 1
   proxy open
+}
+rec_state() {   # rec_state <label>: the record's state (never the code or its hash) into the evidence, and $PRIV/last-status
+  EXSH cgn-authorize --status > "$PRIV/last-status" 2>&1
+  printf '%s: %s\n' "$1" "$(cat "$PRIV/last-status")" >> "$PRIV/record-states.txt"
 }
 fingerprint() {   # fingerprint <cid> <dir> <out>: every file of a data folder, copied out (works on stopped containers too)
   local t="$PRIV/fp-$RANDOM$RANDOM"
@@ -269,6 +283,7 @@ r=$(ready "$cid") || fail "$r"
 chk "service A ready on $ORIG, /health on the pinned revision" "$([ "$r" = "ok $EXPECT" ] && echo 0 || echo 1)" "$r"
 auth=$(timeout 60 docker exec -i "$cid" cgn-authorize "$ORIG" "$ORIGIN" 1 < "$PRIV/code" 2>&1) || fail "cgn-authorize failed"
 echo "   $(printf '%s\n' "$auth" | grep '^AUTHORIZED ')"
+rec_state "after the first cgn-authorize"
 stage="maintenance"
 proxy maintenance || fail "the maintenance proxy did not start"
 chk "maintenance on: the PUBLIC /health answers 503" "$([ "$(public_code)" = 503 ] && echo 0 || echo 1)"
@@ -367,15 +382,15 @@ r=$(ready "$cid") || fail "the original did not come back after N4: $r"
 fingerprint "$cid" "$ORIG" "$PRIV/fp-orig-1" || fail "no fingerprint"
 chk "N4 recovery: the original comes back on the pinned revision, its files unchanged by the refused attempt" "$([ "$r" = "ok $EXPECT" ] && cmp -s "$PRIV/fp-orig-0" "$PRIV/fp-orig-1" && echo 0 || echo 1)"
 
-# ---------------------------------------------------------------- the cutover (A2 -> B on the target), N5
+# ---------------------------------------------------------------- the cutover: prepare, the PENDING start, decide, commit (review 6939462697)
 stage="cutover"
-echo "-- CUTOVER: maintenance on; preflight; authorize the target; graceful stop; one writer; start; private probe; reopen"
+echo "-- CUTOVER: maintenance on; preflight; --prepare the target; graceful stop; one writer; the PENDING start; private checks; commit; reopen"
 [ "$(public_code)" = 503 ] || fail "maintenance is not on"
 pre="B2 receipt for this window: $(upload_gate b2 "$B2_SHA" && echo yes || echo NO); target checked: $([ "$crc" = 0 ] && echo yes || echo NO); target differs from the original: $([ "$TARGET" != "$ORIG" ] && echo yes || echo NO)"
 echo "   preflight: $pre"
 chk "preflight: a same-window B2 receipt, a checked target, a separate folder" "$(printf '%s' "$pre" | grep -q NO && echo 1 || echo 0)"
-auth=$(timeout 60 docker exec -i "$cid" cgn-authorize "$TARGET" "$ORIGIN" 1 < "$PRIV/code" 2>&1); arc=$?
-chk "cgn-authorize records the target (from the live instance, before the switch)" "$([ "$arc" = 0 ] && printf '%s' "$auth" | grep -q "^AUTHORIZED data_dir=$TARGET " && echo 0 || echo 1)"
+po=$(EXSH cgn-authorize --prepare "$TARGET" 2>&1); prc=$?; echo "   $po"; rec_state "after --prepare $TARGET"
+chk "cgn-authorize --prepare (from the live instance) records the target as the ONE pending folder; the original stays approved and served" "$([ "$prc" = 0 ] && grep -q "^STATUS data_dir=$ORIG .* pending_data_dir=$TARGET serving=$ORIG\$" "$PRIV/last-status" && echo 0 || echo 1)"
 graceful_stop "$cid"; gs=$?; echo "   stop: $STOP_STATE"
 chk "the original writer stopped gracefully (exit 0)" "$gs"
 fingerprint "$cid" "$ORIG" "$PRIV/fp-orig-2" || fail "no fingerprint"
@@ -384,66 +399,101 @@ u=$(volume_users "$VOL") || fail "volume users unreadable"
 chk "single writer: the old container removed and confirmed gone, no container on the volume before the start" "$([ -z "$u" ] && echo 0 || echo 1)"
 cid=$(svc b "$TARGET") || fail "could not start on the target"
 r=$(ready "$cid") || fail "the target never became ready: $r"
-bl=$(dk logs "$cid" 2>&1 | head -c 4000)
-chk "startup evidence: the entrypoint says the environment matches the authorized configuration" "$(printf '%s' "$bl" | grep -q 'cgn-entrypoint: the environment matches the authorized configuration' && echo 0 || echo 1)"
-echo "-- N5: a revision mismatch at the reopen gate: the ingress stays in maintenance"
-reopen_gate "$cid" 0000000000000000000000000000000000000000; n5=$?
-chk "N5 the reopen gate refuses a revision that isn't the expected one, and the PUBLIC side stays 503" "$([ "$n5" = 1 ] && [ "$(public_code)" = 503 ] && echo 0 || echo 1)"
-reopen_gate "$cid" "$EXPECT"; rg=$?
-chk "the reopen gate: private probe UP on the pinned revision, then the ingress reopens (PUBLIC /health 200)" "$([ "$rg" = 0 ] && [ "$(public_code)" = 200 ] && echo 0 || echo 1)"
-lo=$(env W6_OWNER="$RUNID" NODE_EXTRA_CA_CERTS="$PRIV/cert.pem" timeout 120 node "$CHK" live "https://localhost:$PUBS" "$PRIV" restored 2>&1); lrc=$?
+bl=$(dk logs "$cid" 2>&1 | head -c 4000); printf '%s\n' "$bl" | grep '^cgn-entrypoint' | sed 's/^/   [start] /'
+chk "startup evidence: the entrypoint starts the target as the PENDING data folder (not committed)" "$(printf '%s' "$bl" | grep -q "cgn-entrypoint: the environment matches the authorized configuration: the PENDING data folder $TARGET (not committed" && echo 0 || echo 1)"
+rec_state "the pending start"
+echo "-- N5: the reopen gate refuses a switch still pending, and a revision mismatch: the ingress stays in maintenance"
+reopen_gate "$cid" "$EXPECT" "$TARGET"; n5a=$?
+chk "N5a the reopen gate refuses while the switch is still pending (neither committed nor aborted), and the PUBLIC side stays 503" "$([ "$n5a" = 1 ] && [ "$(public_code)" = 503 ] && echo 0 || echo 1)"
+so=$(env W6_OWNER="$RUNID" timeout 120 node "$CHK" live "http://127.0.0.1:$BACK" "$PRIV" selected 2>&1); src=$?
+printf '%s\n' "$so" | sed 's/^/   [private] /'
+chk "before the decision, on the private side: the PENDING folder serves the restored copy (the seats, the approved entry, each pre-backup answer with its value, not the later one)" "$src"
+co=$(EXSH cgn-authorize --commit "$TARGET" 2>&1); ccrc=$?; echo "   $co"; rec_state "after --commit $TARGET"
+chk "the decision, still in maintenance: --commit from the instance serving the target; the record approves it, nothing pending" "$([ "$ccrc" = 0 ] && grep -q "^STATUS data_dir=$TARGET .* pending_data_dir=none serving=$TARGET\$" "$PRIV/last-status" && echo 0 || echo 1)"
+reopen_gate "$cid" 0000000000000000000000000000000000000000 "$TARGET"; n5=$?
+chk "N5b the reopen gate refuses a revision that isn't the expected one, and the PUBLIC side stays 503" "$([ "$n5" = 1 ] && [ "$(public_code)" = 503 ] && echo 0 || echo 1)"
+reopen_gate "$cid" "$EXPECT" "$TARGET"; rg=$?
+chk "the reopen gate: the private probe UP on the pinned revision, the record approving the target with nothing pending, the target served; then the ingress reopens (PUBLIC /health 200)" "$([ "$rg" = 0 ] && [ "$(public_code)" = 200 ] && echo 0 || echo 1)"
+lo=$(env W6_OWNER="$RUNID" NODE_EXTRA_CA_CERTS="$PRIV/cert.pem" timeout 180 node "$CHK" live "https://localhost:$PUBS" "$PRIV" restored 2>&1); lrc=$?
 printf '%s\n' "$lo" | sed 's/^/   /'
-chk "through the reopened ingress: the original seats, the approved entry, a repeated answer refused, a replay not doubled" "$lrc"
+chk "through the reopened ingress: the original seats, the approved entry, a repeated answer refused, a replay not doubled; the round played to its end; a replay after the finish and a late answer not recorded" "$lrc"
 fingerprint "$cid" "$ORIG" "$PRIV/fp-orig-3" || fail "no fingerprint"
 chk "the original folder is preserved: its fingerprint after the switch equals the one taken at the stop" "$(cmp -s "$PRIV/fp-orig-2" "$PRIV/fp-orig-3" && echo 0 || echo 1)" "$(wc -l < "$PRIV/fp-orig-2") file(s)"
 cp "$PRIV/fp-orig-2" "$EVD/original-fingerprint-at-stop.txt"; cp "$PRIV/fp-orig-3" "$EVD/original-fingerprint-after-switch.txt"
 
-# ---------------------------------------------------------------- the fallback (B -> C on the original)
-stage="fallback"
-echo "-- FALLBACK: the same cutover back to the retained original folder"
+# ---------------------------------------------------------------- the persisted scores; the return to the original
+stage="return"
+echo "-- RETURN to the retained original after gameplay resumed on the target: a NEW backup and receipt, then an authorized switch"
 proxy maintenance || fail "maintenance did not come back"
-auth=$(timeout 60 docker exec -i "$cid" cgn-authorize "$ORIG" "$ORIGIN" 1 < "$PRIV/code" 2>&1); arc=$?
-graceful_stop "$cid"; gs=$?
+bk3=$(timeout 180 docker exec "$cid" env -i PATH=/usr/local/bin:/usr/bin:/bin HOME=/home/cgn cgn-backup 2>&1); b3rc=$?
+printf '%s\n' "$bk3" | sed 's/^/   [B3] /'; printf '%s\n' "$bk3" > "$EVD/B3-backup-session.txt"
+B3_ARCH=$(printf '%s\n' "$bk3" | grep '^BACKUP_OK ' | awk '{print $2}'); B3_SHA=$(printf '%s\n' "$bk3" | grep '^BACKUP_OK ' | sed -n 's/.* sha256=\([0-9a-f]\{64\}\) .*/\1/p')
+r=$(ready "$cid") || fail "the target did not come back after B3: $r"
+receive b3 "$B3_ARCH" "$B3_SHA"
+chk "B3 (the CURRENT data, after gameplay on the target): BACKUP_OK, then RECEIPT_OK on its fetched-back copy, before any switch back" "$([ "$b3rc" = 0 ] && [ -n "$B3_SHA" ] && [ "$RCPT_OK" = yes ] && echo 0 || echo 1)"
+graceful_stop "$cid" || fail "the target did not stop gracefully: $STOP_STATE"
+rm -rf "$PRIV/target-final"; mkdir -p "$PRIV/target-final"; timeout 60 docker cp "$cid:$TARGET" "$PRIV/target-final/" >/dev/null 2>&1 || fail "could not copy the target out"
+sc=$(node "$CHK" scores "$PRIV" "$PRIV/target-final/$(basename "$TARGET")" 2>&1); scrc=$?; printf '%s\n' "$sc" | sed 's/^/   /'
+chk "the AUTHORITATIVE persisted state after the replays: the round finished once, one score-awarded event per player, each equal to the recorded and the recomputed score" "$scrc"
+nc=0; for m in extra-score changed-points second-finish; do
+  o=$(node "$CHK" scores "$PRIV" "$PRIV/target-final/$(basename "$TARGET")" "$m" 2>&1); orc=$?
+  echo "   [negative control $m] exit $orc: $(printf '%s\n' "$o" | grep '^FAIL ' | head -1 | cut -c1-140)"
+  [ "$orc" = 1 ] || nc=1
+done
+chk "the score check's OWN negative controls: a synthetic extra score event, changed points and a second finish event each make it FAIL" "$nc"
 rmo=$(remove_container "$cid") || fail "B not removed: $rmo"; cid=""
+echo "-- N7: after the commit, booting the PRIOR folder is refused"
+x=$(svc n7 "$ORIG") || fail "could not create the N7 container"
+xs=""; for _ in $(seq 1 40); do xs=$(dk inspect -f '{{.State.Status}} {{.State.ExitCode}}' "$x" 2>/dev/null); [ "${xs%% *}" = exited ] && break; sleep 0.25; done
+xl=$(dk logs "$x" 2>&1 | tail -c 1500)
+chk "N7 a start on the original after the commit: exit 78, a REFUSED line, no server" "$([ "$xs" = "exited 78" ] && printf '%s' "$xl" | grep -q 'cgn-entrypoint: REFUSED: MCHEZO_DATA_DIR is not the authorized data folder' && echo 0 || echo 1)" "$xs"
+rmo=$(remove_container "$x") || fail "the N7 container not removed: $rmo"
+cid=$(svc b2 "$TARGET") || fail "could not restart the approved target"
+r=$(ready "$cid") || fail "the approved target did not come back: $r"
+upload_gate b3 "$B3_SHA"; g3=$?
+po=$(EXSH cgn-authorize --prepare "$ORIG" 2>&1); prc=$?; echo "   $po"; rec_state "after --prepare $ORIG (the return)"
+chk "with B3's receipt from this window, --prepare names the original as the pending folder (the target stays approved)" "$([ "$g3" = 0 ] && [ "$prc" = 0 ] && grep -q "^STATUS data_dir=$TARGET .* pending_data_dir=$ORIG serving=$TARGET\$" "$PRIV/last-status" && echo 0 || echo 1)"
+graceful_stop "$cid"; gs=$?
+rmo=$(remove_container "$cid") || fail "B2 not removed: $rmo"; cid=""
 u=$(volume_users "$VOL") || fail "volume users unreadable"
-chk "fallback: authorize the original from the live instance, graceful stop, one writer" "$([ "$arc" = 0 ] && [ "$gs" = 0 ] && [ -z "$u" ] && echo 0 || echo 1)"
-cid=$(svc c "$ORIG") || fail "could not start the fallback"
-r=$(ready "$cid") || fail "the fallback never became ready: $r"
-reopen_gate "$cid" "$EXPECT"; rg=$?
+cid=$(svc c "$ORIG") || fail "could not start the original"
+r=$(ready "$cid") || fail "the original never became ready: $r"
+chk "the return: graceful stop, one writer, the original starts as the PENDING folder" "$([ "$gs" = 0 ] && [ -z "$u" ] && dk logs "$cid" 2>&1 | grep -q "the PENDING data folder $ORIG (not committed" && echo 0 || echo 1)"
+so=$(env W6_OWNER="$RUNID" timeout 120 node "$CHK" live "http://127.0.0.1:$BACK" "$PRIV" fallback 2>&1); src=$?; printf '%s\n' "$so" | sed 's/^/   [private] /'
+co=$(EXSH cgn-authorize --commit "$ORIG" 2>&1); ccrc=$?; echo "   $co"; rec_state "after --commit $ORIG (the return)"
+reopen_gate "$cid" "$EXPECT" "$ORIG"; rg=$?
 lo=$(env W6_OWNER="$RUNID" NODE_EXTRA_CA_CERTS="$PRIV/cert.pem" timeout 120 node "$CHK" live "https://localhost:$PUBS" "$PRIV" fallback 2>&1); lrc=$?
 printf '%s\n' "$lo" | sed 's/^/   /'
-chk "the fallback serves the retained folder's later state (the post-backup answer), the seats and the approved entry" "$([ "$rg" = 0 ] && [ "$lrc" = 0 ] && echo 0 || echo 1)"
+chk "the return: checked privately, committed in maintenance, the reopen gate passed; the original's later state, the seats and the approved entry are served" "$([ "$src" = 0 ] && [ "$ccrc" = 0 ] && [ "$rg" = 0 ] && [ "$lrc" = 0 ] && echo 0 || echo 1)"
 
-# ---------------------------------------------------------------- N6: a start failure after the target was authorized
+# ---------------------------------------------------------------- N6: a FAILED pending start, undone by an ordinary restart
 stage="N6"
-echo "-- N6: the target fails to start AFTER it was authorized (a target that breaks after its check)"
+echo "-- N6: a pending folder that breaks after its preparation fails to start; recovery is an ORDINARY start with the original environment"
 proxy maintenance || fail "maintenance did not come back"
 ro=$(dt restore --backup /var/data/w6-staging --into "$TARGET-n6"); [ $? = 0 ] || fail "could not restore the N6 target"
 co=$(dt check --data "$TARGET-n6"); [ $? = 0 ] || fail "the N6 target did not pass its check"
-timeout 30 docker exec -u root "$cid" chmod 0500 "$TARGET-n6" || fail "could not break the N6 target"   # LOCAL fault injection: the folder can't be written
-auth=$(timeout 60 docker exec -i "$cid" cgn-authorize "$TARGET-n6" "$ORIGIN" 1 < "$PRIV/code" 2>&1) || fail "could not authorize the N6 target"
+po=$(EXSH cgn-authorize --prepare "$TARGET-n6" 2>&1) || fail "could not prepare the N6 target: $po"
+echo "   $po"
+timeout 30 docker exec -u root "$cid" chmod 0500 "$TARGET-n6" || fail "could not break the N6 target"   # LOCAL fault injection, after the preparation
+rs1=$(dk exec "$cid" sha256sum /var/data/cgn-authorized.conf | cut -d' ' -f1)
 graceful_stop "$cid" || fail "C did not stop gracefully"
 fingerprint "$cid" "$ORIG" "$PRIV/fp-orig-4" || fail "no fingerprint"
 rmo=$(remove_container "$cid") || fail "C not removed: $rmo"; cid=""
 d=$(svc d "$TARGET-n6") || fail "could not create the N6 container"
 ds=""; for _ in $(seq 1 60); do ds=$(dk inspect -f '{{.State.Status}} {{.State.ExitCode}}' "$d" 2>/dev/null); [ "${ds%% *}" = exited ] && break; sleep 0.25; done
 dl=$(dk logs "$d" 2>&1 | tail -c 1500)
-echo "   [N6 target] $ds; last log lines: $(printf "%s" "$dl" | grep -v "^ *at " | tail -3 | tr "\n" " " | cut -c1-300)"
-chk "N6 the broken target fails to start (the server exits; the container ends, as a crash-looping instance would)" "$([ "${ds%% *}" = exited ] && [ "${ds##* }" != 0 ] && echo 0 || echo 1)" "$ds; $(printf "%s" "$dl" | grep -v "^ *at " | tail -2 | tr "\n" " " | cut -c1-200)"
+echo "   [N6 pending start] $ds; last log lines: $(printf "%s" "$dl" | grep -v "^ *at " | tail -3 | tr "\n" " " | cut -c1-300)"
+chk "N6 the broken pending folder fails to start (accepted by the guard as PENDING, then the server exits non-zero, as a failing deploy would)" "$([ "${ds%% *}" = exited ] && [ "${ds##* }" != 0 ] && [ "${ds##* }" != 78 ] && printf '%s' "$dl" | grep -q "the PENDING data folder $TARGET-n6" && echo 0 || echo 1)" "$ds"
 rmo=$(remove_container "$d") || fail "the N6 container not removed: $rmo"
-e=$(svc e "$ORIG") || fail "could not create the N6 fallback container"
-es=""; for _ in $(seq 1 40); do es=$(dk inspect -f '{{.State.Status}} {{.State.ExitCode}}' "$e" 2>/dev/null); [ "${es%% *}" = exited ] && break; sleep 0.25; done
-el=$(dk logs "$e" 2>&1 | tail -c 1500)
-chk "N6 FINDING reproduced: the original is now refused too (exit 78), because the record names the broken target" "$([ "$es" = "exited 78" ] && printf '%s' "$el" | grep -q 'REFUSED: MCHEZO_DATA_DIR is not the authorized data folder' && echo 0 || echo 1)" "$es"
-fingerprint "$e" "$ORIG" "$PRIV/fp-orig-5" || fail "no fingerprint"
-chk "N6 the original folder is untouched by the failed start and the refusal" "$(cmp -s "$PRIV/fp-orig-4" "$PRIV/fp-orig-5" && echo 0 || echo 1)"
-rmo=$(remove_container "$e") || fail "the refused container not removed: $rmo"
-echo "   N6 recovery here: a LOCAL-ONLY one-off container re-authorizes the original. Render offers no one-off job with the disk, and a refusing or crashing instance gives no SSH: this step has NO Render equivalent yet (reported as a finding)."
-oo=$(timeout 60 docker run --rm --label "w6.owner=$RUNID" -i -v "$VOL:/var/data" --entrypoint cgn-authorize "$IMG" "$ORIG" "$ORIGIN" 1 < "$PRIV/code" 2>&1); orc=$?
-cid=$(svc f "$ORIG") || fail "could not start after recovery"
-r=$(ready "$cid") || fail "the original did not come back after recovery: $r"
-reopen_gate "$cid" "$EXPECT"; rg=$?
-chk "N6 local-only recovery: re-authorized, the original serves the pinned revision again, and the ingress reopens" "$([ "$orc" = 0 ] && [ "$r" = "ok $EXPECT" ] && [ "$rg" = 0 ] && echo 0 || echo 1)"
+cid=$(svc e "$ORIG") || fail "could not start the original after N6"
+r=$(ready "$cid"); rr=$?
+rs2=$(dk exec "$cid" sha256sum /var/data/cgn-authorized.conf | cut -d' ' -f1)
+fingerprint "$cid" "$ORIG" "$PRIV/fp-orig-5" || fail "no fingerprint"
+chk "N6 recovery is an ORDINARY start with the original environment: the approved original serves the pinned revision, its files unchanged; the record is byte-identical to the one --prepare wrote (no special container, no edit after the failure)" "$([ "$rr" = 0 ] && [ "$r" = "ok $EXPECT" ] && [ "$rs1" = "$rs2" ] && cmp -s "$PRIV/fp-orig-4" "$PRIV/fp-orig-5" && dk logs "$cid" 2>&1 | grep -q "the APPROVED data folder $ORIG" && echo 0 || echo 1)" "$r"
+ab=$(EXSH cgn-authorize --abort "$TARGET-n6" 2>&1); abrc=$?; echo "   $ab"; rec_state "after --abort $TARGET-n6"
+reopen_gate "$cid" "$EXPECT" "$ORIG"; rg=$?
+chk "N6 then --abort from the approved instance, still in maintenance; the reopen gate passes (pinned revision, the original served, nothing pending)" "$([ "$abrc" = 0 ] && [ "$rg" = 0 ] && [ "$(public_code)" = 200 ] && echo 0 || echo 1)"
+cp "$PRIV/record-states.txt" "$EVD/record-states.txt"
 
 stage="end"
 u=$(volume_users "$VOL") || u="unreadable"

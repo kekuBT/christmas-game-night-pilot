@@ -1,6 +1,6 @@
 #!/bin/sh
-# cgn-entrypoint: PROPOSED deploy file for the Render route (Beta R4, reviews 6917441687, 6918277617 and 6918922306).
-# Not part of the runtime.
+# cgn-entrypoint: PROPOSED deploy file for the Render route (Beta R4, reviews 6917441687, 6918277617, 6918922306 and
+# 6939462697). Not part of the runtime.
 # PID 1 in the container. It runs the unchanged game server, passes Render's SIGTERM on to it, and keeps the
 # container up (and with it the disk and SSH) while cgn-backup has stopped the server on purpose.
 #
@@ -16,21 +16,70 @@
 # - Render's SIGTERM (a deploy, a restart, a shutdown) is passed to the server, which closes every socket and releases
 #   the data lock; then this script exits 0. The 30 s SIGKILL deadline is Render's.
 # - The rollback guard: before anything starts, the environment must match the configuration recorded on the disk by
-#   cgn-authorize (data folder, public origin, proxy count, a salted hash of the access code). A mismatch, or data
-#   present with no record, exits 78 without starting the server. The only start without a record is a first install
-#   (no data yet), and it says so.
+#   cgn-authorize (data folder, public origin, proxy count, a salted hash of the access code). A mismatch, an unusable
+#   record (malformed, or a stale pending entry), or data present with no record, exits 78 without starting the
+#   server. The only start without a record is a first install (no data yet), and it says so.
+# - A data-folder switch (review 6939462697): the record may also name ONE pending folder (cgn-authorize --prepare),
+#   with the same origin, proxy count and code. MCHEZO_DATA_DIR then selects which folder starts: the approved one, or
+#   the pending one (logged as PENDING until cgn-authorize --commit or --abort). Any other folder is refused. So a
+#   failed start on the pending folder is undone by an ordinary redeploy with the original environment.
 set -u
 RUN=${CGN_RUN_DIR:-/tmp/cgn}
 APP=${CGN_APP_DIR:-/app}
 CONF=${CGN_AUTHORIZED_CONFIG:-/var/data/cgn-authorized.conf}
 refuse() { echo "cgn-entrypoint: REFUSED: $*" >&2; exit 78; }
-if [ -f "$CONF" ]; then
-  get() { sed -n "s/^$1=//p" "$CONF"; }
-  [ "${MCHEZO_DATA_DIR:-}" = "$(get data_dir)" ] || refuse "MCHEZO_DATA_DIR is not the authorized data folder (a rollback brings back old environment values)"
-  [ "${MCHEZO_PUBLIC_ORIGIN:-}" = "$(get public_origin)" ] || refuse "MCHEZO_PUBLIC_ORIGIN is not the authorized origin"
-  [ "${MCHEZO_TRUST_PROXY:-unset}" = "$(get trust_proxy)" ] || refuse "MCHEZO_TRUST_PROXY is not the authorized proxy count"
-  [ "$(printf '%s:%s' "$(get code_salt)" "${MCHEZO_BETA_ACCESS_CODE:-}" | sha256sum | cut -d' ' -f1)" = "$(get code_sha256)" ] || refuse "the access code is not the authorized one"
-  echo "cgn-entrypoint: the environment matches the authorized configuration" >&2
+# --- record reader (identical in cgn-authorize and cgn-entrypoint) ---
+# read_record <file>: sets R_data_dir R_public_origin R_trust_proxy R_code_salt R_code_sha256 R_pending_data_dir
+# R_pending_base, or returns 1 with the reason in WHY. Fails closed: an unknown or repeated key, a line without "=",
+# a missing or ill-formed value, a pending entry without its base, or a STALE pending entry (prepared against another
+# approved folder than the recorded one) make the whole record unusable.
+read_record() {
+  R_data_dir=""; R_public_origin=""; R_trust_proxy=""; R_code_salt=""; R_code_sha256=""; R_pending_data_dir=""; R_pending_base=""
+  WHY=""; _seen=" "
+  [ -f "$1" ] && [ ! -L "$1" ] || { WHY="it is not a regular file"; return 1; }
+  [ -r "$1" ] || { WHY="it is not readable"; return 1; }
+  while IFS= read -r _line || [ -n "$_line" ]; do
+    case "$_line" in *=*) ;; *) WHY="a line without '='"; return 1;; esac
+    _k=${_line%%=*}; _v=${_line#*=}
+    case "$_k" in data_dir|public_origin|trust_proxy|code_salt|code_sha256|pending_data_dir|pending_base) ;; *) WHY="an unknown key"; return 1;; esac
+    case "$_seen" in *" $_k "*) WHY="the key $_k appears twice"; return 1;; esac
+    _seen="$_seen$_k "
+    eval "R_$_k=\$_v"
+  done < "$1"
+  case "$R_data_dir" in /*) ;; *) WHY="data_dir is missing or not an absolute path"; return 1;; esac
+  case "$R_public_origin" in https://?*|http://?*) ;; *) WHY="public_origin is missing or not http(s)"; return 1;; esac
+  case "$R_trust_proxy" in unset|0|1|2|3) ;; *) WHY="trust_proxy is missing or not 0-3/unset"; return 1;; esac
+  case "$R_code_salt" in *[!0-9a-f]*|"") WHY="code_salt is missing or not hex"; return 1;; esac
+  [ "${#R_code_salt}" -eq 32 ] || { WHY="code_salt is not 32 hex digits"; return 1; }
+  case "$R_code_sha256" in *[!0-9a-f]*|"") WHY="code_sha256 is missing or not hex"; return 1;; esac
+  [ "${#R_code_sha256}" -eq 64 ] || { WHY="code_sha256 is not 64 hex digits"; return 1; }
+  _np=0
+  case "$_seen" in *" pending_data_dir "*) _np=$((_np + 1));; esac
+  case "$_seen" in *" pending_base "*) _np=$((_np + 1));; esac
+  if [ "$_np" = 1 ]; then WHY="a pending entry without its pair"; return 1; fi
+  if [ "$_np" = 2 ]; then
+    case "$R_pending_data_dir" in /*) ;; *) WHY="pending_data_dir is not an absolute path"; return 1;; esac
+    [ "$R_pending_data_dir" != "$R_data_dir" ] || { WHY="pending_data_dir is the approved folder"; return 1; }
+    [ "$R_pending_base" = "$R_data_dir" ] || { WHY="STALE: the pending folder was prepared against another approved folder"; return 1; }
+  fi
+  return 0
+}
+# --- end record reader ---
+if [ -e "$CONF" ] || [ -L "$CONF" ]; then
+  read_record "$CONF" || refuse "the authorized configuration at $CONF is unusable ($WHY)"
+  if [ "${MCHEZO_DATA_DIR:-}" = "$R_data_dir" ]; then
+    selected="the APPROVED data folder $R_data_dir"
+  elif [ -n "$R_pending_data_dir" ] && [ "${MCHEZO_DATA_DIR:-}" = "$R_pending_data_dir" ]; then
+    selected="the PENDING data folder $R_pending_data_dir (not committed: the approved folder stays $R_data_dir; commit or abort before reopening)"
+  elif [ -n "$R_pending_data_dir" ]; then
+    refuse "MCHEZO_DATA_DIR is not the authorized data folder, nor the pending one (a rollback brings back old environment values)"
+  else
+    refuse "MCHEZO_DATA_DIR is not the authorized data folder (a rollback brings back old environment values)"
+  fi
+  [ "${MCHEZO_PUBLIC_ORIGIN:-}" = "$R_public_origin" ] || refuse "MCHEZO_PUBLIC_ORIGIN is not the authorized origin"
+  [ "${MCHEZO_TRUST_PROXY:-unset}" = "$R_trust_proxy" ] || refuse "MCHEZO_TRUST_PROXY is not the authorized proxy count"
+  [ "$(printf '%s:%s' "$R_code_salt" "${MCHEZO_BETA_ACCESS_CODE:-}" | sha256sum | cut -d' ' -f1)" = "$R_code_sha256" ] || refuse "the access code is not the authorized one"
+  echo "cgn-entrypoint: the environment matches the authorized configuration: $selected" >&2
 elif [ -n "$(ls -A "${MCHEZO_DATA_DIR:-/nonexistent}" 2>/dev/null)" ]; then
   refuse "data exists in ${MCHEZO_DATA_DIR:-?} but no authorized configuration is recorded at $CONF"
 else

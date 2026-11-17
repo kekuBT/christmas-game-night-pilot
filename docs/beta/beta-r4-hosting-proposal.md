@@ -123,7 +123,7 @@ The copy is therefore one state of the folder. Nothing is inferred from comparin
 | **Off Render** | After each night: `scp -s` the `.tar.age` file to an administrative device, then upload it to the **owner's existing private cloud storage**. The laptop is only a transfer device: the game service never depends on it. |
 | **Access** | The owner's storage account, with two-factor sign-in. The operator gets SSH to the instance only during approved windows, and never the private key. |
 | **Retention** | Off Render: every pre-deploy and pre-restore backup for 90 days, plus the last 8 game-night backups. On the disk: the last 3 plaintext copies (as private as the data itself), deleted only after their archive is confirmed off Render. Render's own daily snapshots (7 days) are an extra layer inside Render, not the independent one. |
-| **Restore** | **From the received copy only, after its `RECEIPT_OK`:**<ul><li>upload it with `scp -s`;</li><li>`datatool verify` it on the instance;</li><li>`datatool restore` it into a **new** folder, then `datatool check`;</li><li>`cgn-authorize` the new folder, then change `MCHEZO_DATA_DIR` (which redeploys).</li></ul>The old folder is kept. |
+| **Restore** | **From the received copy only, after its `RECEIPT_OK`:**<ul><li>upload it with `scp -s`;</li><li>`datatool verify` it on the instance;</li><li>`datatool restore` it into a **new** folder, then `datatool check`;</li><li>`cgn-authorize --prepare` the new folder, change `MCHEZO_DATA_DIR` (which redeploys), check it under maintenance, then `--commit` (or `--abort` and redeploy the original values).</li></ul>The old folder is kept. Details: [render-w6.md](render-w6.md). |
 | **Cost** | $0 extra, with storage the owner already has. Each archive is a few KB per room. |
 
 **Evidence: one drill on disposable local data** ([backup-drill/](../evidence/beta-r4-hosting/backup-drill/README.md)).
@@ -210,6 +210,7 @@ The copy is therefore one state of the folder. Nothing is inferred from comparin
 - **So a one-click rollback to old values fails closed** instead of serving the wrong folder or code. The disk, and so the record, isn't rolled back.
 - **Data present but no record** also refuses. A first install (no data yet) starts, and says so.
 - **A planned change** (validation folder to the real folder, a new code): `cgn-authorize` the new values first, then save the environment, which redeploys.
+- **A data-folder switch** (a restore; review 6939462697): `cgn-authorize --prepare <folder>` records ONE pending folder next to the approved one, with the same origin, proxy count and code. The approved folder keeps starting with its own value, so a failed start on the pending one is undone by an ordinary redeploy with the original environment. `--commit` (from the instance serving it) or `--abort` (from one that isn't) ends the switch before reopening; after a commit the old folder is refused, and after an abort the pending one is. Every record change is locked and atomic. Details: [render-w6.md](render-w6.md).
 - **The drill** exercised each refusal: the previous data folder, an older access code, another proxy count, and data with no record.
 
 ## The configuration that changes (no runtime code)
@@ -235,7 +236,7 @@ All of it runs on the paid service, in production mode, with a throwaway access 
 | W3 | **Reconnect:** phones backgrounded and foregrounded; a Wi-Fi to mobile data switch | Every client back in its seat, with no lost answer |
 | W4 | **Restart:** a manual deploy, and a dashboard restart, each mid-game | The room restored; acknowledged answers kept; sockets back |
 | W5 | **Backup:** `cgn-backup` during a validation night, then `scp -s` off Render to the owner's storage, fetch it back, then `cgn-receive` | `BACKUP_OK`, then `RECEIPT_OK` on the owner's device; the stop under 10 s |
-| W6 | **Restore of the received copy:** upload, `verify`, into a new folder, then `check`, authorize, switch, redeploy. Separately, a Render snapshot restore on throwaway data. | The rooms and books back; the old folder kept |
+| W6 | **Restore of the received copy:** upload, `verify`, into a new folder, then `check`, `--prepare`, switch (redeploy), check under maintenance, `--commit`, reopen. Separately, a Render snapshot restore on throwaway data. | The rooms and books back; the old folder kept |
 | W7 | **Rollback:** a revert-commit deploy of the previous release, then the acceptance checks. And one deliberate one-click rollback across a configuration change, to see the guard refuse it. | The previous release serves the current configuration; the one-click rollback fails closed |
 | W8 | **Native devices:** an iPhone (Safari) and an Android phone (Chrome), P1–P8 from REAL_DEVICE_TESTING.md over the public URL. That covers the gate, a QR join, play, lock and unlock, Home Screen install, and a Memory Book export. | No Blocker |
 

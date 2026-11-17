@@ -1,0 +1,58 @@
+== w6-guard-selftest 2026-11-17T05:47:37Z, run 20261117T054737Z-de5c89f9, image cgn-render:w6r (sha256:ba808c185dca)
+   scripts: cgn-authorize.sh 501d1b5f9af82ff2, cgn-entrypoint.sh 0bc9b3fd2f4a7fbb, this file 1d7f16dcbf8fb786
+-- G0: static
+PASS G0 the image's cgn-authorize and cgn-entrypoint are byte-identical to deploy/render, and the record reader block is identical in both (37 lines)
+-- G1: an existing single-configuration record (the previous cgn-authorize, d2e7edf)
+   first install: up 7097ac2bb062925bb296a129f4771f1e68fd522d; cgn-entrypoint: WARNING first install: no authorized configuration yet and no data; run cgn-authorize after the acceptance checks 
+   the previous cgn-authorize: AUTHORIZED data_dir=/var/data/w6g-a public_origin=https://cgn-w6g.test trust_proxy=1 (the access code is kept only as a salted hash)
+PASS G1 a record written by the previous cgn-authorize (5 lines) starts the approved folder, and --status reads it
+PASS G1 --status never prints the code, its salt or its hash
+-- G2: --prepare refusals leave the record unchanged
+PASS G2 --prepare refuses a relative path, a trailing '/', the approved folder, a nested folder either way, a missing folder and a folder of another user; the record is unchanged
+-- G3: one pending folder
+   PREPARED pending_data_dir=/var/data/w6g-b approved_data_dir=/var/data/w6g-a (the approved folder still starts with its own MCHEZO_DATA_DIR; start /var/data/w6g-b, check it, then commit or abort before reopening)
+PASS G3 --prepare records one pending folder (the approved one unchanged)
+PASS G3 while pending, a second --prepare and a whole re-authorization are refused, and the record is unchanged
+-- G4: while pending
+PASS G4 the APPROVED folder still starts while a switch is pending (an ordinary restart)
+PASS G4 unrelated: refused (exit 78) and no server started
+PASS G4 pending-origin: refused (exit 78) and no server started
+PASS G4 pending-proxy: refused (exit 78) and no server started
+PASS G4 pending-code: refused (exit 78) and no server started
+-- G5: the pending start, and a restart before commit
+PASS G5 the pending folder starts, logged PENDING; --status names it as served
+PASS G5 a restart before commit: still the PENDING folder
+PASS G5 --abort is refused from the instance serving the pending folder
+-- G6: abort
+PASS G6 an ordinary redeploy with the original environment starts the approved folder; --abort from it
+PASS G6 after the abort: the aborted folder is refused (78), and --commit has nothing to commit
+-- G7: a failed pending start, undone by an ordinary redeploy
+   PREPARED pending_data_dir=/var/data/w6g-d approved_data_dir=/var/data/w6g-a (the approved folder still starts with its own MCHEZO_DATA_DIR; start /var/data/w6g-d, check it, then commit or abort before reopening)
+PASS G7 the broken pending folder fails to start (the server exits non-zero)
+PASS G7 recovery is an ORDINARY redeploy with the original environment: the approved folder starts, and the record is byte-identical to the one --prepare wrote (no edit after the failure, no special container)
+   ABORTED pending_data_dir=/var/data/w6g-d (no longer authorized); the approved folder stays /var/data/w6g-a
+-- G8: commit
+PASS G8 --commit is refused from an instance not serving the pending folder, and for another folder
+PASS G8 --commit from the instance serving it: the record now approves it, with no pending entry and the original five lines
+PASS G8 after the commit, booting the PRIOR folder is refused (78)
+PASS G8 the committed folder starts as APPROVED
+-- G9: interrupted record changes
+PASS G9 a leftover partial file (an interrupted change) is ignored by the entrypoint and removed by the next change
+PASS G9 a change killed (SIGKILL, confirmed gone) while it waited for the lock leaves the record exactly as it was
+PASS G9 a lock held past 10 s refuses the change, and the record is unchanged
+PASS G9 the lock holder killed (SIGKILL, confirmed gone) mid-change: the lock is released, and the waiting change completes
+-- M1-M10: unusable records (a separate fixture volume; nothing in it is data)
+PASS M1 truncated (no code_sha256): the start exits 78 with the reason; --status says UNUSABLE (exit 1); --prepare is refused
+PASS M2 an unknown key: the start exits 78 with the reason; --status says UNUSABLE (exit 1); --prepare is refused
+PASS M3 a repeated key: the start exits 78 with the reason; --status says UNUSABLE (exit 1); --prepare is refused
+PASS M4 a line without '=': the start exits 78 with the reason; --status says UNUSABLE (exit 1); --prepare is refused
+PASS M5 a STALE pending entry: the start exits 78 with the reason; --status says UNUSABLE (exit 1); --prepare is refused
+PASS M6 a pending entry without its pair: the start exits 78 with the reason; --status says UNUSABLE (exit 1); --prepare is refused
+PASS M7 an empty file: the start exits 78 with the reason; --status says UNUSABLE (exit 1); --prepare is refused
+PASS M8 a symbolic link: the start exits 78 with the reason; --status says UNUSABLE (exit 1); --prepare is refused
+PASS M9 a folder: the start exits 78 with the reason; --status says UNUSABLE (exit 1); --prepare is refused
+PASS M10 a non-hex salt: the start exits 78 with the reason; --status says UNUSABLE (exit 1); --prepare is refused
+-- cleanup (run 20261117T054737Z-de5c89f9)
+PASS only this run's own containers and volumes were removed: containers left 0, volumes left 0; the sentinels are intact
+== 37 passed, 0 failed
+W6 GUARD SELFTEST PASSED
