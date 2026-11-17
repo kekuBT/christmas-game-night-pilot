@@ -15,10 +15,16 @@
 ## B-W7-01: there is no audited previous release (a prerequisite, open)
 - **The facts:** `7097ac2` is the **first** audited archive of this route: SHA-256 `a693c5433d8dd8c17368e9c02fd8092b316d67b6e62ac9c0070a60b99c3a5131`, recorded in [release-7097ac2.md](release-7097ac2.md). No earlier archive was audited, pinned or received.
 - **So the actual predecessor-artifact check cannot pass today.** There is nothing to identify by revision and digest, and so no data-format evidence for a real predecessor.
-- **What unblocks it:** a second audited release.
-  - The next release is audited and pinned exactly as `7097ac2` was.
-  - It is deployed through the gate, in an approved window.
-  - Its predecessor is then `7097ac2` (`a693c543…`), and W7 rolls back to it.
+- **What unblocks it:** an audited release **newer** than `7097ac2`, to deploy first and roll back from. The rollback target, `7097ac2` (`a693c543…`), is already audited. Preparing and independently auditing the newer release is engineering work. Only the hosted execution and any spending need the owner's decision (clarified in [6951228654](https://github.com/kekuBT/christmas-game-night-pilot/pull/50#issuecomment-6951228654)).
+  - **The proposed candidate:** `72e9d8b`, the reviewed uncertain-delivery repair. Its runtime differs from `7097ac2` only in three web-client files; the server, the content and the packages are identical. It is still unpackaged and unaudited as an archive.
+  - **The engineering steps:**
+    1. a full gate on it;
+    2. the package and its release record;
+    3. the independent private audit of the archive;
+    4. a pins-only forward commit, and its revert prepared in advance;
+    5. the local checks under test pins;
+    6. the real predecessor check on the audited `a693c543…`, where that archive is kept.
+  - **The owner-gated hosted operation:** the forward deploy, then W7's rollback and return, and separately the deliberate one-click check on a throwaway service. Any new resource needs approval too.
   - Until then, a W7 on Render could only "roll back" to the release that is already running, which proves nothing.
 - **For the local rehearsal only,** a clearly labelled **LOCAL SURROGATE** stands in for the predecessor, built from `f93e9cba8613859be9891706ead1c60157c73de2`, the commit before the R5 UI changes. Its identity and build:
   - built by [build-predecessor.sh](../evidence/beta-r4-w7/runners/build-predecessor.sh), the same procedure as the R2 rebuild (Node 22.16.0, `npm ci`, `pack.mjs`);

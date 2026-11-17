@@ -1,0 +1,26 @@
+== focused checks on the clean checkout of 20adc1032101559f5ff4902f2846e7a44f3e3d44 (status 0 lines), 2026-11-17T15:10:38Z, node v22.16.0
+-- 1. scope: the diff against cfc4f6a
+ scripts/preview/probe-forwarded-origin.d.mts |  2 ++
+ scripts/preview/probe-forwarded-origin.mjs   | 42 ++++++++++++++++++++++++----
+ 2 files changed, 39 insertions(+), 5 deletions(-)
+files outside scripts/preview: 0
+-- 2. node --check
+PASS node --check scripts/preview/probe-forwarded-origin.mjs
+-- 3. eslint scripts/preview
+PASS eslint scripts/preview (exit 0)
+-- 4. the focused probe tests
+ ✓ tests/preview-probe-verdict.test.ts (16 tests) 11ms
+ Test Files  1 passed (1)
+      Tests  16 passed (16)
+-- 5. the served pages' inline scripts (a local probe on 127.0.0.1, no browser)
+PASS the inline script of the TARGET page: node --check (14 lines)
+PASS the inline script of the OTHER page: node --check (30 lines)
+the OTHER page's script has the control: 1 occurrence(s); its button id: b.id = "top-control"
+headers: TARGET referrer-policy: same-origin; OTHER: 0 Referrer-Policy header(s)
+-- 6. what a control observation records (synthetic curl requests to the local probe; inert values)
+<p>ok: the control was recorded. <a href="/">Open the target page for the verdict</a>.</p>
+<p>ok</p>
+{"where":"target","kind":"xorigin-form-post","method":"POST","label":"top-control","origin":"http://127.0.0.1:18792","host":"127.0.0.1:18791","xForwardedHost":null,"xForwardedProto":null,"secFetchSite":"same-site","secFetchMode":"navigate","refererOrigin":null,"secFetchDest":"document","secFetchUser":"?1","cookiePresent":true}
+{"where":"target","kind":"xorigin-form-post","method":"POST","label":null,"origin":"null","host":"127.0.0.1:18791","xForwardedHost":null,"xForwardedProto":null,"secFetchSite":null,"secFetchMode":null,"refererOrigin":null,"secFetchDest":null,"secFetchUser":null,"cookiePresent":false}
+verdict (expected INCOMPLETE: no own requests in this synthetic check): INCOMPLETE
+the report holds the cookie value, the body or the extra URL value: 0 match(es)

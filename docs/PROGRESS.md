@@ -3900,3 +3900,22 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
   - the W5 self-test, 12/12.
 - **Open:** B-W7-01, no audited predecessor artifact. The actual predecessor check can't pass until a second audited release exists.
 - **Next:** the report on #50, linked on #5 and #49. The real W7, Render, production data and owner keys stay with the owner.
+- **Reported** in 6942141320; linked on #5 and #49.
+- **Review 6942165008:** W7 stays open. ChatGPT accepted the code and evidence as developer-run results. Its private browser audit was blocked on preview access.
+- **Review 6951143760 (with 6951209887):**
+  - B-W7-01's prerequisites were answered in 6951228654 (candidate `72e9d8b`). `render-w7.md` now records that the rollback target `7097ac2` is audited, and that preparing and auditing the newer release is engineering work.
+  - The preview's `FOREIGN_ORIGIN` was diagnosed in 6951298104. It is a configuration fault: GitHub's forwarder rewrites the page's own Origin (F1). The fix is route A.
+  - ChatGPT's probe then returned `INCOMPLETE`: the sibling iframe form arrived with `Origin: null` (POST, same-site, navigate, no Referer). The analysis and one proposed control are in 6951594256.
+- **Review 6951923886: implement the control.** Acknowledged in 6951947263 at 10:08 a.m. ET, estimated at about 25 min.
+  - **The change** (`scripts/preview/probe-forwarded-origin.mjs` and its `.d.mts` only, commit `20adc10`):
+    - the OTHER page shows a visible button;
+    - pressed once, it sets the page's referrer policy with a meta element, then sends one empty form POST to the target as a top-level navigation, labelled `top-control`;
+    - observations record their label (`iframe` or `top-control`; any other value is dropped), plus `Sec-Fetch-Dest` and `Sec-Fetch-User`;
+    - `classify()` is unchanged.
+  - **The focused checks on a clean checkout of `20adc10`,** all passing ([log](evidence/beta-r4-w7/probe-control/checks-20adc10.log)):
+    - `node --check`;
+    - eslint;
+    - `tests/preview-probe-verdict.test.ts`, 16/16;
+    - both served pages' inline scripts, through `node --check`;
+    - a synthetic local recording check: the label, dest and user fields are kept, an unknown label is dropped, and no cookie value, body or extra URL value is stored.
+  - **Next:** the report on #50. ChatGPT runs the control in the private Codespace.
