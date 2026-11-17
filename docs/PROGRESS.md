@@ -4014,3 +4014,24 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
   - with no identity, nothing is removed or retired.
 
   The empty-folder shortcut is removed.
+
+## Beta R4 W7: the private-preview Origin compatibility (handoff 6957705907; investigation only)
+- **Recorded first:**
+  - Reported in 6956378984: the cleanup recovery, tested `9205c93`, head `7103962`.
+  - Review 6956496260 accepted the bounded operator repair. That is not W7 clearance.
+  - **The owner-run Gate R failed twice, `UNSUITABLE`:** 6957040472, then the retry 6957204655 → 6957543881 with the address bar shown.
+    - The page's own fetch, form and WebSocket requests arrived with Origin `http://localhost:3157`. Its cross-origin requests kept their https origin.
+    - The cause within the forwarding and browser path isn't proven.
+  - Phase A was not started.
+- **Acknowledged** in 6957718793 at 1:53 p.m. ET. The estimate is about 50 min.
+- **Found** (`docs/evidence/beta-r4-w7/preview-compat/README.md`):
+  - **What stopped the run is our tooling's https rule:** the probe at `probe-forwarded-origin.mjs:90-91`, and `start` at `w7-owner-preview.sh:146-147`.
+  - **The runtime accepts an `http` public origin.** Its only consequence is that the beta cookie loses `Secure`, because one value sets both the matched origin and the cookie flag.
+  - With the address-bar origin configured, the runtime refuses the rewritten own requests (403 `FOREIGN_ORIGIN`).
+- **Recommended, for architecture review:** C2, a preview-only adapter outside the release.
+  - **What it does:** it restores the one exact value `http://localhost:<port>` to the external `https://<codespace>-<port>.app.github.dev`.
+  - **What it refuses:** an unrewritten external Origin, and a POST or WebSocket with no Origin.
+  - **What it leaves alone:** everything else passes unchanged to the runtime's exact-origin check, and the cookie stays `Secure`.
+  - **Rejected:** C1 (the configuration-only route; the cookie isn't `Secure`); a runtime change (it would touch both pinned releases); the HTTPS port protocol (a hypothesis only). Route B stays the fallback.
+- **Validation:** `repro-origin-cases.mjs` sends the real runtime, in production mode, the as-received cases under C0, C1 and C2 (an adapter model). Its runs are in `preview-compat/final/`.
+- **Not implemented:** the adapter, the probe verdict and the `start` change all wait for the review. Nothing ran in the Codespace. W7 and B-W7-01 stay OPEN.
