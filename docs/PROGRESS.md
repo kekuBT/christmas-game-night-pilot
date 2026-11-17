@@ -3622,3 +3622,9 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
 - **The handoff:** W4 restart preparation and an isolated local rehearsal, as one unmerged draft PR stacked on #45 at `8b511b3`.
 - **Acknowledged** in 6933406957, at 7:12 p.m. ET, with a 2 h 15 min estimate.
 - **W3 local preparation was cleared** in 6933392621. Native C1–C4, Render W1–W8 and the go/no-go stay pending.
+- **Done:**
+  - `docs/beta/render-w4.md`: the runbook, with the local rehearsal kept apart from the real D1 (a manual deploy) and D2 (a dashboard restart), both pending. A real execution needs a same-window `BACKUP_OK` and `RECEIPT_OK`, maintenance and window controls, revision and data-folder checks, and the guard and rollback rules.
+  - `scripts/beta/w4-rehearsal.sh` (the harness: a run-owned volume and the restart actions) and `w4-rehearsal.mjs` (the driver: S, P, R1, R2, L, G and F).
+  - `scripts/beta/w4-selftest.sh` (K1–K5 with sentinels).
+- **The finding:** a tap made during a restart shows `Request failed (502)`, not the friendly wording. It is never shown as in and never saved. A bounded client repair is proposed, not made: the pin is unchanged.
+- **Dev runs:** see `docs/evidence/beta-r4-w4/README.md`. They include trial 1's wrong expectation and control 1's stale rendered check, both fixed.

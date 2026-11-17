@@ -1,0 +1,178 @@
+== w3-harness-selftest 2026-11-17T00:23:31Z, tag 210744, harness scripts/beta/w4-rehearsal.sh (9a55d6d3425f7dd6), image cgn-render:check
+-- M1: docker run fails (exit 1)
+     | == w4-rehearsal 2026-11-17T00:23:31Z, run 20261117T002331Z-db6e4022, image mock-image, driver 7b628ad4fd8c08b5, proxy 06b1738ccd75d5f8
+     |    image id: sha256:0000mock
+     |    ports 18443/18480/18080 free
+     |    throwaway code, env file and TLS key in a private directory (mode 700), removed on exit
+     |    data volume w4-data-20261117T002331Z-db6e4022-a (label w4.owner=20261117T002331Z-db6e4022): throwaway data, removed on exit
+     |    FAILED at container: docker run failed: docker: Error response from daemon: mock run failure 
+     | -- cleanup (run 20261117T002331Z-db6e4022)
+     |    cleanup #1: private-files
+     |    cleanup #2: nothing owned left to remove
+     |    this run's containers left: 0; volumes left: 0; processes left: 0; listeners left on 18443/18480/18080: not checked (this run started no listener); private files left: no
+     |    files holding the access code: 0; files holding a beta cookie value: 0
+     | W4 REHEARSAL HARNESS FAILED
+     calls:
+     > docker image inspect --format {{.Id}} mock-image
+     > docker volume create --label w4.owner=20261117T002331Z-db6e4022 w4-data-20261117T002331Z-db6e4022-a
+     > docker run -d --name w4-svc-20261117T002331Z-db6e4022-1 --label w4.owner=20261117T002331Z-db6e4022 -p 127.0.0.1:18080:10000 -v w4-data-20261117T002331Z-db6e4022-a:/var/data -e MCHEZO_DATA_DIR=/var/data/cgn-w1 -e MCHEZO_PUBLIC_ORIGIN=https://localhost:18443 -e MCHEZO_TRUST_PROXY=1 --env-file <private-dir>/code.env mock-image
+     > docker ps -aq --no-trunc --filter label=w4.owner=20261117T002331Z-db6e4022
+     > docker ps -aq --no-trunc --filter label=w4.owner=20261117T002331Z-db6e4022
+     > docker volume ls -q --filter label=w4.owner=20261117T002331Z-db6e4022
+     > docker ps -aq --no-trunc --filter label=w4.owner=20261117T002331Z-db6e4022
+     > docker volume ls -q --filter label=w4.owner=20261117T002331Z-db6e4022
+     > docker ps -aq --filter label=w4.owner=20261117T002331Z-db6e4022
+     > docker volume ls -q --filter label=w4.owner=20261117T002331Z-db6e4022
+PASS M1 exits non-zero
+PASS M1 the pre-existing w3-svc container survives
+PASS M1 removes only a container its own docker run created
+PASS M1 never deletes by the shared name w3-svc
+PASS M1 leaves none of its own containers behind
+PASS M1 never authorizes (no docker exec)
+PASS M1 never starts the proxy or the driver (no node call)
+PASS M1 does not try the service after the failed start (no health probe)
+-- M2: the image is missing (exit 1)
+     | == w4-rehearsal 2026-11-17T00:23:31Z, run 20261117T002331Z-5adafae3, image mock-image, driver 7b628ad4fd8c08b5, proxy 06b1738ccd75d5f8
+     |    FAILED at image: the image 'mock-image' is not available locally
+     | -- cleanup (run 20261117T002331Z-5adafae3)
+     |    cleanup #1: nothing owned left to remove
+     |    cleanup #2: nothing owned left to remove
+     |    this run's containers left: 0; volumes left: 0; processes left: 0; listeners left on 18443/18480/18080: not checked (this run started no listener); private files left: no
+     |    files holding the access code: 0; files holding a beta cookie value: 0
+     | W4 REHEARSAL HARNESS FAILED
+     calls:
+     > docker image inspect --format {{.Id}} mock-image
+     > docker ps -aq --no-trunc --filter label=w4.owner=20261117T002331Z-5adafae3
+     > docker volume ls -q --filter label=w4.owner=20261117T002331Z-5adafae3
+     > docker ps -aq --no-trunc --filter label=w4.owner=20261117T002331Z-5adafae3
+     > docker volume ls -q --filter label=w4.owner=20261117T002331Z-5adafae3
+     > docker ps -aq --filter label=w4.owner=20261117T002331Z-5adafae3
+     > docker volume ls -q --filter label=w4.owner=20261117T002331Z-5adafae3
+PASS M2 exits non-zero
+PASS M2 the pre-existing w3-svc container survives
+PASS M2 removes only a container its own docker run created
+PASS M2 never deletes by the shared name w3-svc
+PASS M2 leaves none of its own containers behind
+PASS M2 never authorizes (no docker exec)
+PASS M2 never starts the proxy or the driver (no node call)
+PASS M2 never runs a container
+-- M3: the container exits before it is ready (exit 1)
+     | == w4-rehearsal 2026-11-17T00:23:32Z, run 20261117T002332Z-c4a950bb, image mock-image, driver 7b628ad4fd8c08b5, proxy 06b1738ccd75d5f8
+     |    image id: sha256:0000mock
+     |    ports 18443/18480/18080 free
+     |    throwaway code, env file and TLS key in a private directory (mode 700), removed on exit
+     |    data volume w4-data-20261117T002332Z-c4a950bb-a (label w4.owner=20261117T002332Z-c4a950bb): throwaway data, removed on exit
+     |    container 9f788ce7110f (name w4-svc-20261117T002332Z-c4a950bb-1, label w4.owner=20261117T002332Z-c4a950bb)
+     |    FAILED at readiness: never ready (state: exited exit=0)
+     | -- cleanup (run 20261117T002332Z-c4a950bb)
+     |    cleanup #1: container 9f788ce7110f private-files
+     |    cleanup #2: nothing owned left to remove
+     |    this run's containers left: 0; volumes left: 0; processes left: 0; listeners left on 18443/18480/18080: 0; private files left: no
+     |    files holding the access code: 0; files holding a beta cookie value: 0
+     | W4 REHEARSAL HARNESS FAILED
+     calls:
+     > docker image inspect --format {{.Id}} mock-image
+     > docker volume create --label w4.owner=20261117T002332Z-c4a950bb w4-data-20261117T002332Z-c4a950bb-a
+     > docker run -d --name w4-svc-20261117T002332Z-c4a950bb-1 --label w4.owner=20261117T002332Z-c4a950bb -p 127.0.0.1:18080:10000 -v w4-data-20261117T002332Z-c4a950bb-a:/var/data -e MCHEZO_DATA_DIR=/var/data/cgn-w1 -e MCHEZO_PUBLIC_ORIGIN=https://localhost:18443 -e MCHEZO_TRUST_PROXY=1 --env-file <private-dir>/code.env mock-image
+     > created 9f788ce7110f2352f4a05190f1e68cb4
+     > docker inspect -f {{.State.Running}} 9f788ce7110f2352f4a05190f1e68cb4
+     > docker inspect -f {{.State.Status}} exit={{.State.ExitCode}} 9f788ce7110f2352f4a05190f1e68cb4
+     > docker ps -aq --no-trunc --filter label=w4.owner=20261117T002332Z-c4a950bb
+     > docker inspect 9f788ce7110f2352f4a05190f1e68cb4
+     > docker inspect -f {{index .Config.Labels "w4.owner"}} 9f788ce7110f2352f4a05190f1e68cb4
+     > docker rm -f -v 9f788ce7110f2352f4a05190f1e68cb4
+     > removed 9f788ce7110f2352f4a05190f1e68cb4
+     > docker volume ls -q --filter label=w4.owner=20261117T002332Z-c4a950bb
+     > docker ps -aq --no-trunc --filter label=w4.owner=20261117T002332Z-c4a950bb
+     > docker volume ls -q --filter label=w4.owner=20261117T002332Z-c4a950bb
+     > docker ps -aq --filter label=w4.owner=20261117T002332Z-c4a950bb
+     > docker volume ls -q --filter label=w4.owner=20261117T002332Z-c4a950bb
+PASS M3 exits non-zero
+PASS M3 the pre-existing w3-svc container survives
+PASS M3 removes only a container its own docker run created
+PASS M3 never deletes by the shared name w3-svc
+PASS M3 leaves none of its own containers behind
+PASS M3 never authorizes (no docker exec)
+PASS M3 never starts the proxy or the driver (no node call)
+-- M4: /health reports another revision (exit 1)
+     | == w4-rehearsal 2026-11-17T00:23:33Z, run 20261117T002333Z-89fa56d3, image mock-image, driver 7b628ad4fd8c08b5, proxy 06b1738ccd75d5f8
+     |    image id: sha256:0000mock
+     |    ports 18443/18480/18080 free
+     |    throwaway code, env file and TLS key in a private directory (mode 700), removed on exit
+     |    data volume w4-data-20261117T002333Z-89fa56d3-a (label w4.owner=20261117T002333Z-89fa56d3): throwaway data, removed on exit
+     |    container c110401f52d2 (name w4-svc-20261117T002333Z-89fa56d3-1, label w4.owner=20261117T002333Z-89fa56d3)
+     |    FAILED at readiness: revision '0000000000000000000000000000000000000000', not the expected 7097ac2bb062925bb296a129f4771f1e68fd522d
+     | -- cleanup (run 20261117T002333Z-89fa56d3)
+     |    cleanup #1: container c110401f52d2 private-files
+     |    cleanup #2: nothing owned left to remove
+     |    this run's containers left: 0; volumes left: 0; processes left: 0; listeners left on 18443/18480/18080: 0; private files left: no
+     |    files holding the access code: 0; files holding a beta cookie value: 0
+     | W4 REHEARSAL HARNESS FAILED
+     calls:
+     > docker image inspect --format {{.Id}} mock-image
+     > docker volume create --label w4.owner=20261117T002333Z-89fa56d3 w4-data-20261117T002333Z-89fa56d3-a
+     > docker run -d --name w4-svc-20261117T002333Z-89fa56d3-1 --label w4.owner=20261117T002333Z-89fa56d3 -p 127.0.0.1:18080:10000 -v w4-data-20261117T002333Z-89fa56d3-a:/var/data -e MCHEZO_DATA_DIR=/var/data/cgn-w1 -e MCHEZO_PUBLIC_ORIGIN=https://localhost:18443 -e MCHEZO_TRUST_PROXY=1 --env-file <private-dir>/code.env mock-image
+     > created c110401f52d2524dd2a00c2909c87b6b
+     > docker inspect -f {{.State.Running}} c110401f52d2524dd2a00c2909c87b6b
+     > curl -sf --max-time 2 -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf --max-time 5 http://127.0.0.1:18080/health
+     > docker ps -aq --no-trunc --filter label=w4.owner=20261117T002333Z-89fa56d3
+     > docker inspect c110401f52d2524dd2a00c2909c87b6b
+     > docker inspect -f {{index .Config.Labels "w4.owner"}} c110401f52d2524dd2a00c2909c87b6b
+     > docker rm -f -v c110401f52d2524dd2a00c2909c87b6b
+     > removed c110401f52d2524dd2a00c2909c87b6b
+     > docker volume ls -q --filter label=w4.owner=20261117T002333Z-89fa56d3
+     > docker ps -aq --no-trunc --filter label=w4.owner=20261117T002333Z-89fa56d3
+     > docker volume ls -q --filter label=w4.owner=20261117T002333Z-89fa56d3
+     > docker ps -aq --filter label=w4.owner=20261117T002333Z-89fa56d3
+     > docker volume ls -q --filter label=w4.owner=20261117T002333Z-89fa56d3
+PASS M4 exits non-zero
+PASS M4 the pre-existing w3-svc container survives
+PASS M4 removes only a container its own docker run created
+PASS M4 never deletes by the shared name w3-svc
+PASS M4 leaves none of its own containers behind
+PASS M4 never authorizes (no docker exec)
+PASS M4 never starts the proxy or the driver (no node call)
+-- M5: cgn-authorize fails (exit 1)
+     | == w4-rehearsal 2026-11-17T00:23:34Z, run 20261117T002334Z-6cf65ee5, image mock-image, driver 7b628ad4fd8c08b5, proxy 06b1738ccd75d5f8
+     |    image id: sha256:0000mock
+     |    ports 18443/18480/18080 free
+     |    throwaway code, env file and TLS key in a private directory (mode 700), removed on exit
+     |    data volume w4-data-20261117T002334Z-6cf65ee5-a (label w4.owner=20261117T002334Z-6cf65ee5): throwaway data, removed on exit
+     |    container 7c0cdfd54c73 (name w4-svc-20261117T002334Z-6cf65ee5-1, label w4.owner=20261117T002334Z-6cf65ee5)
+     |    /health revision 7097ac2bb062925bb296a129f4771f1e68fd522d is the expected one
+     |    FAILED at authorization: cgn-authorize failed: mock: cgn-authorize failed
+     | -- cleanup (run 20261117T002334Z-6cf65ee5)
+     |    cleanup #1: container 7c0cdfd54c73 private-files
+     |    cleanup #2: nothing owned left to remove
+     |    this run's containers left: 0; volumes left: 0; processes left: 0; listeners left on 18443/18480/18080: 0; private files left: no
+     |    files holding the access code: 0; files holding a beta cookie value: 0
+     | W4 REHEARSAL HARNESS FAILED
+     calls:
+     > docker image inspect --format {{.Id}} mock-image
+     > docker volume create --label w4.owner=20261117T002334Z-6cf65ee5 w4-data-20261117T002334Z-6cf65ee5-a
+     > docker run -d --name w4-svc-20261117T002334Z-6cf65ee5-1 --label w4.owner=20261117T002334Z-6cf65ee5 -p 127.0.0.1:18080:10000 -v w4-data-20261117T002334Z-6cf65ee5-a:/var/data -e MCHEZO_DATA_DIR=/var/data/cgn-w1 -e MCHEZO_PUBLIC_ORIGIN=https://localhost:18443 -e MCHEZO_TRUST_PROXY=1 --env-file <private-dir>/code.env mock-image
+     > created 7c0cdfd54c73e7615d33f50504d5c08c
+     > docker inspect -f {{.State.Running}} 7c0cdfd54c73e7615d33f50504d5c08c
+     > curl -sf --max-time 2 -o /dev/null http://127.0.0.1:18080/health
+     > curl -sf --max-time 5 http://127.0.0.1:18080/health
+     > docker inspect -f {{index .Config.Labels "w4.owner"}} 7c0cdfd54c73e7615d33f50504d5c08c
+     > docker exec -i 7c0cdfd54c73e7615d33f50504d5c08c cgn-authorize /var/data/cgn-w1 https://localhost:18443 1
+     > docker ps -aq --no-trunc --filter label=w4.owner=20261117T002334Z-6cf65ee5
+     > docker inspect 7c0cdfd54c73e7615d33f50504d5c08c
+     > docker inspect -f {{index .Config.Labels "w4.owner"}} 7c0cdfd54c73e7615d33f50504d5c08c
+     > docker rm -f -v 7c0cdfd54c73e7615d33f50504d5c08c
+     > removed 7c0cdfd54c73e7615d33f50504d5c08c
+     > docker volume ls -q --filter label=w4.owner=20261117T002334Z-6cf65ee5
+     > docker ps -aq --no-trunc --filter label=w4.owner=20261117T002334Z-6cf65ee5
+     > docker volume ls -q --filter label=w4.owner=20261117T002334Z-6cf65ee5
+     > docker ps -aq --filter label=w4.owner=20261117T002334Z-6cf65ee5
+     > docker volume ls -q --filter label=w4.owner=20261117T002334Z-6cf65ee5
+PASS M5 exits non-zero
+PASS M5 the pre-existing w3-svc container survives
+PASS M5 removes only a container its own docker run created
+PASS M5 never deletes by the shared name w3-svc
+PASS M5 leaves none of its own containers behind
+PASS M5 never starts the proxy or the driver (no node call)
+-- mock-only: 36 passed, 0 failed
+W3 HARNESS SELFTEST PASSED (mock only)
