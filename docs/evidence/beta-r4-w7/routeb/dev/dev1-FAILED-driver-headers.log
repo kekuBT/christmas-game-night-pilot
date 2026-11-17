@@ -1,0 +1,183 @@
+== route B local run, 2026-11-17T19:11:31Z; packet checkout 153b1369f330849cb788fe2cca95a39f53f57234; tool sha256 60cfdabee9907472
+-- 1 inspect (route B prerequisites: Firefox and the desktop are absent here)
+w7op: route B prerequisites (read-only):
+w7op:   openssl: /usr/bin/openssl
+w7op:   certutil: /usr/bin/certutil
+w7op:   Firefox: MISSING 
+w7op:   DISPLAY: not set in this shell (set it to the display of the noVNC desktop, e.g. :1)
+w7op:   desktop/VNC processes: 
+w7op:   port 3171: free
+w7op:   port 3173: free
+w7op:   port 3174: free
+w7op: inspect changes nothing.
+-- 2 prepare (both releases)
+w7op: building previous (7097ac2bb062925bb296a129f4771f1e68fd522d); this takes a few minutes
+w7op: previous: inventory matches (144 files, fe6d74f8df7280a52102f70ab1d356428e810dfa614f45b53a60596d8e89a61c)
+w7op: building current (988c53558bbbcc1545fe0ca32882f30c1970794b); this takes a few minutes
+w7op: current: inventory matches (144 files, 4f58b3239f04f9ea074c15993371effee6fac1295dd8124924ea00fefb19daef)
+w7op: prepared. Run folder: <scratch>/r4rb/work/w7op-de929d05a7ed8d459dd6a572bf1a0f7c. Identities: <scratch>/r4rb/work/evidence/identity.txt. The code is in <scratch>/r4rb/work/w7op-de929d05a7ed8d459dd6a572bf1a0f7c/secret/code (mode 600): give it to the owner privately, never on GitHub.
+PASS prepare: both inventories match
+previous: revision 7097ac2bb062925bb296a129f4771f1e68fd522d; release.json {
+current: revision 988c53558bbbcc1545fe0ca32882f30c1970794b; release.json {
+-- 3 route A's refusal is kept
+w7op: STOP: the probe report's verdict is UNSUITABLE: route A can't be used (no HTTP allowance, no workaround). Report it.
+PASS start (route A) still refuses an UNSUITABLE probe
+-- 4 routeb: the session CA, the certificate and three profiles
+== route B set up at 2026-11-17T19:12:16Z: origin https://beta.localhost:3173; session CA SHA-256 D7:10:29:FB:99:34:6A:45:DB:9A:C4:A8:87:DD:EF:24:D2:A1:9E:E9:E8:B6:F6:8D:BB:0F:B3:9C:21:B3:01:C9 (its key deleted after issuing one certificate)
+subject=CN = beta.localhost X509v3 Subject Alternative Name:      DNS:beta.localhost notAfter=Nov 19 19:12:16 2026 GMT 
+profiles host, guest, tv: the session CA is their only added trust
+PASS routeb set up
+PASS the CA key is gone after issuing one certificate, which verifies against the session CA
+PASS the certificate names exactly beta.localhost
+PASS the host profile trusts the session CA and maps beta.localhost to loopback
+PASS the guest profile trusts the session CA and maps beta.localhost to loopback
+PASS the tv profile trusts the session CA and maps beta.localhost to loopback
+PASS a second routeb is refused
+-- 5 the firefox command
+w7op: STOP: no firefox-esr or firefox on PATH (report it; this tool installs nothing)
+PASS without Firefox, the firefox command says so and installs nothing
+w7op: Firefox (host) pid 2029, profile <scratch>/r4rb/work/w7op-de929d05a7ed8d459dd6a572bf1a0f7c/profiles/host. Phone size: Ctrl+Shift+M (Responsive Design Mode), 390 x 844, touch on.
+PASS a stand-in Firefox starts on the host profile, recorded in the run folder
+PASS its command line names --profile <run folder>/profiles/host
+-- 6 a failed start stops only this run's processes and keeps the evidence
+== bstart current FAILED at 2026-11-17T19:12:39Z: /health through https://beta.localhost:3173 said 'nothing', expected 988c53558bbbcc1545fe0ca32882f30c1970794b; this run's app and proxy stopped; logs kept: server-current-20261117T191217Z.log, proxy-current-20261117T191217Z.log
+w7op: STOP: route B start failed; stopped only this run's app and proxy (logs: <scratch>/r4rb/work/w7op-de929d05a7ed8d459dd6a572bf1a0f7c/run/server-current-20261117T191217Z.log, <scratch>/r4rb/work/w7op-de929d05a7ed8d459dd6a572bf1a0f7c/run/proxy-current-20261117T191217Z.log)
+PASS bstart fails when its proxy can't start
+PASS the app and proxy it started are stopped, and their pid files removed
+PASS the foreign proxy-named sentinel, the foreign Firefox stand-in and this run's Firefox stand-in are untouched
+PASS the failed start's logs and its line in phases.log are kept
+-- 7 phase A: current
+== bstart current at 2026-11-17T19:12:40Z: /health through https://beta.localhost:3173 (session CA verified) revision 988c53558bbbcc1545fe0ca32882f30c1970794b; data <scratch>/r4rb/work/w7op-de929d05a7ed8d459dd6a572bf1a0f7c/data; app pid 2714 on 127.0.0.1:3171; proxy pid 2716 on 127.0.0.1:3173
+Listening on 127.0.0.1; public origin https://beta.localhost:3173.
+w7op: READY: in the desktop, the host, guest and TV profiles open https://beta.localhost:3173/ (firefox <scratch>/r4rb/work host|guest|tv). Nothing is forwarded but the desktop.
+PASS bstart current: /health through https://beta.localhost:3173 (session CA verified) = 988c535
+PASS a second writer is refused (bstart)
+PASS a route A start is refused while route B runs
+PASS a browser without the session CA refuses the certificate -> page.goto: net::ERR_CERT_AUTHORITY_INVALID at https://beta.localhost:3173/health
+DRIVE control: every check passed
+PASS control: a browser without the CA is refused
+PASS host: /health through https://beta.localhost:3173 (the session CA from the profile) shows 988c535 -> 988c53558bbbcc1545fe0ca32882f30c1970794b
+PASS host: the gate's form posts with the page's own origin and signs in (303) -> 303, Origin https://beta.localhost:3173
+PASS host: the beta cookie is Secure, HttpOnly, SameSite=Lax and host-only (beta.localhost) -> secure=true httpOnly=true sameSite=Lax domain=beta.localhost
+FAIL host: the app creates a room (201), the request carrying the page's own origin -> 201, Origin undefined
+PASS host: a live wss:// update for the same room (room-mwl2ktkt-689026) -> projection:
+INFO screenshot host-390-988c535.png
+PASS guest: /health through https://beta.localhost:3173 (the session CA from the profile) shows 988c535 -> 988c53558bbbcc1545fe0ca32882f30c1970794b
+PASS guest: the gate's form posts with the page's own origin and signs in (303) -> 303, Origin https://beta.localhost:3173
+PASS guest: the beta cookie is Secure, HttpOnly, SameSite=Lax and host-only (beta.localhost) -> secure=true httpOnly=true sameSite=Lax domain=beta.localhost
+PASS guest: a live wss:// update for the same room (room-mwl2ktkt-689026) -> projection:
+PASS tv: /health through https://beta.localhost:3173 (the session CA from the profile) shows 988c535 -> 988c53558bbbcc1545fe0ca32882f30c1970794b
+PASS tv: the gate's form posts with the page's own origin and signs in (303) -> 303, Origin https://beta.localhost:3173
+PASS tv: the beta cookie is Secure, HttpOnly, SameSite=Lax and host-only (beta.localhost) -> secure=true httpOnly=true sameSite=Lax domain=beta.localhost
+PASS tv: a live wss:// update for the same room (room-mwl2ktkt-689026) -> projection:
+DRIVE phase: 1 FAILED
+FAIL current: three profiles sign in, Secure cookie, a room, a live WS each
+PASS a client without the session CA is refused by TLS verification -> UNABLE_TO_VERIFY_LEAF_SIGNATURE
+PASS the right Origin signs in (303 + cookie) -> 303
+PASS the page's own Origin https://beta.localhost:3173: admitted on API, form and WS -> API 201 / form 303 (cookie) / WS open
+PASS Origin https://evil.example, with a valid cookie: refused on API (403 FOREIGN_ORIGIN), form (403, no cookie) and WS (403) -> API 403 FOREIGN_ORIGIN / form 403 / WS 403
+PASS Origin https://beta.localhost:3174, with a valid cookie: refused on API (403 FOREIGN_ORIGIN), form (403, no cookie) and WS (403) -> API 403 FOREIGN_ORIGIN / form 403 / WS 403
+PASS Origin http://beta.localhost:3173, with a valid cookie: refused on API (403 FOREIGN_ORIGIN), form (403, no cookie) and WS (403) -> API 403 FOREIGN_ORIGIN / form 403 / WS 403
+PASS Origin http://localhost:3157, with a valid cookie: refused on API (403 FOREIGN_ORIGIN), form (403, no cookie) and WS (403) -> API 403 FOREIGN_ORIGIN / form 403 / WS 403
+PASS Origin null, with a valid cookie: refused on API (403 FOREIGN_ORIGIN), form (403, no cookie) and WS (403) -> API 403 FOREIGN_ORIGIN / form 403 / WS 403
+PASS a foreign Origin with spoofed X-Forwarded-*, Referer and Sec-Fetch-Site is still refused -> 403 FOREIGN_ORIGIN
+PASS the right Origin without the beta cookie: 401 BETA_ACCESS_REQUIRED -> 401 BETA_ACCESS_REQUIRED
+DRIVE foreign: every check passed
+PASS current: foreign, null and spoofed Origins refused through the TLS origin
+SEED {"roomId":"room-mwl2kx2i-514530","warmGameId":"game-1","secondGameId":"game-2","entryId":"book-1","entrySources":["evt-11"],"hostPlayerId":"player-1","guestPlayerId":"player-2","questions":["trv-lite-051","trv-geog-029","trv-lang-055","trv-natu-069","trv-hist-130","trv-natu-068","trv-scie-008","trv-hist-128","trv-scie-123","trv-legacy-07"],"acked":[{"who":"guest","playerId":"player-2","questionId":"trv-lite-051","ackAt":"2026-11-17T19:12:50.093Z"},{"who":"guest","playerId":"player-2","questionId":"trv-geog-029","ackAt":"2026-11-17T19:12:50.100Z"},{"who":"host","playerId":"player-1","questionId":"trv-lite-051","ackAt":"2026-11-17T19:12:50.105Z"}]}
+PASS synthetic room seeded on current (finished game, approved entry, 3 acknowledged answers)
+-- 8 rollback
+== stop current at 2026-11-17T19:12:54Z: pid 2714 exited; port 3171 free; TLS proxy stopped
+PASS stop current (app and proxy)
+PASS ports 3171, 3173 and 3174 are free after the stop
+== backup before-rollback at 2026-11-17T19:12:54Z
+backup OK: 3 room(s), 1 Memory Book(s), 5 file(s), verified
+verify OK: 5 file(s) match the manifest of 2026-11-17T19:12:54.437Z
+verify OK: 5 file(s) match the manifest of 2026-11-17T19:12:54.437Z
+receipt (local surrogate: no off-host transfer): manifest SHA-256 4954af95ad72c07e2bf744345ef5d1ce4510ec02afcc1b026938c1fc2e8f777e
+PASS backup + verify by both releases
+== compat before-rollback at 2026-11-17T19:12:54Z: the PREVIOUS release (7097ac2bb062925bb296a129f4771f1e68fd522d) reads the backup
+verify OK: 5 file(s) match the manifest of 2026-11-17T19:12:54.437Z
+restore OK: 3 room(s), 1 Memory Book(s) restored and verified. Next, as the user the server runs as: datatool check --data <scratch>/r4rb/work/w7op-de929d05a7ed8d459dd6a572bf1a0f7c/compat-before-rollback
+check OK: 3 room(s), 1 Memory Book(s); owned by this user (uid 0) and private; the lock and a test write worked. A server run by this user can use it.
+PASS the previous release verifies, restores and checks the copy
+== bstart previous at 2026-11-17T19:12:55Z: /health through https://beta.localhost:3173 (session CA verified) revision 7097ac2bb062925bb296a129f4771f1e68fd522d; data <scratch>/r4rb/work/w7op-de929d05a7ed8d459dd6a572bf1a0f7c/data; app pid 3534 on 127.0.0.1:3171; proxy pid 3535 on 127.0.0.1:3173
+[restore] 3 room(s) restored, 0 not loaded (data: <scratch>/r4rb/work/w7op-de929d05a7ed8d459dd6a572bf1a0f7c/data)
+Listening on 127.0.0.1; public origin https://beta.localhost:3173.
+w7op: READY: in the desktop, the host, guest and TV profiles open https://beta.localhost:3173/ (firefox <scratch>/r4rb/work host|guest|tv). Nothing is forwarded but the desktop.
+PASS bstart previous: /health = 7097ac2 behind the same origin
+PASS host: /health through https://beta.localhost:3173 (the session CA from the profile) shows 7097ac2 -> 7097ac2bb062925bb296a129f4771f1e68fd522d
+INFO host: already signed in (the cookie kept in this profile)
+PASS host: the beta cookie is Secure, HttpOnly, SameSite=Lax and host-only (beta.localhost) -> secure=true httpOnly=true sameSite=Lax domain=beta.localhost
+PASS host: a live wss:// update for the same room (room-mwl2ktkt-689026) -> projection:
+INFO screenshot host-390-7097ac2.png
+PASS guest: /health through https://beta.localhost:3173 (the session CA from the profile) shows 7097ac2 -> 7097ac2bb062925bb296a129f4771f1e68fd522d
+INFO guest: already signed in (the cookie kept in this profile)
+PASS guest: the beta cookie is Secure, HttpOnly, SameSite=Lax and host-only (beta.localhost) -> secure=true httpOnly=true sameSite=Lax domain=beta.localhost
+PASS guest: a live wss:// update for the same room (room-mwl2ktkt-689026) -> projection:
+PASS tv: /health through https://beta.localhost:3173 (the session CA from the profile) shows 7097ac2 -> 7097ac2bb062925bb296a129f4771f1e68fd522d
+INFO tv: already signed in (the cookie kept in this profile)
+PASS tv: the beta cookie is Secure, HttpOnly, SameSite=Lax and host-only (beta.localhost) -> secure=true httpOnly=true sameSite=Lax domain=beta.localhost
+PASS tv: a live wss:// update for the same room (room-mwl2ktkt-689026) -> projection:
+DRIVE phase: every check passed
+PASS previous: the same three profiles stay signed in, the same room, a live WS each
+PASS the room answers after the backup, with the host's existing seat (no rejoin) — HTTP 200
+PASS the guest's existing seat still works (no rejoin) — HTTP 200
+PASS the approved "W5 seed" entry is still there and approved — HTTP 200
+PASS a NEW answer after the backup is acknowledged (the original service resumed) — HTTP 200 accepted=true
+RESUME OK (0 failed)
+PASS on previous: same seats, approved entry, answers kept; ONE new answer acknowledged
+-- 9 return
+== stop previous at 2026-11-17T19:13:03Z: pid 3534 exited; port 3171 free; TLS proxy stopped
+PASS stop previous
+== backup before-return at 2026-11-17T19:13:03Z
+backup OK: 3 room(s), 1 Memory Book(s), 5 file(s), verified
+verify OK: 5 file(s) match the manifest of 2026-11-17T19:13:03.490Z
+verify OK: 5 file(s) match the manifest of 2026-11-17T19:13:03.490Z
+receipt (local surrogate: no off-host transfer): manifest SHA-256 128fae597e1a93033d05b5afd49b6bd1049b41b6389f61910ad5aef843298277
+PASS backup before the return
+== check by current at 2026-11-17T19:13:03Z
+check OK: 3 room(s), 1 Memory Book(s); owned by this user (uid 0) and private; the lock and a test write worked. A server run by this user can use it.
+PASS the current release's datatool check accepts what the previous one wrote
+== bstart current at 2026-11-17T19:13:04Z: /health through https://beta.localhost:3173 (session CA verified) revision 988c53558bbbcc1545fe0ca32882f30c1970794b; data <scratch>/r4rb/work/w7op-de929d05a7ed8d459dd6a572bf1a0f7c/data; app pid 4133 on 127.0.0.1:3171; proxy pid 4134 on 127.0.0.1:3173
+[restore] 3 room(s) restored, 0 not loaded (data: <scratch>/r4rb/work/w7op-de929d05a7ed8d459dd6a572bf1a0f7c/data)
+Listening on 127.0.0.1; public origin https://beta.localhost:3173.
+w7op: READY: in the desktop, the host, guest and TV profiles open https://beta.localhost:3173/ (firefox <scratch>/r4rb/work host|guest|tv). Nothing is forwarded but the desktop.
+PASS bstart current again: /health = 988c535
+PASS host: /health through https://beta.localhost:3173 (the session CA from the profile) shows 988c535 -> 988c53558bbbcc1545fe0ca32882f30c1970794b
+INFO host: already signed in (the cookie kept in this profile)
+PASS host: the beta cookie is Secure, HttpOnly, SameSite=Lax and host-only (beta.localhost) -> secure=true httpOnly=true sameSite=Lax domain=beta.localhost
+PASS host: a live wss:// update for the same room (room-mwl2ktkt-689026) -> projection:
+INFO screenshot host-390-988c535.png
+PASS guest: /health through https://beta.localhost:3173 (the session CA from the profile) shows 988c535 -> 988c53558bbbcc1545fe0ca32882f30c1970794b
+INFO guest: already signed in (the cookie kept in this profile)
+PASS guest: the beta cookie is Secure, HttpOnly, SameSite=Lax and host-only (beta.localhost) -> secure=true httpOnly=true sameSite=Lax domain=beta.localhost
+PASS guest: a live wss:// update for the same room (room-mwl2ktkt-689026) -> projection:
+PASS tv: /health through https://beta.localhost:3173 (the session CA from the profile) shows 988c535 -> 988c53558bbbcc1545fe0ca32882f30c1970794b
+INFO tv: already signed in (the cookie kept in this profile)
+PASS tv: the beta cookie is Secure, HttpOnly, SameSite=Lax and host-only (beta.localhost) -> secure=true httpOnly=true sameSite=Lax domain=beta.localhost
+PASS tv: a live wss:// update for the same room (room-mwl2ktkt-689026) -> projection:
+DRIVE phase: every check passed
+PASS after the return: the same profiles, the same room, a live WS each
+PASS the access gate admits the throwaway code
+PASS the original HOST seat works, with no rejoin — HTTP 200
+PASS the original GUEST seat works, with no rejoin — HTTP 200
+PASS the approved "W5 seed" entry is there
+PASS the retained folder's later state is back: the post-backup answer, with its value
+PASS the host's pre-backup answer keeps its submitted value
+LIVE fallback OK (0 failed)
+PASS after the return (read-only): seats work, the approved entry is there, and the action made on the previous release is present
+w7op: running: current (route B, https://beta.localhost:3173) (pid 4133); /health: {"ok":true,"revision":"988c53558bbbcc1545fe0ca32882f30c1970794b"}
+w7op: Firefox host: pid 2029
+-- 10 cleanup
+== stop current at 2026-11-17T19:13:13Z: pid 4133 exited; port 3171 free; TLS proxy stopped
+w7op: removed the code (<scratch>/r4rb/work/w7op-de929d05a7ed8d459dd6a572bf1a0f7c/secret)
+w7op: removed the TLS key and certificates (<scratch>/r4rb/work/w7op-de929d05a7ed8d459dd6a572bf1a0f7c/tls)
+w7op: removed the run folder <scratch>/r4rb/work/w7op-de929d05a7ed8d459dd6a572bf1a0f7c and retired the record; kept <scratch>/r4rb/work/evidence, src/ and the record; nothing outside the run folder was touched
+PASS cleanup
+PASS the run folder (code, TLS key, profiles, data, builds) is gone and the record is retired
+PASS this run's Firefox stand-in was stopped
+PASS the foreign sentinels are untouched
+PASS no process names the run folder any more
+PASS the code appears in no evidence, log or release file (0 files)
+== verdict: ROUTE B LOCAL RUN FAILED (2026-11-17T19:13:32Z)
