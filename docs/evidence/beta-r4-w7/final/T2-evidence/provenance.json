@@ -1,0 +1,9 @@
+{"current":{"image":"cgn-render:check","id":"sha256:91b950e2ab69a333bbc5353d736505585c46f40b2cf6c9badda631f1a8a1edaf","release":{
+  "revision": "7097ac2bb062925bb296a129f4771f1e68fd522d",
+  "builtAt": "2026-11-16T05:22:33.807Z",
+  "node": "v22.16.0"
+}},"previous":{"image":"cgn-render:w7-pred","id":"sha256:d3b91ae7eec093c983be6dc68d4a648500ed1c089f6e09fbf686718c5e1720fa","release":{
+  "revision": "f93e9cba8613859be9891706ead1c60157c73de2",
+  "builtAt": "2026-11-17T07:16:06.192Z",
+  "node": "v22.16.0"
+},"note":"LOCAL SURROGATE: no audited predecessor artifact exists"},"cgnReceiveSha256":"2fb3fe903f28707751485460689c4175ed7ea7cf682b505dec8bb74f41b084cd"}

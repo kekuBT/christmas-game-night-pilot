@@ -1,0 +1,34 @@
+# W7 static checks on the clean checkout of 988c53558bbbcc1545fe0ca32882f30c1970794b (status 0 lines), 2026-11-17T07:37:02Z
+## 1. everything changed since the base d2b1242e89fc2d38c4b9471ec88176db1b3ee690
+ docs/PROGRESS.md                                   |  30 ++
+ docs/beta/render-w7.md                             | 183 +++++++
+ docs/evidence/beta-r4-w7/README.md                 |  34 ++
+ docs/evidence/beta-r4-w7/dev/artifact-dev1.log     |  21 +
+ docs/evidence/beta-r4-w7/dev/predecessor-build.log |  19 +
+ docs/evidence/beta-r4-w7/dev/rehearsal-dev1.log    | 205 ++++++++
+ docs/evidence/beta-r4-w7/dev/selftest-dev1.log     |  86 ++++
+ .../beta-r4-w7/runners/build-predecessor.sh        |  23 +
+ docs/evidence/beta-r4-w7/runners/w7-final.sh       |  37 ++
+ docs/evidence/beta-r4-w7/runners/w7-static.sh      |  38 ++
+ scripts/beta/w7-artifact-check.sh                  |  64 +++
+ scripts/beta/w7-check.mjs                          | 127 +++++
+ scripts/beta/w7-pred-context.sh                    |  50 ++
+ scripts/beta/w7-rehearsal.sh                       | 554 +++++++++++++++++++++
+ scripts/beta/w7-selftest.sh                        | 105 ++++
+ 15 files changed, 1576 insertions(+)
+PASS nothing outside docs/ and scripts/beta/w7-* (empty)
+PASS deploy/ unchanged: the guard scripts, the Dockerfile, the artifact gate, render.yaml and every pin (the canonical release pins stay 7097ac2) (empty)
+PASS the runtime (apps/, src/), tests, manifests and the other scripts (the W5 seed, W6 tools) unchanged (empty)
+PASS the artifact gate's REVISION is still the pin 7097ac2bb062925bb296a129f4771f1e68fd522d
+PASS pins/archive.sha256 still names the audited archive a693c543...
+PASS the guard scripts match their pins (pins/scripts.sha256)
+## 2. lint and syntax
+PASS eslint scripts/beta (exit 0)
+PASS bash -n on scripts/beta and the W7 runners; node --check w5-seed.mjs, w6-check.mjs and w7-check.mjs
+## 3. relative links in the changed documents
+links: 15 missing: 0
+PASS no missing relative link
+## 4. secret scan of the changes since d2b1242e89fc2d38c4b9471ec88176db1b3ee690
+PASS no secret-shaped value (a real age secret key, a private key, an access code, a gate cookie, a token) or local scratch path in the added lines
+## verdict
+W7 STATIC CHECKS PASSED

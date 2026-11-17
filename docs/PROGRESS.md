@@ -3889,3 +3889,14 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
   - the rehearsal `20261117T073050Z-f7382c08` PASSED, 46/46 (a display-only count bug was fixed afterwards);
   - the self-test PASSED, 13/13.
 - **Next:** the final on one clean checkout (`runners/w7-final.sh`: static, the image checks, the artifact check, the W7 self-test, and the W6 guard, hold and switch and W5 receipt regressions), then the report on #50.
+- **The final** on one clean checkout of the candidate `988c535` (07:37–07:42Z), every step PASSED:
+  - static, 10/10;
+  - image checks, 30/30;
+  - the artifact check, 7/7 (LOCAL SURROGATE);
+  - **the W7 self-test, 13/13**, with its rehearsal `20261117T073823Z-90aed9d8` at 46/46;
+  - the W6 guard self-test, 37/37;
+  - the W6 hold self-test, 12/12;
+  - the W6 self-test, 13/13;
+  - the W5 self-test, 12/12.
+- **Open:** B-W7-01, no audited predecessor artifact. The actual predecessor check can't pass until a second audited release exists.
+- **Next:** the report on #50, linked on #5 and #49. The real W7, Render, production data and owner keys stay with the owner.

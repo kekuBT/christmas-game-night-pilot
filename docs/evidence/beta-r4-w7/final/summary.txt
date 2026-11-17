@@ -1,0 +1,10 @@
+== w7-final on 988c53558bbbcc1545fe0ca32882f30c1970794b (status 0 lines), 2026-11-17T07:37:02Z
+1-static: exit 0 in 2 s; last line: W7 STATIC CHECKS PASSED
+2-image-checks: exit 0 in 68 s; last line: IMAGE CHECKS PASSED
+3-artifact-check: exit 0 in 8 s; last line: W7 ARTIFACT CHECK PASSED (LOCAL SURROGATE f93e9cb: the protocol only; the actual predecessor-artifact check is NOT passed: no audited predecessor exists)
+4-w7-selftest: exit 0 in 78 s; last line: W7 SELFTEST PASSED
+5-guard-selftest: exit 0 in 53 s; last line: W6 GUARD SELFTEST PASSED
+6-hold-selftest: exit 0 in 19 s; last line: W6 HOLD SELFTEST PASSED
+7-w6-selftest: exit 0 in 57 s; last line: W6 SELFTEST PASSED
+8-w5-selftest: exit 0 in 35 s; last line: W5 SELFTEST PASSED
+== images under test: current sha256:91b950e2ab69a333bbc5353d736505585c46f40b2cf6c9badda631f1a8a1edaf, previous sha256:d3b91ae7eec093c983be6dc68d4a648500ed1c089f6e09fbf686718c5e1720fa; checkout still clean: 0 lines; 2026-11-17T07:42:22Z

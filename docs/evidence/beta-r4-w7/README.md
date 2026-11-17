@@ -32,3 +32,26 @@ Reused unchanged: `scripts/beta/w5-seed.mjs`, `w6-check.mjs fingerprint`, `rende
 | [artifact-dev1.log](dev/artifact-dev1.log) | 07:22Z | **W7 ARTIFACT CHECK PASSED, 7/7** (LOCAL SURROGATE) |
 | [rehearsal-dev1.log](dev/rehearsal-dev1.log) | `20261117T073050Z-f7382c08` | **W7 REHEARSAL PASSED, 46/46.** It printed "containers on the volume: 0" at D5a while it correctly refused (a missing newline in the count); fixed before the final. |
 | [selftest-dev1.log](dev/selftest-dev1.log) | 07:32Z | **W7 SELFTEST PASSED, 13/13** |
+
+## The final: one clean detached checkout of `988c53558bbbcc1545fe0ca32882f30c1970794b`, status 0 lines before and after, 07:37–07:42Z
+Every run below is on that one revision, by [runners/w7-final.sh](runners/w7-final.sh) ([summary](final/summary.txt)). The images under test were built from that checkout:
+- **current** `cgn-render:check` = `sha256:91b950e2ab69a333bbc5353d736505585c46f40b2cf6c9badda631f1a8a1edaf` (the local rebuild of `7097ac2` under a test pin, as in W4–W6);
+- **previous** `cgn-render:w7-pred` = `sha256:d3b91ae7eec093c983be6dc68d4a648500ed1c089f6e09fbf686718c5e1720fa` (the LOCAL SURROGATE `f93e9cb`, through the same gate).
+
+| Step | Log | Run | Verdict |
+|---|---|---|---|
+| 1 | [1-static.log](final/1-static.log) | 2 s | **W7 STATIC CHECKS PASSED, 10/10.** Scope since `d2b1242`: `docs/` and `scripts/beta/w7-*` only; `deploy/`, the runtime and the other scripts unchanged; the canonical pins; eslint; syntax; links; secret scan. |
+| 2 | [2-image-checks.log](final/2-image-checks.log) | 68 s | **IMAGE CHECKS PASSED, 30/30** (the current image) |
+| 3 | [3-artifact-check.log](final/3-artifact-check.log) | 8 s | **W7 ARTIFACT CHECK PASSED, 7/7** (LOCAL SURROGATE: the protocol only). A1 `ARTIFACT_GATE_OK revision=f93e9cb…` and `INSTALLED_OK`. A2–A4: `ARTIFACT_GATE_FAILED` on the archive's SHA-256, then on the inventory, then on the archive's SHA-256. |
+| 4 | [4-w7-selftest.log](final/4-w7-selftest.log) | tag `599189`, 78 s | **W7 SELFTEST PASSED, 13/13.** The rehearsal [`20261117T073823Z-90aed9d8`](final/w7-T2-rehearsal.log) passed **46/46**; its kept evidence is in [T2-evidence/](final/T2-evidence/). |
+| 5 | [5-guard-selftest.log](final/5-guard-selftest.log) | `20261117T073938Z-21cd3e46`, 53 s | **W6 GUARD SELFTEST PASSED, 37/37** |
+| 6 | [6-hold-selftest.log](final/6-hold-selftest.log) | `20261117T074031Z-88cf3b13`, 19 s | **W6 HOLD SELFTEST PASSED, 12/12** |
+| 7 | [7-w6-selftest.log](final/7-w6-selftest.log) | tag `e127fc`, 57 s | **W6 SELFTEST PASSED, 13/13** (its rehearsal 46/46) |
+| 8 | [8-w5-selftest.log](final/8-w5-selftest.log) | tag `034b82`, 35 s | **W5 SELFTEST PASSED, 12/12** (its rehearsal 33/33) |
+
+**From the rehearsal's raw log:**
+- **D5a:** the start gate counted 1 container on the volume and refused. **D5b:** the data lock refused the second server (`Another process is using this data directory`, exit 2), and the current writer kept serving.
+- **D4:** the probe said `UP f93e9cb…` where `7097ac2…` was expected, so the gate refused. The reopen gate then passed on `f93e9cb`.
+- **S1–S5:** each exited 78 with its `REFUSED` line. The record was byte-identical, the folder's files unchanged, and the public side stayed 503.
+- **F:** exit 137. The start reached only the guard's APPROVED line, killed before the restore. The recovery is an ordinary start on `7097ac2`.
+- **Leak scan:** 0 files hold a code (current or old), a token, a gate cookie or an age secret key.
