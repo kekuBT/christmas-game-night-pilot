@@ -30,6 +30,16 @@
 //                                  comparison requests carrying any other Origin (e.g. "null"), are unattributed: they
 //                                  neither pass nor refuse.
 //
+// The top-level form control (W7 diagnostic, review 6951923886): the iframe comparison form can arrive with a literal
+// `Origin: null` (POST, same-site, navigate, no Referer: a referrer policy in force, from some layer). After its automatic
+// requests, the OTHER page shows a button. Pressed once, it first sets the page's own referrer policy to
+// strict-origin-when-cross-origin (a <meta name="referrer"> element, which overrides a policy delivered by a header), then
+// submits ONE empty form POST as a top-level navigation (target _top, no iframe) to the target, as kind
+// xorigin-form-post with the label "top-control". Each observation records its label ("iframe" or "top-control"; any
+// other value is dropped) and its Sec-Fetch-Dest and Sec-Fetch-User headers, so the report tells the control apart from
+// the iframe observation. classify() is unchanged: the control counts toward the form transport like any comparison form
+// post, a comparison with no Origin or the target's own value is still UNSAFE, and "null" stays unattributed.
+//
 // Usage (in the Codespace; both ports stay Private, the default):
 //   node probe-forwarded-origin.mjs [--target-port 3155] [--other-port 3156] [--out probe-report.json]
 // The forwarded URLs are derived from CODESPACE_NAME and GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN; elsewhere pass
@@ -41,6 +51,8 @@ import { WebSocketServer } from "ws";
 
 /** The target page's own requests, by the `kind` each carries. */
 export const OWN = { "fetch-post": "fetch POST", "form-post": "form POST", ws: "WebSocket" };
+/** The only labels an observation may carry: the iframe form posts, and the top-level form control. */
+export const LABELS = new Set(["iframe", "top-control"]);
 /** The other page's requests to the target, by `kind`, for the same three transports. */
 export const COMPARISON = { "xorigin-fetch-post": "fetch POST", "xorigin-form-post": "form POST", "xorigin-ws": "WebSocket" };
 
@@ -113,11 +125,14 @@ function main() {
     const u = new URL(req.url ?? "/", "http://probe");
     const h = req.headers;
     const ref = (() => { try { return h.referer ? new URL(String(h.referer)).origin : null; } catch { return "unparseable"; } })();
+    const label = u.searchParams.get("label");
     entries.push({
       at: new Date().toISOString(), where, kind: u.searchParams.get("kind") ?? u.pathname, method: req.method,
+      label: LABELS.has(label) ? label : null, // only a known label is kept; nothing else from the URL is recorded
       origin: h.origin ?? null, // null: no Origin header at all (a header with the value "null" stays the string "null")
       host: h.host ?? null, xForwardedHost: h["x-forwarded-host"] ?? null, xForwardedProto: h["x-forwarded-proto"] ?? null,
       secFetchSite: h["sec-fetch-site"] ?? null, secFetchMode: h["sec-fetch-mode"] ?? null, refererOrigin: ref,
+      secFetchDest: h["sec-fetch-dest"] ?? null, secFetchUser: h["sec-fetch-user"] ?? null,
       cookiePresent: Boolean(h.cookie), // never the value
     });
   }
@@ -141,18 +156,34 @@ function ws(url) { return new Promise((res) => { let s; try { s = new WebSocket(
 
   const targetPage = page("Forwarded-origin probe: target (same origin)", `
   try { const r = await fetch("/probe?kind=fetch-post", { method: "POST", body: "x" }); log("fetch POST: " + r.status); } catch (e) { log("fetch POST: " + e); }
-  await post("/probe?kind=form-post"); log("form post: sent");
+  await post("/probe?kind=form-post&label=iframe"); log("form post: sent");
   await ws((location.protocol === "https:" ? "wss://" : "ws://") + location.host + "/probe-ws?kind=ws");
   const rep = await (await fetch("/report")).json();
   const shown = (o) => (o === null ? "(no Origin header)" : JSON.stringify(o));
-  out.textContent = "VERDICT: " + rep.verdict + "\\n" + rep.why + "\\n" + rep.hint + "\\n\\n" + rep.entries.map((e) => [e.where, e.kind, "Origin " + shown(e.origin), "Sec-Fetch-Site " + (e.secFetchSite ?? "(none)")].join("  ")).join("\\n");`);
+  out.textContent = "VERDICT: " + rep.verdict + "\\n" + rep.why + "\\n" + rep.hint + "\\n\\n" + rep.entries.map((e) => [e.where, e.kind, "label " + (e.label ?? "-"), e.method, "Origin " + shown(e.origin), "Sec-Fetch-Site " + (e.secFetchSite ?? "(none)"), "Dest " + (e.secFetchDest ?? "(none)")].join("  ")).join("\\n");`);
   const otherPage = page("Forwarded-origin probe: other origin", `
   const T = ${JSON.stringify(TARGET_URL)};
   try { await fetch(T + "/probe?kind=xorigin-fetch-post", { method: "POST", mode: "no-cors", credentials: "include", body: "x" }); log("cross-origin fetch POST: sent"); } catch (e) { log("cross-origin fetch POST: " + e); }
-  await post(T + "/probe?kind=xorigin-form-post"); log("cross-origin form post: sent");
+  await post(T + "/probe?kind=xorigin-form-post&label=iframe"); log("cross-origin form post (iframe): sent");
   await ws(T.replace(/^http/, "ws") + "/probe-ws?kind=xorigin-ws");
   await fetch("/probe?kind=done", { method: "POST", body: "x" });
-  log("script finished (this is not evidence of what arrived): now open the target page " + T);`);
+  log("script finished (this is not evidence of what arrived).");
+  // The control: visible, and sent only when pressed. The page's referrer policy is set first, then one empty form POST
+  // goes to the target as a top-level navigation (this page is left).
+  const b = document.createElement("button");
+  b.type = "button"; b.id = "top-control"; b.style.cssText = "font:inherit;padding:8px 12px;margin-top:12px";
+  b.textContent = "Control: send one top-level form POST to the target";
+  b.onclick = () => {
+    b.disabled = true;
+    const m = document.createElement("meta"); m.name = "referrer"; m.content = "strict-origin-when-cross-origin"; document.head.appendChild(m);
+    const f = document.createElement("form"); f.method = "POST"; f.target = "_top";
+    f.action = T + "/probe?kind=xorigin-form-post&label=top-control";
+    document.body.appendChild(f);
+    log("control: referrer policy set to strict-origin-when-cross-origin; sending the top-level form POST");
+    f.submit();
+  };
+  document.body.appendChild(b);
+  log("Control ready: press the button once (it leaves this page), then open the target page " + T);`);
 
   function serve(where, port, html) {
     const server = http.createServer((req, res) => {
@@ -165,7 +196,8 @@ function ws(url) { return new Promise((res) => { let s; try { s = new WebSocket(
       if (req.method === "POST" && u.pathname === "/probe") {
         record(where, req);
         req.resume(); // the body is never read
-        req.on("end", () => send(200, "text/html; charset=utf-8", "<p>ok</p>"));
+        const isControl = u.searchParams.get("label") === "top-control";
+        req.on("end", () => send(200, "text/html; charset=utf-8", isControl ? '<p>ok: the control was recorded. <a href="/">Open the target page for the verdict</a>.</p>' : "<p>ok</p>"));
         return;
       }
       send(404, "text/plain", "not found");
