@@ -3997,3 +3997,20 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
   - pre-existing shared-name folders never adopted.
 
   The loops that took arguments now pass them in the right order, and each refusal is checked for its reason.
+- **Reported in 6956005161** (the run-folder repair, tested `b8b486c`, head `a519e8b`).
+
+## Beta R4 W7: retryable final cleanup, no ownership guess (review 6956209006)
+- **Acknowledged** in 6956229455 at 12:50 p.m. ET. The estimate is about 30 min.
+- **The failing tests first:** S12–S15 in `w7-owner-selftest.sh`, run against the unchanged `b8b486c` tool, fail. They cover:
+  - a final `rmdir` failure (a `PATH` shim) and its retry;
+  - an interruption after the token is deleted, and its retry;
+  - a replacement made during recovery;
+  - an interrupted `prepare` without identity;
+  - an interrupted `prepare` after its identity was recorded.
+- **The repair** (D-R4W7-04) is in `scripts/beta/w7-owner-preview.sh`:
+  - the identity is recorded before the token file;
+  - `finalizing` is recorded before the token is deleted;
+  - a token-less recovery requires the identity, with a known birth time, and does only an `rmdir`;
+  - with no identity, nothing is removed or retired.
+
+  The empty-folder shortcut is removed.

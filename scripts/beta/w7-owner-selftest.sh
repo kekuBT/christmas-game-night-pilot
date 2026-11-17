@@ -18,6 +18,13 @@
 #     root: backup, probe and cleanup never use, adopt or remove them
 # S10 the local-test flag inside a Codespace (all, or any one, of the Codespaces variables): refused before any change
 # S11 the probe-report gate, on SYNTHETIC report fixtures (not a browser result)
+# S12 the final rmdir FAILS (a PATH shim): the retry, with the normal rmdir, finishes and retires (review 6956209006)
+# S13 an interruption right AFTER the token file is deleted (local-test hook): the retry finishes; a replacement made
+#     during that recovery (empty, or with a sentinel) is refused and survives
+# S14 an interrupted prepare with NO recorded identity (an empty folder, or one with only a token file): nothing is
+#     removed or retired; a precise message
+# S15 an interrupted prepare AFTER its identity was recorded but before the token file: the folder is proven by its
+#     identity and removed with rmdir only; the record is retired
 set -uo pipefail
 TOOL=$(cd "$(dirname "${1:-$(dirname "$0")/w7-owner-preview.sh}")" && pwd)/$(basename "${1:-w7-owner-preview.sh}")
 [ -f "$TOOL" ] || { echo "no tool at $TOOL"; exit 2; }
@@ -68,7 +75,7 @@ echo "-- S4 a replaced run folder"
 R=$(mkroot s4a); NS=$(prepared "$R" secret data run); rm -rf "$NS"; mkdir -p "$NS/data"; echo "foreign replacement" > "$NS/data/replacement-sentinel"
 for c in "cleanup" "start current" "stop" "backup b1" "compat b1" "check current" "status"; do
   set -- $c; tool_local "$1" "$R" "${@:2}" > "$B/s4.out" 2>&1; rc=$?
-  [ $rc != 0 ] && [ -f "$NS/data/replacement-sentinel" ] && grep -q "no matching token file" "$B/s4.out"; ok $? "S4 '$c' with a replaced run folder (no token file) is refused on the token file (exit $rc); the replacement survives"
+  [ $rc != 0 ] && [ -f "$NS/data/replacement-sentinel" ] && grep -qE "no matching token file|not the folder this run created" "$B/s4.out"; ok $? "S4 '$c' with a replaced run folder (no token file) is refused as not this run's (token or identity; exit $rc); the replacement survives"
 done
 R=$(mkroot s4b); NS=$(prepared "$R" secret data); cp "$NS/.w7op-ns" "$B/tok"; rm -rf "$NS"; mkdir -p "$NS/data"; cp "$B/tok" "$NS/.w7op-ns"; echo "foreign replacement" > "$NS/data/replacement-sentinel"
 tool_local cleanup "$R" > "$B/s4.out" 2>&1; rc=$?; [ $rc != 0 ] && [ -f "$NS/data/replacement-sentinel" ] && grep -q "not the folder this run created" "$B/s4.out"; ok $? "S4 a replacement carrying a copied token file is refused on its identity, even if its inode number is reused (exit $rc); the replacement survives"
@@ -148,6 +155,45 @@ gate "UNSAFE" '{"verdict":"UNSAFE","why":"synthetic"}' "verdict is UNSAFE"
 gate "PRESERVED with an http origin" '{"verdict":"PRESERVED","ownOrigin":"http://localhost:3157"}' "isn't https"
 gate "REWRITTEN_SAME_ORIGIN_ONLY with no origin" '{"verdict":"REWRITTEN_SAME_ORIGIN_ONLY"}' "isn't https"
 gate "a passing https report (the gate passes; no release is prepared here)" '{"verdict":"REWRITTEN_SAME_ORIGIN_ONLY","ownOrigin":"https://localhost:3157"}' "current isn't prepared"
+echo "-- S12 the final rmdir fails, then a retry"
+R=$(mkroot s12); NS=$(prepared "$R" secret data); mkdir -p "$B/shim"; printf '#!/bin/sh\necho "rmdir: simulated failure" >&2\nexit 1\n' > "$B/shim/rmdir"; chmod +x "$B/shim/rmdir"
+clean_env PATH="$B/shim:$PATH" W7OP_LOCAL_TEST=1 bash "$TOOL" cleanup "$R" > "$B/s12.out" 2>&1; rc=$?
+[ $rc != 0 ] && [ -d "$NS" ] && [ ! -e "$NS/secret" ] && ! retired "$R"; ok $? "S12 a failing final rmdir: exit $rc, the code is gone, the folder remains, the record isn't retired"
+tool_local cleanup "$R" > "$B/s12b.out" 2>&1; rc=$?
+[ $rc = 0 ] && [ ! -e "$NS" ] && retired "$R"; ok $? "S12 the normal retry finishes the removal and retires the record (exit $rc: $(tail -1 "$B/s12b.out" | cut -c1-80))"
+
+echo "-- S13 an interruption after the token file is deleted, then a retry; a replacement during recovery"
+R=$(mkroot s13a); NS=$(prepared "$R" secret data)
+clean_env W7OP_LOCAL_TEST=1 W7OP_TEST_INTERRUPT_CLEANUP=after-token bash "$TOOL" cleanup "$R" > "$B/s13.out" 2>&1; rc=$?
+[ $rc = 3 ] && [ -d "$NS" ] && [ ! -e "$NS/.w7op-ns" ] && [ -z "$(ls -A "$NS")" ] && ! retired "$R"; ok $? "S13 the interrupted cleanup stopped after deleting the token (exit $rc); the empty folder remains, not retired"
+tool_local cleanup "$R" > "$B/s13b.out" 2>&1; rc=$?
+[ $rc = 0 ] && [ ! -e "$NS" ] && retired "$R"; ok $? "S13 the retry finishes the removal and retires the record (exit $rc)"
+R=$(mkroot s13c); NS=$(prepared "$R" secret data)
+clean_env W7OP_LOCAL_TEST=1 W7OP_TEST_INTERRUPT_CLEANUP=after-token bash "$TOOL" cleanup "$R" > /dev/null 2>&1
+rmdir "$NS"; mkdir "$NS"; echo "foreign replacement" > "$NS/replacement-sentinel"
+tool_local cleanup "$R" > "$B/s13d.out" 2>&1; rc=$?
+[ $rc != 0 ] && [ -f "$NS/replacement-sentinel" ] && ! retired "$R"; ok $? "S13 a replacement with a sentinel made during recovery is refused (exit $rc); it survives, the record isn't retired"
+R=$(mkroot s13e); NS=$(prepared "$R" secret data)
+clean_env W7OP_LOCAL_TEST=1 W7OP_TEST_INTERRUPT_CLEANUP=after-token bash "$TOOL" cleanup "$R" > /dev/null 2>&1
+rmdir "$NS"; mkdir "$NS"
+tool_local cleanup "$R" > "$B/s13f.out" 2>&1; rc=$?
+[ $rc != 0 ] && [ -d "$NS" ] && ! retired "$R"; ok $? "S13 an EMPTY replacement made during recovery is refused on its identity (exit $rc); it survives"
+
+echo "-- S14 an interrupted prepare with no recorded identity"
+R=$(mkroot s14a); t=$(head -c 16 /dev/urandom | od -An -tx1 | tr -d ' \n'); rp=$(cd "$R" && pwd -P)
+{ echo "w7op-owner 3"; echo "root $rp"; echo "token $t"; echo "created x"; echo "ns w7op-$t"; } > "$R/.w7op-owner"; chmod 600 "$R/.w7op-owner"; mkdir "$R/w7op-$t"
+tool_local cleanup "$R" > "$B/s14.out" 2>&1; rc=$?
+[ $rc != 0 ] && [ -d "$R/w7op-$t" ] && ! retired "$R" && grep -q "no recorded identity" "$B/s14.out"; ok $? "S14 an empty folder without a recorded identity is left untouched, not retired, with a precise message (exit $rc)"
+echo "$t" > "$R/w7op-$t/.w7op-ns"
+tool_local cleanup "$R" > "$B/s14b.out" 2>&1; rc=$?
+[ $rc != 0 ] && [ -f "$R/w7op-$t/.w7op-ns" ] && ! retired "$R"; ok $? "S14 the same folder with only a token file, still without a recorded identity, is left untouched (exit $rc)"
+
+echo "-- S15 an interrupted prepare after its identity was recorded, before the token file"
+R=$(mkroot s15); t=$(head -c 16 /dev/urandom | od -An -tx1 | tr -d ' \n'); rp=$(cd "$R" && pwd -P)
+{ echo "w7op-owner 3"; echo "root $rp"; echo "token $t"; echo "created x"; echo "ns w7op-$t"; } > "$R/.w7op-owner"; chmod 600 "$R/.w7op-owner"; mkdir -m 700 "$R/w7op-$t"; echo "ns-id $(stat -c %d:%i:%.9W "$R/w7op-$t")" >> "$R/.w7op-owner"
+tool_local cleanup "$R" > "$B/s15.out" 2>&1; rc=$?
+[ $rc = 0 ] && [ ! -e "$R/w7op-$t" ] && retired "$R"; ok $? "S15 the folder is proven by its recorded identity, removed with rmdir, and the record retired (exit $rc)"
+
 outside_ok; ok $? "the outside sentinel survived every case"
 
 echo "== W7 OWNER TOOL SELFTEST $([ $bad = 0 ] && echo PASSED || echo FAILED), $n checks, $(date -u +%FT%TZ)"; exit $bad

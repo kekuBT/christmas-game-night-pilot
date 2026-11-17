@@ -94,7 +94,11 @@ $T start "$W" current           # refuses without a passing probe; waits for /he
 - **`cleanup`:**
   - **The order:** it removes the code first, then everything else in the run folder, then the token file and the folder.
   - **It retires the record only after that.** A retry after success removes nothing, so a replacement made under the same name is never touched.
-  - **An interrupted cleanup can be retried,** because the identity survives until the very end.
+  - **An interrupted or failed cleanup can be retried** (review 6956209006):
+    - before the token file goes, the token and the identity prove the folder;
+    - after it, the recorded identity alone does, if the birth time is known. Then only an `rmdir` of the empty folder is allowed;
+    - a replacement made in between is refused.
+  - **With no recorded identity, nothing is removed.** That happens only if `prepare` stopped right after its `mkdir`. The record isn't retired either, and the message says how to recover by hand.
 - **`W7OP_LOCAL_TEST=1` is refused outright** whenever any Codespaces variable is set. In a Codespace, the probe gate always applies.
 
 ## 4. The owner's checklist (phase A, current)

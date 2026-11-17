@@ -41,4 +41,13 @@ See its `summary.txt`. It holds:
 - **the local run** (36 PASS, 0 FAIL). Its browser step must launch, and its plain-`http` verdict must be exactly `UNSUITABLE`. It ends with a cleanup retry against a replacement;
 - **the W7 static checks** on the change.
 
+## `selftest-before-fix-b8b486c.log`, then `final-<sha>/`: the cleanup recovery (review 6956209006)
+**The failing tests first:** the new S12–S15, run against the unchanged `b8b486c` tool, **fail**. They show:
+- a failed final `rmdir` that can never be retried;
+- no interruption point after the token file;
+- a replacement during recovery that isn't refused;
+- an unproven empty folder that is removed.
+
+The repaired tool's runs are in the `final-<sha>/` folder named in that report.
+
 **Not shown:** GitHub's forwarder, the Ports panel, any owner browser, the Codespace's Node version, Render, and B-W7-01.

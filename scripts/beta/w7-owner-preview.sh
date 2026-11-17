@@ -30,7 +30,10 @@
 #   folder recreated under the same name is caught even when the filesystem reuses the inode number.
 # - `cleanup` removes the code first, then everything else in the run folder, the token file last, then the folder,
 #   and only then RETIRES the record. A retired record removes nothing (a retry is a no-op), and a retired or
-#   mismatched run is never touched again. An interrupted cleanup can be retried: the identity is intact until the end.
+#   mismatched run is never touched again. An interrupted or failed cleanup can be retried: until the token file goes,
+#   the token and the identity prove the folder; after it, the recorded identity (with a known birth time) does, and
+#   only an rmdir of the then-empty folder is allowed (review 6956209006). With no recorded identity (prepare stopped
+#   right after its mkdir), nothing is removed or retired: the message says how to recover by hand.
 # The local-test flag (W7OP_LOCAL_TEST=1, a developer's test outside a Codespace, with http://127.0.0.1 allowed) is
 # refused before anything else whenever any Codespaces variable is set. In a Codespace the app starts only with the
 # exact https origin of a passing probe report (REWRITTEN_SAME_ORIGIN_ONLY or PRESERVED). It listens on 127.0.0.1 only,
@@ -100,7 +103,8 @@ prepare)
   TOKEN=$(head -c 16 /dev/urandom | od -An -tx1 | tr -d ' \n'); NS="$W/w7op-$TOKEN"
   t=$(mktemp "$W/$REC.XXXXXX") && chmod 600 "$t" && { echo "$MARK"; echo "root $W"; echo "token $TOKEN"; echo "created $(date -u +%FT%TZ)"; echo "ns w7op-$TOKEN"; } > "$t" && mv -T "$t" "$W/$REC" || die "could not write the ownership record"
   mkdir -m 700 "$NS" || die "could not create the run folder $NS"
-  (umask 077 && echo "$TOKEN" > "$NS/$TOKF") && echo "ns-id $(idof "$NS")" >> "$W/$REC" || die "could not mark the run folder"
+  echo "ns-id $(idof "$NS")" >> "$W/$REC" || die "could not record the run folder's identity"   # identity first: it proves the folder
+  (umask 077 && echo "$TOKEN" > "$NS/$TOKF") || die "could not mark the run folder"
   owned "$W"
   mk secret 700 && (umask 077 && head -c 32 /dev/urandom | base64 | tr -dc 'A-Za-z0-9' | head -c 20 > "$NS/secret/code")
   [ "$(wc -c < "$NS/secret/code")" -ge 16 ] || die "could not make a synthetic code"
@@ -196,8 +200,17 @@ cleanup)
   if [ ! -e "$NS" ] && [ ! -L "$NS" ]; then
     echo "retired $(date -u +%FT%TZ) (the run folder was absent)" >> "$W/$REC"; say "the run folder $NS doesn't exist; nothing removed; the record is retired"; exit 0
   fi
-  if [ -z "$(field ns-id)" ] && [ -d "$NS" ] && [ ! -L "$NS" ] && [ -z "$(ls -A "$NS")" ]; then # interrupted between mkdir and its marking
-    rmdir "$NS" && echo "retired $(date -u +%FT%TZ) (the run folder was empty)" >> "$W/$REC" && { say "removed the empty, unmarked run folder; the record is retired"; exit 0; }
+  if [ -z "$(field ns-id)" ]; then # prepare was interrupted between the mkdir and recording its identity: no proof it is ours
+    die "$NS has no recorded identity (prepare was interrupted right after creating it), so nothing proves this tool created it. Nothing removed, the record isn't retired. If it is this run's (empty, or holding only $TOKF), remove it by hand: rmdir or rm -r '$NS'"
+  fi
+  if [ -d "$NS" ] && [ ! -L "$NS" ] && [ ! -e "$NS/$TOKF" ] && [ ! -L "$NS/$TOKF" ]; then # no token file: an interrupted prepare or a final step
+    id=$(field ns-id); bt=${id##*:}
+    [ "$(idof "$NS")" = "$id" ] || die "$NS is not the folder this run created (identity $(idof "$NS"), recorded $id): a replacement; nothing removed"
+    case $bt in 0|0.000000000|'') die "$NS has no token file, and this filesystem reports no birth time, so its identity can't be proven; nothing removed. If it is this run's, remove it by hand";; esac
+    [ "$(stat -c %u "$NS")" = "$(id -u)" ] || die "$NS belongs to another user; nothing removed"
+    rmdir -- "$NS" || die "could not remove $NS (only an empty folder is removed without its token file: inspect it); the record isn't retired, so cleanup can be retried"
+    git -C "$W/src" worktree prune; echo "retired $(date -u +%FT%TZ)" >> "$W/$REC"
+    say "removed the run folder $NS, proven by its recorded identity (its token file was already gone), and retired the record"; exit 0
   fi
   ns_ok
   if pid_alive; then bash "$0" stop "$W" || die "the server didn't stop; nothing removed"; fi
@@ -207,7 +220,10 @@ cleanup)
   find "$NS" -mindepth 1 -maxdepth 1 ! -name "$TOKF" -exec rm -rf --one-file-system -- {} +
   left=$(find "$NS" -mindepth 1 -maxdepth 1 ! -name "$TOKF" | wc -l)
   if [ "$left" != 0 ]; then echo "w7op: CLEANUP INCOMPLETE: $left entr$([ "$left" = 1 ] && echo y || echo ies) left in $NS; the record isn't retired; retry cleanup" >&2; exit 1; fi
-  rm -f -- "$NS/$TOKF" && rmdir -- "$NS" || { echo "w7op: CLEANUP INCOMPLETE: could not remove $NS" >&2; exit 1; }
+  echo "finalizing $(date -u +%FT%TZ)" >> "$W/$REC"
+  rm -f -- "$NS/$TOKF" || { echo "w7op: CLEANUP INCOMPLETE: could not remove $NS/$TOKF; retry cleanup" >&2; exit 1; }
+  if local_test && [ "${W7OP_TEST_INTERRUPT_CLEANUP:-}" = after-token ]; then echo "w7op: TEST INTERRUPTION after the token file (local test only)" >&2; exit 3; fi
+  rmdir -- "$NS" || { echo "w7op: CLEANUP INCOMPLETE: could not remove $NS; the record isn't retired, and a retry proves the folder by its recorded identity" >&2; exit 1; }
   git -C "$W/src" worktree prune
   echo "retired $(date -u +%FT%TZ)" >> "$W/$REC"
   say "removed the run folder $NS and retired the record; kept $W/evidence, src/ and the record; nothing outside the run folder was touched" ;;

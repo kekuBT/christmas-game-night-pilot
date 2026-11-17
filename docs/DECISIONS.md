@@ -2393,3 +2393,13 @@ Handoff 6813167965 (with the Stage 9.2 clearance). Spec: `docs/stage9/stage93.md
     - **an inode alone:** reuse was observed;
     - **trusting the token file alone:** it can be copied.
   - **Where birth time is unavailable,** a filesystem reports 0. Identity then rests on device:inode plus the token file.
+- **D-R4W7-04 The run folder stays provable through its last step** (review 6956209006).
+  - **`prepare`** records the identity (device:inode:birth time) right after the `mkdir`, before the token file.
+  - **`cleanup`** records `finalizing` before it deletes the token file.
+  - **A cleanup that finds no token file proceeds only if** the recorded identity matches and the birth time is known and non-zero. Even then it only `rmdir`s the empty folder, so a replacement is refused.
+  - **With no recorded identity, nothing is removed or retired.** The message gives the by-hand recovery.
+  - **Why:** removing the token before the `rmdir` made a failed or interrupted final step permanently unretryable. An empty folder without a recorded identity is no proof of ownership, so it is left alone.
+  - **Alternatives rejected:**
+    - **moving the token file outside the run folder before the `rmdir`:** it leaves another file to clean up;
+    - **trusting the token file alone when there's no identity:** it can be copied;
+    - **a recursive delete without the token file:** only an empty folder is safe to remove on identity alone.
