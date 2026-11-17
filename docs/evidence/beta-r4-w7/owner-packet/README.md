@@ -48,6 +48,10 @@ See its `summary.txt`. It holds:
 - a replacement during recovery that isn't refused;
 - an unproven empty folder that is removed.
 
-The repaired tool's runs are in the `final-<sha>/` folder named in that report.
+The repaired tool's runs are in **`final-9205c93/`** (see its `summary.txt`):
+- the self-test, S1–S15, 70 checks;
+- the cleanup-retry reproduction: PASSED, 8 of 8;
+- the local run: 36 PASS, 0 FAIL, with a real Chromium and the verdict `UNSUITABLE`;
+- the W7 static checks on the change.
 
 **Not shown:** GitHub's forwarder, the Ports panel, any owner browser, the Codespace's Node version, Render, and B-W7-01.
