@@ -3756,3 +3756,15 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
   - the static checks **PASSED** on their second run (run 1 FAILED on a false positive in my own scan pattern, kept);
   - `w5-selftest.sh` **PASSED**, 12/12. The rehearsal `20261117T042904Z-ae58ddeb` passed 27/27: `BACKUP_OK`, `/health` unavailable for 1,110 ms, the service resumed, `RECEIPT_OK` on the fetched-back copy, the received copy holding the pre-backup state, and the eight negatives.
 - **Next:** the report on #48, then ChatGPT's review. The real W5 stays PENDING; nothing ran on Render, SSH, storage or the owner's keys.
+- **Reported** in 6938393714, linked on #5 and #47.
+- **Review 6938403611: changes requested.** Acknowledged in 6938453591 at 11:35 p.m. ET, with a 50 min estimate.
+  - **The findings:**
+    1. a W4/W5 ordering deadlock;
+    2. public `/health` and seat probes can't work during maintenance;
+    3. the copy checker accepted changed answer values.
+  - **The repairs:**
+    1. one procedure, two uses: A, W4's same-window prerequisite; B, W5's own acceptance, which needs only W1–W3;
+    2. a private in-instance probe (Node 22, read-only), with maintenance kept on, the seat check in the play window, and an interpretation table;
+    3. exact submitted values, kept private, checked in the pinned shape, plus a same-keys/different-value negative.
+  - **The rehearsal** runs the runbook's own probe text in the container and puts a `--maintenance` proxy in front.
+  - **Dev runs:** the rehearsal passed 33/33, and the self-test 12/12. The reproduction shows `63f9dc5`'s checker accepting a changed value, and the repair rejecting it.

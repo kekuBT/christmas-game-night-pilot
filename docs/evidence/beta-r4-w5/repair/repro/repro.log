@@ -1,0 +1,9 @@
+== old checker (63f9dc5), copy base: exit 0
+COPY OK: 2 data file(s); 3 pre-backup answers checked; 0 failed
+== old checker (63f9dc5), copy changed: exit 0
+COPY OK: 2 data file(s); 3 pre-backup answers checked; 0 failed
+== new checker (working tree), copy base: exit 0
+COPY OK: 2 data file(s); 3 pre-backup answers checked; 0 failed
+== new checker (working tree), copy changed: exit 1
+FAIL the guest's answer to q1 holds the acknowledged value (an integer option index, the one submitted)
+COPY FAILED: 2 data file(s); 3 pre-backup answers checked; 1 failed

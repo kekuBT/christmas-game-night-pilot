@@ -1,0 +1,117 @@
+== w5-rehearsal 2026-11-17T04:38:49Z, run 20261117T043849Z-7ab2a6e3, image cgn-render:check
+   scripts: w5-rehearsal.sh f154d1745f79ee2c, w5-seed.mjs 660df9e1e4b1005d
+   image id: sha256:7b53109a7d69
+   throwaway access code and two DISPOSABLE test age identities (the receiving side's, and a wrong one) in a private directory (mode 700), removed on exit
+   the test recipient (public, disposable): age1kf7w68emfrrtafkjxhqdxp03jgvrc7q8wsqmwx2yz37ttsrrmulsd07rm2
+   data volume w5-data-20261117T043849Z-7ab2a6e3 (label w5.owner=20261117T043849Z-7ab2a6e3): throwaway data, removed on exit
+   container 6894c3805c56 (name w5-svc-20261117T043849Z-7ab2a6e3, label w5.owner=20261117T043849Z-7ab2a6e3)
+PASS the service is ready and /health reports the pinned revision 7097ac2bb062925bb296a129f4771f1e68fd522d
+   authorized: AUTHORIZED data_dir=/var/data/cgn-w1 public_origin=https://localhost:18543 trust_proxy=1 (the access code is kept only a
+   render-like-proxy LISTENING https=18543 http=18544 backend=127.0.0.1:18580 hops=1 MAINTENANCE (a LOCAL stand-in for Render's maintenance mode on the PUBLIC side)
+PASS maintenance on: the PUBLIC /health answers 503 while the service is up
+   private probe (the runbook's text, sha256 0e82ceb2eb590109…, inside the container, no service environment): PROBE 2026-11-17T04:38:50.970Z UP 7097ac2bb062925bb296a129f4771f1e68fd522d
+PASS the runbook's private probe, inside the instance with no service environment, reports UP on the pinned revision while the PUBLIC side answers 503
+   cgn-backup: repository accca1784e22570e30731e888890dad10d194da99d57809abe3244ae80ccc63c, in the image accca1784e22570e30731e888890dad10d194da99d57809abe3244ae80ccc63c
+   cgn-entrypoint: repository 6c623dd08bbf77ca556099d4f678f3900606d5e760f3231ab59cbc592b4b6157, in the image 6c623dd08bbf77ca556099d4f678f3900606d5e760f3231ab59cbc592b4b6157
+   cgn-receive (run from the repository, unchanged): 2fb3fe903f28707751485460689c4175ed7ea7cf682b505dec8bb74f41b084cd
+   age: in the image v1.2.1 (encrypts); on the receiving side 1.1.1 (decrypts)
+PASS the image's cgn-backup is byte-identical to the reviewed deploy/render/cgn-backup.sh
+PASS the image's cgn-entrypoint is byte-identical to the reviewed deploy/render/cgn-entrypoint.sh
+-- seed: synthetic room, a finished game, an APPROVED Memory Book entry, acknowledged answers (w5-seed.mjs)
+   SEED {"roomId":"room-mwk7czci-146828","warmGameId":"game-1","secondGameId":"game-2","entryId":"book-1","entrySources":["evt-11"],"hostPlayerId":"player-1","guestPlayerId":"player-2","questions":["trv-legacy-11","trv-geog-031","trv-food-074","trv-legacy-02","trv-spor-086","trv-ever-096","trv-ever-095","trv-legacy-04","trv-ever-099","trv-natu-067"],"acked":[{"who":"guest","playerId":"player-2","questionId":"trv-legacy-11","ackAt":"2026-11-17T04:38:51.614Z"},{"who":"guest","playerId":"player-2","questionId":"trv-geog-031","ackAt":"2026-11-17T04:38:51.618Z"},{"who":"host","playerId":"player-1","questionId":"trv-legacy-11","ackAt":"2026-11-17T04:38:51.621Z"}]}
+PASS the synthetic state was seeded and every seeded write acknowledged
+-- SOURCE: the reviewed cgn-backup, unchanged, inside the container, with no service environment (as an SSH session)
+   | cgn-backup: stopping the server (pid 10)
+   | cgn-backup: server stopped
+   | backup OK: 1 room(s), 1 Memory Book(s), 3 file(s), verified
+   | verify OK: 3 file(s) match the manifest of 2026-11-17T04:38:52.593Z
+   | cgn-backup: hold released
+   | BACKUP_OK /var/data/backups/cgn-20261117T043852Z.tar.age sha256=0b53d482eb1a907d454266cc73d704d1f033b8e68f0f02a04f4426bdb62301e7 files=4 server_stopped_s=0
+   cgn-backup exit 0 after 391 ms
+PASS cgn-backup exited 0 with exactly one BACKUP_OK line
+   expected SHA-256, taken ONLY from the session's BACKUP_OK line (the control channel): 0b53d482eb1a907d454266cc73d704d1f033b8e68f0f02a04f4426bdb62301e7
+PASS the hold stopped the writer: cgn-backup stopped the server, copied under the data lock, and released the hold
+   [in-instance watch] PROBE 2026-11-17T04:38:51.948Z UP 7097ac2bb062925bb296a129f4771f1e68fd522d
+   [in-instance watch] PROBE 2026-11-17T04:38:52.517Z DOWN ECONNREFUSED
+   [in-instance watch] PROBE 2026-11-17T04:38:53.635Z UP 7097ac2bb062925bb296a129f4771f1e68fd522d
+   [in-instance watch] WATCH down from 2026-11-17T04:38:52.517Z, back at 2026-11-17T04:38:53.635Z (1118 ms); 78 samples; UP 7097ac2bb062925bb296a129f4771f1e68fd522d
+PASS the runbook's private watch, inside the instance, saw the writer stop and come back (UP -> DOWN -> UP on the pinned revision)
+   PUBLIC /health through the maintenance proxy: 71 samples across the backup, 0 not 503
+PASS maintenance kept on: the PUBLIC /health answered 503 on every sample, before, during and after the backup (it says nothing about the writer)
+   server pid before 10, after 183; /health polled 29 times from the start of the backup: unavailable from +177 ms to +1400 ms (1223 ms); BACKUP_OK says server_stopped_s=0
+PASS the writer was excluded during the copy: /health was refused while the server was stopped, and a NEW server process came back
+PASS the original service resumed on its own: ready, pinned revision 7097ac2bb062925bb296a129f4771f1e68fd522d
+PASS no second writer: the data volume's only user before and after is the one service container
+   PASS the room answers after the backup, with the host's existing seat (no rejoin) — HTTP 200
+   PASS the guest's existing seat still works (no rejoin) — HTTP 200
+   PASS the approved "W5 seed" entry is still there and approved — HTTP 200
+   PASS a NEW answer after the backup is acknowledged (the original service resumed) — HTTP 200 accepted=true
+   RESUME OK (0 failed)
+PASS after the backup: the same seats, the approved entry, and a new acknowledged answer (w5-seed.mjs resume)
+PASS the source archive on the volume (the 'Render disk') hashes to the BACKUP_OK value
+-- CHAIN (positive): transport [LOCAL SURROGATE for scp -s] -> upload [LOCAL SURROGATE storage] -> fetch back -> cgn-receive on the fetched copy -> promotion
+   [chain positive] transport=ok upload=ok fetch=ok receipt=ok promotion=ok; receipt record written: yes
+      | RECEIPT_OK <work>/w5-20261117T043849Z-7ab2a6e3/chain-positive/fetched/cgn-20261117T043852Z.tar.age sha256=0b53d482eb1a907d454266cc73d704d1f033b8e68f0f02a04f4426bdb62301e7 files=4 copy=<private>/receive-positive/20261117T043852Z
+PASS positive: every stage ran and passed, RECEIPT_OK on the FETCHED-BACK archive, and the receipt record was written
+PASS positive: every pre-existing file (the sentinels) is unchanged
+-- the RECEIVED copy (decrypted from the fetched-back archive, in the private folder): w5-seed.mjs check-copy
+   PASS the received copy's manifest records a stopped server (serverWasRunning: false)
+   PASS the received copy holds the seeded room's file
+   PASS the received copy holds the seeded room's Memory Book file
+   PASS the warm-up game is in the copy, finished
+   PASS the second game is in the copy
+   PASS the copy's ledger holds the warm-up game's finish event
+   PASS the second game's record in the copy holds exactly the 3 pre-backup answers — found 3 in 2 answer map(s)
+   PASS the guest's acknowledged pre-backup answer to trv-legacy-11 is in the received copy
+   PASS the guest's acknowledged pre-backup answer to trv-geog-031 is in the received copy
+   PASS the host's acknowledged pre-backup answer to trv-legacy-11 is in the received copy
+   PASS the second game keeps its answers where the pinned runtime stores them (extra.answers)
+   PASS the guest's answer to trv-legacy-11 holds the acknowledged value (an integer option index, the one submitted)
+   PASS the guest's answer to trv-geog-031 holds the acknowledged value (an integer option index, the one submitted)
+   PASS the host's answer to trv-legacy-11 holds the acknowledged value (an integer option index, the one submitted)
+   PASS the host's POST-backup answer to trv-geog-031 is NOT in the copy (the copy is the stop point)
+   PASS the "W5 seed" Memory Book entry is in the received copy
+   PASS the entry is APPROVED in the received copy
+   PASS the entry's note reads "W5 seed"
+   PASS the entry is linked to the warm-up game's finish event
+   COPY OK: 2 data file(s); 3 pre-backup answers checked; 0 failed
+PASS the received copy holds the acknowledged pre-backup state (room, approved entry linked to its game, three answers) and not the post-backup answer
+-- the checker's own negatives: each on a damaged COPY of the received copy; check-copy must FAIL every time
+PASS checker negative add-post-answer: the damage was applied, and check-copy FAILS on it
+PASS checker negative drop-pre-answer: the damage was applied, and check-copy FAILS on it
+PASS checker negative unapprove-entry: the damage was applied, and check-copy FAILS on it
+PASS checker negative change-pre-value: the damage was applied, and check-copy FAILS on it
+PASS checker negative change-pre-value fails ONLY on the value (same keys and count: exactly one FAIL, the acknowledged-value check)
+-- NEGATIVES: the same chain, one fault each; each must stop non-zero at the expected stage, with no RECEIPT_OK, no receipt record, no later stage, and every pre-existing file unchanged
+   [chain wrong-hash] transport=ok upload=ok fetch=ok receipt=FAILED(exit 1) promotion=not-run; receipt record written: no
+      | RECEIPT_FAILED: the archive's SHA-256 is 0b53d482eb1a907d454266cc73d704d1f033b8e68f0f02a04f4426bdb62301e7, not the expected 992e9fbdd335784134abe76d15ae6f2b4985116ee6615177cb6643e3c8b1e3ef
+PASS negative wrong-hash: stops as 'transport=ok upload=ok fetch=ok receipt=FAILED(exit 1) promotion=not-run', no RECEIPT_OK, no receipt record, pre-existing files unchanged
+   [chain changed-bytes] transport=ok upload=ok fetch=ok receipt=FAILED(exit 1) promotion=not-run; receipt record written: no
+      | RECEIPT_FAILED: the archive's SHA-256 is 311d5926b8a7550ae92e72767e4c44403c7269ea0759046737eba29179935403, not the expected 0b53d482eb1a907d454266cc73d704d1f033b8e68f0f02a04f4426bdb62301e7
+PASS negative changed-bytes: stops as 'transport=ok upload=ok fetch=ok receipt=FAILED(exit 1) promotion=not-run', no RECEIPT_OK, no receipt record, pre-existing files unchanged
+   [chain truncated] transport=ok upload=ok fetch=ok receipt=FAILED(exit 1) promotion=not-run; receipt record written: no
+      | RECEIPT_FAILED: the archive's SHA-256 is 3bcd7813d2229c5886acea18f98aa8c5a0fdac4da224cbb19fc14423aef339a3, not the expected 0b53d482eb1a907d454266cc73d704d1f033b8e68f0f02a04f4426bdb62301e7
+PASS negative truncated: stops as 'transport=ok upload=ok fetch=ok receipt=FAILED(exit 1) promotion=not-run', no RECEIPT_OK, no receipt record, pre-existing files unchanged
+   [chain wrong-key] transport=ok upload=ok fetch=ok receipt=FAILED(exit 1) promotion=not-run; receipt record written: no
+      | age: error: no identity matched any of the recipients
+      | age: report unexpected or unhelpful errors at https://filippo.io/age/report
+      | RECEIPT_FAILED: decryption failed (wrong key, or a damaged archive)
+PASS negative wrong-key: stops as 'transport=ok upload=ok fetch=ok receipt=FAILED(exit 1) promotion=not-run', no RECEIPT_OK, no receipt record, pre-existing files unchanged
+   [chain missing-transfer] transport=FAILED(no such archive on the source, or the copy failed) upload=not-run fetch=not-run receipt=not-run promotion=not-run; receipt record written: no
+PASS negative missing-transfer: stops as 'transport=FAILED(no such archive on the source, or the copy failed) upload=not-run fetch=not-run receipt=not-run promotion=not-run', no RECEIPT_OK, no receipt record, pre-existing files unchanged
+   [chain missing-download] transport=ok upload=ok fetch=FAILED(not in storage) receipt=not-run promotion=not-run; receipt record written: no
+PASS negative missing-download: stops as 'transport=ok upload=ok fetch=FAILED(not in storage) receipt=not-run promotion=not-run', no RECEIPT_OK, no receipt record, pre-existing files unchanged
+   [chain nonempty-work] transport=ok upload=ok fetch=ok receipt=FAILED(exit 1) promotion=not-run; receipt record written: no
+      | RECEIPT_FAILED: the work folder <private>/receive-nonempty-work is not empty
+PASS negative nonempty-work: stops as 'transport=ok upload=ok fetch=ok receipt=FAILED(exit 1) promotion=not-run', no RECEIPT_OK, no receipt record, pre-existing files unchanged
+   [chain occupied-fetch] transport=ok upload=ok fetch=REFUSED(destination exists) receipt=not-run promotion=not-run; receipt record written: no
+PASS negative occupied-fetch: stops as 'transport=ok upload=ok fetch=REFUSED(destination exists) receipt=not-run promotion=not-run', no RECEIPT_OK, no receipt record, pre-existing files unchanged
+PASS the source archive is unchanged after every chain (still the BACKUP_OK hash)
+PASS the original service is still serving the pinned revision at the end
+-- cleanup (run 20261117T043849Z-7ab2a6e3)
+   cleanup #1: maintenance-proxy container 6894c3805c56 volume w5-data-20261117T043849Z-7ab2a6e3 private-files(code,keys,sessions,decrypted-copies)
+   cleanup #2: nothing owned left to remove
+   this run's containers left: 0; volumes left: 0; processes left: 0; listeners left on 18580/18543/18544: 0; private files left: no
+   files in the kept run folder holding the access code, a session token, a gate cookie or an age secret key: 0
+   checks: 33 passed, 0 failed
+W5 REHEARSAL PASSED

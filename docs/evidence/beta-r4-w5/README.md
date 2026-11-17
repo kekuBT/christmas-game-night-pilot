@@ -123,3 +123,25 @@ A clean detached checkout, with `git status --porcelain` at 0 lines before and a
 - **Not the owner's keys:** the identities are disposable test keys made per run and removed on exit. The owner's recipient, identity and storage are placeholders in the runbook.
 - **Small and synthetic:** one room, two seats, a few KB.
 - **The lifecycle code** in `w5-rehearsal.sh` follows the reviewed `w4-control.sh` rules (with the `w5.owner` label). Its unlistable-inventory branch is exercised by the self-test's T3, a docker shim, not by mock unit cases.
+
+## The repair (review 6938403611: changes requested)
+Reported first in 6938393714 (tested `63f9dc5`). The review found three problems, all accepted (acknowledged in 6938453591).
+
+| # | Finding | The repair |
+|---|---|---|
+| 1 | **A W4/W5 deadlock.** W5 required W4 to have passed; W4 required a same-window receipt, which links to W5. With W1–W3 green and W4 pending, the operator couldn't proceed. | `render-w5.md` now separates **the procedure** from **W5's acceptance**. **Use A:** the same-window prerequisite of a W4 window (or of any deploy, restore or data change), which writes a procedure-completion record. **Use B:** W5's own acceptance record, which needs W1–W3 and **not** W4. `render-w4.md`'s prerequisite 2 runs W5's procedure inside the W4 window with maintenance on, and starts the live drill only after `BACKUP_OK` **and** `RECEIPT_OK` for that same backup are verified. An operator walkthrough covers W1–W3 green with W4 and W5 pending. The receipt is never waived, and every step is inside an owner-approved window. |
+| 2 | **Public browser probes during maintenance.** With maintenance on, the public URL answers 503 to everything. | **A private health probe:** the exact text is in `render-w5.md`; it runs over SSH inside the instance, needs only Node 22, and only reads `127.0.0.1:10000/health`. It has a `check` mode and a timed `watch` across the backup. Maintenance **stays on** for the whole procedure. A public 503 is documented as never being evidence about the writer, and there is a table for reading the states. The interactive seat check moved to the approved play window (maintenance off): W4's drill, or the next play session. |
+| 3 | **The copy checker accepted changed answer values:** it checked keys and the count only. | `w5-seed.mjs` records each acknowledged answer's submitted value **in the private fixture only** (`seed.json`'s `secret`; never printed). It submits three different values, so a swap can't match. `check-copy` requires each answer to be stored where the pinned runtime keeps it (`extra.answers[player][question]`, per `room.ts` at `7097ac2`) and to **equal** the submitted integer. A new checker negative, **`change-pre-value`** (same keys, a different value), must fail, and fail **only** on the value line. |
+
+**The rehearsal now also checks, on the target-host-shaped path:**
+- the **runbook's own probe text** (taken from `render-w5.md` between its heredoc markers) copied into the container and run there with no service environment: a `check` before the backup must report `UP 7097ac2…`, and a `watch` across the backup must show `UP → DOWN → UP` on the pinned revision;
+- a **`--maintenance` Render-like proxy** in front (a LOCAL stand-in for the public side): its public `/health` must answer **503 on every sample**, before, during and after the backup.
+
+### Repair runs, in order (working tree, before the candidate)
+| Run | Verdict | Log |
+|---|---|---|
+| The reproduction (synthetic fixture): `63f9dc5`'s checker against the repaired one | `63f9dc5` accepts a changed value (**COPY OK, exit 0**); the repair rejects it, exit 1, on the value line only | [repair/repro/](repair/repro/README.md) |
+| Rehearsal dev 1 | PASSED, 33/33 (the probe `UP`; the watch `DOWN` for 1,118 ms; 71/71 public samples 503; `change-pre-value` failing only on the value) | [repair/dev/rehearsal-dev1.log](repair/dev/rehearsal-dev1.log) |
+| Self-test dev 1 | PASSED, 12/12 (T2 33/33) | [repair/dev/selftest-dev1.log](repair/dev/selftest-dev1.log) |
+
+The final on the committed repair candidate follows.

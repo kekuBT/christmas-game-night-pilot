@@ -40,7 +40,14 @@
 #
 #   bash scripts/beta/w5-rehearsal.sh <image tag> [work dir]
 #
-# Needs: docker, node 22, age and age-keygen (the receiving side), curl, sha256sum. Port 18580.
+# Review 6938403611 (item 2): the operator's checks during maintenance are PRIVATE, from inside the instance: the exact
+# probe text of docs/beta/render-w5.md ("The private health probe") is copied into the container and run there with no
+# service environment, once as a check and once as a timed watch across the backup. A Render-like proxy in front runs
+# with --maintenance (scripts/beta/render-like-proxy.mjs): its PUBLIC /health must answer 503 throughout, before, during
+# and after the backup, so a public 503 is shown to say nothing about the writer.
+#
+# Needs: docker, node 22, age and age-keygen (the receiving side), curl, sha256sum, openssl. Ports 18580 (the service),
+# 18543 and 18544 (the maintenance proxy's https and http).
 # Exit: 0 "W5 REHEARSAL PASSED"; otherwise "W5 REHEARSAL FAILED" with 1, or 130/143 when interrupted.
 set -uo pipefail
 IMG=${1:-}
@@ -49,13 +56,13 @@ WK_ARG=${2:-}
 PIN=7097ac2bb062925bb296a129f4771f1e68fd522d
 EXPECT=${W5_EXPECTED_REVISION:-$PIN}
 ROOT=$(cd "$(dirname "$0")/../.." && pwd)
-BACK=18580; ORIGIN="https://localhost:18543"
+BACK=18580; PUBS=18543; PUBH=18544; ORIGIN="https://localhost:$PUBS"
 RUNID=$(date -u +%Y%m%dT%H%M%SZ)-$(od -An -N4 -tx1 /dev/urandom | tr -d ' \n')
 if [ -n "$WK_ARG" ]; then mkdir -p "$WK_ARG" || exit 1; WK=$(cd "$WK_ARG" && pwd); else WK=$(mktemp -d); fi
 RUN="$WK/w5-$RUNID"; EVD="$RUN/evidence"
 RECEIVE_SH="$ROOT/deploy/render/operator/cgn-receive.sh"
 W5_DOCKER_SECONDS=${W5_DOCKER_SECONDS:-30}
-cid=""; VOL=""; PRIV=""; privpath=""; CODE=""; LEAKS=""; mon_pid=""; started=0; rc=1; finished=0; cleanups=0; stage="setup"
+cid=""; VOL=""; PRIV=""; privpath=""; CODE=""; LEAKS=""; mon_pid=""; pub_pid=""; inw_pid=""; proxy_pid=""; started=0; rc=1; finished=0; cleanups=0; stage="setup"
 npass=0; nfail=0; ARCHIVE=""; EXPECTED_SHA=""; BACKUP_LINE=""; SRC_SHA=""
 
 chk() { if [ "$2" = 0 ]; then echo "PASS $1"; npass=$((npass + 1)); else echo "FAIL $1${3:+ — $3}"; nfail=$((nfail + 1)); fi; }
@@ -87,7 +94,7 @@ count_owned() {
   printf '%s\n' "$out" | sed '/^$/d' | wc -l | tr -d ' '
 }
 listeners() {
-  awk -v want=" $BACK " 'FNR > 1 && $4 == "0A" { n = split($2, a, ":"); p = 0; h = toupper(a[n]);
+  awk -v want=" $BACK $PUBS $PUBH " 'FNR > 1 && $4 == "0A" { n = split($2, a, ":"); p = 0; h = toupper(a[n]);
     for (i = 1; i <= length(h); i++) p = p * 16 + index("0123456789ABCDEF", substr(h, i, 1)) - 1;
     if (index(want, " " p " ")) c++ } END { print c + 0 }' $(ls /proc/net/tcp /proc/net/tcp6 2>/dev/null)
 }
@@ -110,6 +117,9 @@ cleanup() {
   cleanups=$((cleanups + 1))
   local did="" left p id v listed
   if [ -n "$mon_pid" ]; then stop_pid "$mon_pid"; wait "$mon_pid" 2>/dev/null; mon_pid=""; did="$did monitor"; fi
+  if [ -n "$pub_pid" ]; then stop_pid "$pub_pid"; wait "$pub_pid" 2>/dev/null; pub_pid=""; did="$did public-monitor"; fi
+  if [ -n "$inw_pid" ]; then stop_pid "$inw_pid"; wait "$inw_pid" 2>/dev/null; inw_pid=""; did="$did in-instance-watch"; fi
+  if [ -n "$proxy_pid" ]; then stop_pid "$proxy_pid"; wait "$proxy_pid" 2>/dev/null; proxy_pid=""; did="$did maintenance-proxy"; fi
   left=$(owned_pids)
   if [ -n "$left" ]; then for p in $left; do stop_pid "$p"; done; did="$did $(echo $left | wc -w)-more-owned-process(es)"; fi
   listed=$(dk ps -aq --no-trunc --filter "label=w5.owner=$RUNID" 2>/dev/null) || { listed=""; did="$did (docker could not list this run's containers)"; }
@@ -143,7 +153,7 @@ finish() {
   left_p=$(owned_pids | wc -w)
   if [ "$started" = 1 ]; then left_l=$(listeners); else left_l="not checked (this run started no listener)"; fi
   privleft=no; [ -n "$privpath" ] && [ -e "$privpath" ] && privleft=yes
-  echo "   this run's containers left: $left_c; volumes left: $left_v; processes left: $left_p; listeners left on $BACK: $left_l; private files left: $privleft"
+  echo "   this run's containers left: $left_c; volumes left: $left_v; processes left: $left_p; listeners left on $BACK/$PUBS/$PUBH: $left_l; private files left: $privleft"
   # Nothing private may be in the kept run folder: the access code, a session token, a gate cookie, an age secret key.
   if [ -d "$RUN" ]; then
     leak=$( { [ -n "$LEAKS" ] && grep -rlaF -f <(printf '%s\n' "$LEAKS" | sed '/^$/d') "$RUN" 2>/dev/null; grep -rlaE 'AGE-SECRET-KEY-|cgn_beta=[A-Za-z0-9_-]{8}' "$RUN" 2>/dev/null; } | sort -u | wc -l)
@@ -259,11 +269,11 @@ chain() {
 echo "== w5-rehearsal $(date -u +%FT%TZ), run $RUNID, image $IMG"
 echo "   scripts: w5-rehearsal.sh $(sha256sum "$0" | cut -c1-16), w5-seed.mjs $(sha256sum "$ROOT/scripts/beta/w5-seed.mjs" | cut -c1-16)"
 stage="preflight"
-for c in docker node age age-keygen curl sha256sum cmp truncate dd od; do command -v "$c" >/dev/null 2>&1 || fail "$c is not installed"; done
+for c in docker node age age-keygen curl sha256sum cmp truncate dd od openssl; do command -v "$c" >/dev/null 2>&1 || fail "$c is not installed"; done
 imgid=$(dk image inspect --format '{{.Id}}' "$IMG" 2>/dev/null) || fail "the image '$IMG' is not available locally"
 echo "   image id: ${imgid:0:19}"
 busy=$(listeners)
-[ "$busy" = 0 ] || fail "$busy listener(s) already on $BACK; nothing was started"
+[ "$busy" = 0 ] || fail "$busy listener(s) already on $BACK/$PUBS/$PUBH; nothing was started"
 mkdir -p "$EVD" || fail "could not create the run folder"
 stage="private files"
 PRIV=$(mktemp -d "${TMPDIR:-/tmp}/w5-private.XXXXXXXX") || fail "could not create a private directory"
@@ -292,6 +302,27 @@ stage="authorization"
 auth=$(timeout 60 docker exec -i "$cid" cgn-authorize /var/data/cgn-w1 "$ORIGIN" 1 < "$PRIV/code" 2>&1) || fail "cgn-authorize failed: $(printf '%s' "$auth" | head -c 300 | tr '\n' ' ')"
 printf '%s\n' "$auth" | grep -q '^AUTHORIZED ' || fail "cgn-authorize did not confirm"
 echo "   authorized: $(printf '%s\n' "$auth" | grep '^AUTHORIZED ' | head -1 | cut -c1-120)"
+
+stage="maintenance proxy"
+( umask 077; openssl req -x509 -newkey rsa:2048 -nodes -keyout "$PRIV/key.pem" -out "$PRIV/cert.pem" -days 1 -subj "/CN=localhost" -addext "subjectAltName=DNS:localhost" >/dev/null 2>&1 ) || fail "could not make the local TLS certificate"
+env W5_OWNER="$RUNID" node "$ROOT/scripts/beta/render-like-proxy.mjs" --https-port $PUBS --http-port $PUBH --backend "127.0.0.1:$BACK" --cert "$PRIV/cert.pem" --key "$PRIV/key.pem" --hops 1 --maintenance > "$PRIV/proxy.log" 2>&1 &
+proxy_pid=$!
+up=""; for _ in $(seq 1 40); do grep -q LISTENING "$PRIV/proxy.log" && { up=1; break; }; kill -0 "$proxy_pid" 2>/dev/null || break; sleep 0.25; done
+[ -n "$up" ] || fail "the maintenance proxy did not start: $(tail -c 300 "$PRIV/proxy.log" | tr '\n' ' ')"
+echo "   $(grep LISTENING "$PRIV/proxy.log" | head -1) (a LOCAL stand-in for Render's maintenance mode on the PUBLIC side)"
+pub_code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 3 --cacert "$PRIV/cert.pem" "https://localhost:$PUBS/health")
+chk "maintenance on: the PUBLIC /health answers 503 while the service is up" "$([ "$pub_code" = 503 ] && echo 0 || echo 1)" "HTTP $pub_code"
+
+stage="private probe"
+# The exact probe text from the runbook, between its own heredoc markers; nothing else is run as the operator's probe.
+sed -n "/^cat > \/tmp\/cgn-probe.mjs <<'PROBE'\$/,/^PROBE\$/p" "$ROOT/docs/beta/render-w5.md" | sed '1d;$d' > "$PRIV/cgn-probe.mjs"
+[ -s "$PRIV/cgn-probe.mjs" ] || fail "could not take the probe text from docs/beta/render-w5.md"
+probe_sha=$(sha256sum "$PRIV/cgn-probe.mjs" | cut -c1-16)
+timeout 30 docker exec -i "$cid" sh -c 'cat > /tmp/cgn-probe.mjs' < "$PRIV/cgn-probe.mjs" || fail "could not place the probe in the container"
+pc=$(timeout 30 docker exec "$cid" env -i PATH=/usr/local/bin:/usr/bin:/bin HOME=/home/cgn node /tmp/cgn-probe.mjs check 2>&1); pcrc=$?
+echo "   private probe (the runbook's text, sha256 $probe_sha…, inside the container, no service environment): $pc"
+chk "the runbook's private probe, inside the instance with no service environment, reports UP on the pinned revision while the PUBLIC side answers 503" \
+  "$([ "$pcrc" = 0 ] && printf '%s\n' "$pc" | grep -q "^PROBE .* UP $EXPECT\$" && echo 0 || echo 1)" "exit $pcrc: $pc"
 
 stage="provenance"
 repo_backup=$(sha256sum "$ROOT/deploy/render/cgn-backup.sh" | cut -d' ' -f1)
@@ -326,6 +357,10 @@ pid_before=$(server_pid) || fail "could not read the server pid"
 users_before=$(volume_users "$VOL") || fail "docker could not list the data volume's users"
 env W5_OWNER="$RUNID" bash -c 'while :; do c=$(curl -s -o /dev/null -w "%{http_code}" --max-time 0.5 "http://127.0.0.1:'"$BACK"'/health"); echo "$(date +%s%3N) $c"; sleep 0.1; done' > "$PRIV/monitor.txt" 2>/dev/null &
 mon_pid=$!
+env W5_OWNER="$RUNID" bash -c 'while :; do c=$(curl -s -o /dev/null -w "%{http_code}" --max-time 0.5 --cacert "'"$PRIV/cert.pem"'" "https://localhost:'"$PUBS"'/health"); echo "$(date +%s%3N) $c"; sleep 0.1; done' > "$PRIV/public.txt" 2>/dev/null &
+pub_pid=$!
+env W5_OWNER="$RUNID" timeout 60 docker exec "$cid" env -i PATH=/usr/local/bin:/usr/bin:/bin HOME=/home/cgn node /tmp/cgn-probe.mjs watch 8 > "$PRIV/inwatch.txt" 2>&1 &
+inw_pid=$!
 sleep 0.5
 t_b0=$(date +%s%3N)
 bk=$(timeout 180 docker exec "$cid" env -i PATH=/usr/local/bin:/usr/bin:/bin HOME=/home/cgn cgn-backup 2>&1); brc=$?
@@ -352,6 +387,16 @@ r=$(ready_check) || fail "the service did not come back after the backup: $r"
 pid_after=$(server_pid) || fail "could not read the server pid after the backup"
 sleep 1.5
 stop_pid "$mon_pid"; wait "$mon_pid" 2>/dev/null; mon_pid=""
+wait "$inw_pid"; inwrc=$?; inw_pid=""
+stop_pid "$pub_pid"; wait "$pub_pid" 2>/dev/null; pub_pid=""
+sed 's/^/   [in-instance watch] /' "$PRIV/inwatch.txt"
+inw_sum=$(grep '^WATCH ' "$PRIV/inwatch.txt" | tail -1)
+chk "the runbook's private watch, inside the instance, saw the writer stop and come back (UP -> DOWN -> UP on the pinned revision)" \
+  "$([ "$inwrc" = 0 ] && printf '%s\n' "$inw_sum" | grep -q '^WATCH down from .*, back at .* ([0-9]* ms); [0-9]* samples; UP '"$EXPECT"'$' && echo 0 || echo 1)" "exit $inwrc: $inw_sum"
+pub_n=$(wc -l < "$PRIV/public.txt"); pub_other=$(awk '$2 != "503"' "$PRIV/public.txt" | wc -l)
+echo "   PUBLIC /health through the maintenance proxy: $pub_n samples across the backup, $pub_other not 503"
+chk "maintenance kept on: the PUBLIC /health answered 503 on every sample, before, during and after the backup (it says nothing about the writer)" "$([ "$pub_n" -gt 0 ] && [ "$pub_other" = 0 ] && echo 0 || echo 1)" "$pub_other of $pub_n"
+printf '{"inInstanceWatch":"%s","publicSamples":%s,"publicNot503":%s}\n' "$inw_sum" "$pub_n" "$pub_other" > "$EVD/maintenance-probe.json"
 # From the start of the backup: the first refused /health, the last refused one, the samples; then the first 200 after
 # the last refusal (the service back).
 mon=$(awk -v t0="$t_b0" '$1 >= t0 { if ($2 != "200" && first == "") first = $1; if ($2 != "200") last = $1; n++ } END { printf "%s %s %d", (first == "" ? "-" : first), (last == "" ? "-" : last), n }' "$PRIV/monitor.txt")
@@ -386,11 +431,15 @@ if [ -n "$pos_copy" ] && [ -d "$pos_copy" ]; then
   printf '%s\n' "$cc_out" | sed 's/^/   /'
   chk "the received copy holds the acknowledged pre-backup state (room, approved entry linked to its game, three answers) and not the post-backup answer" "$ccrc"
   echo "-- the checker's own negatives: each on a damaged COPY of the received copy; check-copy must FAIL every time"
-  for m in add-post-answer drop-pre-answer unapprove-entry; do
+  for m in add-post-answer drop-pre-answer unapprove-entry change-pre-value; do
     rm -rf -- "$PRIV/cc-$m"; cp -r -- "$pos_copy" "$PRIV/cc-$m" || fail "could not copy the received copy for $m"
     mo=$(timeout 60 node "$ROOT/scripts/beta/w5-seed.mjs" mutate "$PRIV" "$PRIV/cc-$m" "$m" 2>&1); mrc=$?
     co=$(timeout 60 node "$ROOT/scripts/beta/w5-seed.mjs" check-copy "$PRIV" "$PRIV/cc-$m" 2>&1); crc=$?
     chk "checker negative $m: the damage was applied, and check-copy FAILS on it" "$([ "$mrc" = 0 ] && [ "$crc" != 0 ] && echo 0 || echo 1)" "$(printf '%s\n' "$mo" | tail -1); $(printf '%s\n' "$co" | grep '^FAIL' | head -2 | tr '\n' ';')"
+    if [ "$m" = change-pre-value ]; then
+      nf=$(printf '%s\n' "$co" | grep -c '^FAIL'); nv=$(printf '%s\n' "$co" | grep -c '^FAIL .* holds the acknowledged value')
+      chk "checker negative change-pre-value fails ONLY on the value (same keys and count: exactly one FAIL, the acknowledged-value check)" "$([ "$nf" = 1 ] && [ "$nv" = 1 ] && echo 0 || echo 1)" "$nf FAIL line(s), $nv on the value"
+    fi
   done
 else
   chk "the received copy exists" 1 "no copy (the positive chain failed)"

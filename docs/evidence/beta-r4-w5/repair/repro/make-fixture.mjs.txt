@@ -1,0 +1,11 @@
+// A synthetic received copy in the pinned Trivia shape (extra.answers[player][question] = integer), plus the private
+// fixture the checker reads. Values here are synthetic test values, not from any real run.
+import { writeFileSync } from "node:fs";
+const [priv, copy] = process.argv.slice(2);
+writeFileSync(`${copy}/manifest.json`, JSON.stringify({ serverWasRunning: false, files: [{ sha256: "x" }] }));
+writeFileSync(`${copy}/room-x.json`, JSON.stringify({ id: "room-x", games: [{ id: "game-1", status: "finished", answers: {} }, { id: "game-2", status: "playing", answers: {}, extra: { answers: { "player-2": { q1: 1, q2: 3 }, "player-1": { q1: 2 } } } }], ledger: [{ type: "game-finished", gameInstanceId: "game-1", eventId: "evt-1" }] }));
+writeFileSync(`${copy}/room-x.book.json`, JSON.stringify({ entries: [{ id: "book-1", approved: true, text: "W5 seed", sourceEventIds: ["evt-1"] }] }));
+writeFileSync(`${priv}/seed.json`, JSON.stringify({ roomId: "room-x", warmGameId: "game-1", secondGameId: "game-2", entryId: "book-1",
+  acked: [{ who: "guest", playerId: "player-2", questionId: "q1" }, { who: "guest", playerId: "player-2", questionId: "q2" }, { who: "host", playerId: "player-1", questionId: "q1" }],
+  secret: { submittedValues: [{ playerId: "player-2", questionId: "q1", value: 1 }, { playerId: "player-2", questionId: "q2", value: 3 }, { playerId: "player-1", questionId: "q1", value: 2 }] } }));
+writeFileSync(`${priv}/after.json`, JSON.stringify({ postBackup: { who: "host", playerId: "player-1", questionId: "q2" } }));

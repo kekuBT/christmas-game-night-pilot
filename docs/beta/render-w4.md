@@ -14,16 +14,23 @@
   Claude doesn't operate the account.
 
 ## Before any real deploy or restart (all required, in the same window)
-1. **W1 to W3 have passed** on this service, and the owner has opened a window.
-2. **A backup, received off Render, in this window:**
-   - `cgn-backup` on the service ends with **`BACKUP_OK`**;
-   - the copy is transferred off Render to the owner's chosen storage;
-   - `cgn-receive` on the receiving device ends with **`RECEIPT_OK`**.
+1. **W1 to W3 have passed** on this service, and the owner has opened a **W4 window**. W5's own acceptance is **not** required first (review 6938403611).
+2. **First, inside this same W4 window: W5's backup-and-receipt procedure, as this window's prerequisite.** That is [render-w5.md](render-w5.md), "use A".
+   - It runs with maintenance **on**, between sessions, before either restart operation:
+     1. `cgn-backup` on the service ends with **`BACKUP_OK`**;
+     2. the copy goes off Render to the owner's already-selected storage and is fetched back;
+     3. `cgn-receive` on the receiving device, run on the fetched-back copy, ends with **`RECEIPT_OK`** for the hash in that `BACKUP_OK` line.
+   - **The procedure-completion record** (both lines, for the same backup) goes in the window note. It is **not** W5's acceptance record, which is separate (`render-w5.md`, "use B").
 
-   **Without both lines from this same window, don't deploy or restart.** The steps are W5's: [render-w5.md](render-w5.md).
-3. **Maintenance mode:** **on** outside the window. The operator turns it **off** for the drill, records the times, and turns it back **on** at the end.
+   **Until both lines are verified for this window's backup, the live drill doesn't start, maintenance stays on, and there is no deploy or restart.** The receipt is never waived.
+3. **Maintenance mode:**
+   - **on** outside the drill, and throughout step 2;
+   - the operator turns it **off** for the live drill **only after** the procedure-completion record exists;
+   - the operator records the times, and turns it back **on** at the end.
+
+   **While it is on, the public URL answers 503 to everything**, `/health` included. That is never evidence about the service; read the private probe instead.
 4. **The exact revision and data folder:**
-   - `/health` reports `"revision":"7097ac2bb062925bb296a129f4771f1e68fd522d"`;
+   - the revision is `7097ac2bb062925bb296a129f4771f1e68fd522d`, read with the **private probe** over SSH (`render-w5.md`, "The private health probe") while maintenance is on, and from the public `/health` once maintenance is off for the drill;
    - the service's `MCHEZO_DATA_DIR` is the **throwaway** `/var/data/cgn-w1`, never the real folder;
    - the access gate takes the throwaway code: check it by being admitted with it.
 

@@ -58,7 +58,7 @@ for _ in $(seq 1 40); do grep -q held "$WORK/T1-holder-$TAG.log" && break; sleep
 timeout 300 bash "$H" "$IMG" "$WORK/T1" > "$WORK/T1-$TAG.log" 2>&1; t1=$?
 kill "$holder" 2>/dev/null; wait "$holder" 2>/dev/null
 sed 's/^/     | /' "$WORK/T1-$TAG.log" | grep -E 'FAILED at|W5 REHEARSAL|left:'
-chk "T1 the rehearsal FAILED at its preflight, started nothing, and left nothing" "$([ "$t1" = 1 ] && grep -q 'FAILED at preflight: .* listener(s) already on 18580; nothing was started' "$WORK/T1-$TAG.log" && grep -q '^W5 REHEARSAL FAILED' "$WORK/T1-$TAG.log" && [ "$(owned_left "$WORK/T1-$TAG.log")" = "0 0" ] && echo 0 || echo 1)" "exit $t1"
+chk "T1 the rehearsal FAILED at its preflight, started nothing, and left nothing" "$([ "$t1" = 1 ] && grep -q 'FAILED at preflight: .* listener(s) already on 18580/18543/18544; nothing was started' "$WORK/T1-$TAG.log" && grep -q '^W5 REHEARSAL FAILED' "$WORK/T1-$TAG.log" && [ "$(owned_left "$WORK/T1-$TAG.log")" = "0 0" ] && echo 0 || echo 1)" "exit $t1"
 chk "T1 sentinels intact" "$(sentinels_ok && echo 0 || echo 1)"
 
 echo "-- T2: the rehearsal"

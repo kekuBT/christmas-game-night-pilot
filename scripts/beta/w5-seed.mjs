@@ -14,8 +14,13 @@
 //                                                  the RECEIVED copy (decrypted from the fetched-back archive): the
 //                                                  manifest says the server was stopped; the room, both games, the
 //                                                  approved entry linked to the warm-up game's finish; exactly the three
-//                                                  pre-backup acknowledged answers in the second game, and NOT the
+//                                                  pre-backup acknowledged answers in the second game, each stored where
+//                                                  the pinned runtime keeps it (extra.answers[player][question], an
+//                                                  integer option index) and holding EXACTLY the value that was
+//                                                  submitted and acknowledged (review 6938403611 item 3), and NOT the
 //                                                  post-backup one (the copy is the stop point, not later state).
+//   node w5-seed.mjs mutate <private dir> <copy folder> <kind>   the checker's own negatives (see mutate below).
+// The submitted values live only in the private fixture (seed.json's `secret`), never on stdout or in published evidence.
 // Session tokens, the gate cookie and the access code live only in the private dir (removed by the harness on exit);
 // stdout carries ids and counts, never a secret. Exit 0 only when every check passed.
 import { randomUUID } from "node:crypto";
@@ -97,14 +102,16 @@ async function seed(base, priv) {
   for (const s of seats) await c.must("POST", `/rooms/${room.roomId}/intents`, intent(room.roomId, g2.gameId, "briefing-ready", { ready: true }), s.sessionToken);
   const q2 = await playingQuestions(c, room.roomId, g2.gameId, host.sessionToken);
   if (q2.length < 3) throw new Error(`the second game has only ${q2.length} questions`);
-  const acked = [];
-  for (const [who, s, q] of [["guest", guest, q2[0]], ["guest", guest, q2[1]], ["host", host, q2[0]]]) {
-    const r = await answerAcked(c, room.roomId, g2.gameId, s.sessionToken, q, 1);
+  const acked = [], values = [];
+  // Different values per answer, so a swapped or reset value can't match by accident.
+  for (const [who, s, q, v] of [["guest", guest, q2[0], 1], ["guest", guest, q2[1], 3], ["host", host, q2[0], 2]]) {
+    const r = await answerAcked(c, room.roomId, g2.gameId, s.sessionToken, q, v);
     if (r.status !== 200 || !r.accepted) throw new Error(`the ${who}'s answer was not acknowledged (${r.status} ${r.reason ?? ""})`);
     acked.push({ who, playerId: s.playerId, questionId: q, ackAt: new Date().toISOString() });
+    values.push({ playerId: s.playerId, questionId: q, value: v });
   }
   const out = { roomId: room.roomId, warmGameId: warm.gameId, secondGameId: g2.gameId, entryId: entry.id, entrySources: entry.sourceEventIds ?? [], hostPlayerId: host.playerId, guestPlayerId: guest.playerId, questions: q2, acked,
-    secret: { hostToken: host.sessionToken, guestToken: guest.sessionToken } };
+    secret: { hostToken: host.sessionToken, guestToken: guest.sessionToken, submittedValues: values } };
   writeFileSync(join(priv, "seed.json"), JSON.stringify(out, null, 1), { mode: 0o600 });
   const { secret: _secret, ...pub } = out;
   console.log(`SEED ${JSON.stringify(pub)}`);
@@ -160,6 +167,15 @@ function checkCopy(priv, dir) {
   // A positive control on the reader itself: the absence check below means something only if it finds answers at all.
   check(counted === s.acked.length, `the second game's record in the copy holds exactly the ${s.acked.length} pre-backup answers`, `found ${counted} in ${maps.length} answer map(s)`);
   for (const a of s.acked) check(has(a.playerId, a.questionId), `the ${a.who}'s acknowledged pre-backup answer to ${a.questionId} is in the received copy`);
+  // The pinned runtime (7097ac2, room.ts: perPlayer[qid] = chosen) keeps a Trivia answer as an integer option index in
+  // the game's module state: extra.answers[player][question]. Each must be there, and be EXACTLY the submitted value.
+  const pinned = g2?.extra?.answers && typeof g2.extra.answers === "object" ? g2.extra.answers : undefined;
+  check(!!pinned, "the second game keeps its answers where the pinned runtime stores them (extra.answers)");
+  for (const a of s.acked) {
+    const want = (s.secret?.submittedValues ?? []).find((x) => x.playerId === a.playerId && x.questionId === a.questionId);
+    const got = pinned?.[a.playerId]?.[a.questionId];
+    check(!!want && Number.isInteger(got) && got === want.value, `the ${a.who}'s answer to ${a.questionId} holds the acknowledged value (an integer option index, the one submitted)`);
+  }
   check(!has(after.postBackup.playerId, after.postBackup.questionId), `the ${after.postBackup.who}'s POST-backup answer to ${after.postBackup.questionId} is NOT in the copy (the copy is the stop point)`);
   const bookJson = JSON.parse(readFileSync(bookFile, "utf8"));
   const entries = Array.isArray(bookJson) ? bookJson : bookJson.entries ?? bookJson.book?.entries ?? [];
@@ -176,6 +192,7 @@ function checkCopy(priv, dir) {
 //   add-post-answer   put the post-backup answer into the second game (as if the copy were later state)
 //   drop-pre-answer   remove one acknowledged pre-backup answer (as if it were lost)
 //   unapprove-entry   mark the "W5 seed" entry unapproved
+//   change-pre-value  same keys, a DIFFERENT value for one acknowledged pre-backup answer (review 6938403611 item 3)
 function mutate(priv, dir, kind) {
   const s = JSON.parse(readFileSync(join(priv, "seed.json"), "utf8"));
   const after = JSON.parse(readFileSync(join(priv, "after.json"), "utf8"));
@@ -198,6 +215,7 @@ function mutate(priv, dir, kind) {
     if (!holder) throw new Error("no answer map to change");
     if (kind === "add-post-answer") (holder[after.postBackup.playerId] ??= {})[after.postBackup.questionId] = 2;
     else if (kind === "drop-pre-answer") delete holder[s.acked[0].playerId][s.acked[0].questionId];
+    else if (kind === "change-pre-value") { const per = holder[s.acked[0].playerId]; per[s.acked[0].questionId] = (per[s.acked[0].questionId] + 1) % 4; }
     else throw new Error(`unknown damage ${kind}`);
     writeFileSync(roomFile, JSON.stringify(whole));
   }
