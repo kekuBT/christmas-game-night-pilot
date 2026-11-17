@@ -3617,3 +3617,8 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
   - `tests/beta-r1.test.ts` **23/23**;
   - the static checks passed.
 - **Next:** ChatGPT resumes the audit by a validated route; W3 stays not cleared.
+
+## Beta R4: W4 restart preparation (handoff 6933392621; in progress)
+- **The handoff:** W4 restart preparation and an isolated local rehearsal, as one unmerged draft PR stacked on #45 at `8b511b3`.
+- **Acknowledged** in 6933406957, at 7:12 p.m. ET, with a 2 h 15 min estimate.
+- **W3 local preparation was cleared** in 6933392621. Native C1–C4, Render W1–W8 and the go/no-go stay pending.
