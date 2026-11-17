@@ -1,0 +1,27 @@
+== w5-rehearsal 2026-11-17T04:29:20Z, run 20261117T042920Z-a1557847, image cgn-render:check
+   scripts: w5-rehearsal.sh 0191f9fc5de27d18, w5-seed.mjs 7d177a231e0d3515
+   image id: sha256:7b53109a7d69
+   throwaway access code and two DISPOSABLE test age identities (the receiving side's, and a wrong one) in a private directory (mode 700), removed on exit
+   the test recipient (public, disposable): age1af56775qnqr7xhgggw50qhfq6r7hxtyza46lt7md62je97lwh3aq6mghwj
+   data volume w5-data-20261117T042920Z-a1557847 (label w5.owner=20261117T042920Z-a1557847): throwaway data, removed on exit
+   container dfeb59dfd1af (name w5-svc-20261117T042920Z-a1557847, label w5.owner=20261117T042920Z-a1557847)
+PASS the service is ready and /health reports the pinned revision 7097ac2bb062925bb296a129f4771f1e68fd522d
+   authorized: AUTHORIZED data_dir=/var/data/cgn-w1 public_origin=https://localhost:18543 trust_proxy=1 (the access code is kept only a
+   cgn-backup: repository accca1784e22570e30731e888890dad10d194da99d57809abe3244ae80ccc63c, in the image accca1784e22570e30731e888890dad10d194da99d57809abe3244ae80ccc63c
+   cgn-entrypoint: repository 6c623dd08bbf77ca556099d4f678f3900606d5e760f3231ab59cbc592b4b6157, in the image 6c623dd08bbf77ca556099d4f678f3900606d5e760f3231ab59cbc592b4b6157
+   cgn-receive (run from the repository, unchanged): 2fb3fe903f28707751485460689c4175ed7ea7cf682b505dec8bb74f41b084cd
+   age: in the image v1.2.1 (encrypts); on the receiving side 1.1.1 (decrypts)
+PASS the image's cgn-backup is byte-identical to the reviewed deploy/render/cgn-backup.sh
+PASS the image's cgn-entrypoint is byte-identical to the reviewed deploy/render/cgn-entrypoint.sh
+-- seed: synthetic room, a finished game, an APPROVED Memory Book entry, acknowledged answers (w5-seed.mjs)
+   SEED {"roomId":"room-mwk70rot-748502","warmGameId":"game-1","secondGameId":"game-2","entryId":"book-1","entrySources":["evt-11"],"hostPlayerId":"player-1","guestPlayerId":"player-2","questions":["trv-math-093","trv-legacy-09","trv-lite-051","trv-hist-039","trv-tech-114","trv-spac-018","trv-geog-030","trv-scie-012","trv-geog-119","trv-spac-021"],"acked":[{"who":"guest","playerId":"player-2","questionId":"trv-math-093","ackAt":"2026-11-17T04:29:21.775Z"},{"who":"guest","playerId":"player-2","questionId":"trv-legacy-09","ackAt":"2026-11-17T04:29:21.778Z"},{"who":"host","playerId":"player-1","questionId":"trv-math-093","ackAt":"2026-11-17T04:29:21.781Z"}]}
+PASS the synthetic state was seeded and every seeded write acknowledged
+-- SOURCE: the reviewed cgn-backup, unchanged, inside the container, with no service environment (as an SSH session)
+   interrupted (SIGTERM)
+-- cleanup (run 20261117T042920Z-a1557847)
+   cleanup #1: container dfeb59dfd1af volume w5-data-20261117T042920Z-a1557847 private-files(code,keys,sessions,decrypted-copies)
+   cleanup #2: nothing owned left to remove
+   this run's containers left: 0; volumes left: 0; processes left: 0; listeners left on 18580: 0; private files left: no
+   files in the kept run folder holding the access code, a session token, a gate cookie or an age secret key: 0
+   checks: 4 passed, 0 failed
+W5 REHEARSAL FAILED

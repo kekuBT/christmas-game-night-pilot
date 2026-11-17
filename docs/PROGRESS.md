@@ -3730,7 +3730,7 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
   - **Its limits:** an independently rebuilt exact-SHA runtime with real process transitions. It is not the promotion archive, not a Docker replacement, not Render, and not physical Safari or Android; Firefox at 390×844 is emulation. The Render 30-second budget is unmeasured.
   - The pin is still `7097ac2`. `72e9d8b` is reviewed but not packaged or promoted. No merge or deployment is authorized.
 
-## Beta R4: W5 backup and independent receipt preparation (handoff 6937786587; in progress)
+## Beta R4: W5 backup and independent receipt preparation (handoff 6937786587; complete, tested `63f9dc5`)
 - **Acknowledged** in 6938068379 at 11:16 p.m. ET. The estimate is about 3 h 25 min, with 45 min of contingency.
 - **The branch** is `claude/beta-r4-w5-receipt`, from #47's head `a4bfdf9`, as a stacked draft PR. Unmerged.
 - **The scope:**
@@ -3752,4 +3752,7 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
   - dev 2 and 3 passed, 24/24 and 27/27;
   - self-test dev 1 **FAILED** on its own bugs;
   - self-test dev 2 passed, 12/12.
-- **Next:** the final on a clean checkout of the committed candidate, the evidence, and the report on #48.
+- **The final on a clean checkout of `63f9dc5`:**
+  - the static checks **PASSED** on their second run (run 1 FAILED on a false positive in my own scan pattern, kept);
+  - `w5-selftest.sh` **PASSED**, 12/12. The rehearsal `20261117T042904Z-ae58ddeb` passed 27/27: `BACKUP_OK`, `/health` unavailable for 1,110 ms, the service resumed, `RECEIPT_OK` on the fetched-back copy, the received copy holding the pre-backup state, and the eight negatives.
+- **Next:** the report on #48, then ChatGPT's review. The real W5 stays PENDING; nothing ran on Render, SSH, storage or the owner's keys.

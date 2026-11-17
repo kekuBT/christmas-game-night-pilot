@@ -80,6 +80,43 @@ All on this machine's Docker with the pinned image `cgn-render:check` (`sha256:7
 
 The final run is on a clean checkout of the committed candidate; see the next section.
 
+## The final, on ONE clean SHA: `63f9dc58b6b00817737d51cf6c72b3173aa57503`
+A clean detached checkout, with `git status --porcelain` at 0 lines before and after, and 0 Docker containers and volumes before and after. The candidate was pushed before testing. The runs below ran one after another.
+
+| Step | Command | Run | Verdict | Log |
+|---|---|---|---|---|
+| Static, run 1 | `bash runners/w5-static.sh <checkout>` | 04:28Z | **FAILED, 1 check, a false positive in my scan:** the pattern `AGE-SECRET-KEY-` matched the harness's own leak-scan line (the pattern text itself, not a key). Narrowed to a real key's shape (`AGE-SECRET-KEY-1` followed by 50+ key characters); the candidate is unchanged. | [final/static-run1.log](final/static-run1.log) |
+| Static, final | the same runner, narrowed | 04:28Z | **W5 STATIC CHECKS PASSED (exit 0):**<ul><li>nothing outside `docs/` and `scripts/beta/w5-*` changed since #47's head `a4bfdf9`;</li><li>the runtime, tests, manifests and other scripts unchanged;</li><li>`deploy/` unchanged from `a4bfdf9` and from `2e2257c`;</li><li>the pin `7097ac2`;</li><li>`cgn-backup.sh` matches its pin;</li><li>eslint, `bash -n` on 10 scripts, and `node --check`;</li><li>42 links, 0 missing;</li><li>no secret-shaped value.</li></ul> | [final/static-final.log](final/static-final.log) |
+| Self-test | `bash scripts/beta/w5-selftest.sh cgn-render:check --work <scratch>/w5/st-final` | 04:29:02–04:29:23Z | **W5 SELFTEST PASSED (exit 0), 12/12** | [final/selftest-final.log](final/selftest-final.log) |
+| ↳ T1 port in use | (inside the self-test) | | FAILED at preflight as required, nothing started | [final/T1-rehearsal.log](final/T1-rehearsal.log) |
+| ↳ **T2 the rehearsal** | (inside the self-test) | run **`20261117T042904Z-ae58ddeb`** | **W5 REHEARSAL PASSED, 27/27** | [final/T2-rehearsal.log](final/T2-rehearsal.log), [final/T2-evidence/](final/T2-evidence/) |
+| ↳ T3 unlistable inventory | (inside the self-test) | | **UNVERIFIED and FAILED** as required; real docker found 0 left | [final/T3-rehearsal.log](final/T3-rehearsal.log) |
+| ↳ T4 interrupted | (inside the self-test) | | exit 143, cleanup ran, 0 left | [final/T4-rehearsal.log](final/T4-rehearsal.log) |
+
+**T2 in numbers** (the T2 evidence folder: `backup-session.txt`, `expected-from-BACKUP_OK.sha256`, `stop-timing.json`, `provenance.json`, `seed.json`, `negatives.jsonl`, `summary.json`):
+- **Runtime:** the image `sha256:7b53109a7d69…`, `/health` revision `7097ac2bb062925bb296a129f4771f1e68fd522d`.
+- **Script hashes:**
+  - `cgn-backup` is `accca1784e22…c63c`, in the image and in the repository;
+  - `cgn-entrypoint` is `6c623dd08bbf…4b6157`;
+  - `cgn-receive` is `2fb3fe903f28…b084cd`.
+- **`age`:** v1.2.1 in the image encrypted; the receiving side's `age` 1.1.1 decrypted.
+- **The source:** `BACKUP_OK /var/data/backups/cgn-20261117T042906Z.tar.age sha256=66f31647425721528824a77d75a8ac9a84a6c95b89a58df4785063cde74d51dc files=4 server_stopped_s=0`.
+  - `cgn-backup` took **375 ms** in all.
+  - Seen from outside, `/health` was **unavailable for 1,110 ms**, from +172 ms to +1,282 ms after the backup began, over 26 samples. That includes the server's restart.
+  - The server pid went from 11 to 146.
+  - The data volume's only user before and after was the one service container.
+- **The positive chain:** `transport=ok upload=ok fetch=ok receipt=ok promotion=ok`. `RECEIPT_OK` was printed on the **fetched** file, with the same hash and `files=4`.
+- **The received copy:**
+  - `serverWasRunning: false`;
+  - the room, both games, and the warm-up's finish event;
+  - exactly the 3 pre-backup answers, and not the post-backup one;
+  - "W5 seed" approved and linked to that finish.
+
+  The checker failed on all three damaged copies.
+- **The eight chain negatives** stopped at their expected stages, each with nothing promoted and nothing overwritten. The source archive still hashed to the `BACKUP_OK` value at the end.
+
+**The receiving `age` version:** the runbook asks for `age` v1.2.x on the receiving device, to match the image. This rehearsal shows that 1.1.1 also decrypts what 1.2.1 encrypted. It doesn't change that recommendation.
+
 ## Limits
 - **Local surrogates:** `docker cp` stands in for `scp -s`, and local folders for the owner's storage. **They prove the chain's ordering, refusals and checks, not SSH or cloud transport.**
 - **Not Render:** Render's maintenance mode, health checks, disk, SSH user and environment, and timing aren't exercised. The stop measured here is local.
