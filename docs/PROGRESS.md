@@ -3719,3 +3719,24 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
   No full gate was run, as the handoff asked.
 - **Unchanged:** the exact-pin W4 live audit stays OPEN, owned by ChatGPT. There is no W5 work and no deployment.
 - **Next:** the report on #47, linked on #5, then ChatGPT's review of the consolidated candidate.
+- **Reported** in 6937715086, linked on #5 in 6937723535.
+- **Review 6937786587: integration and W4 LOCAL PREPARATION accepted.**
+  - ChatGPT independently checked the ancestry and comparisons, and read the raw focused evidence. These are developer tests, not independent runs.
+  - **Its exact-pin live audit `w4-live-7097ac2`** is recorded in 6936797118 (edited at 04:06Z):
+    - two real graceful process transitions (a restart, then a replacement on the same data);
+    - host, guest and TV recovered without rejoining;
+    - exact answer counts and final scores of 120 and 360;
+    - the approved Memory Book seed was preserved.
+  - **Its limits:** an independently rebuilt exact-SHA runtime with real process transitions. It is not the promotion archive, not a Docker replacement, not Render, and not physical Safari or Android; Firefox at 390×844 is emulation. The Render 30-second budget is unmeasured.
+  - The pin is still `7097ac2`. `72e9d8b` is reviewed but not packaged or promoted. No merge or deployment is authorized.
+
+## Beta R4: W5 backup and independent receipt preparation (handoff 6937786587; in progress)
+- **Acknowledged** in 6938068379 at 11:16 p.m. ET. The estimate is about 3 h 25 min, with 45 min of contingency.
+- **The branch** is `claude/beta-r4-w5-receipt`, from #47's head `a4bfdf9`, as a stacked draft PR. Unmerged.
+- **The scope:**
+  1. `docs/beta/render-w5.md`: the operator journey from the same-window `BACKUP_OK`, through `scp -s` to the owner's device, the private storage and the fetch-back, to `cgn-receive` `RECEIPT_OK`. Real execution is PENDING.
+  2. A bounded local rehearsal. It uses the pinned image, the reviewed `cgn-backup` and `cgn-receive` unchanged, and labelled local surrogates for the transport and the storage. The receipt reads the fetched-back copy.
+  3. A focused negative matrix.
+  4. The W4 seed-memory path, corrected to the verified UI.
+  5. The independent W4 verdict, recorded.
+- **Unchanged:** the runtime and the release/deploy pins stay `7097ac2`. There is no account operation, no public port, no spending, and no W6.
