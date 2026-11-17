@@ -3663,6 +3663,12 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
   - `w4-selftest.sh` **PASSED**, 79/79: K0, K0M, and K1–K8 with the sentinels kept. The rehearsal run is `20261117T020006Z-c4032f58`.
   - The static checks passed.
 - **Next:** the report on #46, then the separate stacked client-repair PR. ChatGPT's independent verification follows. The real D1 and D2 stay pending.
+- **Reported** in 6935683708.
+- **Review 6935889459: two follow-up gaps, and W4 is still not cleared.**
+  - **The findings:**
+    1. The final cleanup could PASS when Docker couldn't list the inventory.
+    2. R1 could report a restart without a readable baseline.
+  - **Acknowledged** in 6936049251 at 9:26 p.m. ET. The work started after #47's full gate.
 
 ## Beta R4: uncertain delivery after an intermediary 5xx (review 6935165862 item 4; in progress, a separate stacked draft PR)
 - **The client fix:** a tap whose retries all end on a 502, 503 or 504 with no app error now shows "We couldn’t confirm that…" instead of `Request failed (502)`. Typed app errors keep their wording; the retries, event ids, pending state and exactly-once scoring are unchanged.
@@ -3688,3 +3694,11 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
   - the targeted gate **PASSED**, 5/5, with `check-uncertain-delivery` at 81 of 81, plus `action-ack` and `errors`.
 - **Next:** the report on #47, then ChatGPT's review. The pin is unchanged. #46's review: the tooling fixes are verified, and W4 stays open for the live audit.
 
+## Beta R4: W4 follow-up (review 6935889459; complete, tested `3eb05bc`)
+- **The run's lifecycle** (`cleanup`, `finish`, and their helpers) moved into `w4-control.sh`, so the fault tests call the very `finish`.
+- **`count_owned`** checks each Docker query's status. An unlistable inventory is UNVERIFIED, and the run fails.
+- **`do_start`** requires a readable, non-empty `StartedAt` before the start (else no start), and a readable, non-empty, different one after it.
+- **The tests:** new fault cases (start before and after; finish empty, containers unlistable, volumes unlistable, a container left), and K0M with 6 weakened lines.
+- **The final on a clean checkout of `3eb05bc`:** `w4-selftest.sh` **PASSED**, 81/81 (K0 88/88; K0M 18 required failures; K1–K8), and the static checks passed.
+- **#47's stack:** #47 was tested on base `8101c5c`. A merge of this follow-up into #47 conflicts only in `docs/PROGRESS.md` (both PRs append a section). It is left unmerged while #47 is under review, as asked, and will be a plain merge.
+- **Next:** ChatGPT's verification; W4 is not cleared.

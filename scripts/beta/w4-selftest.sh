@@ -7,7 +7,8 @@
 #    after a failure, the sentinels kept.
 # K0M the meta-control: the same tests pointed at a copy of w4-control.sh with the reviewed defects put back must FAIL,
 #    on those cases: a stop judged by the CLI's exit alone, and a fresh branch that ignores the removal's outcome and
-#    does not check the volume's users (the original had neither check; either one alone catches an ignored removal).
+#    does not check the volume's users (the original had neither check; either one alone catches an ignored removal);
+#    review 6935889459: a start without a readable baseline, and an unlistable inventory read as 0.
 # K1 the W3 harness self-test's mock cases M1-M5 (scripts/beta/w3-harness-selftest.sh --mock-only), pointed at the W4
 #    harness: a failed docker run, a missing image, a container exiting early, a wrong revision and a failed
 #    authorization each fail without touching a pre-existing w3-svc, without authorizing after a failure, without
@@ -54,15 +55,21 @@ weak="$WORK/K0M-$TAG-w4-control-weakened.sh"
 sed -e 's/^  \[ "\$code" = 0 \] && \[ "\$status" = exited \] && \[ "\$running" = false \] && \[ "\$exitc" = 0 \] && \[ "\$oom" = false \]$/  [ "$code" = 0 ]   # WEAKENED: the CLI exit alone/' \
     -e 's/^  rmo=\$(remove_container "\$old") || { fail_answer .*$/  rmo=$(remove_container "$old")   # WEAKENED: the removal outcome ignored/' \
     -e 's/^    \[ -z "\$users" \] || { fail_answer .*$/    true   # WEAKENED: the volume'"'"'s users not checked/' \
+    -e 's|^  if ! before=\$(dk inspect.*$|  before=$(dk inspect -f "{{.State.StartedAt}}" "$cid" 2>/dev/null); if false; then   # WEAKENED: the baseline not checked|' \
+    -e 's~^  left_c=\$(count_owned containers) || left_c=.*$~  left_c=$(count_owned containers || echo 0)   # WEAKENED: an unlistable inventory read as 0~' \
+    -e 's~^  left_v=\$(count_owned volumes) || left_v=.*$~  left_v=$(count_owned volumes || echo 0)   # WEAKENED: an unlistable inventory read as 0~' \
     "$ROOT/scripts/beta/w4-control.sh" > "$weak"
 nweak=$(grep -c '# WEAKENED' "$weak")
-chk "K0M the defects were put back in the copy (3 weakened lines)" "$([ "$nweak" = 3 ] && echo 0 || echo 1)" "$nweak"
+chk "K0M the defects were put back in the copy (6 weakened lines)" "$([ "$nweak" = 6 ] && echo 0 || echo 1)" "$nweak"
 W4_CONTROL_FILE="$weak" timeout 300 bash "$ROOT/scripts/beta/w4-control-selftest.sh" > "$WORK/K0M-$TAG.log" 2>&1
 k0m=$?
 grep -E "^(FAIL|-- [0-9])" "$WORK/K0M-$TAG.log" | sed 's/^/     | /'
 chk "K0M the fault tests FAIL against the weakened copy" "$([ "$k0m" != 0 ] && grep -q '^W4 CONTROL SELFTEST FAILED' "$WORK/K0M-$TAG.log" && echo 0 || echo 1)" "exit $k0m"
 chk "K0M a forced exit (137) is caught: stop-forced and fresh-forced fail" "$(grep -q '^FAIL stop-forced fails closed' "$WORK/K0M-$TAG.log" && grep -q '^FAIL fresh-forced starts no replacement' "$WORK/K0M-$TAG.log" && echo 0 || echo 1)"
 chk "K0M an ignored removal is caught: fresh-removal-fails, fresh-removal-unconfirmed, fresh-not-ours and fresh-volume-in-use start a replacement and fail" "$(grep -q '^FAIL fresh-removal-fails starts no replacement' "$WORK/K0M-$TAG.log" && grep -q '^FAIL fresh-removal-unconfirmed starts no replacement' "$WORK/K0M-$TAG.log" && grep -q '^FAIL fresh-not-ours starts no replacement' "$WORK/K0M-$TAG.log" && grep -q '^FAIL fresh-volume-in-use starts no replacement' "$WORK/K0M-$TAG.log" && echo 0 || echo 1)"
+
+chk "K0M a start without a readable baseline is caught: start-before-unreadable and start-before-empty call docker start" "$(grep -q '^FAIL start-before-unreadable fails closed' "$WORK/K0M-$TAG.log" && grep -q '^FAIL start-before-empty fails closed' "$WORK/K0M-$TAG.log" && echo 0 || echo 1)"
+chk "K0M an unlistable inventory read as 0 is caught: finish-containers-unlistable and finish-volumes-unlistable PASS the run" "$(grep -q '^FAIL finish-containers-unlistable' "$WORK/K0M-$TAG.log" && grep -q '^FAIL finish-volumes-unlistable' "$WORK/K0M-$TAG.log" && echo 0 || echo 1)"
 
 echo "-- K1: the W3 mock cases against the W4 harness"
 timeout 600 bash "$ROOT/scripts/beta/w3-harness-selftest.sh" "$IMG" --mock-only --harness "$H" --work "$WORK/K1-$TAG" > "$WORK/K1-$TAG.log" 2>&1

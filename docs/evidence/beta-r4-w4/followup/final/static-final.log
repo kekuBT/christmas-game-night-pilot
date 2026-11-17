@@ -1,0 +1,25 @@
+# FINAL static checks on the clean checkout of 3eb05bc00c282455fb365857024424b7b7e986ee (status 0 lines), 2026-11-17T03:03:40Z
+## 1. everything changed since the reviewed head 8101c5c
+ docs/PROGRESS.md                                   |  16 ++
+ docs/beta/render-w4.md                             |   7 +-
+ docs/evidence/beta-r4-w4/README.md                 |  28 +++
+ docs/evidence/beta-r4-w4/followup/dev/control1.log | 214 ++++++++++++++++++++
+ docs/evidence/beta-r4-w4/followup/dev/k0m-dev1.log | 224 +++++++++++++++++++++
+ scripts/beta/w4-control-selftest.sh                |  52 ++++-
+ scripts/beta/w4-control.sh                         | 102 +++++++++-
+ scripts/beta/w4-rehearsal.sh                       |  68 -------
+ scripts/beta/w4-selftest.sh                        |  11 +-
+ 9 files changed, 644 insertions(+), 78 deletions(-)
+## 2. runtime files changed since 7097ac2 (empty = unchanged)
+(end)
+## 3. deploy files changed since 2e2257c (empty = unchanged)
+(end)
+## 4. tools other than the W4 ones changed since 8101c5c (empty = none)
+(end)
+## 5. lint and shell syntax
+eslint scripts/beta: exit 0
+shell syntax (scripts/beta/w4-control-selftest.sh scripts/beta/w4-control.sh scripts/beta/w4-rehearsal.sh scripts/beta/w4-selftest.sh ): ok
+## 6. relative links in the changed documents
+links: 30 missing: 0
+## 7. secret scan of the changes since 8101c5c
+(end of secret scan)

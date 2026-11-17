@@ -80,6 +80,41 @@ Labels: **rendered** is a page's own DOM; **API** is the server's record over HT
 
 **A false start, discarded:** the first static-check pass ran while `git worktree add` was still writing the clean checkout. It saw a partial tree, and its output was deleted. The self-test was not affected, because it starts only after the checkout completes. The checks were then rerun on the complete checkout (above).
 
+## The follow-up (review 6935889459)
+**The review found two more gaps** in the tooling tested at `5a5d287`, both reproduced with shell mocks.
+1. **The final cleanup could PASS with an unknown inventory.** `finish` piped each Docker inventory query straight into `wc -l`, so a failed or timed-out query (exit 124, no output) read as 0, and the run passed.
+2. **R1 could report a verified restart without a baseline.** `do_start` ignored the status of the first `StartedAt` read, so an unreadable or empty baseline followed by any later timestamp counted as "a new start".
+
+**The fixes, in `scripts/beta/w4-control.sh`:**
+- **The run's lifecycle moved there** (`listeners`, `owned_pids`, `stop_pid`, `cleanup`, `finish`). The fault tests now call the very `finish` the harness traps on exit.
+- **`count_owned containers|volumes`** checks each query's status:
+  - a failed query makes that inventory **UNVERIFIED**, never 0, and the run fails (exit nonzero);
+  - `cleanup` notes a listing it couldn't get, instead of reading it as "nothing left".
+- **`do_start`** requires a successful, non-empty `StartedAt` **before** `docker start`, and doesn't start the container without one. Afterwards it requires a successful, non-empty, **different** one.
+
+**The tests:**
+- **New fault cases in `w4-control-selftest.sh`:**
+  - `start-before-unreadable` and `start-before-empty`: they fail closed, and `docker start` is never called;
+  - `start-after-unreadable` and `start-after-empty`;
+  - `finish-empty`, the control: it passes, exit 0, with 0 and 0;
+  - `finish-containers-unlistable` and `finish-volumes-unlistable`, separately: each reads UNVERIFIED and fails, exit nonzero;
+  - `finish-container-left`: it counts 1, and fails.
+
+  The existing unchanged and successful start cases are kept.
+- **K0M** also puts the two new defects back (6 weakened lines), and requires those cases to fail.
+
+| Run (dev, before the tested commit) | Verdict | What it showed | Evidence |
+|---|---|---|---|
+| Fault tests | **PASSED, 88/88** | All the new start and finish cases fail closed as required; `finish-empty` passes; the sentinels are kept | [followup/dev/control1.log](followup/dev/control1.log) |
+| Meta-control (6 weakened lines) | **FAILED, as required:** 18 failures | With the defects put back: `start-before-unreadable` and `-empty` call `docker start`; `finish-containers-unlistable` and `finish-volumes-unlistable` **PASS the run with exit 0** (the review's reproduction); plus the earlier stop and removal cases | [followup/dev/k0m-dev1.log](followup/dev/k0m-dev1.log) |
+
+**The final, on a clean checkout of the tested commit `3eb05bc00c282455fb365857024424b7b7e986ee`** (status 0 lines; 0 containers and 0 volumes before and after):
+
+| Final | Verdict | Observed | Evidence |
+|---|---|---|---|
+| `w4-selftest.sh` | **W4 SELFTEST PASSED (exit 0)**, 81 passed, 0 failed | <ul><li>**K0:** 88/88 fault cases, including the new start and finish cases.</li><li>**K0M:** the weakened copy fails, 70 passed and 18 failed, including both new defects.</li><li>**K1:** the W3 mock cases pass.</li><li>**K2** `20261117T025941Z-8678b161`: PASSED. R1 a verified graceful stop and a new start recorded against a readable baseline; R2 a confirmed removal; G an isolated refusal, teardown 169 ms.</li><li>**K3** `…030017Z-37d20d02`: exactly six R2 failures.</li><li>**K4** `…030149Z-61d2d535`.</li><li>**K5** `…030150Z-38bfd73c`.</li><li>**K6** `…030152Z-99907040`.</li><li>**K7** `…030233Z-28e0b8c4`.</li><li>**K8** `…030313Z-bd456b7d`.</li><li>The sentinels survived every case.</li><li>Every run's final inventory was verified: 0 and 0.</li></ul> | [followup/final/selftest-final.log](followup/final/selftest-final.log); [K2's](followup/final/) and K3's JSON |
+| Static checks | **Passed** | <ul><li>No runtime file differs from `7097ac2`.</li><li>No deploy file differs from `2e2257c`.</li><li>No tool other than the W4 ones changed since `8101c5c`.</li><li>eslint and `bash -n` pass.</li><li>30 links, none missing.</li><li>The secret scan is empty.</li></ul> | [followup/final/static-final.log](followup/final/static-final.log) |
+
 ## Every run, in order
 | Run | Code | Verdict | Evidence |
 |---|---|---|---|
