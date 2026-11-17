@@ -96,7 +96,7 @@ Render facts were re-read from the official pages on **2026-11-17, 16:31Z**. The
 
 ### The one-click check: the synthetic-phase exception
 This is the architect's decision in review 6954485280. Execution still needs the owner's approval. It is stated identically in [render-w7.md](render-w7.md#the-synthetic-phase-exception).
-- **The condition:** the deliberate one-click check runs on **the single planned service**, so no second service and no extra cost. It runs **only while that service and its disk have never held family data or a real access code.** That means:
+- **The condition:** the deliberate one-click check runs on **the single planned service**. Reusing the service and disk avoids a second service or disk charge; the usual Render overages and tax may still apply (§3). It runs **only while that service and its disk have never held family data or a real access code.** That means:
   - the data folder is the throwaway `/var/data/cgn-w1`;
   - the code and the `age` identity are throwaway ones;
   - `/var/data/cgn` has never been authorized.

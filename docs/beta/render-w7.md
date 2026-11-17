@@ -156,7 +156,7 @@ The architect's decision is in review [6954485280](https://github.com/kekuBT/chr
    Render's daily snapshots from the synthetic phase hold only synthetic data, and expire after seven days.
 
 **Remaining prerequisites for that window:**
-- the owner's approval of the window (the execution decision). No second service or disk is created, so there's no spend beyond the approved $7.25 baseline;
+- the owner's approval of the window (the execution decision). Reusing the service and disk avoids a second service or disk charge. The usual Render overages and tax may still apply ([beta-r4-readiness.md](beta-r4-readiness.md) §3);
 - the exception's condition, checked first: no real data or real code has ever been on the service;
 - a throwaway access code and `age` identity created for it;
 - B-W7-01 for the revert-commit half (a second audited release);

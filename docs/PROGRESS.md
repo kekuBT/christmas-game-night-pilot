@@ -3965,3 +3965,8 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
   - the evidence template.
 - **The tool:** `scripts/beta/w7-owner-preview.sh`, the operator's: `inspect`, `prepare`, `probe`, `start`, `stop`, `backup`, `compat`, `check`, `status`, `cleanup`.
 - **The local test:** `docs/evidence/beta-r4-w7/owner-packet/`. W7 stays OPEN, and B-W7-01 is open.
+- **Reported in 6955277111** (the packet, tested `902407d`, head `8760d19`).
+
+## Beta R4: cost wording in the one-click exception (review 6954869766; docs only)
+- **Acknowledged** in 6955286653 at 12:13 p.m. ET. The estimate is about 10 min.
+- **`render-w7.md` and `beta-r4-readiness.md` §2** now agree with readiness §3: reusing the service and disk avoids a second service or disk charge, and the usual Render overages and tax may still apply. This replaces "no spend beyond the approved $7.25 baseline" and "no extra cost".
