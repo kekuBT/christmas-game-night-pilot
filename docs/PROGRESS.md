@@ -3673,7 +3673,8 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
   - a browser driver, `scripts/check-uncertain-delivery.mjs`, covering server down, committed and reply lost, a typed app error on a 5xx, and a real app rejection.
 - **The negative control:** on the unrepaired client the driver fails, 6 failures, all on the wording.
 - **The pin `7097ac2` is unchanged** until a candidate review.
-- **Next:**
-  1. the full gate on the clean SHA;
-  2. the report on the new PR, linked to #46 and #5.
+- **The final:** the full gate **PASSED (exit 0)**, 112 of 112, on a clean checkout of `f4c558f`, run `20261117-021501-f4c558f7-19428`.
+  - The unit tests: 2,077 passed.
+  - `check-uncertain-delivery`: 47 of 47.
+- **Next:** the report on #47, linked to #46 and #5, then ChatGPT's candidate review. The pin is unchanged.
 

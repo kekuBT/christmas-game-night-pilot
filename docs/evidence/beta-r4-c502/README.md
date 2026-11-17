@@ -35,3 +35,21 @@
 | Its A-502 screenshot | A finding about the evidence, not the app | The tapped tile was **mid-animation** (it animates back after a failed send) and overlapped its neighbours. The driver's next checks found every tile tappable. The driver now waits until the tiles are back in place before the screenshot, and that is checked. | |
 | Targeted 2: `uncertain-delivery` | PASSED (exit 0) | The tiles settled (no overlap) for 502, 503 and 504 | [gate](dev/targeted-dev2.log), [driver](dev/targeted-dev2-driver.log), [screenshot](screens/dev2-after-a-502-settled-390.png) |
 | The negative control (unrepaired client) | **FAILED, as required** | See above | |
+
+## The final (one run, on one revision)
+**A full gate on a clean checkout of the tested commit `f4c558f7dc589ec704ce3c9a2fbd008e94d3dc14`** (status 0 lines): `MCHEZO_CHROMIUM_PATH=<chrome-headless-shell 1243> node scripts/gate.mjs full`.
+
+**The verdict: PASSED (exit 0),** run `20261117-021501-f4c558f7-19428`.
+- **112 passed, 0 failed,** 0 timed out, 0 infrastructure, 0 invalid, 0 cancelled, 0 not run.
+- **Wall time:** 41 min 20 s, on 3 workers.
+- **The steps:**
+  - typecheck (server and web), lint and build;
+  - **unit tests: 163 files, 2,077 tests passed**, including the new intermediary cases in `tests/correctness.test.ts`;
+  - E2E (Chromium);
+  - every `scripts/check-*.mjs` driver, including **`check-uncertain-delivery`, all 47 checks passed** (A 502, 503, 504; B; C; D), and the unchanged `check-action-ack` and `check-errors`.
+
+**Evidence:**
+- [the gate log](final/gate-full-final.log) and [summary](final/summary.txt);
+- the logs: [unit tests](final/04-unit-tests.log), [uncertain-delivery](final/56-check-uncertain-delivery.log), [action-ack](final/76-check-action-ack.log), [errors](final/107-check-errors.log);
+- the screenshots: [A, 502, couldn't confirm](final/screens/a-502-couldnt-confirm-390.png) and [B, 502, committed, went through](final/screens/b-502-committed-went-through-390.png).
+
