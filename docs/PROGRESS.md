@@ -3919,3 +3919,24 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
     - both served pages' inline scripts, through `node --check`;
     - a synthetic local recording check: the label, dest and user fields are kept, an unknown label is dropped, and no cookie value, body or extra URL value is stored.
   - **Next:** the report on #50. ChatGPT runs the control in the private Codespace.
+- **Reported** in 6952076569 (the probe control, tested `20adc10`).
+- **Review 6952207048:**
+  - the tunnel diagnostic passed (`REWRITTEN_SAME_ORIGIN_ONLY`, twice);
+  - the owner's $10/month Codespaces budget fixed the billing blocker;
+  - ChatGPT's live browser audit was then blocked by its browser tool's URL policy;
+  - W7 stays INCOMPLETE.
+
+## Beta R4: readiness matrix and Render execution proposal (handoff 6954127832; planning only)
+- **Acknowledged** in 6954179846 at 11:31 a.m. ET. The estimate is about 75 min, plus 30 min of contingency.
+- **The document:** `docs/beta/beta-r4-readiness.md` (new; it reuses the existing runbooks). It contains:
+  - the readiness matrix, in four groups: product journeys, the B-W7-01 release pair (no provider needed), provider-only checks, and account prerequisites;
+  - the execution proposal: validate on `7097ac2`, then go forward to `72e9d8b` once it is audited, with W7 between the two;
+  - why the free tier doesn't fit;
+  - the owner decision (execution windows; the route and spend were already approved in 6919813048) and the cost (Render $7.25/month, plus Codespaces up to $10/month, scoped separately);
+  - the order of work before and after deployment;
+  - the smallest next step for the preview audit.
+- **Render terms** were re-read from the official pages at 2026-11-17 16:31Z, and are unchanged from 2026-11-16. The hashes are appended to `docs/evidence/beta-r4-hosting/render-fetch-log.txt`.
+- **Two precisions:**
+  - Render documents no bandwidth spend limit;
+  - Render doesn't document passing `Origin` through: it is expected, and W1 checks it.
+- **Unchanged:** no runtime, security, deploy or pin change. W7 stays OPEN, and there is no W8.

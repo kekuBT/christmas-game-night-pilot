@@ -11,6 +11,7 @@
     - It must stay otherwise empty: that is the way-in control below.
   - **The off-provider destination:** selected by the owner (a private folder), with access and owner-only sharing verified by ChatGPT.
   - **Still pending:** the transfer, receipt and restore with throwaway data (W5, W6); the owner's `age` key pair; W1–W8; native devices; the go/no-go.
+  - **2026-11-17:** the readiness matrix and the Render execution proposal are in [beta-r4-readiness.md](beta-r4-readiness.md) (handoff 6954127832). The Render terms used here were re-read that day and are unchanged.
 - **The requirement:** an independently hosted full website, with no dependency on a home computer. It supersedes the home-route (H1) prerequisite.
 - **Revision 5 (this one), for review 6918922306:** a run killed outright after its files exist.
   - **The fix:** each run now records what it may create before creating it, and every process it starts carries its token. Reconciliation (automatic at the start of every backup, or `cgn-backup reconcile`) removes an abandoned run's recorded files once none of its processes lives. It never touches a running run or any path no record lists.

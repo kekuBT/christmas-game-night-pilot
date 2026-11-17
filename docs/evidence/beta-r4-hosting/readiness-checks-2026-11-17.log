@@ -1,0 +1,26 @@
+== checks on the working tree (base 7c1590c), 2026-11-17T16:36:17Z
+-- relative links
+links: 35, missing: 0
+-- commands and paths named in the document
+present: scripts/beta/w7-pred-context.sh
+present: scripts/beta/w7-rehearsal.sh
+present: deploy/render/cgn-artifact-gate.sh
+present: deploy/render/cgn-authorize.sh
+present: deploy/render/cgn-backup.sh
+present: deploy/render/operator/cgn-receive.sh
+present: docs/device-testing/beta-go-no-go-DRAFT-7097ac2.md
+present: docs/evidence/gate-runs/20261116-035311-7097ac2b-9479
+present: W7_CURRENT_REVISION / W7_PREVIOUS_REVISION in w7-rehearsal.sh
+present: ARTIFACT_GATE_OK / INSTALLED_OK in the gate
+present: exit 78 in cgn-entrypoint.sh
+present: /health in src/server/http.ts
+present: HttpOnly and SameSite=Lax in src/server/access.ts
+src diff 7097ac2..72e9d8b: 0 file(s)
+-- secret scan of the changes
+no secret-shaped value or scratch path in the added lines
+-- scope
+ M docs/PROGRESS.md
+ M docs/beta/beta-r4-hosting-proposal.md
+ M docs/evidence/beta-r4-hosting/render-fetch-log.txt
+?? docs/beta/beta-r4-readiness.md
+the new document: no secret-shaped value or scratch path

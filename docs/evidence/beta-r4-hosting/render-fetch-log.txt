@@ -22,3 +22,22 @@
 2026-11-16T13:18:22Z 03c1fdeff32c28ff https://render.com/docs/team-members
 2026-11-16T13:18:22Z 146f8c53b789ae0d https://render.com/docs/inbound-ip-rules
 2026-11-16T13:18:23Z c187943f7c8749f1 https://render.com/docs/projects
+# 2026-11-17 re-read for handoff 6954127832 (docs/beta/beta-r4-readiness.md). Columns: HTTP status, bytes, time (UTC), first 16 hex digits of the page's SHA-256, URL. docs/disk-snapshots returned 404 and was not used.
+200 727395 2026-11-17T16:31:28Z 4e48f8021211e229 https://render.com/pricing
+200 370234 2026-11-17T16:31:29Z b712721b9263d799 https://render.com/docs/disks
+200 392277 2026-11-17T16:31:29Z 3e728c5adf8eee77 https://render.com/docs/free
+200 656340 2026-11-17T16:31:29Z cf58a9eee397b0a4 https://render.com/docs/websocket
+200 623958 2026-11-17T16:31:30Z d31b204987d536e2 https://render.com/docs/deploys
+200 511239 2026-11-17T16:31:30Z c7f0943441d4f925 https://render.com/docs/web-services
+200 318836 2026-11-17T16:31:30Z 2019423c077d4a42 https://render.com/docs/outbound-bandwidth
+200 341953 2026-11-17T16:31:31Z 9fc4aeb1ed2b8e02 https://render.com/docs/rollbacks
+200 478224 2026-11-17T16:31:32Z 70f5979940fbc9a7 https://render.com/docs/ssh
+200 326699 2026-11-17T16:31:32Z e85de15eded587eb https://render.com/docs/build-pipeline
+200 394634 2026-11-17T16:31:32Z feae3132309b2671 https://render.com/docs/health-checks
+200 334454 2026-11-17T16:31:33Z 5ee4bca812fcba9a https://render.com/docs/maintenance-mode
+200 345142 2026-11-17T16:31:33Z dee1b893259e803c https://render.com/docs/docker
+200 369903 2026-11-17T16:31:34Z ed4edf421edd1760 https://render.com/docs/private-network
+200 360070 2026-11-17T16:31:34Z ea63cde0489c9a7d https://render.com/docs/team-members
+200 515012 2026-11-17T16:31:34Z 15f54de41889b2b8 https://render.com/docs/environment-variables
+200 389930 2026-11-17T16:31:35Z 20237e098db7d2c7 https://render.com/docs/custom-domains
+404 169124 2026-11-17T16:31:35Z ab89149b8b505c58 https://render.com/docs/disk-snapshots
