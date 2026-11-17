@@ -1,0 +1,13 @@
+Review 6958719378 P1: do the copyable operator sequences stop at the first failure? Checker: runners/snippet-check.py.
+It reads the documents themselves, then:
+- runs every multi-command line (and every && span in a table) in bash, with a stub operator that fails each step in turn;
+- requires at most one state-changing line per fenced block, because a pasted block runs every line.
+
+before-31f68a2-docs.log  the checker of 4395f08 against the UNREPAIRED documents of 31f68a2: 10 PASS / 11 FAIL (exit 1).
+                         The rollback and return chains ran bstart after a failed stop, backup, compat or check, and still
+                         exited 0. The firefox line kept going too. The setup blocks held 3 and 6 state-changing lines.
+after-4395f08.log        a clean checkout of 4395f08 (0 tracked changes), the REPAIRED documents: 51 PASS / 0 FAIL (exit 0).
+                         For each chain: with no failure, every step runs in order (exit 0); failing step k, exactly steps
+                         1..k run and the exit is 9 (bstart/start never runs after a failure). Every block has at most
+                         one state-changing line.
+This is a documentation and sequence check with a stub operator. The tool and the runtime are unchanged.

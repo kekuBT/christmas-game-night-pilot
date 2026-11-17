@@ -1,0 +1,66 @@
+run 2026-11-17T19:36:47Z on a clean checkout of 4395f08d51641444f69ced34bb87dac1d3150a9c (tracked changes: 0); the REPAIRED documents
+== docs/beta/w7-routeb-recipe.md: 6 bash blocks, 0 table chains
+PASS block 1: at most one state-changing line (1: git clone --branch claude/beta-r4-w7-rollback --single-branc)
+PASS block 2: at most one state-changing line (1: $T prepare "$W" && $T routeb "$W" && $T bstart "$W" current)
+PASS block 3: at most one state-changing line (1: $T firefox "$W" host && $T firefox "$W" guest && $T firefox )
+PASS block 4: at most one state-changing line (1: $T stop "$W" && $T backup "$W" before-rollback && $T compat )
+PASS block 5: at most one state-changing line (1: $T stop "$W" && $T backup "$W" before-return && $T check "$W)
+PASS block 6: at most one state-changing line (1: $T cleanup "$W")
+-- chain: git clone --branch claude/beta-r4-w7-rollback --single-branch https://github.com/kekuBT/christmas-game-night-pilot "$W/src"  && git -C "$W/src" checkout --detach <the tested commit named in the report>  && bash "$W/src/scripts/beta/w7-owner-selftest.sh"
+PASS   all succeed: 3 steps in order, exit 0 -> git clone -> git -C -> w7-owner-selftest.sh
+PASS   step 1 (git clone) fails: exit 9 (must be non-zero); 1 of 3 steps ran (must be 1)
+PASS   step 2 (git -C) fails: exit 9 (must be non-zero); 2 of 3 steps ran (must be 2)
+PASS   step 3 (w7-owner-selftest.sh) fails: exit 9 (must be non-zero); 3 of 3 steps ran (must be 3)
+-- chain: $T prepare "$W" && $T routeb "$W" && $T bstart "$W" current
+PASS   all succeed: 3 steps in order, exit 0 -> w7-owner-preview.sh prepare /work -> w7-owner-preview.sh routeb /work -> w7-owner-preview.sh bstart /work current
+PASS   step 1 (w7-owner-preview.sh prepare /work) fails: exit 9 (must be non-zero); 1 of 3 steps ran (must be 1)
+PASS   step 2 (w7-owner-preview.sh routeb /work) fails: exit 9 (must be non-zero); 2 of 3 steps ran (must be 2)
+PASS   step 3 (w7-owner-preview.sh bstart /work current) fails: exit 9 (must be non-zero); 3 of 3 steps ran (must be 3)
+-- chain: $T firefox "$W" host && $T firefox "$W" guest && $T firefox "$W" tv
+PASS   all succeed: 3 steps in order, exit 0 -> w7-owner-preview.sh firefox /work host -> w7-owner-preview.sh firefox /work guest -> w7-owner-preview.sh firefox /work tv
+PASS   step 1 (w7-owner-preview.sh firefox /work host) fails: exit 9 (must be non-zero); 1 of 3 steps ran (must be 1)
+PASS   step 2 (w7-owner-preview.sh firefox /work guest) fails: exit 9 (must be non-zero); 2 of 3 steps ran (must be 2)
+PASS   step 3 (w7-owner-preview.sh firefox /work tv) fails: exit 9 (must be non-zero); 3 of 3 steps ran (must be 3)
+-- chain: $T stop "$W" && $T backup "$W" before-rollback && $T compat "$W" before-rollback && $T bstart "$W" previous
+PASS   all succeed: 4 steps in order, exit 0 -> w7-owner-preview.sh stop /work -> w7-owner-preview.sh backup /work before-rollback -> w7-owner-preview.sh compat /work before-rollback -> w7-owner-preview.sh bstart /work previous
+PASS   step 1 (w7-owner-preview.sh stop /work) fails: exit 9 (must be non-zero); 1 of 4 steps ran (must be 1)
+PASS   step 2 (w7-owner-preview.sh backup /work before-rollback) fails: exit 9 (must be non-zero); 2 of 4 steps ran (must be 2)
+PASS   step 3 (w7-owner-preview.sh compat /work before-rollback) fails: exit 9 (must be non-zero); 3 of 4 steps ran (must be 3)
+PASS   step 4 (w7-owner-preview.sh bstart /work previous) fails: exit 9 (must be non-zero); 4 of 4 steps ran (must be 4)
+-- chain: $T stop "$W" && $T backup "$W" before-return && $T check "$W" current && $T bstart "$W" current
+PASS   all succeed: 4 steps in order, exit 0 -> w7-owner-preview.sh stop /work -> w7-owner-preview.sh backup /work before-return -> w7-owner-preview.sh check /work current -> w7-owner-preview.sh bstart /work current
+PASS   step 1 (w7-owner-preview.sh stop /work) fails: exit 9 (must be non-zero); 1 of 4 steps ran (must be 1)
+PASS   step 2 (w7-owner-preview.sh backup /work before-return) fails: exit 9 (must be non-zero); 2 of 4 steps ran (must be 2)
+PASS   step 3 (w7-owner-preview.sh check /work current) fails: exit 9 (must be non-zero); 3 of 4 steps ran (must be 3)
+PASS   step 4 (w7-owner-preview.sh bstart /work current) fails: exit 9 (must be non-zero); 4 of 4 steps ran (must be 4)
+== docs/beta/w7-owner-test-packet.md: 3 bash blocks, 3 table chains
+PASS block 1: at most one state-changing line (1: git clone --branch claude/beta-r4-w7-rollback --single-branc)
+PASS block 2: at most one state-changing line (1: $T prepare "$W" && $T probe "$W")
+PASS block 3: at most one state-changing line (1: $T start "$W" current)
+-- chain: git clone --branch claude/beta-r4-w7-rollback --single-branch https://github.com/kekuBT/christmas-game-night-pilot "$W/src"  && git -C "$W/src" checkout --detach <this packet's commit, named in the report>  && bash "$W/src/scripts/beta/w7-owner-selftest.sh"
+PASS   all succeed: 3 steps in order, exit 0 -> git clone -> git -C -> w7-owner-selftest.sh
+PASS   step 1 (git clone) fails: exit 9 (must be non-zero); 1 of 3 steps ran (must be 1)
+PASS   step 2 (git -C) fails: exit 9 (must be non-zero); 2 of 3 steps ran (must be 2)
+PASS   step 3 (w7-owner-selftest.sh) fails: exit 9 (must be non-zero); 3 of 3 steps ran (must be 3)
+-- chain: $T prepare "$W" && $T probe "$W"
+PASS   all succeed: 2 steps in order, exit 0 -> w7-owner-preview.sh prepare /work -> w7-owner-preview.sh probe /work
+PASS   step 1 (w7-owner-preview.sh prepare /work) fails: exit 9 (must be non-zero); 1 of 2 steps ran (must be 1)
+PASS   step 2 (w7-owner-preview.sh probe /work) fails: exit 9 (must be non-zero); 2 of 2 steps ran (must be 2)
+-- chain: $T stop "$W" && $T backup "$W" before-rollback && $T compat "$W" before-rollback && $T start "$W" previous
+PASS   all succeed: 4 steps in order, exit 0 -> w7-owner-preview.sh stop /work -> w7-owner-preview.sh backup /work before-rollback -> w7-owner-preview.sh compat /work before-rollback -> w7-owner-preview.sh start /work previous
+PASS   step 1 (w7-owner-preview.sh stop /work) fails: exit 9 (must be non-zero); 1 of 4 steps ran (must be 1)
+PASS   step 2 (w7-owner-preview.sh backup /work before-rollback) fails: exit 9 (must be non-zero); 2 of 4 steps ran (must be 2)
+PASS   step 3 (w7-owner-preview.sh compat /work before-rollback) fails: exit 9 (must be non-zero); 3 of 4 steps ran (must be 3)
+PASS   step 4 (w7-owner-preview.sh start /work previous) fails: exit 9 (must be non-zero); 4 of 4 steps ran (must be 4)
+-- chain: $T stop "$W" && $T backup "$W" before-return && $T check "$W" current && $T start "$W" current
+PASS   all succeed: 4 steps in order, exit 0 -> w7-owner-preview.sh stop /work -> w7-owner-preview.sh backup /work before-return -> w7-owner-preview.sh check /work current -> w7-owner-preview.sh start /work current
+PASS   step 1 (w7-owner-preview.sh stop /work) fails: exit 9 (must be non-zero); 1 of 4 steps ran (must be 1)
+PASS   step 2 (w7-owner-preview.sh backup /work before-return) fails: exit 9 (must be non-zero); 2 of 4 steps ran (must be 2)
+PASS   step 3 (w7-owner-preview.sh check /work current) fails: exit 9 (must be non-zero); 3 of 4 steps ran (must be 3)
+PASS   step 4 (w7-owner-preview.sh start /work current) fails: exit 9 (must be non-zero); 4 of 4 steps ran (must be 4)
+-- chain: $T stop "$W" && $T cleanup "$W"
+PASS   all succeed: 2 steps in order, exit 0 -> w7-owner-preview.sh stop /work -> w7-owner-preview.sh cleanup /work
+PASS   step 1 (w7-owner-preview.sh stop /work) fails: exit 9 (must be non-zero); 1 of 2 steps ran (must be 1)
+PASS   step 2 (w7-owner-preview.sh cleanup /work) fails: exit 9 (must be non-zero); 2 of 2 steps ran (must be 2)
+== snippet check: every check passed
+exit 0

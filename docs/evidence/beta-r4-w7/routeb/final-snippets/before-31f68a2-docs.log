@@ -1,0 +1,29 @@
+run 2026-11-17T19:36:48Z with the checker of the clean checkout 4395f08d51641444f69ced34bb87dac1d3150a9c, against the UNREPAIRED documents of 31f68a2 (git show 31f68a2:docs/beta/<file>)
+== w7-routeb-recipe.md: 6 bash blocks, 0 table chains
+FAIL block 1: at most one state-changing line (3: git clone --branch claude/beta-r4-w7-rollback --single-branc | git -C "$W/src" checkout --detach <the tested commit named i | bash "$W/src/scripts/beta/w7-owner-selftest.sh")
+FAIL block 2: at most one state-changing line (3: $T prepare "$W" | $T routeb "$W" | $T bstart "$W" current)
+PASS block 3: at most one state-changing line (1: $T firefox "$W" host;  $T firefox "$W" guest;  $T firefox "$)
+PASS block 4: at most one state-changing line (1: $T stop "$W"; $T backup "$W" before-rollback; $T compat "$W")
+PASS block 5: at most one state-changing line (1: $T stop "$W"; $T backup "$W" before-return; $T check "$W" cu)
+PASS block 6: at most one state-changing line (1: $T cleanup "$W")
+-- chain: $T firefox "$W" host;  $T firefox "$W" guest;  $T firefox "$W" tv
+PASS   all succeed: 3 steps in order, exit 0 -> w7-owner-preview.sh firefox /work host -> w7-owner-preview.sh firefox /work guest -> w7-owner-preview.sh firefox /work tv
+FAIL   step 1 (w7-owner-preview.sh firefox /work host) fails: exit 0 (must be non-zero); 3 of 3 steps ran (must be 1) -> also ran: w7-owner-preview.sh firefox /work guest | w7-owner-preview.sh firefox /work tv
+FAIL   step 2 (w7-owner-preview.sh firefox /work guest) fails: exit 0 (must be non-zero); 3 of 3 steps ran (must be 2) -> also ran: w7-owner-preview.sh firefox /work tv
+PASS   step 3 (w7-owner-preview.sh firefox /work tv) fails: exit 9 (must be non-zero); 3 of 3 steps ran (must be 3)
+-- chain: $T stop "$W"; $T backup "$W" before-rollback; $T compat "$W" before-rollback; $T bstart "$W" previous
+PASS   all succeed: 4 steps in order, exit 0 -> w7-owner-preview.sh stop /work -> w7-owner-preview.sh backup /work before-rollback -> w7-owner-preview.sh compat /work before-rollback -> w7-owner-preview.sh bstart /work previous
+FAIL   step 1 (w7-owner-preview.sh stop /work) fails: exit 0 (must be non-zero); 4 of 4 steps ran (must be 1) -> also ran: w7-owner-preview.sh backup /work before-rollback | w7-owner-preview.sh compat /work before-rollback | w7-owner-preview.sh bstart /work previous
+FAIL   step 2 (w7-owner-preview.sh backup /work before-rollback) fails: exit 0 (must be non-zero); 4 of 4 steps ran (must be 2) -> also ran: w7-owner-preview.sh compat /work before-rollback | w7-owner-preview.sh bstart /work previous
+FAIL   step 3 (w7-owner-preview.sh compat /work before-rollback) fails: exit 0 (must be non-zero); 4 of 4 steps ran (must be 3) -> also ran: w7-owner-preview.sh bstart /work previous
+PASS   step 4 (w7-owner-preview.sh bstart /work previous) fails: exit 9 (must be non-zero); 4 of 4 steps ran (must be 4)
+-- chain: $T stop "$W"; $T backup "$W" before-return; $T check "$W" current; $T bstart "$W" current
+PASS   all succeed: 4 steps in order, exit 0 -> w7-owner-preview.sh stop /work -> w7-owner-preview.sh backup /work before-return -> w7-owner-preview.sh check /work current -> w7-owner-preview.sh bstart /work current
+FAIL   step 1 (w7-owner-preview.sh stop /work) fails: exit 0 (must be non-zero); 4 of 4 steps ran (must be 1) -> also ran: w7-owner-preview.sh backup /work before-return | w7-owner-preview.sh check /work current | w7-owner-preview.sh bstart /work current
+FAIL   step 2 (w7-owner-preview.sh backup /work before-return) fails: exit 0 (must be non-zero); 4 of 4 steps ran (must be 2) -> also ran: w7-owner-preview.sh check /work current | w7-owner-preview.sh bstart /work current
+FAIL   step 3 (w7-owner-preview.sh check /work current) fails: exit 0 (must be non-zero); 4 of 4 steps ran (must be 3) -> also ran: w7-owner-preview.sh bstart /work current
+PASS   step 4 (w7-owner-preview.sh bstart /work current) fails: exit 9 (must be non-zero); 4 of 4 steps ran (must be 4)
+== w7-owner-test-packet.md: 1 bash blocks, 0 table chains
+FAIL block 1: at most one state-changing line (6: git clone --branch claude/beta-r4-w7-rollback --single-branc | git -C "$W/src" checkout --detach <this packet's commit, nam | bash "$W/src/scripts/beta/w7-owner-selftest.sh" | $T prepare "$W" | $T probe "$W" | $T start "$W" current)
+== snippet check: 11 FAILED
+exit 1
