@@ -3951,3 +3951,17 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
   4. **§5 keeps its uncertainty:** the owner's address bar and the error-page explanation are hypotheses. No new navigation is asserted as permitted, and the audit isn't relocated. ChatGPT owns the browser restriction, and the owner owns any audit-location exception.
   5. **The $0 statement** is narrowed to the existing application on Render's free web-service tier. Report 6954353201's mangled log links are repaired.
 - **Unchanged:** no runtime, security, deploy or pin change. W7 stays OPEN, and there is no W8.
+- **Reported in 6954773296** (head `a9965dc`, docs only); linked on #5 in 6954791513.
+
+## Beta R4 W7: the owner-run browser test packet (handoff 6954764073)
+- **Acknowledged** in 6954815435 at 11:55 a.m. ET. The estimate is about 75 min.
+- **The handoff:** the owner accepted owner-run browser testing, reviewed by ChatGPT, in place of ChatGPT's interactive audit, for this checkpoint only. It is recorded as owner-run evidence, never independent. It changes the tester only.
+- **The packet:** `docs/beta/w7-owner-test-packet.md`. It covers:
+  - the phases and their identities: `988c535`, an unaudited local pack, inventory `4f58b323…`; and `7097ac2`, rebuilt, inventory equal to the audited `fe6d74f8…`. They are a LOCAL SURROGATE pair (D-R4W7-01);
+  - the route's feasibility: route A in the owner's own browser, opened at the forwarded `https` address, with Gate R (the probe in that session). It fails closed, and the exact blocker is named;
+  - the operator's steps in the existing Codespace;
+  - the owner's checklist O1–O7;
+  - the W7 pause points P1–P3;
+  - the evidence template.
+- **The tool:** `scripts/beta/w7-owner-preview.sh`, the operator's: `inspect`, `prepare`, `probe`, `start`, `stop`, `backup`, `compat`, `check`, `status`, `cleanup`.
+- **The local test:** `docs/evidence/beta-r4-w7/owner-packet/`. W7 stays OPEN, and B-W7-01 is open.

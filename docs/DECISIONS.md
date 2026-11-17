@@ -2357,3 +2357,16 @@ Handoff 6813167965 (with the Stage 9.2 clearance). Spec: `docs/stage9/stage93.md
     - **Changing the server or the retry count:** out of scope, and not needed.
   - **The release pin `7097ac2` is unchanged** until an explicit candidate review.
 
+
+## Beta R4 W7: the owner-run browser test packet (handoff 6954764073; docs/beta/w7-owner-test-packet.md)
+- **D-R4W7-01 The packet's previous phase is a local rebuild of `7097ac2`, checked against the audited inventory.**
+  - **The pair:** the current phase is `988c535`, the runtime review candidate. The previous phase is `7097ac2`, rebuilt locally. Its 144-file inventory must equal the audited `fe6d74f8…`, and `prepare` refuses to serve otherwise.
+  - **Why:**
+    - `7097ac2` is the real rollback target;
+    - its files can be checked against the audited record;
+    - it has the same server as `988c535` (`git diff 7097ac2 988c535 -- src` is empty). Compatibility is still checked (`compat`, `check`).
+  - **Its label:** a LOCAL SURROGATE pair, since the current side is an unaudited local pack. It can't clear B-W7-01.
+  - **Alternatives:**
+    - **The rehearsal's `f93e9cb` surrogate:** rejected. It has no audited identity to check, and it isn't the rollback target.
+    - **The audited archive bytes `a693c543…`, where the operator holds them:** better, but not implemented. The tool builds from source, and `prepare`'s inventory check covers the same files.
+  - **Reversible:** the pair is two constants in `scripts/beta/w7-owner-preview.sh`.
