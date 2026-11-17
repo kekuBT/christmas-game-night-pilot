@@ -1,0 +1,133 @@
+# clean detached checkout of 0c42ed6564c1f920653e82233d828102d8091269 (git status --porcelain: 0 lines before and after), node_modules symlinked from the #47 worktree
+# command: bash int-checks.sh <checkout>   (runners/int-checks.sh)
+# integration checks on the clean checkout of 0c42ed6564c1f920653e82233d828102d8091269 (status 0 lines), 2026-11-17T03:48:04Z
+## 1. ancestry
+0c42ed6564c1f920653e82233d828102d8091269 parents: d811ed9bf9a8036fb35a64def8765f24888afaa4  Beta R4: integrated stack record (#47 + #46, handoff 6936988676)
+d811ed9bf9a8036fb35a64def8765f24888afaa4 parents: e577579cae3003bfbce93dea607190e901f0a9fb e6cbe110af673b32d5dbbc245988b3f7a853a251  Merge #46 W4 follow-up (e6cbe11) into #47 (handoff 6936988676)
+PASS the candidate's parent is the merge d811ed9bf9a8036fb35a64def8765f24888afaa4
+PASS the merge's parents are #47 e577579cae3003bfbce93dea607190e901f0a9fb and #46 e6cbe110af673b32d5dbbc245988b3f7a853a251, in that order
+PASS merge base of the two heads is 8101c5cb8a493aefc93f1edbf6cdb9d8bc1c2dfe
+PASS 72e9d8ba59ef3271d756bc2bf77b40ea4d6ee74d is an ancestor of the candidate
+PASS e577579cae3003bfbce93dea607190e901f0a9fb is an ancestor of the candidate
+PASS 3eb05bc00c282455fb365857024424b7b7e986ee is an ancestor of the candidate
+PASS e6cbe110af673b32d5dbbc245988b3f7a853a251 is an ancestor of the candidate
+PASS 8101c5cb8a493aefc93f1edbf6cdb9d8bc1c2dfe is an ancestor of the candidate
+## 2. reviewed tested -> head deltas (names; docs/evidence only expected)
+-- 72e9d8ba59ef3271d756bc2bf77b40ea4d6ee74d..e577579cae3003bfbce93dea607190e901f0a9fb
+docs/PROGRESS.md
+docs/evidence/beta-r4-c502/README.md
+docs/evidence/beta-r4-c502/repair/final/check-action-ack.log
+docs/evidence/beta-r4-c502/repair/final/check-errors.log
+docs/evidence/beta-r4-c502/repair/final/check-uncertain-delivery.log
+docs/evidence/beta-r4-c502/repair/final/gate-fast-final.log
+docs/evidence/beta-r4-c502/repair/final/gate-targeted-final.log
+docs/evidence/beta-r4-c502/repair/final/screens/a-502-couldnt-confirm-390.png
+docs/evidence/beta-r4-c502/repair/final/screens/b-502-committed-went-through-390.png
+docs/evidence/beta-r4-c502/repair/final/screens/e-502-gateway-json-couldnt-confirm-390.png
+docs/evidence/beta-r4-c502/repair/final/unit-tests.log
+PASS #47 tested->head touches nothing outside docs/ (empty)
+-- 3eb05bc00c282455fb365857024424b7b7e986ee..e6cbe110af673b32d5dbbc245988b3f7a853a251
+docs/PROGRESS.md
+docs/evidence/beta-r4-w4/README.md
+docs/evidence/beta-r4-w4/followup/final/K2-w4-20261117T025943-529c9a.json
+docs/evidence/beta-r4-w4/followup/final/K3-w4-20261117T030018-0e5341.json
+docs/evidence/beta-r4-w4/followup/final/selftest-final.log
+docs/evidence/beta-r4-w4/followup/final/static-final.log
+PASS #46 tested->head touches nothing outside docs/ (empty)
+## 3. runtime, tests, manifests, gate and drivers vs the reviewed 72e9d8b (acceptance 1)
+PASS apps/ and src/ identical to 72e9d8ba59ef3271d756bc2bf77b40ea4d6ee74d (empty)
+PASS tests/, package*.json, tsconfig*, scripts/ outside scripts/beta identical to 72e9d8ba59ef3271d756bc2bf77b40ea4d6ee74d (empty)
+## 4. W4 tooling vs the reviewed e6cbe11 / tested 3eb05bc (acceptance 1)
+PASS scripts/beta/ identical to e6cbe110af673b32d5dbbc245988b3f7a853a251 (empty)
+PASS scripts/beta/ identical to 3eb05bc00c282455fb365857024424b7b7e986ee (empty)
+## 5. deploy/ and the pin (acceptance 2)
+PASS deploy/ identical to e577579cae3003bfbce93dea607190e901f0a9fb (empty)
+PASS deploy/ identical to e6cbe110af673b32d5dbbc245988b3f7a853a251 (empty)
+PASS deploy/ identical to 2e2257c (the accepted deployment scripts) (empty)
+29:REVISION=7097ac2bb062925bb296a129f4771f1e68fd522d
+scripts/beta/w4-rehearsal.sh:41:PIN=7097ac2bb062925bb296a129f4771f1e68fd522d
+scripts/beta/w4-control-selftest.sh:30:PIN=7097ac2bb062925bb296a129f4771f1e68fd522d
+PASS the artifact gate's REVISION is the pin
+PASS the W4 harness's PIN is the pin
+a693c5433d8dd8c17368e9c02fd8092b316d67b6e62ac9c0070a60b99c3a5131  mchezo-7097ac2.tgz
+## 6. the whole candidate vs each reviewed side
+-- vs 72e9d8ba59ef3271d756bc2bf77b40ea4d6ee74d (expect docs/ and scripts/beta/w4-* only)
+M	docs/PROGRESS.md
+M	docs/beta/render-w4.md
+M	docs/evidence/beta-r4-c502/README.md
+A	docs/evidence/beta-r4-c502/repair/final/check-action-ack.log
+A	docs/evidence/beta-r4-c502/repair/final/check-errors.log
+A	docs/evidence/beta-r4-c502/repair/final/check-uncertain-delivery.log
+A	docs/evidence/beta-r4-c502/repair/final/gate-fast-final.log
+A	docs/evidence/beta-r4-c502/repair/final/gate-targeted-final.log
+A	docs/evidence/beta-r4-c502/repair/final/screens/a-502-couldnt-confirm-390.png
+A	docs/evidence/beta-r4-c502/repair/final/screens/b-502-committed-went-through-390.png
+A	docs/evidence/beta-r4-c502/repair/final/screens/e-502-gateway-json-couldnt-confirm-390.png
+A	docs/evidence/beta-r4-c502/repair/final/unit-tests.log
+A	docs/evidence/beta-r4-integration/README.md
+M	docs/evidence/beta-r4-w4/README.md
+A	docs/evidence/beta-r4-w4/followup/dev/control1.log
+A	docs/evidence/beta-r4-w4/followup/dev/k0m-dev1.log
+A	docs/evidence/beta-r4-w4/followup/final/K2-w4-20261117T025943-529c9a.json
+A	docs/evidence/beta-r4-w4/followup/final/K3-w4-20261117T030018-0e5341.json
+A	docs/evidence/beta-r4-w4/followup/final/selftest-final.log
+A	docs/evidence/beta-r4-w4/followup/final/static-final.log
+M	scripts/beta/w4-control-selftest.sh
+M	scripts/beta/w4-control.sh
+M	scripts/beta/w4-rehearsal.sh
+M	scripts/beta/w4-selftest.sh
+PASS vs 72e9d8ba59ef3271d756bc2bf77b40ea4d6ee74d: nothing outside docs/ and scripts/beta/w4-* (empty)
+-- vs e6cbe110af673b32d5dbbc245988b3f7a853a251 (expect #47's client fix, tests, driver and docs)
+M	apps/web/src/App.tsx
+M	apps/web/src/components/intentRetry.ts
+M	apps/web/src/ui/mchezo/lib/errors.ts
+M	docs/DECISIONS.md
+M	docs/PROGRESS.md
+M	docs/beta/render-w4.md
+A	docs/evidence/beta-r4-c502/README.md
+A	docs/evidence/beta-r4-c502/dev/before-unrepaired-driver.log
+A	docs/evidence/beta-r4-c502/dev/before-unrepaired-gate.log
+A	docs/evidence/beta-r4-c502/dev/targeted-dev1-driver.log
+A	docs/evidence/beta-r4-c502/dev/targeted-dev1.log
+A	docs/evidence/beta-r4-c502/dev/targeted-dev2-driver.log
+A	docs/evidence/beta-r4-c502/dev/targeted-dev2.log
+A	docs/evidence/beta-r4-c502/final/04-unit-tests.log
+A	docs/evidence/beta-r4-c502/final/107-check-errors.log
+A	docs/evidence/beta-r4-c502/final/56-check-uncertain-delivery.log
+A	docs/evidence/beta-r4-c502/final/76-check-action-ack.log
+A	docs/evidence/beta-r4-c502/final/gate-full-final.log
+A	docs/evidence/beta-r4-c502/final/screens/a-502-couldnt-confirm-390.png
+A	docs/evidence/beta-r4-c502/final/screens/b-502-committed-went-through-390.png
+A	docs/evidence/beta-r4-c502/final/summary.txt
+A	docs/evidence/beta-r4-c502/repair/dev/before-f4c558f-driver.log
+A	docs/evidence/beta-r4-c502/repair/dev/before-f4c558f-gate.log
+A	docs/evidence/beta-r4-c502/repair/dev/targeted-dev1-driver.log
+A	docs/evidence/beta-r4-c502/repair/dev/targeted-dev1.log
+A	docs/evidence/beta-r4-c502/repair/final/check-action-ack.log
+A	docs/evidence/beta-r4-c502/repair/final/check-errors.log
+A	docs/evidence/beta-r4-c502/repair/final/check-uncertain-delivery.log
+A	docs/evidence/beta-r4-c502/repair/final/gate-fast-final.log
+A	docs/evidence/beta-r4-c502/repair/final/gate-targeted-final.log
+A	docs/evidence/beta-r4-c502/repair/final/screens/a-502-couldnt-confirm-390.png
+A	docs/evidence/beta-r4-c502/repair/final/screens/b-502-committed-went-through-390.png
+A	docs/evidence/beta-r4-c502/repair/final/screens/e-502-gateway-json-couldnt-confirm-390.png
+A	docs/evidence/beta-r4-c502/repair/final/unit-tests.log
+A	docs/evidence/beta-r4-c502/repair/screens/before-f4c558f-e-502-gateway-json-390.png
+A	docs/evidence/beta-r4-c502/repair/screens/dev-after-e-502-gateway-json-390.png
+A	docs/evidence/beta-r4-c502/screens/before-a-502-unrepaired-390.png
+A	docs/evidence/beta-r4-c502/screens/dev2-after-a-502-settled-390.png
+A	docs/evidence/beta-r4-integration/README.md
+A	scripts/check-uncertain-delivery.mjs
+M	tests/correctness.test.ts
+M	tests/errors.test.ts
+PASS vs e6cbe110af673b32d5dbbc245988b3f7a853a251: nothing outside docs/, the 3 client files, the 2 test files and the driver (empty)
+## 7. lint and shell syntax of the W4 tooling
+PASS eslint scripts/beta (exit 0)
+PASS bash -n scripts/beta/*.sh (8 files)
+## 8. relative links in the documents this integration changed
+links: 62 missing: 0
+PASS no missing relative link
+## 9. secret scan of the changes since each reviewed head
+PASS no secret-shaped string in the added lines
+## verdict
+INTEGRATION CHECKS PASSED

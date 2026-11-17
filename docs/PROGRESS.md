@@ -3703,11 +3703,19 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
 - **#47's stack:** #47 was tested on base `8101c5c`. A merge of this follow-up into #47 conflicts only in `docs/PROGRESS.md` (both PRs append a section). It is left unmerged while #47 is under review, as asked, and will be a plain merge.
 - **Next:** ChatGPT's verification; W4 is not cleared.
 
-## Beta R4: the integrated stack, #47 + #46 (handoff 6936988676; in progress)
+## Beta R4: the integrated stack, #47 + #46 (handoff 6936988676; complete, tested `0c42ed6`)
 - **Acknowledged** in 6937528275 at 10:42 p.m. ET, with a 55 min estimate.
 - **The merge:** an ordinary `git merge --no-ff` of #46's reviewed head `e6cbe11` into #47's reviewed head `e577579` (merge base `8101c5c`), as merge commit `d811ed9`. No rebase, force-push or PR merge.
   - Only `docs/PROGRESS.md` conflicted. Both sections are kept unchanged.
   - `docs/beta/render-w4.md` merged automatically.
 - **The candidate:** the runtime and tests are identical to `72e9d8b`; the W4 tooling is identical to `e6cbe11`; `deploy/` is unchanged. The pin stays `7097ac2`.
 - **The plan:** focused validation on one clean checkout: the integration diffs, the W4 control mocks (K0, K0M), the fast gate, then the targeted uncertain-delivery, action-ack and errors gate. The record is `docs/evidence/beta-r4-integration/README.md`.
+- **The results** on a clean checkout of `0c42ed6`, run one after another:
+  - the integration checks **PASSED**, 25/25;
+  - the W4 control mocks **PASSED**, 7/7: K0 88/88, and K0M with its 18 required failures;
+  - the fast gate **PASSED (exit 0)**, `20261117-034840-0c42ed65-8445`, with 2,085 unit tests;
+  - the targeted gate **PASSED (exit 0)**, `20261117-034958-0c42ed65-12859`: `check-uncertain-delivery` 81/81, `action-ack` 52/52, `errors` 5/5.
+
+  No full gate was run, as the handoff asked.
 - **Unchanged:** the exact-pin W4 live audit stays OPEN, owned by ChatGPT. There is no W5 work and no deployment.
+- **Next:** the report on #47, linked on #5, then ChatGPT's review of the consolidated candidate.

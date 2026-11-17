@@ -45,4 +45,27 @@ No full historical gate is planned. The delta is tooling and documentation, and 
 
 ## Results
 
-(Recorded in the evidence commit after the candidate.)
+**The tested candidate: `0c42ed6564c1f920653e82233d828102d8091269`.** It was pushed before testing. Every step ran on one clean detached checkout of it, with `git status --porcelain` at 0 lines before and after. Its `node_modules` came from a symlink to the #47 worktree. The steps ran one after another: each started only after the previous one had exited. No other gate or unit run was active.
+
+| # | Step | Run | Verdict | What it showed | Raw evidence |
+| --- | --- | --- | --- | --- | --- |
+| 1 | Integration checks (`runners/int-checks.sh`) | 03:47Z | **INTEGRATION CHECKS PASSED (exit 0)**, 25 PASS, 0 FAIL | <ul><li>**Ancestry:** the candidate's parent is the merge; its parents are `e577579` then `e6cbe11`; the base is `8101c5c`; both tested SHAs are ancestors.</li><li>**Tested→head:** `72e9d8b..e577579` and `3eb05bc..e6cbe11` touch only `docs/`.</li><li>**Identical to `72e9d8b`:** `apps/`, `src/`, `tests/`, the package manifests, the TypeScript configs and `scripts/` outside `scripts/beta`.</li><li>**`scripts/beta/`:** identical to `e6cbe11` and to `3eb05bc`.</li><li>**`deploy/`:** identical to both heads and to `2e2257c`; `REVISION` and `PIN` are `7097ac2…`.</li><li>**The whole tree:** compared with `72e9d8b`, only `docs/` and `scripts/beta/w4-*` differ. Compared with `e6cbe11`, only `docs/`, the 3 client files, the 2 test files and the driver.</li><li>**Static:** `eslint scripts/beta` exit 0; `bash -n` passes on 8 files; 62 relative links, 0 missing; no secret-shaped string in the added lines.</li></ul> | [final/int-checks.log](final/int-checks.log) |
+| 2 | W4 control mocks: K0 and K0M (`runners/int-w4-mocks.sh`, running the candidate's own `w4-selftest.sh` lines 41–44 and 47–72) | tag `78ee00`, 03:48Z | **W4 CONTROL MOCKS PASSED (exit 0)**, 7 passed, 0 failed | <ul><li>**K0:** 88/88 fault cases fail closed (`W4 CONTROL SELFTEST PASSED`).</li><li>**K0M:** the 6 weakened lines were put back, and the tests FAIL as required, with 18 failures: forced exit, OOM, still running, both baseline cases, each ignored removal, and both unlistable inventories.</li><li>**Same as reviewed:** these match #46's reviewed final on `3eb05bc` (K0 88/88; K0M 18 required failures).</li><li>**Docker:** none was used (the daemon wasn't even running), and 0 containers and 0 volumes were left.</li></ul> | [final/w4-mocks.log](final/w4-mocks.log), [final/w4-mocks-K0.log](final/w4-mocks-K0.log), [final/w4-mocks-K0M.log](final/w4-mocks-K0M.log) |
+| 3 | `node scripts/gate.mjs fast` | `20261117-034840-0c42ed65-8445` | **PASSED (exit 0)**, 5/5 | typecheck (server and web), lint, build, **unit tests: 163 files, 2,085 tests passed**. Wall time 1 min 11 s. | [final/gate-fast.log](final/gate-fast.log), [final/unit-tests.log](final/unit-tests.log) |
+| 4 | `node scripts/gate.mjs targeted uncertain-delivery action-ack errors` (started after step 3 exited) | `20261117-034958-0c42ed65-12859` | **PASSED (exit 0)**, 5/5 | build, browser preflight, then three drivers:<ul><li>**`check-uncertain-delivery`:** 81 PASS, 0 FAIL ("UNCERTAIN DELIVERY ALL PASSED"), covering cases A–E and E-committed.</li><li>**`check-action-ack`:** 52 PASS, 0 FAIL.</li><li>**`check-errors`:** 5 PASS, 0 FAIL.</li></ul>Wall time 37 s. Chromium (chrome-headless-shell 153). | [final/gate-targeted.log](final/gate-targeted.log), [final/check-uncertain-delivery.log](final/check-uncertain-delivery.log), [final/check-action-ack.log](final/check-action-ack.log), [final/check-errors.log](final/check-errors.log), [final/screens/](final/screens/) |
+
+**No failed run.** Every run on the candidate is listed above, and each passed the first time.
+
+**The logs:** ANSI codes are stripped and the scratch path is shown as `<scratch>`. Nothing else was edited.
+
+**The screenshots** (390 px, from step 4) show what the client fix renders on the integrated build:
+- `a-502-couldnt-confirm-390.png`;
+- `b-502-committed-went-through-390.png`;
+- `e-502-gateway-json-couldnt-confirm-390.png`.
+
+## Limitations
+
+- **This is focused validation, not a full gate.** The last full gate of this client fix ran on `f4c558f`, and of the W4 tooling on its own SHAs. Neither is a test of this candidate. The decision was the handoff's: the delta is tooling and documentation.
+- **The W4 check here is the mock layer only (K0, K0M).** No real-Docker case (K1–K8) and no rehearsal of the pinned image ran on this candidate. The W4 tooling is byte-identical to the reviewed `3eb05bc`, whose full `w4-selftest.sh` (81/81) is the evidence for those, and is attributed there.
+- **The browser drivers are Chromium simulations,** on a developer machine against a local server. This is not Safari, not Android, not Render, and not the release pin `7097ac2`'s package.
+- **The exact-pin W4 live audit stays OPEN,** owned by ChatGPT. Nothing here clears it. There was no deployment, no W5 work and no account operation.
