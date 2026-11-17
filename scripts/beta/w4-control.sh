@@ -21,6 +21,11 @@
 #                 deadline; a server starting, any other exit, or the deadline is a failure. Then its container and
 #                 fixture volume are removed (labels read back first) and confirmed gone, and the data volume must
 #                 have had exactly one user, the container under test, before and after.
+# The run's lifecycle lives here too (review 6935889459), so the fault tests call the very functions the harness calls:
+#   cleanup       removes only this run's containers (label read back first), volumes and private files, and its
+#                 processes; a listing docker cannot give is noted, never read as "nothing left"
+#   finish        the EXIT trap: cleanup twice, then the inventory. count_owned checks each docker query's status: a
+#                 failed or timed-out query makes that inventory UNVERIFIED, and the run FAILS. Never read as 0.
 # Test-only knobs, for the self-tests' negative controls:
 #   W4_STOP_SECONDS   docker stop's grace period (default 30; 0 forces a SIGKILL)
 #   W4_GUARD_SECONDS  the guard probe's deadline (default 60)
@@ -69,6 +74,91 @@ remove_volume() {
   [ -z "$out" ] || { echo "volume $v (REMOVAL NOT CONFIRMED: still present)"; return 1; }
   volumes=$(printf ' %s ' $volumes | sed "s| $v | |g")
   echo "volume $v"
+}
+
+# How many of this run's containers or volumes are left: prints the count, or FAILS (status 1) when docker cannot say.
+count_owned() {
+  local out
+  case "$1" in
+    containers) out=$(dk ps -aq --no-trunc --filter "label=w4.owner=$RUNID" 2>/dev/null) || return 1 ;;
+    volumes) out=$(dk volume ls -q --filter "label=w4.owner=$RUNID" 2>/dev/null) || return 1 ;;
+    *) return 1 ;;
+  esac
+  printf '%s\n' "$out" | sed '/^$/d' | wc -l | tr -d ' '
+}
+
+# ---------------------------------------------------------------- the run's lifecycle (the harness's EXIT trap)
+listeners() {
+  awk -v want=" $HTTPS $HTTPP $BACK " 'FNR > 1 && $4 == "0A" { n = split($2, a, ":"); p = 0; h = toupper(a[n]);
+    for (i = 1; i <= length(h); i++) p = p * 16 + index("0123456789ABCDEF", substr(h, i, 1)) - 1;
+    if (index(want, " " p " ")) c++ } END { print c + 0 }' $(ls /proc/net/tcp /proc/net/tcp6 2>/dev/null)
+}
+owned_pids() {
+  local f p
+  for f in /proc/[0-9]*/environ; do
+    p=${f#/proc/}; p=${p%/environ}
+    [ "$p" = "$$" ] && continue
+    grep -qsaF "W4_OWNER=$RUNID" "$f" 2>/dev/null && echo "$p"
+  done
+}
+stop_pid() {
+  local p=$1
+  kill -0 "$p" 2>/dev/null || return 0
+  kill -TERM "$p" 2>/dev/null
+  for _ in $(seq 1 25); do kill -0 "$p" 2>/dev/null || return 0; sleep 0.2; done
+  kill -KILL "$p" 2>/dev/null
+}
+cleanup() {
+  cleanups=$((cleanups + 1))
+  local did="" left p id v
+  if [ -n "$driver_pid" ]; then stop_pid "$driver_pid"; wait "$driver_pid" 2>/dev/null; driver_pid=""; did="$did driver"; fi
+  if [ -n "$proxy_pid" ]; then stop_pid "$proxy_pid"; wait "$proxy_pid" 2>/dev/null; proxy_pid=""; did="$did proxy"; fi
+  left=$(owned_pids)
+  if [ -n "$left" ]; then for p in $left; do stop_pid "$p"; done; did="$did $(echo $left | wc -w)-more-owned-process(es)"; fi
+  # Every container of this run: the current one, and any other carrying this run's label (probes, a failed run).
+  local listed
+  listed=$(dk ps -aq --no-trunc --filter "label=w4.owner=$RUNID" 2>/dev/null) || { listed=""; did="$did (docker could not list this run's containers)"; }
+  for id in $cid $listed; do
+    case " $did " in *" ${id:0:12}"*) continue ;; esac
+    dk inspect "$id" >/dev/null 2>&1 || continue
+    did="$did $(remove_container "$id")"
+  done
+  cid=""
+  listed=$(dk volume ls -q --filter "label=w4.owner=$RUNID" 2>/dev/null) || { listed=""; did="$did (docker could not list this run's volumes)"; }
+  for v in $volumes $listed; do
+    case " $did " in *" volume $v"*) continue ;; esac
+    dk volume inspect "$v" >/dev/null 2>&1 || continue
+    if [ "$(vol_label_of "$v")" = "$RUNID" ]; then dk volume rm "$v" >/dev/null 2>&1 && did="$did volume $v" || did="$did volume $v (REMOVAL FAILED)"; fi
+  done
+  volumes=""
+  if [ -n "$PRIV" ] && [ -d "$PRIV" ]; then rm -rf -- "$PRIV"; did="$did private-files"; fi
+  PRIV=""
+  echo "   cleanup #$cleanups:${did:- nothing owned left to remove}"
+}
+finish() {
+  local code=$? left_c left_v left_p left_l leak=0 cookie=0 privleft
+  [ "$finished" = 1 ] && return
+  finished=1
+  trap - INT TERM
+  echo "-- cleanup (run $RUNID)"
+  cleanup
+  cleanup
+  # Review 6935889459: an inventory docker cannot give is UNVERIFIED, never 0, and the run fails.
+  left_c=$(count_owned containers) || left_c="UNVERIFIED (docker could not list this run's containers)"
+  left_v=$(count_owned volumes) || left_v="UNVERIFIED (docker could not list this run's volumes)"
+  left_p=$(owned_pids | wc -w)
+  if [ "$started" = 1 ]; then left_l=$(listeners); else left_l="not checked (this run started no listener)"; fi
+  privleft=no; [ -n "$privpath" ] && [ -e "$privpath" ] && privleft=yes
+  echo "   this run's containers left: $left_c; volumes left: $left_v; processes left: $left_p; listeners left on $HTTPS/$HTTPP/$BACK: $left_l; private files left: $privleft"
+  if [ -n "$CODE" ]; then leak=$(grep -rlF -f <(printf '%s\n' "$CODE") "$LOG" "$PLOG" "$EVD" 2>/dev/null | wc -l); fi
+  cookie=$(grep -rlE 'cgn_beta=[A-Za-z0-9_-]{8}' "$LOG" "$EVD" 2>/dev/null | wc -l)
+  echo "   files holding the access code: $leak; files holding a beta cookie value: $cookie"
+  if [ "$code" = 0 ] && [ "$rc" = 0 ] && [ "$left_c" = 0 ] && [ "$left_v" = 0 ] && [ "$left_p" = 0 ] && [ "$left_l" = 0 ] && [ "$privleft" = no ] && [ "$leak" = 0 ] && [ "$cookie" = 0 ]; then
+    echo "W4 REHEARSAL HARNESS PASSED"; exit 0
+  fi
+  echo "W4 REHEARSAL HARNESS FAILED"
+  if [ "$code" -gt 1 ]; then exit "$code"; fi
+  exit 1
 }
 
 # One container of this run on the given volume and public origin; prints its ID, or nothing.
@@ -121,10 +211,16 @@ do_start() {
   local seq=$1 st before after r
   st=$(dk inspect -f '{{.State.Status}} {{.State.Running}}' "$cid" 2>/dev/null) || st=""
   [ "$st" = "exited false" ] || { fail_answer "$seq" start "the container is not stopped (state '${st:-unreadable}'); it was not started"; return; }
-  before=$(dk inspect -f '{{.State.StartedAt}}' "$cid" 2>/dev/null)
+  # Review 6935889459: a restart is verified only against a readable baseline. Before the start, a successful, non-empty
+  # StartedAt (else the container is not started); after it, a successful, non-empty and DIFFERENT one.
+  if ! before=$(dk inspect -f '{{.State.StartedAt}}' "$cid" 2>/dev/null) || [ -z "$before" ]; then
+    fail_answer "$seq" start "the start time before the start could not be read ('${before:-}'); the container was not started"; return
+  fi
   timeout 60 docker start "$cid" >/dev/null 2>&1 || { fail_answer "$seq" start "docker start failed"; return; }
-  after=$(dk inspect -f '{{.State.StartedAt}}' "$cid" 2>/dev/null)
-  if [ -z "$after" ] || [ "$after" = "$before" ]; then fail_answer "$seq" start "no new start is recorded (StartedAt '${after:-unreadable}')"; return; fi
+  if ! after=$(dk inspect -f '{{.State.StartedAt}}' "$cid" 2>/dev/null) || [ -z "$after" ]; then
+    fail_answer "$seq" start "the start time after the start could not be read ('${after:-}')"; return
+  fi
+  [ "$after" != "$before" ] || { fail_answer "$seq" start "no new start is recorded (StartedAt unchanged: $after)"; return; }
   r=$(ready_check) || { fail_answer "$seq" start "$r"; return; }
   answer "$seq" "$(printf '{"ok":true,"action":"start","container":"%s","restarted":true,"revision":"%s","ms":%s}' "${cid:0:12}" "${r#ok }" "$(ms_since "$REQ_T0")")"
   echo "   [restart] start (the same container, stopped before, a new start recorded): $(cat "$PRIV/ctl/done-$seq")"

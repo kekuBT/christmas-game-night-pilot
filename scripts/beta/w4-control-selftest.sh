@@ -14,6 +14,12 @@
 #   guard   a guard that never exits (bounded by its deadline), a server that starts, an exit other than 78, a 78 without
 #           a REFUSED line, a failed teardown: each fails; the probe never mounts the data volume; its own container
 #           and fixture volume are removed (label read back first)
+# Review 6935889459:
+#   start   the start time cannot be read, or reads empty, BEFORE the start (docker start is then never called) or
+#           AFTER it: each fails closed
+#   finish  the harness's exit verdict: the containers' or the volumes' inventory cannot be listed (docker exits 124
+#           with no output): each makes that inventory UNVERIFIED and the run FAIL (exit nonzero); a container of the run
+#           left behind fails it; an empty inventory (the control) passes
 # plus the passing cases (a graceful stop, a recorded start, a clean fresh replacement, a refusing guard).
 # W4_CONTROL_FILE (default scripts/beta/w4-control.sh) exists only for w4-selftest.sh's meta-control, which points these
 # tests at a deliberately weakened copy (the two defects review 6935165862 reproduced) and requires them to FAIL.
@@ -50,7 +56,8 @@ case "$1" in
         [ "$(get "$id" 3)" = stopped ] && [ -n "${MOCK_INSPECT_FAIL_AFTER_STOP:-}" ] && exit 1
         if [ "$(get "$id" 3)" = stopped ]; then echo "${MOCK_STOP_STATE:-exited 0 false false}"; else echo "running 0 false true"; fi ;;
       *'.State.Status}} {{.State.Running'*) if [ "$(get "$id" 3)" = stopped ]; then echo "${MOCK_BEFORE_START:-exited false}"; else echo "running true"; fi ;;
-      *StartedAt*) get "$id" 6 ;;
+      *StartedAt*) if [ "$(get "$id" 3)" = stopped ]; then k=${MOCK_SA_BEFORE:-}; else k=${MOCK_SA_AFTER:-}; fi
+        case "$k" in fail) exit 1 ;; empty) echo ""; exit 0 ;; esac; get "$id" 6 ;;
       *'.State.Running'*) [ "$(get "$id" 3)" = running ] && echo true || echo false ;;
       *Mounts*) echo "$(get "$id" 2) " ;;
       *) echo "{}" ;;
@@ -61,7 +68,8 @@ case "$1" in
     case "$id" in ${MOCK_RM_FAIL:-__none__}*) exit 1 ;; esac
     case "$id" in ${MOCK_RM_KEEP:-__none__}*) exit 0 ;; esac
     rm -f "$M/c/$id"; exit 0 ;;
-  ps) shift; f=""; while [ $# -gt 0 ]; do [ "$1" = --filter ] && f=$2; shift; done
+  ps) [ -n "${MOCK_PS_RC:-}" ] && exit "$MOCK_PS_RC"
+    shift; f=""; while [ $# -gt 0 ]; do [ "$1" = --filter ] && f=$2; shift; done
     for c in "$M"/c/*; do [ -f "$c" ] || continue; id=${c##*/}
       case "$f" in
         id=*) [ "$id" = "${f#id=}" ] && echo "$id" ;;
@@ -83,7 +91,12 @@ case "$1" in
       create) v=${*: -1}; l=""; [ "$3" = --label ] && l=${4#*=}; echo "$l" > "$M/v/$v"; echo "$v" ;;
       inspect) v=${*: -1}; [ -f "$M/v/$v" ] && cat "$M/v/$v" || exit 1 ;;
       rm) v=${*: -1}; rm -f "$M/v/$v" ;;
-      ls) f=${*: -1}; n=${f#name=^}; n=${n%\$}; [ -f "$M/v/$n" ] && echo "$n"; exit 0 ;;
+      ls) [ -n "${MOCK_VOLLS_RC:-}" ] && exit "$MOCK_VOLLS_RC"
+        f=${*: -1}
+        case "$f" in
+          name=*) n=${f#name=^}; n=${n%\$}; [ -f "$M/v/$n" ] && echo "$n" ;;
+          label=*) for v in "$M"/v/*; do [ -f "$v" ] || continue; [ "w4.owner=$(cat "$v")" = "$f" ] && echo "${v##*/}"; done ;;
+        esac; exit 0 ;;
     esac ;;
   *) exit 0 ;;
 esac
@@ -148,6 +161,12 @@ run_case start-not-stopped start
 chk "start-not-stopped fails closed, and never calls docker start" "$([ "$(field .ok)" = false ] && [ "$(calls '^start ')" = 0 ] && echo 0 || echo 1)"; sentinel_ok start-not-stopped
 PRESET=stopped run_case start-same-startedat start MOCK_START_SAME=1
 chk "start-same-startedat fails closed: no new start recorded" "$([ "$(field .ok)" = false ] && echo 0 || echo 1)"; sentinel_ok start-same-startedat
+for b in unreadable:fail empty:empty; do
+  PRESET=stopped run_case "start-before-${b%%:*}" start "MOCK_SA_BEFORE=${b#*:}"
+  chk "start-before-${b%%:*} fails closed, and never calls docker start (no readable baseline)" "$([ "$(field .ok)" = false ] && [ "$(calls '^start ')" = 0 ] && echo 0 || echo 1)" "$(field .why | cut -c1-80)"; sentinel_ok "start-before-${b%%:*}"
+  PRESET=stopped run_case "start-after-${b%%:*}" start "MOCK_SA_AFTER=${b#*:}"
+  chk "start-after-${b%%:*} fails closed (the start time after the start is not readable)" "$([ "$(field .ok)" = false ] && echo 0 || echo 1)" "$(field .why | cut -c1-80)"; sentinel_ok "start-after-${b%%:*}"
+done
 # ---- fresh
 run_case fresh-ok fresh
 chk "fresh-ok replaces the container: graceful, removed, volume free, exactly one docker run after the removal" "$([ "$(field .ok)" = true ] && [ "$(field .graceful)" = true ] && [ "$(field .oldRemoved)" = true ] && [ "$(field .volumeFree)" = true ] && [ "$(calls '^run ')" = 1 ] && [ "$(grep -nE '^(rm|run) ' "$CASE/calls.log" | cut -d: -f2 | cut -c1-3 | tr '\n' ' ')" = "rm  run " ] && echo 0 || echo 1)"; sentinel_ok fresh-ok
@@ -178,6 +197,33 @@ run_case guard-78-no-refused guard-probe MOCK_LOGS=
 chk "guard-78-no-refused fails: exit 78 without a REFUSED line" "$([ "$(field .ok)" = false ] && echo 0 || echo 1)"; guard_common guard-78-no-refused
 run_case guard-teardown-fails guard-probe MOCK_RM_FAIL=guard
 chk "guard-teardown-fails fails: the probe's container could not be removed" "$([ "$(field .ok)" = false ] && echo 0 || echo 1)"; sentinel_ok guard-teardown-fails
+
+# ---- finish: the harness's exit verdict (the very finish and cleanup the harness traps on EXIT)
+run_finish() {   # <name> [VAR=value ...]
+  local name=$1; shift
+  CASE="$WORK/$name"; mkdir -p "$CASE/c" "$CASE/v" "$CASE/wk/evidence"; : > "$CASE/calls.log"
+  printf 'mockrun\nw4-data-mockrun-a\nstopped\n0\nfalse\nT0\nw4-svc-mockrun-1\n' > "$CASE/c/old-1"
+  printf 'someone-else\nsentinel-vol\nrunning\n0\nfalse\nT0\nw4-svc\n' > "$CASE/c/sentinel-1"
+  echo mockrun > "$CASE/v/w4-data-mockrun-a"; echo someone-else > "$CASE/v/sentinel-vol"
+  : > "$CASE/wk/run.log"; : > "$CASE/wk/proxy.log"
+  env "$@" PATH="$WORK/bin:$PATH" MOCK_DIR="$CASE" bash -c '
+    RUNID=mockrun HTTPS=1 HTTPP=2 BACK=3 cid=old-1 volumes=" w4-data-mockrun-a" driver_pid="" proxy_pid="" PRIV="" privpath="" CODE="" started=1 rc=0 cleanups=0 finished=0
+    LOG="$1/run.log" PLOG="$1/proxy.log" EVD="$1/evidence"
+    . "$2"
+    true; finish' _ "$CASE/wk" "$CONTROL" > "$CASE/out.log" 2>&1
+  CASE_RC=$?
+  echo "-- $name (finish; ${*:-no faults}) exit $CASE_RC"
+  sed 's/^/     | /' "$CASE/out.log"
+}
+inv() { grep -o "this run's containers left: [^;]*; volumes left: [^;]*" "$CASE/out.log"; }
+run_finish finish-empty
+chk "finish-empty (the control) PASSES, exit 0, with an inventory of 0 and 0" "$([ "$CASE_RC" = 0 ] && grep -q '^W4 REHEARSAL HARNESS PASSED' "$CASE/out.log" && [ "$(inv)" = "this run's containers left: 0; volumes left: 0" ] && echo 0 || echo 1)" "$(inv)"; sentinel_ok finish-empty
+run_finish finish-containers-unlistable MOCK_PS_RC=124
+chk "finish-containers-unlistable reports the containers as UNVERIFIED (never 0) and FAILS, exit nonzero" "$([ "$CASE_RC" != 0 ] && grep -q '^W4 REHEARSAL HARNESS FAILED' "$CASE/out.log" && inv | grep -q "containers left: UNVERIFIED" && echo 0 || echo 1)" "exit $CASE_RC; $(inv)"; sentinel_ok finish-containers-unlistable
+run_finish finish-volumes-unlistable MOCK_VOLLS_RC=124
+chk "finish-volumes-unlistable reports the volumes as UNVERIFIED (never 0) and FAILS, exit nonzero" "$([ "$CASE_RC" != 0 ] && grep -q '^W4 REHEARSAL HARNESS FAILED' "$CASE/out.log" && inv | grep -q "volumes left: UNVERIFIED" && inv | grep -q "containers left: 0;" && echo 0 || echo 1)" "exit $CASE_RC; $(inv)"; sentinel_ok finish-volumes-unlistable
+run_finish finish-container-left MOCK_RM_FAIL=old
+chk "finish-container-left: a container of the run that could not be removed is counted (1) and FAILS the run" "$([ "$CASE_RC" != 0 ] && inv | grep -q "containers left: 1;" && echo 0 || echo 1)" "exit $CASE_RC; $(inv)"; sentinel_ok finish-container-left
 
 echo "-- $passn passed, $failn failed"
 [ "$failn" = 0 ] && { echo "W4 CONTROL SELFTEST PASSED"; exit 0; }

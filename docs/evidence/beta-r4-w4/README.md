@@ -80,6 +80,34 @@ Labels: **rendered** is a page's own DOM; **API** is the server's record over HT
 
 **A false start, discarded:** the first static-check pass ran while `git worktree add` was still writing the clean checkout. It saw a partial tree, and its output was deleted. The self-test was not affected, because it starts only after the checkout completes. The checks were then rerun on the complete checkout (above).
 
+## The follow-up (review 6935889459)
+**The review found two more gaps** in the tooling tested at `5a5d287`, both reproduced with shell mocks.
+1. **The final cleanup could PASS with an unknown inventory.** `finish` piped each Docker inventory query straight into `wc -l`, so a failed or timed-out query (exit 124, no output) read as 0, and the run passed.
+2. **R1 could report a verified restart without a baseline.** `do_start` ignored the status of the first `StartedAt` read, so an unreadable or empty baseline followed by any later timestamp counted as "a new start".
+
+**The fixes, in `scripts/beta/w4-control.sh`:**
+- **The run's lifecycle moved there** (`listeners`, `owned_pids`, `stop_pid`, `cleanup`, `finish`). The fault tests now call the very `finish` the harness traps on exit.
+- **`count_owned containers|volumes`** checks each query's status:
+  - a failed query makes that inventory **UNVERIFIED**, never 0, and the run fails (exit nonzero);
+  - `cleanup` notes a listing it couldn't get, instead of reading it as "nothing left".
+- **`do_start`** requires a successful, non-empty `StartedAt` **before** `docker start`, and doesn't start the container without one. Afterwards it requires a successful, non-empty, **different** one.
+
+**The tests:**
+- **New fault cases in `w4-control-selftest.sh`:**
+  - `start-before-unreadable` and `start-before-empty`: they fail closed, and `docker start` is never called;
+  - `start-after-unreadable` and `start-after-empty`;
+  - `finish-empty`, the control: it passes, exit 0, with 0 and 0;
+  - `finish-containers-unlistable` and `finish-volumes-unlistable`, separately: each reads UNVERIFIED and fails, exit nonzero;
+  - `finish-container-left`: it counts 1, and fails.
+
+  The existing unchanged and successful start cases are kept.
+- **K0M** also puts the two new defects back (6 weakened lines), and requires those cases to fail.
+
+| Run (dev, before the tested commit) | Verdict | What it showed | Evidence |
+|---|---|---|---|
+| Fault tests | **PASSED, 88/88** | All the new start and finish cases fail closed as required; `finish-empty` passes; the sentinels are kept | [followup/dev/control1.log](followup/dev/control1.log) |
+| Meta-control (6 weakened lines) | **FAILED, as required:** 18 failures | With the defects put back: `start-before-unreadable` and `-empty` call `docker start`; `finish-containers-unlistable` and `finish-volumes-unlistable` **PASS the run with exit 0** (the review's reproduction); plus the earlier stop and removal cases | [followup/dev/k0m-dev1.log](followup/dev/k0m-dev1.log) |
+
 ## Every run, in order
 | Run | Code | Verdict | Evidence |
 |---|---|---|---|

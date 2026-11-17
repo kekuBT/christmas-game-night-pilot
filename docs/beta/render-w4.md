@@ -141,7 +141,7 @@ MCHEZO_CHROMIUM_PATH=<…> bash scripts/beta/w4-selftest.sh <packaged image tag>
   - **The restarts:** on the driver's request: `docker stop` (graceful `SIGTERM`, passed on by `cgn-entrypoint`), then `docker start` of the same container; or a **fresh container** on the same volume.
   - **The actions fail closed** (`w4-control.sh`, review 6935165862). Every docker call is bounded.
     - **A stop** counts only when the container reads back as `exited` with exit code 0, not OOM-killed. `docker stop` also exits 0 after it had to `SIGKILL` (exit 137), and that is a failure.
-    - **A start** needs a stopped container, and a new start time afterwards.
+    - **A start** needs a stopped container and a **readable, non-empty start time before it**, or the container isn't started. Afterwards it needs a readable, non-empty **different** start time (review 6935889459).
     - **A replacement** starts only when all of these hold:
       - the old container stopped gracefully;
       - it was removed, after its label read back as the run's, and confirmed gone;
@@ -150,6 +150,7 @@ MCHEZO_CHROMIUM_PATH=<…> bash scripts/beta/w4-selftest.sh <packaged image tag>
       After any failure, **no replacement starts**, and the driver stops the rehearsal there.
   - **After each restart:** readiness, the pinned `/health` revision, and the run's label.
   - **Isolation is W3's:** a run id; labelled containers and volumes, removed only when the label reads back as the run's; a port preflight; checked startup steps; owned processes; private, removed code and key files; cleanup run twice.
+  - **The final verdict** checks the status of each Docker query in its inventory of the run's containers and volumes. A list Docker can't give is reported as **UNVERIFIED**, never as 0, and the run **fails** (review 6935889459).
 - **The driver, `w4-rehearsal.mjs`,** with a host, a guest and a TV in Chromium. Its checks:
   - **S:** a seeded Memory Book note.
   - **P:** acknowledged answers before the first stop.
@@ -180,7 +181,9 @@ MCHEZO_CHROMIUM_PATH=<…> bash scripts/beta/w4-selftest.sh <packaged image tag>
   - **K0M, the meta-control:** the same tests, pointed at a copy with the reviewed defects put back, must FAIL on those cases. The defects:
     - a stop judged by the CLI's exit alone;
     - a removal's outcome ignored;
-    - no check of the volume's users.
+    - no check of the volume's users;
+    - a start without a readable baseline;
+    - an unlistable inventory read as 0.
   - **K1:** the W3 harness's mock cases M1–M5, pointed at the W4 harness.
   - **K2:** the rehearsal.
   - **K3, the negative control:** a fresh container on **empty** data must fail exactly the six continuity and durability checks after R2.

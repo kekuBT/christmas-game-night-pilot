@@ -49,75 +49,7 @@ cid=""; volumes=""; proxy_pid=""; driver_pid=""; PRIV=""; privpath=""; CODE=""; 
 # shellcheck source=scripts/beta/w4-control.sh
 . "$ROOT/scripts/beta/w4-control.sh" || { echo "cannot load scripts/beta/w4-control.sh" >&2; exit 2; }
 
-listeners() {
-  awk -v want=" $HTTPS $HTTPP $BACK " 'FNR > 1 && $4 == "0A" { n = split($2, a, ":"); p = 0; h = toupper(a[n]);
-    for (i = 1; i <= length(h); i++) p = p * 16 + index("0123456789ABCDEF", substr(h, i, 1)) - 1;
-    if (index(want, " " p " ")) c++ } END { print c + 0 }' $(ls /proc/net/tcp /proc/net/tcp6 2>/dev/null)
-}
-owned_pids() {
-  local f p
-  for f in /proc/[0-9]*/environ; do
-    p=${f#/proc/}; p=${p%/environ}
-    [ "$p" = "$$" ] && continue
-    grep -qsaF "W4_OWNER=$RUNID" "$f" 2>/dev/null && echo "$p"
-  done
-}
-stop_pid() {
-  local p=$1
-  kill -0 "$p" 2>/dev/null || return 0
-  kill -TERM "$p" 2>/dev/null
-  for _ in $(seq 1 25); do kill -0 "$p" 2>/dev/null || return 0; sleep 0.2; done
-  kill -KILL "$p" 2>/dev/null
-}
 fail() { echo "   FAILED at $stage: $*"; rc=1; exit 1; }
-cleanup() {
-  cleanups=$((cleanups + 1))
-  local did="" left p id v
-  if [ -n "$driver_pid" ]; then stop_pid "$driver_pid"; wait "$driver_pid" 2>/dev/null; driver_pid=""; did="$did driver"; fi
-  if [ -n "$proxy_pid" ]; then stop_pid "$proxy_pid"; wait "$proxy_pid" 2>/dev/null; proxy_pid=""; did="$did proxy"; fi
-  left=$(owned_pids)
-  if [ -n "$left" ]; then for p in $left; do stop_pid "$p"; done; did="$did $(echo $left | wc -w)-more-owned-process(es)"; fi
-  # Every container of this run: the current one, and any other carrying this run's label (probes, a failed run).
-  for id in $cid $(dk ps -aq --no-trunc --filter "label=w4.owner=$RUNID" 2>/dev/null); do
-    case " $did " in *" ${id:0:12}"*) continue ;; esac
-    dk inspect "$id" >/dev/null 2>&1 || continue
-    did="$did $(remove_container "$id")"
-  done
-  cid=""
-  for v in $volumes $(dk volume ls -q --filter "label=w4.owner=$RUNID" 2>/dev/null); do
-    case " $did " in *" volume $v"*) continue ;; esac
-    dk volume inspect "$v" >/dev/null 2>&1 || continue
-    if [ "$(vol_label_of "$v")" = "$RUNID" ]; then dk volume rm "$v" >/dev/null 2>&1 && did="$did volume $v" || did="$did volume $v (REMOVAL FAILED)"; fi
-  done
-  volumes=""
-  if [ -n "$PRIV" ] && [ -d "$PRIV" ]; then rm -rf -- "$PRIV"; did="$did private-files"; fi
-  PRIV=""
-  echo "   cleanup #$cleanups:${did:- nothing owned left to remove}"
-}
-finish() {
-  local code=$? left_c left_v left_p left_l leak=0 cookie=0 privleft
-  [ "$finished" = 1 ] && return
-  finished=1
-  trap - INT TERM
-  echo "-- cleanup (run $RUNID)"
-  cleanup
-  cleanup
-  left_c=$(dk ps -aq --filter "label=w4.owner=$RUNID" 2>/dev/null | wc -l)
-  left_v=$(dk volume ls -q --filter "label=w4.owner=$RUNID" 2>/dev/null | wc -l)
-  left_p=$(owned_pids | wc -w)
-  if [ "$started" = 1 ]; then left_l=$(listeners); else left_l="not checked (this run started no listener)"; fi
-  privleft=no; [ -n "$privpath" ] && [ -e "$privpath" ] && privleft=yes
-  echo "   this run's containers left: $left_c; volumes left: $left_v; processes left: $left_p; listeners left on $HTTPS/$HTTPP/$BACK: $left_l; private files left: $privleft"
-  if [ -n "$CODE" ]; then leak=$(grep -rlF -f <(printf '%s\n' "$CODE") "$LOG" "$PLOG" "$EVD" 2>/dev/null | wc -l); fi
-  cookie=$(grep -rlE 'cgn_beta=[A-Za-z0-9_-]{8}' "$LOG" "$EVD" 2>/dev/null | wc -l)
-  echo "   files holding the access code: $leak; files holding a beta cookie value: $cookie"
-  if [ "$code" = 0 ] && [ "$rc" = 0 ] && [ "$left_c" = 0 ] && [ "$left_v" = 0 ] && [ "$left_p" = 0 ] && [ "$left_l" = 0 ] && [ "$privleft" = no ] && [ "$leak" = 0 ] && [ "$cookie" = 0 ]; then
-    echo "W4 REHEARSAL HARNESS PASSED"; exit 0
-  fi
-  echo "W4 REHEARSAL HARNESS FAILED"
-  if [ "$code" -gt 1 ]; then exit "$code"; fi
-  exit 1
-}
 trap finish EXIT
 trap 'echo "   interrupted (SIGINT)"; rc=130; exit 130' INT
 trap 'echo "   interrupted (SIGTERM)"; rc=143; exit 143' TERM
