@@ -3719,3 +3719,56 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
   No full gate was run, as the handoff asked.
 - **Unchanged:** the exact-pin W4 live audit stays OPEN, owned by ChatGPT. There is no W5 work and no deployment.
 - **Next:** the report on #47, linked on #5, then ChatGPT's review of the consolidated candidate.
+- **Reported** in 6937715086, linked on #5 in 6937723535.
+- **Review 6937786587: integration and W4 LOCAL PREPARATION accepted.**
+  - ChatGPT independently checked the ancestry and comparisons, and read the raw focused evidence. These are developer tests, not independent runs.
+  - **Its exact-pin live audit `w4-live-7097ac2`** is recorded in 6936797118 (edited at 04:06Z):
+    - two real graceful process transitions (a restart, then a replacement on the same data);
+    - host, guest and TV recovered without rejoining;
+    - exact answer counts and final scores of 120 and 360;
+    - the approved Memory Book seed was preserved.
+  - **Its limits:** an independently rebuilt exact-SHA runtime with real process transitions. It is not the promotion archive, not a Docker replacement, not Render, and not physical Safari or Android; Firefox at 390×844 is emulation. The Render 30-second budget is unmeasured.
+  - The pin is still `7097ac2`. `72e9d8b` is reviewed but not packaged or promoted. No merge or deployment is authorized.
+
+## Beta R4: W5 backup and independent receipt preparation (handoff 6937786587; repaired per review 6938403611, tested `7e9d3c7`)
+- **Acknowledged** in 6938068379 at 11:16 p.m. ET. The estimate is about 3 h 25 min, with 45 min of contingency.
+- **The branch** is `claude/beta-r4-w5-receipt`, from #47's head `a4bfdf9`, as a stacked draft PR. Unmerged.
+- **The scope:**
+  1. `docs/beta/render-w5.md`: the operator journey from the same-window `BACKUP_OK`, through `scp -s` to the owner's device, the private storage and the fetch-back, to `cgn-receive` `RECEIPT_OK`. Real execution is PENDING.
+  2. A bounded local rehearsal. It uses the pinned image, the reviewed `cgn-backup` and `cgn-receive` unchanged, and labelled local surrogates for the transport and the storage. The receipt reads the fetched-back copy.
+  3. A focused negative matrix.
+  4. The W4 seed-memory path, corrected to the verified UI.
+  5. The independent W4 verdict, recorded.
+- **Unchanged:** the runtime and the release/deploy pins stay `7097ac2`. There is no account operation, no public port, no spending, and no W6.
+- **Built:**
+  - `scripts/beta/w5-rehearsal.sh`, the local chain: the pinned image; the reviewed `cgn-backup` and `cgn-receive` unchanged; surrogates for transport and storage; the receipt on the fetched-back copy; a promotion only after `RECEIPT_OK`; eight chain negatives; the checker's own negatives; verified cleanup;
+  - `scripts/beta/w5-seed.mjs`, the synthetic state with an approved Memory Book entry, the resume checks and the received-copy checks;
+  - `scripts/beta/w5-selftest.sh`, with sentinels, a port in use, an unlistable inventory and an interruption;
+  - `docs/beta/render-w5.md`, the operator runbook;
+  - the W4 seed-memory path, corrected in `render-w4.md`;
+  - the independent W4 verdict, recorded in the W4 evidence README.
+- **The dev runs** (in `docs/evidence/beta-r4-w5/`):
+  - dev 1 **FAILED**: the copy reader missed Trivia's answers;
+  - dev 2 and 3 passed, 24/24 and 27/27;
+  - self-test dev 1 **FAILED** on its own bugs;
+  - self-test dev 2 passed, 12/12.
+- **The final on a clean checkout of `63f9dc5`:**
+  - the static checks **PASSED** on their second run (run 1 FAILED on a false positive in my own scan pattern, kept);
+  - `w5-selftest.sh` **PASSED**, 12/12. The rehearsal `20261117T042904Z-ae58ddeb` passed 27/27: `BACKUP_OK`, `/health` unavailable for 1,110 ms, the service resumed, `RECEIPT_OK` on the fetched-back copy, the received copy holding the pre-backup state, and the eight negatives.
+- **Next:** the report on #48, then ChatGPT's review. The real W5 stays PENDING; nothing ran on Render, SSH, storage or the owner's keys.
+- **Reported** in 6938393714, linked on #5 and #47.
+- **Review 6938403611: changes requested.** Acknowledged in 6938453591 at 11:35 p.m. ET, with a 50 min estimate.
+  - **The findings:**
+    1. a W4/W5 ordering deadlock;
+    2. public `/health` and seat probes can't work during maintenance;
+    3. the copy checker accepted changed answer values.
+  - **The repairs:**
+    1. one procedure, two uses: A, W4's same-window prerequisite; B, W5's own acceptance, which needs only W1–W3;
+    2. a private in-instance probe (Node 22, read-only), with maintenance kept on, the seat check in the play window, and an interpretation table;
+    3. exact submitted values, kept private, checked in the pinned shape, plus a same-keys/different-value negative.
+  - **The rehearsal** runs the runbook's own probe text in the container and puts a `--maintenance` proxy in front.
+  - **Dev runs:** the rehearsal passed 33/33, and the self-test 12/12. The reproduction shows `63f9dc5`'s checker accepting a changed value, and the repair rejecting it.
+- **The repair final on a clean checkout of `7e9d3c7`:**
+  - the static checks **PASSED** on their second run (run 1 FAILED on the scanner matching its own committed pattern file, kept);
+  - `w5-selftest.sh` **PASSED**, 12/12. The rehearsal `20261117T044108Z-b7f2585b` passed 33/33: public 503 on all 71 samples; the private probe `UP`, then `DOWN` for 1,122 ms, then `UP`; `RECEIPT_OK`; the exact values; `change-pre-value` failing only on the value.
+- **Next:** the new report on #48. W5 clearance and W6 stay held.

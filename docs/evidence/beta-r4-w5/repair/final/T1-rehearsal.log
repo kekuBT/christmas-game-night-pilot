@@ -1,0 +1,11 @@
+== w5-rehearsal 2026-11-17T04:41:07Z, run 20261117T044107Z-c3eb9ae5, image cgn-render:check
+   scripts: w5-rehearsal.sh f154d1745f79ee2c, w5-seed.mjs 660df9e1e4b1005d
+   image id: sha256:7b53109a7d69
+   FAILED at preflight: 1 listener(s) already on 18580/18543/18544; nothing was started
+-- cleanup (run 20261117T044107Z-c3eb9ae5)
+   cleanup #1: nothing owned left to remove
+   cleanup #2: nothing owned left to remove
+   this run's containers left: 0; volumes left: 0; processes left: 0; listeners left on 18580/18543/18544: not checked (this run started no listener); private files left: no
+   files in the kept run folder holding the access code, a session token, a gate cookie or an age secret key: 0
+   checks: 0 passed, 1 failed
+W5 REHEARSAL FAILED

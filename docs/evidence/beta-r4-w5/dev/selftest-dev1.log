@@ -1,0 +1,66 @@
+== w5-selftest 2026-11-17T04:23:32Z, tag b655d6, harness 0191f9fc5de27d18, seed 7d177a231e0d3515, image cgn-render:check
+   before: containers 0, volumes 0
+-- T0: static
+PASS T0 bash -n on the W5 shell scripts and node --check on w5-seed.mjs
+-- sentinels of another owner (label w5.sentinel=b655d6, never w5.owner)
+sh: 1: cannot create /s/keep: Permission denied
+FAIL sentinels created: a running container and a volume holding a file
+-- T1: a port already in use
+     |    FAILED at preflight: 1 listener(s) already on 18580; nothing was started
+     |    this run's containers left: 0; volumes left: 0; processes left: 0; listeners left on 18580: not checked (this run started no listener); private files left: no
+     | W5 REHEARSAL FAILED
+FAIL T1 the rehearsal FAILED at its preflight, started nothing, and left nothing — exit 1
+FAIL T1 sentinels intact
+-- T2: the rehearsal
+     | PASS the service is ready and /health reports the pinned revision 7097ac2bb062925bb296a129f4771f1e68fd522d
+     | PASS the image's cgn-backup is byte-identical to the reviewed deploy/render/cgn-backup.sh
+     | PASS the image's cgn-entrypoint is byte-identical to the reviewed deploy/render/cgn-entrypoint.sh
+     | PASS the synthetic state was seeded and every seeded write acknowledged
+     | PASS cgn-backup exited 0 with exactly one BACKUP_OK line
+     | PASS the hold stopped the writer: cgn-backup stopped the server, copied under the data lock, and released the hold
+     | PASS the writer was excluded during the copy: /health was refused while the server was stopped, and a NEW server process came back
+     | PASS the original service resumed on its own: ready, pinned revision 7097ac2bb062925bb296a129f4771f1e68fd522d
+     | PASS no second writer: the data volume's only user before and after is the one service container
+     | PASS after the backup: the same seats, the approved entry, and a new acknowledged answer (w5-seed.mjs resume)
+     | PASS the source archive on the volume (the 'Render disk') hashes to the BACKUP_OK value
+     | PASS positive: every stage ran and passed, RECEIPT_OK on the FETCHED-BACK archive, and the receipt record was written
+     | PASS positive: every pre-existing file (the sentinels) is unchanged
+     | PASS the received copy holds the acknowledged pre-backup state (room, approved entry linked to its game, three answers) and not the post-backup answer
+     | PASS checker negative add-post-answer: the damage was applied, and check-copy FAILS on it
+     | PASS checker negative drop-pre-answer: the damage was applied, and check-copy FAILS on it
+     | PASS checker negative unapprove-entry: the damage was applied, and check-copy FAILS on it
+     | PASS negative wrong-hash: stops as 'transport=ok upload=ok fetch=ok receipt=FAILED(exit 1) promotion=not-run', no RECEIPT_OK, no receipt record, pre-existing files unchanged
+     | PASS negative changed-bytes: stops as 'transport=ok upload=ok fetch=ok receipt=FAILED(exit 1) promotion=not-run', no RECEIPT_OK, no receipt record, pre-existing files unchanged
+     | PASS negative truncated: stops as 'transport=ok upload=ok fetch=ok receipt=FAILED(exit 1) promotion=not-run', no RECEIPT_OK, no receipt record, pre-existing files unchanged
+     | PASS negative wrong-key: stops as 'transport=ok upload=ok fetch=ok receipt=FAILED(exit 1) promotion=not-run', no RECEIPT_OK, no receipt record, pre-existing files unchanged
+     | PASS negative missing-transfer: stops as 'transport=FAILED(no such archive on the source, or the copy failed) upload=not-run fetch=not-run receipt=not-run promotion=not-run', no RECEIPT_OK, no receipt record, pre-existing files unchanged
+     | PASS negative missing-download: stops as 'transport=ok upload=ok fetch=FAILED(not in storage) receipt=not-run promotion=not-run', no RECEIPT_OK, no receipt record, pre-existing files unchanged
+     | PASS negative nonempty-work: stops as 'transport=ok upload=ok fetch=ok receipt=FAILED(exit 1) promotion=not-run', no RECEIPT_OK, no receipt record, pre-existing files unchanged
+     | PASS negative occupied-fetch: stops as 'transport=ok upload=ok fetch=REFUSED(destination exists) receipt=not-run promotion=not-run', no RECEIPT_OK, no receipt record, pre-existing files unchanged
+     | PASS the source archive is unchanged after every chain (still the BACKUP_OK hash)
+     | PASS the original service is still serving the pinned revision at the end
+     |    this run's containers left: 0; volumes left: 0; processes left: 0; listeners left on 18580: 0; private files left: no
+     |    files in the kept run folder holding the access code, a session token, a gate cookie or an age secret key: 0
+     |    checks: 27 passed, 0 failed
+     | W5 REHEARSAL PASSED
+PASS T2 W5 REHEARSAL PASSED (exit 0), nothing of the run left
+FAIL T2 sentinels intact
+-- T3: an inventory docker cannot give (a shim answers exit 124 to every listing filtered by the run's label)
+     |    cleanup #1: (docker could not list this run's containers) container 88b4889f7f23 (docker could not list this run's volumes) volume w5-data-20261117T042341Z-339abf1f private-files(code,keys,sessions,decrypted-copies)
+     |    cleanup #2: (docker could not list this run's containers) (docker could not list this run's volumes)
+     |    this run's containers left: UNVERIFIED (docker could not list this run's containers); volumes left: UNVERIFIED (docker could not list this run's volumes); processes left: 0; listeners left on 18580: 0; private files left: no
+     | W5 REHEARSAL FAILED
+PASS T3 the run reports the inventory UNVERIFIED and FAILS (exit nonzero), never 0
+FAIL T3 real docker: the run's container and volume were removed all the same (tracked by id) — no-run-id
+FAIL T3 sentinels intact
+-- T4: an interrupted run (SIGTERM after seeding, before the backup)
+     |    interrupted (SIGTERM)
+     |    this run's containers left: 0; volumes left: 0; processes left: 0; listeners left on 18580: 0; private files left: no
+     | W5 REHEARSAL FAILED
+FAIL T4 interrupted: exit 143, cleanup ran, nothing of the run left, no private files left — exit 143
+FAIL T4 sentinels intact
+-- removing this self-test's own sentinels (label read back first)
+FAIL the sentinels removed (they were this self-test's own)
+   after: containers 0, volumes 0
+== 3 passed, 9 failed
+W5 SELFTEST FAILED

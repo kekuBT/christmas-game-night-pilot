@@ -1,0 +1,6 @@
+cgn-backup: stopping the server (pid 10)
+cgn-backup: server stopped
+backup OK: 1 room(s), 1 Memory Book(s), 3 file(s), verified
+verify OK: 3 file(s) match the manifest of 2026-11-17T04:41:11.352Z
+cgn-backup: hold released
+BACKUP_OK /var/data/backups/cgn-20261117T044111Z.tar.age sha256=18b485e0c04baf8099e589414b42c0811c318142795cf91ba699ce3107124ae4 files=4 server_stopped_s=0
