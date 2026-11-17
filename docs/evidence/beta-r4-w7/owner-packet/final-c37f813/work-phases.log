@@ -1,0 +1,27 @@
+== start current at 2026-11-17T17:24:47Z: /health revision 988c53558bbbcc1545fe0ca32882f30c1970794b; origin http://127.0.0.1:3157; data <scratch>/r4p5/work/data; pid 13236
+Listening on 127.0.0.1; public origin http://127.0.0.1:3157.
+== stop current at 2026-11-17T17:24:49Z: pid 13236 exited; port 3157 free
+== backup before-rollback at 2026-11-17T17:24:49Z
+backup OK: 1 room(s), 1 Memory Book(s), 3 file(s), verified
+verify OK: 3 file(s) match the manifest of 2026-11-17T17:24:49.733Z
+verify OK: 3 file(s) match the manifest of 2026-11-17T17:24:49.733Z
+receipt (local surrogate: no off-host transfer): manifest SHA-256 824fc730042a0ef79d28548107cc3c4202a5ccbfc4ef6a8544b579fab17ccf46
+== compat before-rollback at 2026-11-17T17:24:49Z: the PREVIOUS release (7097ac2bb062925bb296a129f4771f1e68fd522d) reads the backup
+verify OK: 3 file(s) match the manifest of 2026-11-17T17:24:49.733Z
+restore OK: 1 room(s), 1 Memory Book(s) restored and verified. Next, as the user the server runs as: datatool check --data <scratch>/r4p5/work/compat-before-rollback
+check OK: 1 room(s), 1 Memory Book(s); owned by this user (uid 0) and private; the lock and a test write worked. A server run by this user can use it.
+== start previous at 2026-11-17T17:24:50Z: /health revision 7097ac2bb062925bb296a129f4771f1e68fd522d; origin http://127.0.0.1:3157; data <scratch>/r4p5/work/data; pid 13455
+[restore] 1 room(s) restored, 0 not loaded (data: <scratch>/r4p5/work/data)
+Listening on 127.0.0.1; public origin http://127.0.0.1:3157.
+== stop previous at 2026-11-17T17:24:52Z: pid 13455 exited; port 3157 free
+== backup before-return at 2026-11-17T17:24:52Z
+backup OK: 1 room(s), 1 Memory Book(s), 3 file(s), verified
+verify OK: 3 file(s) match the manifest of 2026-11-17T17:24:52.582Z
+verify OK: 3 file(s) match the manifest of 2026-11-17T17:24:52.582Z
+receipt (local surrogate: no off-host transfer): manifest SHA-256 a321f2ee69b966d8bc4081526c87f95b0f23e9431a7ba3710d53557f952795d5
+== check by current at 2026-11-17T17:24:52Z
+check OK: 1 room(s), 1 Memory Book(s); owned by this user (uid 0) and private; the lock and a test write worked. A server run by this user can use it.
+== start current at 2026-11-17T17:24:53Z: /health revision 988c53558bbbcc1545fe0ca32882f30c1970794b; origin http://127.0.0.1:3157; data <scratch>/r4p5/work/data; pid 13628
+[restore] 1 room(s) restored, 0 not loaded (data: <scratch>/r4p5/work/data)
+Listening on 127.0.0.1; public origin http://127.0.0.1:3157.
+== stop current at 2026-11-17T17:24:55Z: pid 13628 exited; port 3157 free
