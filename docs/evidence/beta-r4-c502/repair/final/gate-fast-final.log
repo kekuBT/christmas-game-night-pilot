@@ -1,0 +1,33 @@
+# FINAL fast gate on a clean checkout of 72e9d8ba59ef3271d756bc2bf77b40ea4d6ee74d (status 0 lines), 2026-11-17T03:12:07Z
+# command: node scripts/gate.mjs fast
+Mchezo gate fast | run 20261117-031207-72e9d8ba-4751
+  revision 72e9d8ba59ef3271d756bc2bf77b40ea4d6ee74d (clean tree) | fingerprint 56dc2266fa63 (653 files)
+  plan     5 steps: 5 fast/build, 0 browser drivers · 3 workers (auto: 4 CPUs, 15.0 GB available)
+  history  0 local run(s) in ./test-results/timing-history.jsonl + committed baseline (2026-11-10) · contention ×1.02 for 3 worker(s) (measured, 1 run(s))
+  estimate this run: 21–29s (measured) · the same steps one after another: about 47s · longest step unit-tests ~24s
+  method   each step's median (p10–p90 for the range) over up to 10 earlier sequential runs, ×1.02 contention, replayed through the scheduler (exclusive steps first, then longest first)
+  results  <scratch>/c502r/final/repo/test-results/20261117-031207-72e9d8ba-4751
+        start typecheck-server on w1 (usually 5s)
+        start typecheck-web on w2 (usually 6s)
+        start lint on w3 (usually 8s)
+[ 1/5] PASS        12.7s  typecheck-server  w1
+        start unit-tests on w1 (usually 24s)
+[ 2/5] PASS        12.7s  typecheck-web  w2
+        start build-web on w2 (usually 5s)
+[ 3/5] PASS         7.2s  build-web  w2
+[ 4/5] PASS        20.6s  lint  w3
+── progress  4/5 done · 4 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 1m 00s
+   running   unit-tests 47s (w1)
+   remaining 15–15s · total 75–76s · done around 03:13–03:13 UTC (measured)
+[ 5/5] PASS        54.8s  unit-tests  w1
+
+PASSED (exit 0) | fast | run 20261117-031207-72e9d8ba-4751
+  5 passed, 0 failed, 0 timed out, 0 infrastructure, 0 invalid, 0 cancelled, 0 not run
+  timing   wall 1m 08s · step time 1m 48s (sum) · 3 workers, 53% busy · 1.59× the same steps run one after another
+           predicted 21–28s (about 24s, measured) → actual 1m 08s (+183%)
+           longest  unit-tests 55s, lint 21s, typecheck-server 13s · the longest step is 81% of the wall time
+           machine  CPU mean 75%, peak 99% · memory available ≥ 13616 MB · load peak 4.39
+           contention ×2.307 (median step time vs its sequential median)
+           retries  none (the gate never retries a step)
+  report <scratch>/c502r/final/repo/test-results/20261117-031207-72e9d8ba-4751/report.json
+gate exit: 0

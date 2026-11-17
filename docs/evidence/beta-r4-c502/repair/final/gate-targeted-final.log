@@ -1,0 +1,35 @@
+# FINAL targeted gate on a clean checkout of 72e9d8ba59ef3271d756bc2bf77b40ea4d6ee74d (status 0 lines), 2026-11-17T03:13:14Z
+# command: MCHEZO_CHROMIUM_PATH=<chrome-headless-shell 1243> node scripts/gate.mjs targeted uncertain-delivery action-ack errors
+Mchezo gate targeted | run 20261117-031314-72e9d8ba-9223
+  revision 72e9d8ba59ef3271d756bc2bf77b40ea4d6ee74d (clean tree) | fingerprint 56dc2266fa63 (653 files)
+  plan     5 steps: 1 fast/build, 3 browser drivers, 1 other (E2E, fixtures, preflight) · 3 workers (auto: 4 CPUs, 14.8 GB available)
+  history  1 local run(s) in ./test-results/timing-history.jsonl + committed baseline (2026-11-10) · contention ×1.66 for 3 worker(s) (measured, 2 run(s))
+  estimate this run: 0–7m (low-confidence) · the same steps one after another: about 1m 37s · longest step check-uncertain-delivery ~1m 00s
+  method   each step's median (p10–p90 for the range) over up to 10 earlier sequential runs, ×1.66 contention, replayed through the scheduler (exclusive steps first, then longest first)
+  unknown  no timing history for 1 step(s), assumed ~60s each: check-uncertain-delivery
+  results  <scratch>/c502r/final/repo/test-results/20261117-031314-72e9d8ba-9223
+        start build-web on w1 (usually 5s)
+[ 1/5] PASS         4.6s  build-web  w1
+        start browser-preflight on w1 (usually 1s)
+[ 2/5] PASS         0.6s  browser-preflight  w1
+  browser  chrome-headless-shell 153.0.8010.12 (MCHEZO_CHROMIUM_PATH)
+  server   w1 http://localhost:35511 (pid 9342, data <scratch>/c502r/final/repo/test-results/20261117-031314-72e9d8ba-9223/server-data/w1)
+  server   w2 http://localhost:45531 (pid 9343, data <scratch>/c502r/final/repo/test-results/20261117-031314-72e9d8ba-9223/server-data/w2)
+  server   w3 http://localhost:38943 (pid 9344, data <scratch>/c502r/final/repo/test-results/20261117-031314-72e9d8ba-9223/server-data/w3)
+        start check-uncertain-delivery on w1 (no timing history)
+        wait  check-action-ack: load 4.1 > 4 CPUs
+        start check-action-ack on w2 (usually 28s)
+        start check-errors on w3 (usually 4s)
+[ 3/5] PASS         5.5s  check-errors  w3
+[ 4/5] PASS        30.2s  check-uncertain-delivery  w1
+[ 5/5] PASS        28.9s  check-action-ack  w2
+
+PASSED (exit 0) | targeted | run 20261117-031314-72e9d8ba-9223
+  5 passed, 0 failed, 0 timed out, 0 infrastructure, 0 invalid, 0 cancelled, 0 not run
+  timing   wall 39s · step time 1m 10s (sum) · 3 workers, 60% busy · 1.79× the same steps run one after another
+           predicted 0–7m (about 1m 40s, low-confidence) → actual 39s (-61%)
+           longest  check-uncertain-delivery 30s, check-action-ack 29s, check-errors 6s · the longest step is 77% of the wall time
+           machine  CPU mean 26%, peak 78% · memory available ≥ 14319 MB · load peak 4.36 · backpressure 1 wait(s), 4s
+           retries  none (the gate never retries a step)
+  report <scratch>/c502r/final/repo/test-results/20261117-031314-72e9d8ba-9223/report.json
+gate exit: 0

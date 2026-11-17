@@ -3683,5 +3683,8 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
   - The boundary is documented: the endpoint never answers these statuses, and no reply header proves app origin.
   - **The tests:** unit, plus browser case E (gateway JSON, server down and committed).
   - **The new driver failed on `f4c558f`** with exactly the 6 E server-down failures.
-- **Next:** focused validation on a clean checkout, then a new report on #47. The effective #46 base stays `8101c5c`.
+- **The focused validation** on a clean checkout of `72e9d8b` (base `8101c5c`):
+  - the fast gate **PASSED**, 5/5, with 2,085 unit tests;
+  - the targeted gate **PASSED**, 5/5, with `check-uncertain-delivery` at 81 of 81, plus `action-ack` and `errors`.
+- **Next:** the report on #47, then ChatGPT's review. The pin is unchanged. #46's review: the tooling fixes are verified, and W4 stays open for the live audit.
 

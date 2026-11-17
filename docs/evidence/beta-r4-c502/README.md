@@ -95,5 +95,12 @@ So for those three statuses, the body is the app's only if one of its `error`, `
 | **The new driver on the REVIEWED revision `f4c558f`** | **FAILED (exit 1), as required:** 6 failures | Exactly the E server-down cases. "Bad Gateway", `Request failed (503)` and `Request failed (504)` were shown, and "couldn't confirm" never appeared. A, B, C, D and E-committed passed there. | [gate](repair/dev/before-f4c558f-gate.log), [driver](repair/dev/before-f4c558f-driver.log), [screenshot](repair/screens/before-f4c558f-e-502-gateway-json-390.png) |
 | Targeted on the fix: `uncertain-delivery`, `action-ack`, `errors` | **PASSED (exit 0)** | `check-uncertain-delivery`: 81 checks passed, including every E case | [gate](repair/dev/targeted-dev1.log), [driver](repair/dev/targeted-dev1-driver.log), [screenshot](repair/screens/dev-after-e-502-gateway-json-390.png) |
 
+**The focused validation:** two gate runs on a clean checkout of the tested commit `72e9d8ba59ef3271d756bc2bf77b40ea4d6ee74d` (status 0 lines), with the effective #46 base `8101c5c`. Each verdict stands alone.
+
+| Gate | Run | Verdict | Steps and results | Evidence |
+|---|---|---|---|---|
+| `node scripts/gate.mjs fast` | `20261117-031207-72e9d8ba-4751` | **PASSED (exit 0)**, 5/5 | typecheck (server and web), lint, build, **unit tests: 163 files, 2,085 tests passed** | [gate](repair/final/gate-fast-final.log), [unit tests](repair/final/unit-tests.log) |
+| `node scripts/gate.mjs targeted uncertain-delivery action-ack errors` | `20261117-031314-72e9d8ba-9223` | **PASSED (exit 0)**, 5/5 | <ul><li>**`check-uncertain-delivery`: all 81 checks passed** (A, B, C, D, E for 502/503/504, E-committed);</li><li>`check-action-ack`: ALL PASSED;</li><li>`check-errors`: ALL PASSED.</li></ul> | [gate](repair/final/gate-targeted-final.log), [uncertain-delivery](repair/final/check-uncertain-delivery.log), [action-ack](repair/final/check-action-ack.log), [errors](repair/final/check-errors.log), [screenshots](repair/final/screens/) |
+
 **An observation, out of scope:** on a 390 px answer tile, a long word ("Liechtenstein") breaks mid-word. That is existing layout behaviour this change doesn't touch.
 
