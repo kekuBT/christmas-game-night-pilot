@@ -1,0 +1,205 @@
+== w7-rehearsal 2026-11-17T07:30:50Z, run 20261117T073050Z-f7382c08, current cgn-render:check, previous cgn-render:w7-pred (expected revisions 7097ac2 and f93e9cb)
+   scripts: w7-rehearsal.sh 7d8562251e340e9f, w7-check.mjs a06c3452704a63c4, w5-seed.mjs 660df9e1e4b1005d
+   throwaway codes (current and an OLD rotated one), a DISPOSABLE test identity (receiving side), TLS key and the runbook's probe in a private folder (mode 700), removed on exit
+PASS the current service is ready on /var/data/cgn-w1, /health on the reviewed revision
+   AUTHORIZED data_dir=/var/data/cgn-w1 public_origin=https://localhost:18743 trust_proxy=1 (the access code is kept only as a salted hash)
+PASS the service is live: the PUBLIC /health answers 200
+PASS both images carry the reviewed cgn-backup, cgn-entrypoint and cgn-authorize, byte for byte
+PASS the images' release.json: the current names 7097ac2, the previous names f93e9cb
+   SEED {"roomId":"room-mwkdi92y-590456","warmGameId":"game-1","secondGameId":"game-2","entryId":"book-1","entrySources":["evt-11"],"hostPlayerId":"player-1","guestPlayerId":"player-2","questions":["trv-hist-040","trv-spac-020","trv-hist-128","trv-spac-019","trv-arts-063","trv-ever-095","trv-tech-115","trv-scie-124","trv-scie-008","trv-natu-072"],"acked":[{"who":"guest","playerId":"player-2","questionId":"trv-hist-040","ackAt":"2026-11-17T07:30:55.215Z"},{"who":"guest","playerId":"player-2","questionId":"trv-spac-020","ackAt":"2026-11-17T07:30:55.223Z"},{"who":"host","playerId":"player-1","questionId":"trv-hist-040","ackAt":"2026-11-17T07:30:55.226Z"}]}
+   [B0] cgn-backup: stopping the server (pid 10)
+   [B0] cgn-backup: server stopped
+   [B0] backup OK: 1 room(s), 1 Memory Book(s), 3 file(s), verified
+   [B0] verify OK: 3 file(s) match the manifest of 2026-11-17T07:30:55.549Z
+   [B0] cgn-backup: hold released
+   [B0] BACKUP_OK /var/data/backups/cgn-20261117T073055Z.tar.age sha256=12c3c5abeb328531840f8c91c2e03cd779889742bcc15348566781962f4bcb34 files=4 server_stopped_s=0
+   [chain b0] RECEIPT_OK <work>/w7-20261117T073050Z-f7382c08/chain-b0/fetched/cgn-20261117T073055Z.tar.age sha256=12c3c5abeb328531840f8c91c2e03cd779889742bcc15348566781962f4bcb34 files=4 copy=<private>/receive-b0/20261117T073055Z
+PASS B0 (an earlier backup, as from a nightly run): BACKUP_OK and its RECEIPT_OK
+-- WINDOW 1: roll back to the previous release by the supported revert-commit path
+PASS maintenance on: the PUBLIC /health answers 503
+-- D6: a pending switch refuses the preflight
+   [B1] cgn-backup: stopping the server (pid 140)
+   [B1] cgn-backup: server stopped
+   [B1] backup OK: 1 room(s), 1 Memory Book(s), 3 file(s), verified
+   [B1] verify OK: 3 file(s) match the manifest of 2026-11-17T07:30:57.922Z
+   [B1] cgn-backup: hold released
+   [B1] BACKUP_OK /var/data/backups/cgn-20261117T073057Z.tar.age sha256=6d31d0a837f21bc3cc7fafa421a15dc36bc2b511bcb6d88350fedfc404aac4b5 files=4 server_stopped_s=1
+   [chain b1] RECEIPT_OK <work>/w7-20261117T073050Z-f7382c08/chain-b1/fetched/cgn-20261117T073057Z.tar.age sha256=6d31d0a837f21bc3cc7fafa421a15dc36bc2b511bcb6d88350fedfc404aac4b5 files=4 copy=<private>/receive-b1/20261117T073057Z
+   [preflight] the record or the writer is not as required (STATUS data_dir=/var/data/cgn-w1 public_origin=https://localhost:18743 trust_proxy=1 pending_data_dir=/var/data/cgn-w7-other serving=/var/data/cgn-w1)
+PASS D6 with a switch pending (even with B1's receipt), the preflight refuses
+PASS D6 the switch aborted from the instance serving the approved folder; nothing pending
+-- the window's backup W, now that the record is as required (B1, taken while the switch was pending, is kept only as a mismatched receipt)
+   [W] cgn-backup: stopping the server (pid 270)
+   [W] cgn-backup: server stopped
+   [W] backup OK: 1 room(s), 1 Memory Book(s), 3 file(s), verified
+   [W] verify OK: 3 file(s) match the manifest of 2026-11-17T07:30:59.992Z
+   [W] cgn-backup: hold released
+   [W] BACKUP_OK /var/data/backups/cgn-20261117T073059Z.tar.age sha256=a60d682839d2236139e90add99661561a10d7ab9104f0016bee779abee874c44 files=4 server_stopped_s=1
+-- D1/D2: a missing or mismatched receipt refuses the preflight
+   [preflight] no receipt for this window's backup (a60d682839d2...)
+PASS D1 with no receipt yet for the window's backup, the preflight refuses
+   [chain w-changed] RECEIPT_FAILED: the archive's SHA-256 is 29674d4187674bac3f74679b1e3e649cdd5870bf1b5d0c1ea896638ad8761c66, not the expected a60d682839d2236139e90add99661561a10d7ab9104f0016bee779abee874c44
+   [preflight] no receipt for this window's backup (a60d682839d2...)
+PASS D2a a changed fetched copy: RECEIPT_FAILED, no receipt record, the preflight refuses
+   [preflight] no receipt for this window's backup (a60d682839d2...)
+PASS D2b B0's receipt (an earlier backup) offered for this window's backup: the preflight refuses
+   [preflight] no receipt for this window's backup (a60d682839d2...)
+PASS D2c B1's receipt (taken earlier in this window, before the abort) offered for the window's backup: the preflight refuses
+   [chain w] RECEIPT_OK <work>/w7-20261117T073050Z-f7382c08/chain-w/fetched/cgn-20261117T073059Z.tar.age sha256=a60d682839d2236139e90add99661561a10d7ab9104f0016bee779abee874c44 files=4 copy=<private>/receive-w/20261117T073059Z
+PASS the window's backup: BACKUP_OK, then the independent RECEIPT_OK on its fetched-back copy
+-- COMPAT: the previous release reads (and writes) a DISPOSABLE copy of the current state: the window's verified copy, on its own throwaway volume
+   [preflight] no compatibility evidence for the previous release
+PASS before the compatibility evidence exists, the preflight refuses
+   [previous datatool] verify OK: 3 file(s) match the manifest of 2026-11-17T07:30:59.992Z
+   [previous datatool] restore OK: 1 room(s), 1 Memory Book(s) restored and verified. Next, as the user the server runs as: datatool check --data /var/data/cgn-compat
+   [previous datatool] check OK: 1 room(s), 1 Memory Book(s); owned by this user (uid 10001) and private; the lock and a test write worked. A server run by this user can use it.
+PASS COMPAT the previous release's datatool: verify, restore into a new folder, check (as the service user), each exit 0
+   [previous on the copy] cgn-entrypoint: the environment matches the authorized configuration: the APPROVED data folder /var/data/cgn-compat
+   [previous on the copy] [restore] 1 room(s) restored, 0 not loaded (data: /var/data/cgn-compat)
+PASS COMPAT the previous release starts on the copy: /health on f93e9cb, the room restored, nothing unloaded or quarantined
+   PASS the reference ledger holds the COMPLETED warm-up game: one game-finished and one score-awarded per player — 16 event(s) in all
+   LEDGER OK: 16 event(s) recorded privately
+   [previous on the copy] PASS the access gate admits the authorized code
+   [previous on the copy] PASS the original HOST seat works, with no rejoin — HTTP 200
+   [previous on the copy] PASS the original GUEST seat works, with no rejoin — HTTP 200
+   [previous on the copy] PASS the approved "W5 seed" entry is there, linked to the warm-up game's finish
+   [previous on the copy] PASS each of the 3 acknowledged seed answers is there with its submitted value
+   [previous on the copy] PASS the COMPLETED score ledger: the warm-up game's finish and its two score events are exactly the reference ones (values not printed) — HTTP 200, 3 event(s)
+   [previous on the copy] PASS before the new action, the host has no answer to the second question
+   [previous on the copy] PASS a NEW action (the host's answer to the second question) is acknowledged — HTTP 200
+   [previous on the copy] PASS a replay of its event id records nothing twice (one answer, its value) — HTTP 200 accepted=true reason=
+   [previous on the copy] LIVE compat OK (0 failed)
+PASS COMPAT on the copy, the previous release serves the seats, the approved entry, each answer's value and the completed ledger, and acknowledges a new action
+   [persisted by the previous release] PASS the completed score ledger is kept: every event of the reference, unchanged and in order — 16 reference event(s), 16 now
+   [persisted by the previous release] PASS no score or finish event was added by the rollback — 0 later event(s)
+   [persisted by the previous release] PASS the new action is PERSISTED with its value (where the runtime keeps it: extra.answers)
+   [persisted by the previous release] PASS each acknowledged seed answer keeps its submitted value in the persisted state
+   [persisted by the previous release] PASS the approved entry is persisted, linked to the warm-up game's finish
+   [persisted by the previous release] PERSISTED OK (0 failed)
+   [current datatool on the folder the previous release wrote] check OK: 1 room(s), 1 Memory Book(s); owned by this user (uid 10001) and private; the lock and a test write worked. A server run by this user can use it.
+PASS COMPAT what the previous release wrote: stopped gracefully, persisted (ledger kept, action persisted), and the CURRENT release's datatool check accepts it
+PASS COMPAT_OK: the previous release can safely read the current format, and the current release reads what it writes (the disposable volume removed)
+   [preflight] maintenance on; a receipt for exactly this backup; compatibility evidence; the record approves /var/data/cgn-w1, nothing pending, served: PASS
+PASS the rollback preflight PASSES: maintenance on, the receipt for exactly the window's backup, compatibility evidence, the record approving /var/data/cgn-w1 with nothing pending, served
+-- D5: an incorrect writer
+   [start gate] containers on the volume: 0
+PASS D5a the start gate refuses while the current writer is still on the volume
+   [D5] cgn-entrypoint: the environment matches the authorized configuration: the APPROVED data folder /var/data/cgn-w1
+   [D5] Another process is using this data directory (/var/data/cgn-w1). Stop it first: one process writes a data directory at a time.
+   [D5] cgn-entrypoint: server exited (2) with no hold; exiting so the platform restarts the instance
+PASS D5b a second writer on the same instance (the previous release, in the instance's network namespace, same folder): the data lock refuses it (no server), and the current writer keeps serving
+   stop: docker stop exit 0; state exited, exit code 0, OOM-killed false
+PASS the current writer stopped gracefully (exit 0)
+PASS the window's backup is exactly the data at the stop (every file, the manifest aside)
+   PASS the reference ledger holds the COMPLETED warm-up game: one game-finished and one score-awarded per player — 16 event(s) in all
+   LEDGER OK: 16 event(s) recorded privately
+   [start gate] containers on the volume: 0
+PASS one writer: the old container removed and confirmed gone; no container on the volume before the start
+   [previous start] cgn-entrypoint: the environment matches the authorized configuration: the APPROVED data folder /var/data/cgn-w1
+   [previous start] [restore] 1 room(s) restored, 0 not loaded (data: /var/data/cgn-w1)
+PASS the previous start: the guard accepts the CURRENT environment (the APPROVED folder /var/data/cgn-w1), the server restores the room with nothing unloaded, and /health names f93e9cb
+-- D4: the reopen gate refuses a wrong served revision
+   [reopen gate] private probe: PROBE 2026-11-17T07:31:08.545Z UP f93e9cba8613859be9891706ead1c60157c73de2; expected 7097ac2bb062925bb296a129f4771f1e68fd522d
+   [reopen gate] record: STATUS data_dir=/var/data/cgn-w1 public_origin=https://localhost:18743 trust_proxy=1 pending_data_dir=none serving=/var/data/cgn-w1; expected data_dir=/var/data/cgn-w1, nothing pending, served /var/data/cgn-w1
+PASS D4 expecting the reviewed revision while the previous one serves: the reopen gate refuses, the PUBLIC side stays 503
+   [reopen gate] private probe: PROBE 2026-11-17T07:31:08.921Z UP f93e9cba8613859be9891706ead1c60157c73de2; expected f93e9cba8613859be9891706ead1c60157c73de2
+   [reopen gate] record: STATUS data_dir=/var/data/cgn-w1 public_origin=https://localhost:18743 trust_proxy=1 pending_data_dir=none serving=/var/data/cgn-w1; expected data_dir=/var/data/cgn-w1, nothing pending, served /var/data/cgn-w1
+PASS the reopen gate: the private probe UP on the expected PREVIOUS revision, the approved folder served, nothing pending; the ingress reopens (PUBLIC 200)
+   [through the reopened ingress] PASS the access gate admits the authorized code
+   [through the reopened ingress] PASS the original HOST seat works, with no rejoin — HTTP 200
+   [through the reopened ingress] PASS the original GUEST seat works, with no rejoin — HTTP 200
+   [through the reopened ingress] PASS the approved "W5 seed" entry is there, linked to the warm-up game's finish
+   [through the reopened ingress] PASS each of the 3 acknowledged seed answers is there with its submitted value
+   [through the reopened ingress] PASS the COMPLETED score ledger: the warm-up game's finish and its two score events are exactly the reference ones (values not printed) — HTTP 200, 3 event(s)
+   [through the reopened ingress] PASS before the new action, the host has no answer to the second question
+   [through the reopened ingress] PASS a NEW action (the host's answer to the second question) is acknowledged — HTTP 200
+   [through the reopened ingress] PASS a replay of its event id records nothing twice (one answer, its value) — HTTP 200 accepted=true reason=
+   [through the reopened ingress] LIVE rolled OK (0 failed)
+PASS after the rollback, through the ingress: the original host and guest seats, the completed score ledger, the approved entry, each answer's value, a NEW action acknowledged once
+PASS an OLD (rotated) code does not open the gate (401, no gate cookie)
+-- WINDOW 2: return to the reviewed release
+   [B2] cgn-backup: stopping the server (pid 14)
+   [B2] cgn-backup: server stopped
+   [B2] backup OK: 1 room(s), 1 Memory Book(s), 3 file(s), verified
+   [B2] verify OK: 3 file(s) match the manifest of 2026-11-17T07:31:10.455Z
+   [B2] cgn-backup: hold released
+   [B2] BACKUP_OK /var/data/backups/cgn-20261117T073110Z.tar.age sha256=d1ecbda3149c555fc62f5434b0cc24caa3a61ef7c77459b72ec6cc32e4180875 files=4 server_stopped_s=0
+   [chain b2] RECEIPT_OK <work>/w7-20261117T073050Z-f7382c08/chain-b2/fetched/cgn-20261117T073110Z.tar.age sha256=d1ecbda3149c555fc62f5434b0cc24caa3a61ef7c77459b72ec6cc32e4180875 files=4 copy=<private>/receive-b2/20261117T073110Z
+   [preflight] maintenance on; a receipt for exactly this backup; the record approves /var/data/cgn-w1, nothing pending, served: PASS
+PASS B2 (on the previous release, of the CURRENT data): BACKUP_OK, RECEIPT_OK, and the preflight passes
+   PASS the completed score ledger is kept: every event of the reference, unchanged and in order — 16 reference event(s), 16 now
+   PASS no score or finish event was added by the rollback — 0 later event(s)
+   PASS the new action is PERSISTED with its value (where the runtime keeps it: extra.answers)
+   PASS each acknowledged seed answer keeps its submitted value in the persisted state
+   PASS the approved entry is persisted, linked to the warm-up game's finish
+   PERSISTED OK (0 failed)
+PASS the previous release stopped gracefully; the AUTHORITATIVE persisted state: the completed ledger kept, no score or finish added, the new action persisted with its value, the approved entry
+   [negative control drop-action] exit 1: FAIL the new action is PERSISTED with its value (where the runtime keeps it: extra.answers)
+   [negative control changed-ledger] exit 1: FAIL the completed score ledger is kept: every event of the reference, unchanged and in order — 16 reference event(s), 16 now
+   [negative control lost-event] exit 1: FAIL the completed score ledger is kept: every event of the reference, unchanged and in order — 16 reference event(s), 15 now
+PASS the persisted check's OWN negative controls: a dropped action, changed points and a lost score event each make it FAIL
+   [start gate] containers on the volume: 0
+   [current start] cgn-entrypoint: the environment matches the authorized configuration: the APPROVED data folder /var/data/cgn-w1
+   [current start] [restore] 1 room(s) restored, 0 not loaded (data: /var/data/cgn-w1)
+PASS the current start: the guard accepts the CURRENT environment (the APPROVED folder /var/data/cgn-w1), the server restores the room with nothing unloaded, and /health names 7097ac2
+   [reopen gate] private probe: PROBE 2026-11-17T07:31:13.380Z UP 7097ac2bb062925bb296a129f4771f1e68fd522d; expected 7097ac2bb062925bb296a129f4771f1e68fd522d
+   [reopen gate] record: STATUS data_dir=/var/data/cgn-w1 public_origin=https://localhost:18743 trust_proxy=1 pending_data_dir=none serving=/var/data/cgn-w1; expected data_dir=/var/data/cgn-w1, nothing pending, served /var/data/cgn-w1
+   [through the reopened ingress] PASS the access gate admits the authorized code
+   [through the reopened ingress] PASS the original HOST seat works, with no rejoin — HTTP 200
+   [through the reopened ingress] PASS the original GUEST seat works, with no rejoin — HTTP 200
+   [through the reopened ingress] PASS the approved "W5 seed" entry is there, linked to the warm-up game's finish
+   [through the reopened ingress] PASS each of the 3 acknowledged seed answers is there with its submitted value
+   [through the reopened ingress] PASS the COMPLETED score ledger: the warm-up game's finish and its two score events are exactly the reference ones (values not printed) — HTTP 200, 3 event(s)
+   [through the reopened ingress] PASS the action acknowledged on the previous release is there, with its value (read by this release)
+   [through the reopened ingress] PASS the second game is still in play (the rollback neither finished nor reset it) — playing
+   [through the reopened ingress] LIVE returned OK (0 failed)
+PASS the return: the reopen gate passes on the reviewed revision; the seats, the completed ledger, the entry, and the action written by the previous release are served
+-- WINDOW 3: the provider one-click rollback, modelled as the previous image with STALE environment values against the preserved disk record
+   [B3] cgn-backup: stopping the server (pid 13)
+   [B3] cgn-backup: server stopped
+   [B3] backup OK: 1 room(s), 1 Memory Book(s), 3 file(s), verified
+   [B3] verify OK: 3 file(s) match the manifest of 2026-11-17T07:31:14.889Z
+   [B3] cgn-backup: hold released
+   [B3] BACKUP_OK /var/data/backups/cgn-20261117T073114Z.tar.age sha256=005a24775be984f6169ea32398cf3eee161c6ea01aaea08dfdffc8cdef39410e files=4 server_stopped_s=0
+   [chain b3] RECEIPT_OK <work>/w7-20261117T073050Z-f7382c08/chain-b3/fetched/cgn-20261117T073114Z.tar.age sha256=005a24775be984f6169ea32398cf3eee161c6ea01aaea08dfdffc8cdef39410e files=4 copy=<private>/receive-b3/20261117T073114Z
+   [preflight] maintenance on; a receipt for exactly this backup; the record approves /var/data/cgn-w1, nothing pending, served: PASS
+PASS B3: BACKUP_OK, RECEIPT_OK, and the preflight passes
+   [s1-old-folder] exited 78: cgn-entrypoint: REFUSED: MCHEZO_DATA_DIR is not the authorized data folder (a rollback brings back old environment values)
+PASS S1 an OLD data folder (the validation folder): refused (78) before any server
+   [s2-old-code] exited 78: cgn-entrypoint: REFUSED: the access code is not the authorized one
+PASS S2 an OLD (rotated) access code: refused (78)
+   [s3-old-origin] exited 78: cgn-entrypoint: REFUSED: MCHEZO_PUBLIC_ORIGIN is not the authorized origin
+PASS S3 an OLD public origin: refused (78)
+   [s4-old-hops] exited 78: cgn-entrypoint: REFUSED: MCHEZO_TRUST_PROXY is not the authorized proxy count
+PASS S4 an OLD proxy count: refused (78)
+   [s5-all-old] exited 78: cgn-entrypoint: REFUSED: MCHEZO_DATA_DIR is not the authorized data folder (a rollback brings back old environment values)
+PASS S5 every old value at once (a one-click rollback across a configuration change): refused (78)
+PASS after S1-S5: the disk record byte-identical, the data folder's files unchanged, maintenance kept closed (PUBLIC 503)
+-- F: a FAILED start of the previous release (killed during start), then the safe recovery
+   [start gate] containers on the volume: 0
+   [F] exited 137
+PASS F the killed start: exited 137; the record byte-identical, the folder's files unchanged, maintenance kept closed
+   [start gate] containers on the volume: 0
+   [recovery start] cgn-entrypoint: the environment matches the authorized configuration: the APPROVED data folder /var/data/cgn-w1
+   [recovery start] [restore] 1 room(s) restored, 0 not loaded (data: /var/data/cgn-w1)
+PASS the recovery start: the guard accepts the CURRENT environment (the APPROVED folder /var/data/cgn-w1), the server restores the room with nothing unloaded, and /health names 7097ac2
+   [reopen gate] private probe: PROBE 2026-11-17T07:31:21.666Z UP 7097ac2bb062925bb296a129f4771f1e68fd522d; expected 7097ac2bb062925bb296a129f4771f1e68fd522d
+   [reopen gate] record: STATUS data_dir=/var/data/cgn-w1 public_origin=https://localhost:18743 trust_proxy=1 pending_data_dir=none serving=/var/data/cgn-w1; expected data_dir=/var/data/cgn-w1, nothing pending, served /var/data/cgn-w1
+   [through the reopened ingress] PASS the access gate admits the authorized code
+   [through the reopened ingress] PASS the original HOST seat works, with no rejoin — HTTP 200
+   [through the reopened ingress] PASS the original GUEST seat works, with no rejoin — HTTP 200
+   [through the reopened ingress] PASS the approved "W5 seed" entry is there, linked to the warm-up game's finish
+   [through the reopened ingress] PASS each of the 3 acknowledged seed answers is there with its submitted value
+   [through the reopened ingress] PASS the COMPLETED score ledger: the warm-up game's finish and its two score events are exactly the reference ones (values not printed) — HTTP 200, 3 event(s)
+   [through the reopened ingress] PASS the action acknowledged on the previous release is there, with its value (read by this release)
+   [through the reopened ingress] PASS the second game is still in play (the rollback neither finished nor reset it) — playing
+   [through the reopened ingress] LIVE recovered OK (0 failed)
+PASS the recovery is an ORDINARY start of the reviewed release with the current environment: the reopen gate passes, and the seats, ledger, entry and action are served
+PASS at the end: exactly one container on the volume (no competing writer)
+-- cleanup (run 20261117T073050Z-f7382c08)
+   cleanup #1: proxy container a0f3d610995d volume w7-data-20261117T073050Z-f7382c08 private-files(codes,keys,sessions,decrypted-copies)
+   cleanup #2: nothing owned left to remove
+   this run's containers left: 0; volumes left: 0; processes left: 0; listeners left on 18780/18781/18743/18744: 0; private files left: no
+   files (the kept run folder and this run's own log) holding an access code (current or old), a session token, a gate cookie or an age secret key: 0
+   checks: 46 passed, 0 failed
+W7 REHEARSAL PASSED

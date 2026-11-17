@@ -3876,3 +3876,16 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
   - archive SHA-256 `e34c6c1c…16210`;
   - inventory 144 files, SHA-256 `338e6931…d1d3`;
   - the differences from `7097ac2`: only the web bundle (`apps/web/dist`), with the server, content and packages identical (`git diff f93e9cb 7097ac2 -- src package.json package-lock.json` is empty).
+- **The draft PR** is #50 (stacked on #49), subscribed, and linked on #5 (6941495066) and #49 (6941495706).
+- **The candidate:**
+  - `scripts/beta/w7-pred-context.sh`: the previous release's build context as a revert commit makes it (only the artifact pins change).
+  - `scripts/beta/w7-artifact-check.sh`: A1, the predecessor through the same gate; A2–A4, the wrong-artifact refusals.
+  - `scripts/beta/w7-rehearsal.sh` and `w7-check.mjs`: three windows. The rollback, with COMPAT on a disposable copy and the denials D1, D2, D4, D5 and D6. The return, with the persisted state and its negative controls. The one-click model S1–S5, and F, a killed start with an ordinary recovery.
+  - `scripts/beta/w7-selftest.sh`: T0–T4, with sentinels.
+  - `docs/beta/render-w7.md`: the runbook, with B-W7-01, the provider steps for a throwaway window, and the remaining prerequisites.
+  - `docs/evidence/beta-r4-w7/`: the README, the dev runs and the runners.
+- **Dev runs:**
+  - the artifact check PASSED, 7/7;
+  - the rehearsal `20261117T073050Z-f7382c08` PASSED, 46/46 (a display-only count bug was fixed afterwards);
+  - the self-test PASSED, 13/13.
+- **Next:** the final on one clean checkout (`runners/w7-final.sh`: static, the image checks, the artifact check, the W7 self-test, and the W6 guard, hold and switch and W5 receipt regressions), then the report on #50.
