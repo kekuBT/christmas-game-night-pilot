@@ -3670,12 +3670,11 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
     2. R1 could report a restart without a readable baseline.
   - **Acknowledged** in 6936049251 at 9:26 p.m. ET. The work started after #47's full gate.
 
-## Beta R4: W4 follow-up (review 6935889459; in progress on #46)
+## Beta R4: W4 follow-up (review 6935889459; complete, tested `3eb05bc`)
 - **The run's lifecycle** (`cleanup`, `finish`, and their helpers) moved into `w4-control.sh`, so the fault tests call the very `finish`.
 - **`count_owned`** checks each Docker query's status. An unlistable inventory is UNVERIFIED, and the run fails.
 - **`do_start`** requires a readable, non-empty `StartedAt` before the start (else no start), and a readable, non-empty, different one after it.
 - **The tests:** new fault cases (start before and after; finish empty, containers unlistable, volumes unlistable, a container left), and K0M with 6 weakened lines.
-- **Next:**
-  1. one fresh W4 self-test on the exact tested SHA;
-  2. a new report on #46;
-  3. the change to #47's base, recorded separately.
+- **The final on a clean checkout of `3eb05bc`:** `w4-selftest.sh` **PASSED**, 81/81 (K0 88/88; K0M 18 required failures; K1–K8), and the static checks passed.
+- **#47's stack:** #47 was tested on base `8101c5c`. A merge of this follow-up into #47 conflicts only in `docs/PROGRESS.md` (both PRs append a section). It is left unmerged while #47 is under review, as asked, and will be a plain merge.
+- **Next:** ChatGPT's verification; W4 is not cleared.
