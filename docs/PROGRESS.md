@@ -3772,3 +3772,20 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
   - the static checks **PASSED** on their second run (run 1 FAILED on the scanner matching its own committed pattern file, kept);
   - `w5-selftest.sh` **PASSED**, 12/12. The rehearsal `20261117T044108Z-b7f2585b` passed 33/33: public 503 on all 71 samples; the private probe `UP`, then `DOWN` for 1,122 ms, then `UP`; `RECEIPT_OK`; the exact values; `change-pre-value` failing only on the value.
 - **Next:** the new report on #48. W5 clearance and W6 stay held.
+- **Reported** in 6938592832.
+- **Review 6938602366: W5 backup and independent receipt preparation CLEARED.**
+  - All three repair findings are closed.
+  - ChatGPT's independent live audit ran on the exact candidate `7e9d3c7`, as a stopped-process native copy with simulated maintenance:
+    - the probe went UP → DOWN → UP, with a 1,425 ms interruption;
+    - the seats, the result, the TV and the approved entry recovered.
+  - **Its limits:** live Render W4/W5, physical devices and deployment are pending.
+  - **Its observation:** a long Trivia label wraps at 390 px. That's outside #48.
+
+## Beta R4: W6 restore preparation (handoff 6938602366; in progress)
+- **Acknowledged** in this thread at 12:05 a.m. ET. The estimate is about 60 min, with 30 min of contingency.
+- **The branch** is `claude/beta-r4-w6-restore`, from #48's head `d2e7edf`, as a stacked draft PR.
+- **The scope:**
+  - a local restore rehearsal: a W5-received copy, then verify, restore into a new folder, check, a single-writer cutover, the recovered state, and a reversible fallback;
+  - negatives;
+  - `docs/beta/render-w6.md`, with the Render disk snapshot kept separate and PENDING.
+- **Unchanged:** the runtime and the pin stay `7097ac2`, at $0. There is no Render operation and no W7.
