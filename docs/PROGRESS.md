@@ -3859,7 +3859,7 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
   - W4 self-test, 81/81;
   - the round-5 drill, 19/19.
 - **Next:** the new report on #49, linked on #5 and #48.
-- **Reported** in 6941116920 (repair 2); linked on #5 and #48.
+- **Reported** in 6941122210 (repair 2); linked on #5 and #48.
 - **Review 6941129590: W6 local preparation CLEARED.** The non-blocking observation is that the TV entry screen's optional spectator action sits lower than the name field. W7 was handed off in the same comment.
 
 ## Beta R4: W7 rollback preparation (handoff 6941129590; in progress)
