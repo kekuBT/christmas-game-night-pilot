@@ -1,0 +1,239 @@
+{
+ "tool": "scripts/beta/w4-rehearsal.mjs",
+ "toolSha256": "e59fab3dea244590577780b6fccae39b7fc2fd6fe2e97260f0096e26b9877d0f",
+ "node": "v22.23.4",
+ "runId": "20261117T020218-b2e561",
+ "origin": "https://localhost:18443",
+ "startedAt": "2026-11-17T02:02:18.089Z",
+ "control": null,
+ "scope": "LOCAL rehearsal: the packaged pinned runtime on a run-owned Docker volume behind a local TLS proxy, restarted by the harness (docker stop/start; a fresh container on the same volume). Not Render, not a phone.",
+ "restarts": [
+  {
+   "action": "stop",
+   "ok": true,
+   "container": "68eb2c2a543c",
+   "graceful": true,
+   "state": "docker stop exit 0; state exited, exit code 0, OOM-killed false",
+   "ms": 281
+  },
+  {
+   "action": "start",
+   "ok": true,
+   "container": "68eb2c2a543c",
+   "restarted": true,
+   "revision": "7097ac2bb062925bb296a129f4771f1e68fd522d",
+   "ms": 579
+  },
+  {
+   "action": "fresh",
+   "ok": true,
+   "container": "d0e2bdeba6ef",
+   "oldContainer": "68eb2c2a543c",
+   "graceful": true,
+   "oldRemoved": true,
+   "volumeFree": true,
+   "volume": "w4-data-20261117T020216Z-97ebf713-a",
+   "revision": "7097ac2bb062925bb296a129f4771f1e68fd522d",
+   "ms": 990
+  },
+  {
+   "action": "lock-probe",
+   "ok": true,
+   "exit": 2,
+   "output": "Another server (pid 23) is using this data directory (/var/data/cgn-w1). Stop it first: one process writes a data directory at a time.",
+   "ms": 293
+  },
+  {
+   "action": "guard-probe",
+   "ok": false,
+   "exit": null,
+   "output": "",
+   "serverStarted": false,
+   "mode": "hang",
+   "deadlineS": 20,
+   "fixtureVolume": "w4-data-20261117T020216Z-97ebf713-guard2",
+   "dataVolume": {
+    "onlyTheWriterBefore": true,
+    "onlyTheWriterAfter": true
+   },
+   "teardown": "container d6d6c8f0b462; volume w4-data-20261117T020216Z-97ebf713-guard2",
+   "teardownMs": 284,
+   "why": "the guard did not exit within 20 s",
+   "ms": 20776
+  }
+ ],
+ "probes": {
+  "lock": {
+   "ok": true,
+   "action": "lock-probe",
+   "exit": 2,
+   "output": "Another server (pid 23) is using this data directory (/var/data/cgn-w1). Stop it first: one process writes a data directory at a time.",
+   "ms": 293
+  },
+  "guard": {
+   "ok": false,
+   "action": "guard-probe",
+   "exit": null,
+   "output": "",
+   "serverStarted": false,
+   "mode": "hang",
+   "deadlineS": 20,
+   "fixtureVolume": "w4-data-20261117T020216Z-97ebf713-guard2",
+   "dataVolume": {
+    "onlyTheWriterBefore": true,
+    "onlyTheWriterAfter": true
+   },
+   "teardown": "container d6d6c8f0b462; volume w4-data-20261117T020216Z-97ebf713-guard2",
+   "teardownMs": 284,
+   "why": "the guard did not exit within 20 s",
+   "ms": 20776
+  }
+ },
+ "seen": {
+  "seed": {
+   "firstRound": "finished",
+   "noteStatus": 201,
+   "noteId": "book-1"
+  },
+  "r1TapMessageWhileDown": "Request failed (502)",
+  "R1": {
+   "guestScreen": "Question 2 of 10",
+   "hostScreen": "Answer locked in",
+   "tvScreen": "Featured question (Q1 of 10) · each phone goes at its own pace"
+  },
+  "R2": {
+   "guestScreen": "Answer locked in",
+   "hostScreen": "Answer locked in",
+   "tvScreen": "Featured question (Q1 of 10) · each phone goes at its own pace"
+  }
+ },
+ "checks": [
+  {
+   "name": "S a first round finished and a synthetic Memory Book note citing it was saved and reads back (API)",
+   "ok": true,
+   "detail": "{\"round\":true,\"status\":201,\"readBack\":true}"
+  },
+  {
+   "name": "P a second round is playing; host and guest each answered question 1 and saw it locked in (acknowledged, rendered), recorded once (API)",
+   "ok": true,
+   "detail": "{\"start\":201,\"guestLocked\":true,\"hostLocked\":true,\"recorded\":{\"guest\":1,\"host\":1}}"
+  },
+  {
+   "name": "R1 the container stopped gracefully: the harness read it back as exited with exit code 0, not forced or OOM-killed (harness)",
+   "ok": true,
+   "detail": "{\"ok\":true,\"graceful\":true,\"state\":\"docker stop exit 0; state exited, exit code 0, OOM-killed false\"}"
+  },
+  {
+   "name": "R1 while the service was down the guest's screen said it was reconnecting, and the tap was NOT shown as in (rendered)",
+   "ok": true,
+   "detail": "{\"stop\":\"docker stop exit 0; state exited, exit code 0, OOM-killed false\",\"banner\":true,\"shownIn\":false,\"message\":\"Request failed (502)\"}"
+  },
+  {
+   "name": "R1 the same container started again: it was stopped before, and a new start is recorded (harness)",
+   "ok": true,
+   "detail": "{\"ok\":true,\"restarted\":true,\"container\":\"68eb2c2a543c\"}"
+  },
+  {
+   "name": "R1 the service is back with the pinned revision (harness: start, container 68eb2c2a543c)",
+   "ok": true,
+   "detail": "{\"ok\":true,\"revision\":\"7097ac2bb062925bb296a129f4771f1e68fd522d\",\"ms\":579}"
+  },
+  {
+   "name": "R1 each page (host, guest, TV) opened a new live socket after the restart",
+   "ok": true,
+   "detail": "{\"host\":true,\"guest\":true,\"tv\":true}"
+  },
+  {
+   "name": "R1 the same room, the same two seats and the same round, still playing (API)",
+   "ok": true,
+   "detail": "{\"sameRoom\":true,\"guestSeat\":true,\"hostSeat\":true,\"status\":\"playing\"}"
+  },
+  {
+   "name": "R1 the acknowledged answers are kept, each once (guest 1, host 1) (API)",
+   "ok": true,
+   "detail": "{\"guest\":1,\"host\":1}"
+  },
+  {
+   "name": "R1 each screen shows the playing round on a new live connection (rendered): guest Question 2 of 10, host locked in, TV the featured question",
+   "ok": true,
+   "detail": "{\"guest\":\"Question 2 of 10\",\"host\":\"Answer locked in\",\"tv\":\"Featured question (Q1 of 10) · each phone goes at its own pace\",\"live\":{\"guest\":true,\"host\":true,\"tv\":true}}"
+  },
+  {
+   "name": "R1 the unconfirmed tap was not saved: question 2 is not recorded for the guest (API)",
+   "ok": true,
+   "detail": "1 recorded"
+  },
+  {
+   "name": "R1 the guest answered question 2 again after the restart: locked in (rendered), recorded once (API)",
+   "ok": true,
+   "detail": "2 recorded"
+  },
+  {
+   "name": "R1 play continues: the host answers question 2 in its own page after the restart, locked in (rendered), recorded once (API)",
+   "ok": true,
+   "detail": "{\"shown\":true,\"locked\":true,\"recorded\":2}"
+  },
+  {
+   "name": "R2 the old container stopped gracefully, was removed and confirmed gone, and no container used the data before the replacement started (harness)",
+   "ok": true,
+   "detail": "{\"ok\":true,\"graceful\":true,\"oldRemoved\":true,\"volumeFree\":true,\"old\":\"68eb2c2a543c\",\"new\":\"d0e2bdeba6ef\"}"
+  },
+  {
+   "name": "R2 the service is back with the pinned revision (harness: fresh, container d0e2bdeba6ef)",
+   "ok": true,
+   "detail": "{\"ok\":true,\"revision\":\"7097ac2bb062925bb296a129f4771f1e68fd522d\",\"ms\":990}"
+  },
+  {
+   "name": "R2 each page (host, guest, TV) opened a new live socket after the restart",
+   "ok": true,
+   "detail": "{\"host\":true,\"guest\":true,\"tv\":true}"
+  },
+  {
+   "name": "R2 the same room, the same two seats and the same round, still playing (API)",
+   "ok": true,
+   "detail": "{\"sameRoom\":true,\"guestSeat\":true,\"hostSeat\":true,\"status\":\"playing\"}"
+  },
+  {
+   "name": "R2 the acknowledged answers are kept, each once (guest 2, host 2) (API)",
+   "ok": true,
+   "detail": "{\"guest\":2,\"host\":2}"
+  },
+  {
+   "name": "R2 each screen shows the playing round on a new live connection (rendered): guest Answer locked in, host locked in, TV the featured question",
+   "ok": true,
+   "detail": "{\"guest\":\"Answer locked in\",\"host\":\"Answer locked in\",\"tv\":\"Featured question (Q1 of 10) · each phone goes at its own pace\",\"live\":{\"guest\":true,\"host\":true,\"tv\":true}}"
+  },
+  {
+   "name": "R2 play continues: the host answers question 3 in its own page after the restart, locked in (rendered), recorded once (API)",
+   "ok": true,
+   "detail": "{\"shown\":true,\"locked\":true,\"recorded\":3}"
+  },
+  {
+   "name": "R2 the seeded Memory Book note still reads back after the fresh container (API)",
+   "ok": true,
+   "detail": "{\"status\":200,\"found\":true}"
+  },
+  {
+   "name": "L a second server process on the same data, in the running container, is refused by the one-writer lock (harness)",
+   "ok": true,
+   "detail": "{\"ok\":true,\"exit\":2,\"output\":\"Another server (pid 23) is using this data directory (/var/data/cgn-w1). Stop it first: one process writes a data directory at a time.\"}"
+  },
+  {
+   "name": "G the rollback guard: the probe's own container (a fixture volume holding only the authorization record, never the data volume) with another public origin exited 78 with REFUSED before its deadline; its teardown was confirmed; the data volume's only user before and after was the container under test (harness)",
+   "ok": false,
+   "detail": "{\"ok\":false,\"exit\":null,\"serverStarted\":false,\"mode\":\"hang\",\"deadlineS\":20,\"dataVolume\":{\"onlyTheWriterBefore\":true,\"onlyTheWriterAfter\":true},\"teardown\":\"container d6d6c8f0b462; volume w4-data-20261117T020216Z-97ebf713-guard2\",\"teardownMs\":284,\"ms\":20776,\"output\":\"\",\"why\":\"the guard did not exit within 20 s\"}"
+  }
+ ],
+ "failures": [
+  "G the rollback guard: the probe's own container (a fixture volume holding only the authorization record, never the data volume) with another public origin exited 78 with REFUSED before its deadline; its teardown was confirmed; the data volume's only user before and after was the container under test (harness)"
+ ],
+ "screenshots": [
+  "r2-host.png",
+  "r2-guest.png",
+  "r2-tv.png"
+ ],
+ "aborted": "the harness reported a failed guard-probe (the guard did not exit within 20 s); no further restart or probe was requested",
+ "finishedAt": "2026-11-17T02:02:55.586Z",
+ "durationS": 37,
+ "verdict": "FAILED"
+}

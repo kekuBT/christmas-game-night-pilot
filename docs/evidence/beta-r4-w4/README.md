@@ -71,6 +71,15 @@ Labels: **rendered** is a page's own DOM; **API** is the server's record over HT
 | Meta-control, attempt 1 | Too weak | With only the stop check and the removal check weakened, the removal cases **still failed closed**: the new check of the volume's users catches an ignored removal by itself (two layers). So the meta-control now also weakens that check, as the original had neither. | [dev/k0m-attempt1.log](repair/dev/k0m-attempt1.log) |
 | Self-test dev 1 | PASSED, 79/79 | K0, K0M, K1–K8 | [dev/selftest-dev1.log](repair/dev/selftest-dev1.log) |
 
+**The finals, on a clean checkout of the tested commit `5a5d2878b326451302dfd73d87f5719693a67075`** (status 0 lines; 0 containers and 0 volumes before and after):
+
+| Final | Verdict | Run IDs and observed results | Evidence |
+|---|---|---|---|
+| `w4-selftest.sh` | **W4 SELFTEST PASSED (exit 0)**, 79 passed, 0 failed | <ul><li>**K0:** the 72 fault cases fail closed.</li><li>**K0M:** the weakened copy fails, as required.</li><li>**K1:** the W3 mock cases pass.</li><li>**K2** `20261117T020006Z-c4032f58`: PASSED.<ul><li>R1: a verified graceful stop; a new start recorded.</li><li>R2: the old container removed and confirmed gone before the replacement.</li><li>G: refused (78) in its own container; teardown 168 ms; the data volume's only user before and after was the writer.</li><li>Standings rendered on the TV, host and guest.</li></ul></li><li>**K3** `…020042Z-6f3fe97e`: FAILED exactly the six R2 checks.</li><li>**K4** `…020213Z-2a25695b`: the port preflight.</li><li>**K5** `…020214Z-8283043c`: readiness, on the revision.</li><li>**K6** `…020216Z-97ebf713`: G failed at its 20 s deadline; teardown 284 ms; aborted.</li><li>**K7** `…020257Z-12ad2d8b`: G failed, a server STARTED; teardown 291 ms; aborted.</li><li>**K8** `…020337Z-bcb8ac00`: R1 failed with exit 137 although `docker stop` exited 0; nothing started or replaced; aborted.</li><li>The sentinels survived every case.</li></ul> | [final/selftest-final.log](repair/final/selftest-final.log); the driver's JSON for K2, K3, K6, K7 and K8 in [final/](repair/final/); [K2's screenshots](repair/final/K2-screens/), with the room code masked |
+| Static checks | **Passed** | <ul><li>No runtime file differs from `7097ac2`.</li><li>No deploy file differs from `2e2257c`.</li><li>No tool other than the W4 ones changed since `5fdc73c`.</li><li>eslint and `bash -n` pass.</li><li>24 links, none missing.</li><li>The secret scan is empty.</li></ul> | [final/static-final.log](repair/final/static-final.log) |
+
+**A false start, discarded:** the first static-check pass ran while `git worktree add` was still writing the clean checkout. It saw a partial tree, and its output was deleted. The self-test was not affected, because it starts only after the checkout completes. The checks were then rerun on the complete checkout (above).
+
 ## Every run, in order
 | Run | Code | Verdict | Evidence |
 |---|---|---|---|

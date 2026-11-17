@@ -3639,7 +3639,7 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
     4. A bounded client repair for the raw 502 is authorized, as a separate PR after this one.
   - **Acknowledged** in 6935192651 at 8:40 p.m. ET, with a 1 h 55 min estimate.
 
-## Beta R4: W4 repair (review 6935165862; in progress on #46)
+## Beta R4: W4 repair (review 6935165862; complete, tested `5a5d287`)
 - **The restart and probe actions moved** into `scripts/beta/w4-control.sh`. The harness and the fault tests source it.
 - **They fail closed,** and every docker call is bounded:
   - a stop counts only when the container reads back as `exited` with exit code 0, not OOM-killed;
@@ -3659,8 +3659,7 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
   - prerequisite 4 records the revision, the folder identity and the gate outcome, never the code;
   - D1 and PASS separate the fully-down case from a lost response (reconcile, at most once);
   - the 502 repair is now authorized as a separate PR.
-- **Next:**
-  1. finals on a clean exact SHA, and a new report on #46;
-  2. then the separate stacked client-repair PR.
-
-  The real D1 and D2 stay pending.
+- **Finals on a clean checkout of `5a5d287`:**
+  - `w4-selftest.sh` **PASSED**, 79/79: K0, K0M, and K1–K8 with the sentinels kept. The rehearsal run is `20261117T020006Z-c4032f58`.
+  - The static checks passed.
+- **Next:** the report on #46, then the separate stacked client-repair PR. ChatGPT's independent verification follows. The real D1 and D2 stay pending.
