@@ -3677,4 +3677,11 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
   - The unit tests: 2,077 passed.
   - `check-uncertain-delivery`: 47 of 47.
 - **Next:** the report on #47, linked to #46 and #5, then ChatGPT's candidate review. The pin is unchanged.
+- **Reported** in 6936654226.
+- **Review 6936791624: changes requested.** A gateway's generic JSON got past the fix. Acknowledged in 6936808904 at 10:07 p.m. ET.
+- **The repair:** on 502, 503 and 504, only Mchezo's **existing app errors** (`isKnownAppError`) count as the app's. Generic JSON is unconfirmed.
+  - The boundary is documented: the endpoint never answers these statuses, and no reply header proves app origin.
+  - **The tests:** unit, plus browser case E (gateway JSON, server down and committed).
+  - **The new driver failed on `f4c558f`** with exactly the 6 E server-down failures.
+- **Next:** focused validation on a clean checkout, then a new report on #47. The effective #46 base stays `8101c5c`.
 

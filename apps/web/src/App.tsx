@@ -1033,9 +1033,10 @@ export function App() {
         return { status: resp.status, body: await resp.json().catch(() => ({})) };
       });
       const r = res.body as { accepted?: boolean; reason?: string; error?: string };
-      // An exhausted 502/503/504 from a proxy or the host's edge (no error of
-      // the app's own) becomes "couldn't confirm": the action may already be
-      // recorded. A typed app error stays itself (describeIntentFailure).
+      // An exhausted 502/503/504 from a proxy or the host's edge (no existing
+      // Mchezo app error in the body, so HTML, empty or a gateway's generic
+      // JSON) becomes "couldn't confirm": the action may already be recorded.
+      // A known app error stays itself (describeIntentFailure).
       if (res.status >= 400) throw new Error(describeIntentFailure(res));
       if (!r.accepted) failed(r.reason === "PHASE_CLOSED" ? "Time was up for that one — it wasn’t counted." : r.reason === "READY_LOCKED" ? "The game has already started." : `Not accepted: ${r.reason || "unknown"}`); else setMsg("Saved.");
       await refresh();

@@ -156,14 +156,49 @@ describe("an exhausted intermediary 502/503/504 is unconfirmed (apps/web/src/com
     expect(NOT_DELIVERED).not.toMatch(/not received|didn’t reach|wasn’t sent|failed|not saved/i);
   });
 
-  it("a typed app error on a 5xx stays itself: the app's own body is authoritative", () => {
+  it("one of Mchezo's existing app errors on a 5xx stays itself (error, reason or code)", () => {
     for (const status of [502, 503, 504]) {
       const res = { status, body: { error: "Display name already taken" } };
       expect(isUnconfirmedIntermediaryFailure(res)).toBe(false);
       expect(shown(res)).toBe("That name is taken in this room — pick another.");
+      expect(shown({ status, body: { reason: "PHASE_CLOSED" } })).toBe("That game has closed — the five-minute limit passed. The host can skip it once it is stalled.");
+      expect(shown({ status, body: { code: "ALREADY_ANSWERED" } })).toBe("Your answer is already in — it counted once.");
+      expect(shown({ status, body: { error: "Not accepted: UNKNOWN_QUESTION" } })).toBe("That question is no longer open.");
+      expect(shown({ status, body: { error: "Only host/cohost can start a game" } })).toBe("Only the host or a cohost can do that.");
     }
-    expect(isUnconfirmedIntermediaryFailure({ status: 503, body: { code: "MAINTENANCE" } })).toBe(false);
-    expect(isUnconfirmedIntermediaryFailure({ status: 502, body: { reason: "PHASE_CLOSED" } })).toBe(false);
+  });
+
+  // Review 6936791624: a gateway can answer with JSON that LOOKS like an app error. Mchezo's intents endpoint never
+  // answers 502/503/504 and marks no reply as its own, so only an existing Mchezo app error counts as the app's.
+  it("the review's reproductions: a gateway's generic JSON is unconfirmed, not shown", () => {
+    expect(shown({ status: 502, body: { error: "Bad Gateway" } })).toBe(NOT_DELIVERED);
+    expect(shown({ status: 503, body: { code: "SERVICE_UNAVAILABLE" } })).toBe(NOT_DELIVERED);
+    expect(shown({ status: 504, body: { reason: "upstream timeout" } })).toBe(NOT_DELIVERED);
+  });
+  const GATEWAY_JSON: unknown[] = [
+    { error: "Bad Gateway" }, { code: "SERVICE_UNAVAILABLE" }, { reason: "upstream timeout" },
+    { error: "Service Unavailable", code: "503" }, { error: "Gateway Timeout", message: "upstream request timeout" },
+    { code: "MAINTENANCE" }, { error: "no healthy upstream" }, { status: "error", message: "Bad gateway" },
+    { error: "constructor" }, { reason: "toString" },
+  ];
+  it.each([502, 503, 504])("every generic gateway JSON body on a %i is unconfirmed, and its text is never shown", (status) => {
+    for (const body of GATEWAY_JSON) {
+      const res = { status, body };
+      expect(isUnconfirmedIntermediaryFailure(res), JSON.stringify(body)).toBe(true);
+      expect(shown(res), JSON.stringify(body)).toBe(NOT_DELIVERED);
+    }
+  });
+  it("a gateway's generic JSON on every try still sends ONE request, three times (same event id)", async () => {
+    const { send, sent } = phone(() => ({ status: 502, body: { error: "Bad Gateway" } }));
+    const res = await sendIntent(send, noSleep);
+    expect(send).toHaveBeenCalledTimes(3);
+    expect(new Set(sent).size).toBe(1);
+    expect(shown(res)).toBe(NOT_DELIVERED);
+  });
+  it("generic JSON on other statuses is unchanged (non-target behaviour): a 500 or 4xx still shows its error", () => {
+    expect(describeIntentFailure({ status: 500, body: { error: "Bad Gateway" } })).toBe("Bad Gateway");
+    expect(describeIntentFailure({ status: 500, body: { code: "SERVICE_UNAVAILABLE" } })).toBe("Request failed (500)");
+    expect(describeIntentFailure({ status: 400, body: { error: "Session token required" } })).toBe("Session token required");
   });
 
   it("meaningful app errors keep their wording: 4xx errors are not retried and not reworded", async () => {

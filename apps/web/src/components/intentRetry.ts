@@ -11,16 +11,27 @@
  * network failure or a 5xx, with short backoff. It never retries a 4xx:
  * the server answered, and repeating cannot change the answer.
  *
- * Beta R4 (review 6935165862): when the retries end on a 502, 503 or 504
- * that carries no error of the app's own, the answer came from something
- * between the phone and the game (a proxy, or the host's edge while the
- * server restarts), not from the game. The action may or may not have
- * reached the server: a restart can lose the reply to an action the server
- * already recorded. describeIntentFailure turns that case into the same
- * "couldn't confirm" wording as a dropped connection, which never claims
- * either way; the screen then shows the server's own state.
+ * Beta R4 (reviews 6935165862 and 6936791624): when the retries end on a
+ * 502, 503 or 504 that carries no error of the app's own, the answer came
+ * from something between the phone and the game (a proxy, or the host's
+ * edge while the server restarts), not from the game. The action may or may
+ * not have reached the server: a restart can lose the reply to an action the
+ * server already recorded. describeIntentFailure turns that case into the
+ * same "couldn't confirm" wording as a dropped connection, which never
+ * claims either way; the screen then shows the server's own state.
+ *
+ * The boundary. Mchezo's intents endpoint (src/server/http.ts) answers 200
+ * (accepted, or {accepted:false, reason:<code>}), 4xx {error} or 500 {error};
+ * it never answers 502, 503 or 504, and its replies carry no header that
+ * would prove they came from the game. So for those three statuses a body
+ * counts as the app's only when one of its error, reason or code strings is
+ * one of Mchezo's EXISTING app errors (isKnownAppError: an error with an
+ * established message in errors.ts). Generic JSON from a gateway, such as
+ * {"error":"Bad Gateway"}, {"code":"SERVICE_UNAVAILABLE"} or
+ * {"reason":"upstream timeout"}, is not, and is unconfirmed like HTML or an
+ * empty body. Other statuses (4xx, 500) are unchanged.
  */
-import { NOT_DELIVERED } from "../ui/mchezo/lib/errors.js";
+import { NOT_DELIVERED, isKnownAppError } from "../ui/mchezo/lib/errors.js";
 export interface IntentResponse {
   status: number;
   body: unknown;
@@ -54,30 +65,41 @@ export async function sendIntent(send: () => Promise<IntentResponse>, opts: Retr
 /** The statuses a proxy or a host's edge answers when the game behind it is unreachable. */
 const INTERMEDIARY_STATUSES = new Set([502, 503, 504]);
 
-/** True when the body carries an error of the app's own: a non-empty `error`, `code` or `reason` string. */
-function hasAppError(body: unknown): boolean {
-  if (typeof body !== "object" || body === null) return false;
+/**
+ * The body's app error, if it carries one of Mchezo's existing app errors in
+ * its error, reason or code field (in that order); otherwise undefined.
+ * A non-empty string the app never produces does not count.
+ */
+function knownAppError(body: unknown): string | undefined {
+  if (typeof body !== "object" || body === null) return undefined;
   const b = body as Record<string, unknown>;
-  return ["error", "code", "reason"].some((k) => typeof b[k] === "string" && (b[k] as string).trim() !== "");
+  for (const k of ["error", "reason", "code"]) {
+    const v = b[k];
+    if (typeof v === "string" && isKnownAppError(v)) return v.trim();
+  }
+  return undefined;
 }
 
 /**
  * True when a final 502, 503 or 504 came from an intermediary, not the game:
- * no error of the app's own in the body. Such a send is UNCONFIRMED: it may
- * or may not have been recorded.
+ * the body carries none of Mchezo's existing app errors (HTML, empty, or a
+ * gateway's generic JSON). Such a send is UNCONFIRMED: it may or may not
+ * have been recorded.
  */
 export function isUnconfirmedIntermediaryFailure(res: IntentResponse): boolean {
-  return INTERMEDIARY_STATUSES.has(res.status) && !hasAppError(res.body);
+  return INTERMEDIARY_STATUSES.has(res.status) && knownAppError(res.body) === undefined;
 }
 
 /**
  * The message for a send that ended with an HTTP error (status >= 400):
- * the "couldn't confirm" wording for an unconfirmed intermediary failure;
- * otherwise the app's own error, unchanged (humanError translates it), or
- * the bare status when the body says nothing.
+ * - a 502, 503 or 504: the "couldn't confirm" wording, unless the body
+ *   carries one of Mchezo's existing app errors, which is shown as itself
+ *   (humanError translates it);
+ * - any other status (4xx, 500): unchanged, the body's error, else the bare
+ *   status.
  */
 export function describeIntentFailure(res: IntentResponse): string {
-  if (isUnconfirmedIntermediaryFailure(res)) return NOT_DELIVERED;
+  if (INTERMEDIARY_STATUSES.has(res.status)) return knownAppError(res.body) ?? NOT_DELIVERED;
   const b = (typeof res.body === "object" && res.body !== null ? res.body : {}) as { error?: unknown };
   return typeof b.error === "string" && b.error !== "" ? b.error : `Request failed (${res.status})`;
 }

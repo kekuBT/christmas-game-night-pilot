@@ -53,3 +53,47 @@
 - the logs: [unit tests](final/04-unit-tests.log), [uncertain-delivery](final/56-check-uncertain-delivery.log), [action-ack](final/76-check-action-ack.log), [errors](final/107-check-errors.log);
 - the screenshots: [A, 502, couldn't confirm](final/screens/a-502-couldnt-confirm-390.png) and [B, 502, committed, went through](final/screens/b-502-committed-went-through-390.png).
 
+## The repair (review 6936791624): a gateway's generic JSON
+**The finding:** the first version (`f4c558f`) counted any non-empty `error`, `code` or `reason` as an app error. A gateway answering with its own JSON got past it:
+- `502 {"error":"Bad Gateway"}` showed "Bad Gateway";
+- `503 {"code":"SERVICE_UNAVAILABLE"}` showed `Request failed (503)`;
+- `504 {"reason":"upstream timeout"}` showed `Request failed (504)`.
+
+**The contract:**
+- **The intents endpoint** (`src/server/http.ts`) answers:
+  - 200 `{accepted:true,…}` or `{accepted:false, reason:<code>}`;
+  - a 4xx `{error}` (session, not found, a bad request);
+  - 500 `{error}` (a failed save).
+- **It never answers 502, 503 or 504,** and its replies carry no header that proves app origin.
+- **The service worker's** offline 503 is an HTML page, so it is unconfirmed already.
+
+So for those three statuses, the body is the app's only if one of its `error`, `reason` or `code` strings is one of **Mchezo's existing app errors**: `isKnownAppError` in `errors.ts`, the errors with an established message there.
+
+**The change:**
+- **`errors.ts` `isKnownAppError`:** the exact entries, the two families, an optional "Not accepted: " prefix, and own keys only.
+- **`intentRetry.ts`:**
+  - `knownAppError(body)` (error, then reason, then code);
+  - `isUnconfirmedIntermediaryFailure`;
+  - `describeIntentFailure`: on 502, 503 and 504 it returns the known app error, else `NOT_DELIVERED`; other statuses are unchanged.
+- **Decision D-BR4-C502-01** is amended.
+
+**The tests:**
+- **Unit:**
+  - the review's three reproductions;
+  - every status against ten generic gateway bodies, including inherited keys (`constructor`, `toString`);
+  - one request, three tries with gateway JSON;
+  - known app errors in `error`, `reason` or `code` on a 5xx shown as themselves;
+  - 500 and 4xx unchanged;
+  - `isKnownAppError` positive and negative.
+- **Browser, the new case E:**
+  - gateway JSON on 502, 503 and 504 with the server down: "couldn't confirm"; the gateway's text never shown; not shown as in; nothing recorded; a re-tap recorded once;
+  - **E-committed:** `502 {"error":"Bad Gateway"}` replacing every reply after the server recorded the first try: recorded once, LOCKED IN, "went through", the gateway's text not left on screen.
+  - A, B, C and D are kept as controls.
+
+| Run (dev, before the tested commit) | Verdict | What it showed | Evidence |
+|---|---|---|---|
+| **The new driver on the REVIEWED revision `f4c558f`** | **FAILED (exit 1), as required:** 6 failures | Exactly the E server-down cases. "Bad Gateway", `Request failed (503)` and `Request failed (504)` were shown, and "couldn't confirm" never appeared. A, B, C, D and E-committed passed there. | [gate](repair/dev/before-f4c558f-gate.log), [driver](repair/dev/before-f4c558f-driver.log), [screenshot](repair/screens/before-f4c558f-e-502-gateway-json-390.png) |
+| Targeted on the fix: `uncertain-delivery`, `action-ack`, `errors` | **PASSED (exit 0)** | `check-uncertain-delivery`: 81 checks passed, including every E case | [gate](repair/dev/targeted-dev1.log), [driver](repair/dev/targeted-dev1-driver.log), [screenshot](repair/screens/dev-after-e-502-gateway-json-390.png) |
+
+**An observation, out of scope:** on a 390 px answer tile, a long word ("Liechtenstein") breaks mid-word. That is existing layout behaviour this change doesn't touch.
+

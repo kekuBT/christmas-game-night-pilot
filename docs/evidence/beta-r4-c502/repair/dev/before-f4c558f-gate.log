@@ -1,0 +1,44 @@
+Mchezo gate targeted | run 20261117-030849-f4c558f7-3590
+  revision f4c558f7dc589ec704ce3c9a2fbd008e94d3dc14 + 1 uncommitted change(s) | fingerprint 59ccf675c198 (653 files)
+  plan     3 steps: 1 fast/build, 1 browser drivers, 1 other (E2E, fixtures, preflight) · 3 workers (auto: 4 CPUs, 15.0 GB available)
+  history  0 local run(s) in ./test-results/timing-history.jsonl + committed baseline (2026-11-10) · contention ×1.02 for 3 worker(s) (measured, 1 run(s))
+  estimate this run: 0–4m (low-confidence) · the same steps one after another: about 1m 05s · longest step check-uncertain-delivery ~1m 00s
+  method   each step's median (p10–p90 for the range) over up to 10 earlier sequential runs, ×1.02 contention, replayed through the scheduler (exclusive steps first, then longest first)
+  unknown  no timing history for 1 step(s), assumed ~60s each: check-uncertain-delivery
+  results  <scratch>/c502r/before/test-results/20261117-030849-f4c558f7-3590
+        start build-web on w1 (usually 5s)
+[ 1/3] PASS         4.5s  build-web  w1
+        start browser-preflight on w1 (usually 1s)
+[ 2/3] PASS         0.6s  browser-preflight  w1
+  browser  chrome-headless-shell 153.0.8010.12 (MCHEZO_CHROMIUM_PATH)
+  server   w1 http://localhost:46507 (pid 3709, data <scratch>/c502r/before/test-results/20261117-030849-f4c558f7-3590/server-data/w1)
+        start check-uncertain-delivery on w1 (no timing history)
+── progress  2/3 done · 2 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 1m 00s
+   running   check-uncertain-delivery 54s (w1)
+   remaining 0–3m · total 1–4m · done around 03:10–03:12 UTC (low-confidence)
+[ 3/3] FAIL        74.2s  check-uncertain-delivery  w1  FAIL E 502 {"error":"Bad Gateway"} (gateway JSON, server down): the phone says it couldn't confirm it — not within 15000ms | FAIL E 502 {"error":"Bad Gateway"} 
+      | PASS E 504 {"reason":"upstream timeout"} (gateway JSON, server down): the "couldn't confirm" line is gone
+      | PASS E-committed 502 {"error":"Bad Gateway"} (gateway JSON, reply lost after the server recorded it): the phone tried three times
+      | PASS E-committed 502 {"error":"Bad Gateway"} (gateway JSON, reply lost after the server recorded it): every try carried the same event id — 3 tries, 1 id(s)
+      | PASS E-committed 502 {"error":"Bad Gateway"} (gateway JSON, reply lost after the server recorded it): the server recorded it exactly once — 1
+      | PASS E-committed 502 {"error":"Bad Gateway"} (gateway JSON, reply lost after the server recorded it): the screen shows the server's state: LOCKED IN
+      | PASS E-committed 502 {"error":"Bad Gateway"} (gateway JSON, reply lost after the server recorded it): the line says it went through, and the gateway's text is not on screen
+      | PASS E-committed 502 {"error":"Bad Gateway"} (gateway JSON, reply lost after the server recorded it): a fresh tap for the same answer doesn't count twice — 1
+      | PASS C 503 with the app's own error: the typed error keeps its own wording
+      | PASS C 503 with the app's own error: it is not turned into "couldn't confirm" — "We could not bring you back into your seat — rejoin with the room code."
+      | PASS C 503 with the app's own error: the server has nothing
+      | PASS D a real app rejection (UNKNOWN_QUESTION): the server's reason keeps its wording
+      | PASS D a real app rejection (UNKNOWN_QUESTION): it is not turned into "couldn't confirm" — "That question is no longer open."
+      | PASS D a real app rejection (UNKNOWN_QUESTION): nothing is recorded
+      | UNCERTAIN DELIVERY FAILURES: 6
+      | MCHEZO_DRIVER_STATS {"browsers":1,"contexts":10,"pages":10,"peakOpenPages":1}
+
+FAILED (exit 1) | targeted | run 20261117-030849-f4c558f7-3590
+  2 passed, 1 failed, 0 timed out, 0 infrastructure, 0 invalid, 0 cancelled, 0 not run
+  FAIL      check-uncertain-delivery (w1) [functional]: FAIL E 502 {"error":"Bad Gateway"} (gateway JSON, server down): the phone says it couldn't confirm it — not within 15000ms | FAIL E 502 {"error":"Bad Gateway"} (gateway JSON, server down): the gateway
+  timing   wall 1m 20s · step time 1m 19s (sum) · 3 workers, 33% busy · 0.99× the same steps run one after another
+           predicted 0–4m (about 1m 01s, low-confidence) → actual 1m 20s (+31%)
+           longest  check-uncertain-delivery 1m 14s, build-web 5s, browser-preflight 1s · the longest step is 93% of the wall time
+           machine  CPU mean 9%, peak 55% · memory available ≥ 14877 MB · load peak 0.7
+           retries  none (the gate never retries a step)
+  report <scratch>/c502r/before/test-results/20261117-030849-f4c558f7-3590/report.json
