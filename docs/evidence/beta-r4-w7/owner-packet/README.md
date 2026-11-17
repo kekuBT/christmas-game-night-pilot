@@ -34,7 +34,11 @@ This repair passed its own checks. Review 6955682854 then found that its `cleanu
 - **The reproduction:** [runners/repro-cleanup-retry.sh](runners/repro-cleanup-retry.sh) runs a real `prepare`, a cleanup, replacements with sentinels, and a second cleanup.
 - **The result against the `c37f813` tool** (`repro-before-fix-c37f813.log`): **REPRO FAILED.** The retry deleted all 34 replacements.
 
-## `final-<sha>/`: the repaired tool, on one clean checkout
-See that folder's `summary.txt`. It holds the self-test, the local run (whose browser step must launch, and whose plain-`http` verdict must be exactly `UNSUITABLE`), and the W7 static checks on the change.
+## `final-b8b486c/`: the run-folder repair (review 6955682854), on one clean checkout
+See its `summary.txt`. It holds:
+- **the self-test** (S1–S11, 61 checks);
+- **the same cleanup-retry reproduction against the repaired tool.** **REPRO PASSED: 8 of 8 replacement sentinels survived** (0 of 34 against `c37f813`);
+- **the local run** (36 PASS, 0 FAIL). Its browser step must launch, and its plain-`http` verdict must be exactly `UNSUITABLE`. It ends with a cleanup retry against a replacement;
+- **the W7 static checks** on the change.
 
 **Not shown:** GitHub's forwarder, the Ports panel, any owner browser, the Codespace's Node version, Render, and B-W7-01.
