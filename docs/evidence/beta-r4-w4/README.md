@@ -1,4 +1,4 @@
-# Beta R4 W4 preparation: the local restart rehearsal (handoff 6933392621)
+# Beta R4 W4 preparation: the local restart rehearsal (handoff 6933392621; repaired after review 6935165862)
 
 **Where it ran:** this machine's Docker.
 - **The image:** `cgn-render:check` (`sha256:7b53109a7d69`), the local `deploy/render` build of the pinned `7097ac2` used for W1–W3. Each run checked the `/health` revision.
@@ -9,9 +9,11 @@
 
 ## What a run checks
 The tools are:
-- `scripts/beta/w4-rehearsal.sh`, the harness: W3's isolation, plus a run-owned volume and the restart actions;
+- `scripts/beta/w4-rehearsal.sh`, the harness: W3's isolation, plus a run-owned volume;
+- `scripts/beta/w4-control.sh`, the restart and probe actions, which fail closed. The harness and the fault tests both source it.
 - `scripts/beta/w4-rehearsal.mjs`, the driver;
-- `scripts/beta/w4-selftest.sh`, which runs the rehearsal with its controls.
+- `scripts/beta/w4-control-selftest.sh`, the fault-injection tests, run against a mock docker;
+- `scripts/beta/w4-selftest.sh`, which runs the fault tests, the rehearsal and its controls.
 
 Labels: **rendered** is a page's own DOM; **API** is the server's record over HTTP; **harness** is the harness that did the restart.
 
@@ -19,11 +21,13 @@ Labels: **rendered** is a page's own DOM; **API** is the server's record over HT
 |---|---|---|
 | S | A first Trivia round finishes; the host saves a synthetic Memory Book note citing it | It reads back (API) |
 | P | A second round; the host and guest each answer question 1 | Locked in (rendered), recorded once (API) |
-| R1 | **`docker stop`** (graceful `SIGTERM`, passed on by `cgn-entrypoint`). While it is down, the guest taps question 2. Then **`docker start`** of the same container. | **While down:**<ul><li>the guest's banner says it is reconnecting;</li><li>the tap is **not** shown as in (rendered).</li></ul>**After the restart:**<ul><li>the pinned revision (harness);</li><li>the same room, seats and round (API);</li><li>the acknowledged answers kept once, and the unconfirmed tap **not** saved (API);</li><li>a new live socket on each page;</li><li>each screen showing the playing round on that live connection (rendered).</li></ul>**Then:**<ul><li>the guest re-taps question 2: locked in, recorded once;</li><li>play continues: the host answers question 2 in its own page, acknowledged.</li></ul> |
-| R2 | A **fresh container** of the same image on the **same** volume, with the same environment (a local analogue of a redeploy) | The same checks as R1, both earlier answers kept once; the host answers question 3 in its own page; **the seeded Memory Book note reads back** (API) |
+| R1 | **`docker stop`** (graceful `SIGTERM`, passed on by `cgn-entrypoint`). While it is down, the guest taps question 2. Then **`docker start`** of the same container. | **The harness:** a **verified graceful stop**: the container reads back as `exited` with exit code 0, not OOM-killed. Then the start: the container was stopped, and a new start time is recorded.<br>**While down:**<ul><li>the guest's banner says it is reconnecting;</li><li>the tap is **not** shown as in (rendered).</li></ul>**After the restart:**<ul><li>the pinned revision (harness);</li><li>the same room, seats and round (API);</li><li>the acknowledged answers kept once, and the unconfirmed tap **not** saved (API);</li><li>a new live socket on each page;</li><li>each screen showing the playing round on that live connection (rendered).</li></ul>**Then:**<ul><li>the guest re-taps question 2: locked in, recorded once;</li><li>play continues: the host answers question 2 in its own page, acknowledged.</li></ul> |
+| R2 | A **fresh container** of the same image on the **same** volume, with the same environment (a local analogue of a redeploy) | **The harness:** the old container stopped gracefully, then was removed (after its label read back as the run's) and confirmed gone. No container used the volume before the replacement started.<br>The same checks as R1, both earlier answers kept once; the host answers question 3 in its own page; **the seeded Memory Book note reads back** (API) |
 | L | A second `node dist/server/serve.js` **inside** the running container | Refused by the one-writer lock: exit 2, "Another server (pid N) is using this data directory" |
-| G | A second container on the same volume with **another public origin** | `cgn-entrypoint` refuses before any server starts: exit 78, `REFUSED: MCHEZO_PUBLIC_ORIGIN is not the authorized origin` |
+| G | **The probe's own container**, with **another public origin**, on a **fixture volume owned by the run**. The volume holds only a copy of the authorization record, streamed as tar out of the running container. **The data volume is never mounted by a second container.** | **Refused:** `cgn-entrypoint` exits 78 with `REFUSED: MCHEZO_PUBLIC_ORIGIN is not the authorized origin` before the deadline (60 s). No server starts.<br>**Teardown:** the probe's container and volume, bounded and confirmed gone.<br>**The data volume:** its only user, before and after, is the container under test. |
 | F | The round finishes (the guest through the UI, the host through the API) | **Server record (API):** every answer once, and the guest's score equal to the score of its recorded answers.<br>**Rendered:** the host's, guest's and TV's standings equal the recorded scores. |
+
+**Any failed harness action stops the rehearsal there** (an `ABORTED` line). Nothing more is asked of the harness, and no replacement starts.
 
 **After every run,** none of its containers, volumes, processes, listeners or private files is left, and no log or evidence file holds the code or a cookie. Screenshots mask the room code.
 
@@ -32,9 +36,40 @@ Labels: **rendered** is a page's own DOM; **API** is the server's record over HT
   - While the service is down, the proxy answers 502.
   - The phone retries three times, then shows the raw text **`Request failed (502)`** (recorded verbatim in every run).
   - It doesn't show its friendly `NOT_DELIVERED` wording: "We couldn’t confirm that — check your connection. If it doesn’t show as in, try again."
-- **The safety property holds:** the tap is never shown as in, the server never records it, and re-tapping after the restart counts it once.
+- **The safety property holds:** the tap is never shown as in. In this fully-down case, the server never records it, and re-tapping after the restart counts it once.
+- **In a real deploy, a response can also be lost after the server committed the tap.** The runbook's D1 now covers that case: reconcile with the server's state, and count each tap at most once.
 - **The cause:** the pinned client turns a final 5xx into `Request failed (<status>)`, and `humanError` passes it through.
-- **Proposed bounded repair, not made here:** map a final 502, 503 or 504 that isn't the app's own JSON to `NOT_DELIVERED`. See [render-w4.md](../../beta/render-w4.md#the-finding-from-the-rehearsal-a-tap-made-during-a-restart-can-show-request-failed-502). It is a runtime change, so it needs its own approval and a new candidate. **The pin is unchanged.**
+- **The repair is authorized (review 6935165862) as a separate stacked draft PR, after this tooling repair.** It will show the existing "couldn't confirm" wording, never "not received". See [render-w4.md](../../beta/render-w4.md#the-finding-from-the-rehearsal-a-tap-made-during-a-restart-can-show-request-failed-502). **The pin is unchanged** until its candidate review.
+
+## The repair (review 6935165862)
+**The review found three defects** in the tooling tested at `618f179`. None of them is in the runtime.
+1. **The fresh replacement ignored a failed stop or removal,** and still answered `ok:true`. ChatGPT reproduced this with a mock. R1 also trusted the Docker CLI's exit code alone: `docker stop` exits 0 even when it had to `SIGKILL` the container (exit 137).
+2. **The guard probe** ran a second container on the **active writer's volume**, with no time limit.
+3. **The runbook** had two errors:
+   - its prerequisite 4 said to record the code;
+   - it claimed that every tap made during a deploy goes unrecorded.
+
+**The fixes:**
+- **The actions moved** into `scripts/beta/w4-control.sh`, and they fail closed. Every docker call is bounded.
+  - A stop counts only when the container reads back as `exited` with exit code 0, not OOM-killed.
+  - A start needs a stopped container, and a new `StartedAt` afterwards.
+  - A replacement needs a graceful stop, then a removal (label read back first) confirmed gone, and no container on the volume.
+  - The driver asserts these for R1 and R2, and stops at the first failed action.
+- **The guard probe** runs in its own container, on a run-owned fixture volume that holds only a tar copy of the authorization record.
+  - It has a deadline, and its teardown is bounded and confirmed.
+  - The data volume's only user must be the writer under test.
+- **The runbook** is corrected.
+
+| Run (dev, before the tested commit) | Verdict | What it showed | Evidence |
+|---|---|---|---|
+| Rehearsal t1 | PASSED | <ul><li>R1: a verified graceful stop (exit code 0) and a new start recorded.</li><li>R2: the old container removed and confirmed gone, then the replacement.</li><li>G: the guard refused (exit 78) in its own container on its own fixture volume; teardown 175 ms; the data volume's only user was the writer.</li></ul> | [dev/t1.log](repair/dev/t1.log) |
+| Control: a hanging guard (`W4_GUARD_MODE=hang`, 15 s) | FAILED, as required | G failed at its deadline; teardown 260 ms; the data volume's only user was the writer; ABORTED; nothing left | [dev/hang.log](repair/dev/hang.log) |
+| Control: a non-refusing guard (`W4_GUARD_MODE=serve`, 15 s) | FAILED, as required | A server STARTED in the probe's container, on its fixture volume; teardown 312 ms; the data volume's only user was the writer; ABORTED | [dev/serve.log](repair/dev/serve.log) |
+| Control: a forced stop (`W4_STOP_SECONDS=0`) | FAILED, as required | `docker stop exit 0`, but the container read back as exit code 137, so the stop was refused; no start and no replacement; ABORTED | [dev/forced.log](repair/dev/forced.log) |
+| Fault tests, attempt 1 | **FAILED: a mock defect** | The mock `curl` ignored `-o /dev/null`, so the readiness output picked up the JSON, and the two passing cases (start-ok, fresh-ok) failed. The mock was fixed; `w4-control.sh` was unchanged. | [dev/control1.log](repair/dev/control1.log) |
+| Fault tests, attempt 2 | PASSED, 72/72 | | [dev/control2.log](repair/dev/control2.log) |
+| Meta-control, attempt 1 | Too weak | With only the stop check and the removal check weakened, the removal cases **still failed closed**: the new check of the volume's users catches an ignored removal by itself (two layers). So the meta-control now also weakens that check, as the original had neither. | [dev/k0m-attempt1.log](repair/dev/k0m-attempt1.log) |
+| Self-test dev 1 | PASSED, 79/79 | K0, K0M, K1–K8 | [dev/selftest-dev1.log](repair/dev/selftest-dev1.log) |
 
 ## Every run, in order
 | Run | Code | Verdict | Evidence |

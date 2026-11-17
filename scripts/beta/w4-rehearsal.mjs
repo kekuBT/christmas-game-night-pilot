@@ -12,15 +12,21 @@
 //   S   Memory Book seed: a first Trivia round is finished, and the host saves a synthetic note citing it; it reads back.
 //   P   a second Trivia round, mid-play: host and guest each answer question 1 and see it LOCKED IN (acknowledged); the
 //       guest moves to question 2.
-//   R1  the SAME container is stopped (graceful SIGTERM). While it is down the guest taps an answer to question 2: the
-//       phone must say it couldn't confirm it, never that it's in. The container is started again. Then: the pinned
+//   R1  the SAME container is stopped: the harness must report a VERIFIED graceful stop (exited, exit code 0, not forced
+//       or OOM-killed). While it is down the guest taps an answer to question 2: the phone must not show it as in. The
+//       container is started again (the harness must report it was stopped and a new start is recorded). Then: the pinned
 //       revision (harness); the same room, seats and round (API); question 1 recorded once each, and the unconfirmed tap
 //       NOT recorded (API); each page opened a new socket; the guest's screen shows question 2 open, the host's and the
 //       TV's screens show the playing round (rendered). The guest answers question 2 again: locked in, recorded once.
-//   R2  a FRESH container of the same image on the SAME data (a local analogue of a redeploy, not a Render deploy):
-//       the same checks, both earlier answers kept once; the seeded Memory Book note still reads back (API).
+//   R2  a FRESH container of the same image on the SAME data (a local analogue of a redeploy, not a Render deploy): the
+//       harness must report the old container stopped gracefully, was removed and confirmed gone, and no container used
+//       the data before the replacement started; then the same checks, both earlier answers kept once, and the seeded
+//       Memory Book note still reads back (API).
 //   L   the one-writer lock: a second server process in the running container must be refused (harness).
-//   G   the rollback guard: a second container on the same data with another public origin must refuse to start (78).
+//   G   the rollback guard: the probe's own container, on a fixture volume holding only a copy of the authorization
+//       record (never the data volume), with another public origin, must exit 78 with REFUSED before its deadline; its
+//       teardown confirmed; the data volume's only user the container under test, before and after (harness).
+// Any failed restart or probe action STOPS the rehearsal there (an "ABORTED" line): nothing more is asked of the harness.
 //   F   the round finishes (guest through the UI, host through the API): every answer once, the guest's score equal to the
 //       score of its recorded answers, and the host's, guest's and TV's rendered standings equal to the recorded scores.
 // --control empty-data (the negative control): R2's fresh container gets a NEW, EMPTY volume (data lost). The room,
@@ -68,6 +74,12 @@ async function until(fn, timeoutMs, stepMs = 200) { const end = Date.now() + tim
 const overall = setTimeout(() => { console.error(`w4-rehearsal: the run exceeded --max-minutes ${MAX_MS / 60_000}`); process.exit(1); }, MAX_MS);
 
 // ---------- restart requests to the harness ----------
+// A failed restart or probe action stops the rehearsal: no further restart or probe is requested after it.
+class Abort extends Error {}
+function mustSucceed(name, ok, res, detail) {
+  check(name, ok, JSON.stringify({ ok: res.ok, ...detail, why: res.why }));
+  if (!ok) throw new Abort(`the harness reported a failed ${res.action ?? "action"} (${res.why ?? "see the check above"}); no further restart or probe was requested`);
+}
 let seqN = 0;
 async function harness(action, timeoutMs = 120_000) {
   const seq = ++seqN, done = join(CTL, `done-${seq}`);
@@ -248,6 +260,7 @@ try {
   // ---- R1: the same container stopped (an unconfirmed tap while down) and started ----
   say("R1: stop the container (graceful SIGTERM); the guest taps while it is down; start it again");
   const stop1 = await harness("stop");
+  mustSucceed("R1 the container stopped gracefully: the harness read it back as exited with exit code 0, not forced or OOM-killed (harness)", stop1.ok === true && stop1.graceful === true, stop1, { graceful: stop1.graceful, state: stop1.state });
   const down = await until(async () => ((await banner(g)) ?? "").includes("reconnecting"), 20000);
   await g.locator(`${QUESTION(2)} .mz-slab:not([disabled])`).first().click();
   // The phone retries for about 1.6 s; then it shows its message for the tap. Read what it actually says.
@@ -258,6 +271,7 @@ try {
   // An observation, not a pass condition: the wording a player sees for a tap made during the restart.
   console.log(`NOTE R1 the phone's message for the tap made while the service was down: "${tapMessage ?? "(none)"}" (the friendly wording would be: "We couldn’t confirm that — check your connection. If it doesn’t show as in, try again.")`);
   const start1 = await harness("start");
+  mustSucceed("R1 the same container started again: it was stopped before, and a new start is recorded (harness)", start1.ok === true && start1.restarted === true, start1, { restarted: start1.restarted, container: start1.container });
   start1.at = Date.now() - (start1.ms ?? 0);
   await afterRestart("R1", start1, { guest: 1, host: 1, guestScreen: "Question 2 of 10" });
   check("R1 the unconfirmed tap was not saved: question 2 is not recorded for the guest (API)", (await answersOf("guest")).length === 1, `${(await answersOf("guest")).length} recorded`);
@@ -271,6 +285,7 @@ try {
   const freshAction = CONTROL === "empty-data" ? "fresh-empty" : "fresh";
   say(`R2: a fresh container of the same image on ${CONTROL === "empty-data" ? "a NEW, EMPTY volume (negative control)" : "the SAME data"}`);
   const fresh = await harness(freshAction);
+  mustSucceed("R2 the old container stopped gracefully, was removed and confirmed gone, and no container used the data before the replacement started (harness)", fresh.ok === true && fresh.graceful === true && fresh.oldRemoved === true && fresh.volumeFree === true, fresh, { graceful: fresh.graceful, oldRemoved: fresh.oldRemoved, volumeFree: fresh.volumeFree, old: fresh.oldContainer, new: fresh.container });
   fresh.at = Date.now() - (fresh.ms ?? 0);
   await afterRestart("R2", fresh, { guest: 2, host: 2, guestScreen: "Answer locked in" });
   await hostAnswersNext("R2", 3);
@@ -282,10 +297,12 @@ try {
     // ---- L and G: the one-writer lock and the rollback guard ----
     const lock = await harness("lock-probe");
     ev.probes.lock = lock;
-    check("L a second server process on the same data, in the running container, is refused by the one-writer lock (harness)", lock.exit === 2 && /is using this data directory/.test(lock.output ?? ""), JSON.stringify({ exit: lock.exit, output: (lock.output ?? "").slice(0, 160) }));
-    const guard = await harness("guard-probe");
+    mustSucceed("L a second server process on the same data, in the running container, is refused by the one-writer lock (harness)", lock.ok === true && lock.exit === 2 && /is using this data directory/.test(lock.output ?? ""), lock, { exit: lock.exit, output: (lock.output ?? "").slice(0, 160) });
+    const guard = await harness("guard-probe", 240_000);
     ev.probes.guard = guard;
-    check("G a second container on the same data with another public origin refuses to start (harness: cgn-entrypoint's rollback guard, exit 78)", guard.exit === 78 && /REFUSED: MCHEZO_PUBLIC_ORIGIN is not the authorized origin/.test(guard.output ?? ""), JSON.stringify({ exit: guard.exit, output: (guard.output ?? "").slice(0, 160) }));
+    mustSucceed("G the rollback guard: the probe's own container (a fixture volume holding only the authorization record, never the data volume) with another public origin exited 78 with REFUSED before its deadline; its teardown was confirmed; the data volume's only user before and after was the container under test (harness)",
+      guard.ok === true && guard.exit === 78 && /REFUSED: MCHEZO_PUBLIC_ORIGIN is not the authorized origin/.test(guard.output ?? "") && guard.serverStarted === false && guard.dataVolume?.onlyTheWriterBefore === true && guard.dataVolume?.onlyTheWriterAfter === true,
+      guard, { exit: guard.exit, serverStarted: guard.serverStarted, mode: guard.mode, deadlineS: guard.deadlineS, dataVolume: guard.dataVolume, teardown: guard.teardown, teardownMs: guard.teardownMs, ms: guard.ms, output: (guard.output ?? "").slice(0, 160) });
 
     // ---- F: finish the round; the server's record, then each screen's rendered result ----
     say("F: the guest finishes through the UI, the host through the API");
@@ -314,7 +331,8 @@ try {
   }
   exitCode = ev.failures.length ? 1 : 0;
 } catch (e) {
-  check(`the run completed (${String(e?.message ?? e).split("\n")[0].slice(0, 160)})`, false);
+  if (e instanceof Abort) { ev.aborted = e.message; console.log(`ABORTED ${e.message}`); }
+  else check(`the run completed (${String(e?.message ?? e).split("\n")[0].slice(0, 160)})`, false);
   exitCode = 1;
 } finally {
   clearTimeout(overall);

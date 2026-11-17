@@ -1,0 +1,25 @@
+== w4-rehearsal 2026-11-17T01:48:00Z, run 20261117T014800Z-0fc7a481, image cgn-render:check, driver e59fab3dea244590, proxy 06b1738ccd75d5f8
+   image id: sha256:7b53109a7d69
+   ports 18443/18480/18080 free
+   throwaway code, env file and TLS key in a private directory (mode 700), removed on exit
+   data volume w4-data-20261117T014800Z-0fc7a481-a (label w4.owner=20261117T014800Z-0fc7a481): throwaway data, removed on exit
+   container 7302f74c62eb (name w4-svc-20261117T014800Z-0fc7a481-1, label w4.owner=20261117T014800Z-0fc7a481)
+   /health revision 7097ac2bb062925bb296a129f4771f1e68fd522d is the expected one
+   AUTHORIZED data_dir=/var/data/cgn-w1 public_origin=https://localhost:18443 trust_proxy=1 (the access code is kept only as a salted hash)
+   listeners on 18443/18480/18080 while running (positive control; expect 3): 3
+-- the rehearsal (bounded: timeout 900 s, and the driver's own --max-minutes)
+   [restart] stop: docker stop exit 0; state exited, exit code 137, OOM-killed false: FAILED: not a verified graceful stop
+   PASS S a first round finished and a synthetic Memory Book note citing it was saved and reads back (API) — {"round":true,"status":201,"readBack":true}
+   PASS P a second round is playing; host and guest each answered question 1 and saw it locked in (acknowledged, rendered), recorded once (API) — {"start":201,"guestLocked":true,"hostLocked":true,"recorded":{"guest":1,"host":1}}
+   [6.0s] R1: stop the container (graceful SIGTERM); the guest taps while it is down; start it again
+   FAIL R1 the container stopped gracefully: the harness read it back as exited with exit code 0, not forced or OOM-killed (harness) — {"ok":false,"graceful":false,"state":"docker stop exit 0; state exited, exit code 137, OOM-killed false"}
+   ABORTED the harness reported a failed stop (see the check above); no further restart or probe was requested
+   evidence: <scratch>/w4r/dev/forced/evidence/w4-20261117T014802-e35e7e.json
+   W4 REHEARSAL FAILED (1 failure(s))
+   driver exit: 1
+-- cleanup (run 20261117T014800Z-0fc7a481)
+   cleanup #1: proxy container 7302f74c62eb volume w4-data-20261117T014800Z-0fc7a481-a private-files
+   cleanup #2: nothing owned left to remove
+   this run's containers left: 0; volumes left: 0; processes left: 0; listeners left on 18443/18480/18080: 0; private files left: no
+   files holding the access code: 0; files holding a beta cookie value: 0
+W4 REHEARSAL HARNESS FAILED

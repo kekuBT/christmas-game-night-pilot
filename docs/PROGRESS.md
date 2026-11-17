@@ -3631,4 +3631,36 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
 - **Finals on a clean checkout of `618f179`:**
   - `w4-selftest.sh` **PASSED**: K1–K5, the sentinels kept; the rehearsal run is `20261117T003140Z-d06ba320`;
   - the static checks passed.
-- **Next:** ChatGPT's independent review. The real D1 and D2 on Render stay pending, behind a same-window `BACKUP_OK` and `RECEIPT_OK`.
+- **Review 6935165862: changes requested. W4 is not cleared.**
+  - **The findings:**
+    1. The fresh replacement ignored a failed stop or removal, and R1 trusted the Docker CLI's exit alone.
+    2. The guard probe mounted the active writer's volume, with no enclosing time limit.
+    3. Two runbook corrections: never record the code; a tap during a deploy may already be committed.
+    4. A bounded client repair for the raw 502 is authorized, as a separate PR after this one.
+  - **Acknowledged** in 6935192651 at 8:40 p.m. ET, with a 1 h 55 min estimate.
+
+## Beta R4: W4 repair (review 6935165862; in progress on #46)
+- **The restart and probe actions moved** into `scripts/beta/w4-control.sh`. The harness and the fault tests source it.
+- **They fail closed,** and every docker call is bounded:
+  - a stop counts only when the container reads back as `exited` with exit code 0, not OOM-killed;
+  - a start needs a stopped container, and a new `StartedAt` afterwards;
+  - a replacement needs a graceful stop, a removal confirmed gone (label first), and no container on the volume.
+
+  The driver asserts these for R1 and R2, and stops the rehearsal at the first failed action.
+- **The guard probe** runs its own container on a run-owned fixture volume holding only a tar copy of the authorization record. The data volume is never mounted twice.
+  - Its deadline is 60 s; it fails on a server starting, another exit, or the deadline.
+  - Its teardown is bounded and confirmed.
+  - The data volume's only user must be the writer under test.
+- **The tests:**
+  - `scripts/beta/w4-control-selftest.sh` (K0): 72 mock fault cases, all failing closed;
+  - K0M: the same tests against a copy with the reviewed defects put back must fail;
+  - K6, K7 and K8: real Docker, a hanging guard, a non-refusing guard and a forced stop.
+- **The runbook:**
+  - prerequisite 4 records the revision, the folder identity and the gate outcome, never the code;
+  - D1 and PASS separate the fully-down case from a lost response (reconcile, at most once);
+  - the 502 repair is now authorized as a separate PR.
+- **Next:**
+  1. finals on a clean exact SHA, and a new report on #46;
+  2. then the separate stacked client-repair PR.
+
+  The real D1 and D2 stay pending.

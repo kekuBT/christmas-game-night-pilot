@@ -12,9 +12,14 @@
 #                continuity and durability checks must then fail
 #   lock-probe   a second server process INSIDE the running container, on the same data folder: the one-writer lock
 #                must refuse it (exit 2, "is using this data directory")
-#   guard-probe  a second container on the same volume with a different public origin: cgn-entrypoint's rollback guard
-#                must refuse it before any server starts (exit 78)
-# After every (re)start: readiness, the pinned /health revision, the container still carrying this run's label.
+#   guard-probe  the probe's OWN container, on a fixture volume owned by this run holding only a copy of the
+#                authorization record, with a different public origin: cgn-entrypoint's rollback guard must refuse it
+#                (exit 78) before its deadline. The data volume is never mounted by a second container.
+# The actions live in scripts/beta/w4-control.sh (sourced here and by the fault tests), and they FAIL CLOSED (review
+# 6935165862): a stop counts only when the container reads back as exited with code 0 (not forced, not OOM-killed); a
+# replacement starts only after the old container stopped gracefully, was removed and confirmed gone, and no container
+# uses the data volume; every docker call is bounded. After every (re)start: readiness, the pinned /health revision,
+# the container still carrying this run's label.
 #
 # Isolation is the W3 harness's (review 6930033578): a run id; containers and volumes named for it and labelled
 # w4.owner=<run id>; only what this run created is removed, after its label is read back; nothing deleted in advance; a
@@ -26,7 +31,8 @@
 #   bash scripts/beta/w4-rehearsal.sh <image tag> [work dir] [extra w4-rehearsal.mjs options, e.g. --control empty-data]
 #
 # Needs: docker, node 22 with this repository's node_modules, openssl, curl. Ports 18080, 18443, 18480.
-# W4_EXPECTED_REVISION (default: the release pin 7097ac2…) exists for a revision-mismatch control.
+# W4_EXPECTED_REVISION (default: the release pin 7097ac2…) exists for a revision-mismatch control; W4_STOP_SECONDS,
+# W4_GUARD_SECONDS and W4_GUARD_MODE (see w4-control.sh) for the forced-stop and guard negative controls.
 # Exit: 0 "W4 REHEARSAL HARNESS PASSED"; otherwise "W4 REHEARSAL HARNESS FAILED" with 1, or 130/143 when interrupted.
 set -uo pipefail
 IMG=${1:-}
@@ -39,7 +45,9 @@ HTTPS=18443; HTTPP=18480; BACK=18080; ORIGIN="https://localhost:$HTTPS"
 RUNID=$(date -u +%Y%m%dT%H%M%SZ)-$(od -An -N4 -tx1 /dev/urandom | tr -d ' \n')
 if [ -n "$WK_ARG" ]; then mkdir -p "$WK_ARG" || exit 1; WK=$(cd "$WK_ARG" && pwd); else WK=$(mktemp -d); fi
 LOG="$WK/w4-$RUNID.log"; PLOG="$WK/proxy-$RUNID.log"; EVD="$WK/evidence"
-cid=""; volumes=""; proxy_pid=""; driver_pid=""; PRIV=""; privpath=""; CODE=""; started=0; rc=1; stage="setup"; cleanups=0; finished=0; nseq=0
+cid=""; volumes=""; proxy_pid=""; driver_pid=""; PRIV=""; privpath=""; CODE=""; started=0; rc=1; stage="setup"; cleanups=0; finished=0; nseq=0; VOL=""
+# shellcheck source=scripts/beta/w4-control.sh
+. "$ROOT/scripts/beta/w4-control.sh" || { echo "cannot load scripts/beta/w4-control.sh" >&2; exit 2; }
 
 listeners() {
   awk -v want=" $HTTPS $HTTPP $BACK " 'FNR > 1 && $4 == "0A" { n = split($2, a, ":"); p = 0; h = toupper(a[n]);
@@ -62,15 +70,6 @@ stop_pid() {
   kill -KILL "$p" 2>/dev/null
 }
 fail() { echo "   FAILED at $stage: $*"; rc=1; exit 1; }
-label_of() { docker inspect -f '{{index .Config.Labels "w4.owner"}}' "$1" 2>/dev/null; }
-vol_label_of() { docker volume inspect -f '{{index .Labels "w4.owner"}}' "$1" 2>/dev/null; }
-# Remove one container of this run (only after its label reads back as this run's).
-remove_container() {
-  local id=$1 l
-  l=$(label_of "$id")
-  if [ "$l" = "$RUNID" ]; then docker rm -f -v "$id" >/dev/null 2>&1 && echo "container ${id:0:12}" || echo "container ${id:0:12} (REMOVAL FAILED)"
-  else echo "container ${id:0:12} not removed (label '${l:-unreadable}')"; fi
-}
 cleanup() {
   cleanups=$((cleanups + 1))
   local did="" left p id v
@@ -79,16 +78,16 @@ cleanup() {
   left=$(owned_pids)
   if [ -n "$left" ]; then for p in $left; do stop_pid "$p"; done; did="$did $(echo $left | wc -w)-more-owned-process(es)"; fi
   # Every container of this run: the current one, and any other carrying this run's label (probes, a failed run).
-  for id in $cid $(docker ps -aq --no-trunc --filter "label=w4.owner=$RUNID" 2>/dev/null); do
+  for id in $cid $(dk ps -aq --no-trunc --filter "label=w4.owner=$RUNID" 2>/dev/null); do
     case " $did " in *" ${id:0:12}"*) continue ;; esac
-    docker inspect "$id" >/dev/null 2>&1 || continue
+    dk inspect "$id" >/dev/null 2>&1 || continue
     did="$did $(remove_container "$id")"
   done
   cid=""
-  for v in $volumes $(docker volume ls -q --filter "label=w4.owner=$RUNID" 2>/dev/null); do
+  for v in $volumes $(dk volume ls -q --filter "label=w4.owner=$RUNID" 2>/dev/null); do
     case " $did " in *" volume $v"*) continue ;; esac
-    docker volume inspect "$v" >/dev/null 2>&1 || continue
-    if [ "$(vol_label_of "$v")" = "$RUNID" ]; then docker volume rm "$v" >/dev/null 2>&1 && did="$did volume $v" || did="$did volume $v (REMOVAL FAILED)"; fi
+    dk volume inspect "$v" >/dev/null 2>&1 || continue
+    if [ "$(vol_label_of "$v")" = "$RUNID" ]; then dk volume rm "$v" >/dev/null 2>&1 && did="$did volume $v" || did="$did volume $v (REMOVAL FAILED)"; fi
   done
   volumes=""
   if [ -n "$PRIV" ] && [ -d "$PRIV" ]; then rm -rf -- "$PRIV"; did="$did private-files"; fi
@@ -103,8 +102,8 @@ finish() {
   echo "-- cleanup (run $RUNID)"
   cleanup
   cleanup
-  left_c=$(docker ps -aq --filter "label=w4.owner=$RUNID" 2>/dev/null | wc -l)
-  left_v=$(docker volume ls -q --filter "label=w4.owner=$RUNID" 2>/dev/null | wc -l)
+  left_c=$(dk ps -aq --filter "label=w4.owner=$RUNID" 2>/dev/null | wc -l)
+  left_v=$(dk volume ls -q --filter "label=w4.owner=$RUNID" 2>/dev/null | wc -l)
   left_p=$(owned_pids | wc -w)
   if [ "$started" = 1 ]; then left_l=$(listeners); else left_l="not checked (this run started no listener)"; fi
   privleft=no; [ -n "$privpath" ] && [ -e "$privpath" ] && privleft=yes
@@ -123,36 +122,9 @@ trap finish EXIT
 trap 'echo "   interrupted (SIGINT)"; rc=130; exit 130' INT
 trap 'echo "   interrupted (SIGTERM)"; rc=143; exit 143' TERM
 
-# One container of this run on the given volume and public origin; prints its ID or nothing.
-run_container() {
-  local vol=$1 origin=$2 tag=$3
-  docker run -d --name "w4-svc-$RUNID-$tag" --label "w4.owner=$RUNID" -p "127.0.0.1:$BACK:10000" -v "$vol:/var/data" \
-    -e MCHEZO_DATA_DIR=/var/data/cgn-w1 -e "MCHEZO_PUBLIC_ORIGIN=$origin" -e MCHEZO_TRUST_PROXY=1 --env-file "$PRIV/code.env" "$IMG" 2>"$PRIV/docker-run.err"
-}
-new_volume() {
-  local v="w4-data-$RUNID-$1"
-  docker volume create --label "w4.owner=$RUNID" "$v" >/dev/null 2>&1 || return 1
-  volumes="$volumes $v"; echo "$v"
-}
-# Readiness and the pinned revision of the current container; prints "ok <revision>" or a reason.
-ready_check() {
-  local ok="" health rev
-  for _ in $(seq 1 80); do
-    [ "$(docker inspect -f '{{.State.Running}}' "$cid" 2>/dev/null)" = true ] || break
-    curl -sf --max-time 2 -o /dev/null "http://127.0.0.1:$BACK/health" && { ok=1; break; }
-    sleep 0.25
-  done
-  [ -n "$ok" ] || { echo "never ready (state: $(docker inspect -f '{{.State.Status}} exit={{.State.ExitCode}}' "$cid" 2>/dev/null))"; return 1; }
-  health=$(curl -sf --max-time 5 "http://127.0.0.1:$BACK/health") || { echo "/health stopped answering"; return 1; }
-  rev=$(printf '%s' "$health" | grep -o '"revision":"[0-9a-f]*"' | head -1 | cut -d'"' -f4)
-  [ "$rev" = "$EXPECT" ] || { echo "revision '${rev:-none}', not the expected $EXPECT"; return 1; }
-  [ "$(label_of "$cid")" = "$RUNID" ] || { echo "the container does not carry this run's label"; return 1; }
-  echo "ok $rev"
-}
-
 echo "== w4-rehearsal $(date -u +%FT%TZ), run $RUNID, image $IMG, driver $(sha256sum "$ROOT/scripts/beta/w4-rehearsal.mjs" | cut -c1-16), proxy $(sha256sum "$ROOT/scripts/beta/render-like-proxy.mjs" | cut -c1-16)"
 stage="image"
-imgid=$(docker image inspect --format '{{.Id}}' "$IMG" 2>/dev/null) || fail "the image '$IMG' is not available locally"
+imgid=$(dk image inspect --format '{{.Id}}' "$IMG" 2>/dev/null) || fail "the image '$IMG' is not available locally"
 echo "   image id: ${imgid:0:19}"
 stage="port preflight"
 busy=$(listeners)
@@ -171,7 +143,7 @@ VOL=$(new_volume a) || fail "could not create this run's data volume"
 echo "   data volume $VOL (label w4.owner=$RUNID): throwaway data, removed on exit"
 stage="container"
 if ! cid=$(run_container "$VOL" "$ORIGIN" 1); then
-  cid=$(docker ps -aq --no-trunc --filter "label=w4.owner=$RUNID" 2>/dev/null | head -1)
+  cid=$(dk ps -aq --no-trunc --filter "label=w4.owner=$RUNID" 2>/dev/null | head -1)
   fail "docker run failed: $(head -c 300 "$PRIV/docker-run.err" | tr '\n' ' ')"
 fi
 started=1
@@ -180,7 +152,7 @@ stage="readiness"
 r=$(ready_check) || fail "$r"
 echo "   /health revision ${r#ok } is the expected one"
 stage="authorization"
-auth=$(docker exec -i "$cid" cgn-authorize /var/data/cgn-w1 "$ORIGIN" 1 < "$PRIV/code" 2>&1) || fail "cgn-authorize failed: $(printf '%s' "$auth" | head -c 300 | tr '\n' ' ')"
+auth=$(timeout 60 docker exec -i "$cid" cgn-authorize /var/data/cgn-w1 "$ORIGIN" 1 < "$PRIV/code" 2>&1) || fail "cgn-authorize failed: $(printf '%s' "$auth" | head -c 300 | tr '\n' ' ')"
 printf '%s\n' "$auth" | sed 's/^/   /'
 printf '%s\n' "$auth" | grep -q '^AUTHORIZED ' || fail "cgn-authorize did not confirm"
 stage="proxy"
@@ -192,50 +164,6 @@ for _ in $(seq 1 40); do grep -q LISTENING "$PLOG" && { up=1; break; }; kill -0 
 n=$(listeners)
 echo "   listeners on $HTTPS/$HTTPP/$BACK while running (positive control; expect 3): $n"
 [ "$n" -ge 3 ] || fail "expected 3 listeners, found $n"
-
-# One restart request from the driver: "<seq> <action>" in ctl/req; the answer (one JSON line) goes to ctl/done-<seq>.
-serve_request() {
-  local seq action out code t0 old r v probe
-  read -r seq action < "$PRIV/ctl/req" || return 0
-  rm -f "$PRIV/ctl/req"
-  t0=$(date +%s%3N)
-  case "$action" in
-    stop)
-      docker stop -t 30 "$cid" >/dev/null 2>&1; code=$?
-      r=$(docker inspect -f '{{.State.Status}} exit={{.State.ExitCode}}' "$cid" 2>/dev/null)
-      printf '{"ok":%s,"action":"stop","container":"%s","state":"%s","ms":%s}\n' "$([ "$code" = 0 ] && echo true || echo false)" "${cid:0:12}" "$r" "$(( $(date +%s%3N) - t0 ))" > "$PRIV/ctl/done-$seq"
-      echo "   [restart] stop: docker stop exit $code (graceful SIGTERM to cgn-entrypoint); container ${cid:0:12} $r" ;;
-    start)
-      docker start "$cid" >/dev/null 2>&1 || { printf '{"ok":false,"why":"docker start failed"}\n' > "$PRIV/ctl/done-$seq"; return; }
-      if r=$(ready_check); then printf '{"ok":true,"action":"start","container":"%s","revision":"%s","ms":%s}\n' "${cid:0:12}" "${r#ok }" "$(( $(date +%s%3N) - t0 ))" > "$PRIV/ctl/done-$seq"
-      else printf '{"ok":false,"why":"%s"}\n' "$r" > "$PRIV/ctl/done-$seq"; fi
-      echo "   [restart] start (the same container): $(cat "$PRIV/ctl/done-$seq")" ;;
-    fresh|fresh-empty)
-      old=$cid
-      docker stop -t 30 "$old" >/dev/null 2>&1; code=$?
-      echo "   [restart] $action: docker stop exit $code (graceful SIGTERM); removing $(remove_container "$old")"
-      v=$VOL
-      if [ "$action" = fresh-empty ]; then v=$(new_volume empty) || { printf '{"ok":false,"why":"no volume"}\n' > "$PRIV/ctl/done-$seq"; return; }; echo "   [restart] NEGATIVE CONTROL: the new container gets a NEW, EMPTY volume $v (data lost)"; fi
-      nseq=$((nseq + 1))
-      if ! cid=$(run_container "$v" "$ORIGIN" "fresh$nseq"); then cid=""; printf '{"ok":false,"why":"docker run failed"}\n' > "$PRIV/ctl/done-$seq"; return; fi
-      if r=$(ready_check); then printf '{"ok":true,"action":"%s","container":"%s","oldContainer":"%s","volume":"%s","revision":"%s","ms":%s}\n' "$action" "${cid:0:12}" "${old:0:12}" "$v" "${r#ok }" "$(( $(date +%s%3N) - t0 ))" > "$PRIV/ctl/done-$seq"
-      else printf '{"ok":false,"why":"%s"}\n' "$r" > "$PRIV/ctl/done-$seq"; fi
-      echo "   [restart] $action: $(cat "$PRIV/ctl/done-$seq")" ;;
-    lock-probe)
-      out=$(docker exec -e PORT=10001 "$cid" sh -c 'cd /app && exec timeout 20 node dist/server/serve.js' 2>&1); code=$?
-      probe=$(printf '%s' "$out" | tr '\n' ' ' | sed 's/"/'"'"'/g' | head -c 300)
-      printf '{"ok":true,"action":"lock-probe","exit":%s,"output":"%s"}\n' "$code" "$probe" > "$PRIV/ctl/done-$seq"
-      echo "   [probe] lock-probe: a second server in the running container exited $code: $probe" ;;
-    guard-probe)
-      nseq=$((nseq + 1))
-      docker run --name "w4-svc-$RUNID-guard$nseq" --label "w4.owner=$RUNID" -v "$VOL:/var/data" \
-        -e MCHEZO_DATA_DIR=/var/data/cgn-w1 -e "MCHEZO_PUBLIC_ORIGIN=https://other.invalid" -e MCHEZO_TRUST_PROXY=1 --env-file "$PRIV/code.env" "$IMG" > "$PRIV/guard.out" 2>&1; code=$?
-      probe=$(tr '\n' ' ' < "$PRIV/guard.out" | sed 's/"/'"'"'/g' | head -c 300)
-      echo "   [probe] guard-probe: a second container on the same volume with a different public origin exited $code: $probe; removing $(remove_container "$(docker ps -aq --no-trunc --filter "name=^w4-svc-$RUNID-guard$nseq$" | head -1)")"
-      printf '{"ok":true,"action":"guard-probe","exit":%s,"output":"%s"}\n' "$code" "$probe" > "$PRIV/ctl/done-$seq" ;;
-    *) printf '{"ok":false,"why":"unknown action"}\n' > "$PRIV/ctl/done-$seq" ;;
-  esac
-}
 
 stage="rehearsal"
 echo "-- the rehearsal (bounded: timeout 900 s, and the driver's own --max-minutes)"
