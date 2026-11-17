@@ -1,0 +1,8 @@
+== w6-hold-selftest 2026-11-17T06:28:52Z, run 20261117T062852Z-0082d223, image cgn-render:w6r-516bacb ()
+   scripts: cgn-authorize.sh 501d1b5f9af82ff2, cgn-entrypoint.sh 0bc9b3fd2f4a7fbb, this file 059a474748ec20d2
+Cannot connect to the Docker daemon at unix:///var/run/docker.sock. Is the docker daemon running?
+could not create the volumes
+-- cleanup (run 20261117T062852Z-0082d223)
+FAIL only this run's own containers and volumes were removed: containers left UNVERIFIED, volumes left UNVERIFIED; the sentinels are intact — sentinel: '' ''
+== 0 passed, 1 failed
+W6 HOLD SELFTEST FAILED

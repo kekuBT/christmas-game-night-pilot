@@ -3772,3 +3772,90 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
   - the static checks **PASSED** on their second run (run 1 FAILED on the scanner matching its own committed pattern file, kept);
   - `w5-selftest.sh` **PASSED**, 12/12. The rehearsal `20261117T044108Z-b7f2585b` passed 33/33: public 503 on all 71 samples; the private probe `UP`, then `DOWN` for 1,122 ms, then `UP`; `RECEIPT_OK`; the exact values; `change-pre-value` failing only on the value.
 - **Next:** the new report on #48. W5 clearance and W6 stay held.
+- **Reported** in 6938592832.
+- **Review 6938602366: W5 backup and independent receipt preparation CLEARED.**
+  - All three repair findings are closed.
+  - ChatGPT's independent live audit ran on the exact candidate `7e9d3c7`, as a stopped-process native copy with simulated maintenance:
+    - the probe went UP → DOWN → UP, with a 1,425 ms interruption;
+    - the seats, the result, the TV and the approved entry recovered.
+  - **Its limits:** live Render W4/W5, physical devices and deployment are pending.
+  - **Its observation:** a long Trivia label wraps at 390 px. That's outside #48.
+
+## Beta R4: W6 restore preparation (handoff 6938602366; in progress)
+- **Acknowledged** in this thread at 12:05 a.m. ET. The estimate is about 60 min, with 30 min of contingency.
+- **The branch** is `claude/beta-r4-w6-restore`, from #48's head `d2e7edf`, as a stacked draft PR.
+- **The scope:**
+  - a local restore rehearsal: a W5-received copy, then verify, restore into a new folder, check, a single-writer cutover, the recovered state, and a reversible fallback;
+  - negatives;
+  - `docs/beta/render-w6.md`, with the Render disk snapshot kept separate and PENDING.
+- **Unchanged:** the runtime and the pin stay `7097ac2`, at $0. There is no Render operation and no W7.
+- **The candidate:**
+  - `scripts/beta/w6-rehearsal.sh`, `w6-check.mjs` and `w6-selftest.sh`;
+  - `docs/beta/render-w6.md`, the runbook. It requires C's fresh same-window `BACKUP_OK` and its independently verified `RECEIPT_OK` before any live switch, and keeps the Render disk snapshot separate and PENDING;
+  - `docs/evidence/beta-r4-w6/`, with its development runs:
+    - dev0 VOID (the docker daemon was down);
+    - dev1, dev2 and dev3 PASSED, 39/39 each;
+    - the selftest PASSED, 12/12, then 13/13 after the log leak-scan check was added.
+- **Finding F-W6-01 (OPEN, reproduced as case N6):** once `cgn-authorize` names the target, a failed start on it leaves the original refused by the guard (exit 78). Re-authorizing needs SSH on a running instance, and Render has no one-off job with the disk. So there is no supported recovery on Render. Locally, a one-off container recovered it. Nothing reviewed was changed. The options are listed for the owner in `render-w6.md`.
+- **Next:** the final on a clean checkout (static checks plus `w6-selftest.sh`), then the new report on #49.
+- **The final** on one clean checkout of the candidate `b4bba09`:
+  - the static checks **PASSED**;
+  - `w6-selftest.sh` **PASSED**, 13/13. The rehearsal `20261117T052219Z-200994c2` passed 39/39, with N1–N6 and F-W6-01 reproduced.
+- **Next:** the new report on #49. W6 on Render, the snapshot exercise, F-W6-01's decision and W7 stay with the owner.
+- **Reported** in 6939452610; linked on #5 and #48.
+- **Review 6939462697: W6 BLOCKED.**
+  - **The blocker F-W6-01:** the original couldn't start after a failed target boot. ChatGPT reproduced it independently.
+  - **A coverage gap:** duplicate scoring after recovery was checked only on the answer map.
+  - **The independent audit's observation:** a cached note list after reconnect. The runbook now has a reload step and a cutoff notice to players.
+  - **The scoped repair:** a prepare / commit / abort switch of the data folder, with N6 recovering by an ordinary restart.
+
+## Beta R4: W6 repair, a recoverable data-folder switch (review 6939462697; in progress)
+- **Acknowledged** in 6939714464 at 12:38 a.m. ET. The estimate is about 2 h, plus 1 h of contingency.
+- **The guard** (`deploy/render/cgn-authorize.sh` and `cgn-entrypoint.sh`; their pins in `pins/scripts.sha256`; `deploy/render/README.md`):
+  - The record holds the approved configuration, plus at most ONE pending folder. The pending folder shares the origin, proxy count and code, and carries its base folder.
+  - `--prepare`, `--commit` (only from the instance serving the folder), `--abort` (only from one not serving it), and `--status`.
+  - The entrypoint starts the approved or the pending folder (logged `PENDING`) and refuses anything else, including unusable or stale records (78).
+  - Every change is locked (flock) and atomic.
+  - A record with no pending entry keeps the old format.
+  - `cgn-backup.sh`, `cgn-receive.sh`, the Dockerfile, the artifact gate, the runtime and the release pin are unchanged.
+- **Tests:**
+  - `scripts/beta/w6-guard-selftest.sh` (new): G0–G9 and M1–M10, 37 checks.
+  - `w6-rehearsal.sh` and `w6-check.mjs`: the prepare / commit cutover; the reopen gate on the record; the round played to its end; persisted exact scores with three negative controls; the return with B3; N6 recovered by an ordinary restart; N7. That's 46 checks.
+  - **Regressions:** the round-5 focused backup drill (19/19 on the new scripts); the image checks (30/30 with C2 reading `pins/scripts.sha256`; the old harness's fixed hashes fail C2 by design, and that run is kept); the W4 and W5 self-tests.
+- **Docs:** `docs/beta/render-w6.md` (the switch, the procedure, the recovery, the later return, the Render steps for a throwaway hosted window); the proposal's guard text; `docs/evidence/beta-r4-w6/README.md`.
+- **The final** on one clean checkout of the candidate `516bacb` (`docs/evidence/beta-r4-w6/runners/w6r-final.sh`, 06:06–06:15Z), every step PASSED:
+  - the static checks;
+  - the image checks, 30/30;
+  - the guard self-test, 37/37;
+  - the W6 self-test, 13/13 (its rehearsal 46/46);
+  - the W5 self-test, 12/12;
+  - the W4 self-test, 81/81;
+  - the round-5 focused backup drill, 19/19.
+- **Next:** the new report on #49. On Render, the hosted validation of the switch, the real W6, the snapshot and W7 stay with the owner.
+- **Reported** in 6940429646; linked on #5 and #48.
+- **Review 6940435060: W6 still BLOCKED.**
+  - **F-W6-02:** while a backup hold paused the pending writer, `--abort` succeeded, and the entrypoint then resumed the revoked folder.
+  - **Confirmed by the review:** the N6 recovery and the persisted-score checks.
+
+## Beta R4: W6 repair 2, F-W6-02 (review 6940435060; in progress)
+- **Acknowledged** in 6940594073 at 1:27 a.m. ET. The estimate is about 60 min, plus 30 min of contingency.
+- **Reproduced first** on the `516bacb` image with a new `scripts/beta/w6-hold-selftest.sh`:
+  - run 1 was VOID (the docker daemon was down);
+  - run 2 had test bugs;
+  - run 3 was the clean reproduction: abort accepted at `serving=none`, and the revoked folder resumed in H4–H6 and H8.
+- **The fix:**
+  - `cgn-authorize --abort` runs only with affirmative evidence that the APPROVED folder is being served on this instance.
+  - `cgn-entrypoint` re-validates the record before every server launch, each resume after a hold included. A revoked folder is refused (78) before any writer starts. A first install may resume while there is still no record.
+  - The pins and the deploy README are updated.
+- **Dev results:** the hold self-test 12/12, the guard self-test 37/37, the rehearsal 46/46.
+- **Docs:** the runbook's abort rule and recovery step, the hold self-test, the proposal's guard text, and the evidence README's repair-2 section. `runners/w6r-final.sh` adds the hold self-test as step 3b.
+- **The final** on one clean checkout of the candidate `bb24f40` (06:47–06:56Z), every step PASSED:
+  - static;
+  - image checks, 30/30;
+  - guard self-test, 37/37;
+  - **hold self-test, 12/12**;
+  - W6 self-test, 13/13 (its rehearsal 46/46);
+  - W5 self-test, 12/12;
+  - W4 self-test, 81/81;
+  - the round-5 drill, 19/19.
+- **Next:** the new report on #49, linked on #5 and #48.

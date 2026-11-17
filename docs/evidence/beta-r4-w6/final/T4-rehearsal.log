@@ -1,0 +1,19 @@
+== w6-rehearsal 2026-11-17T05:22:58Z, run 20261117T052258Z-3cecf71a, image cgn-render:check
+   scripts: w6-rehearsal.sh a430fd546ff1589c, w6-check.mjs 075adc94de6e6603, w5-seed.mjs 660df9e1e4b1005d
+   throwaway code, a DISPOSABLE test identity (receiving side), TLS key and the runbook's probe in a private folder (mode 700), removed on exit
+PASS service A ready on /var/data/cgn-w1, /health on the pinned revision
+   AUTHORIZED data_dir=/var/data/cgn-w1 public_origin=https://localhost:18643 trust_proxy=1 (the access code is kept only as a salted hash)
+PASS maintenance on: the PUBLIC /health answers 503
+PASS the image's cgn-backup is byte-identical to the reviewed deploy/render/cgn-backup.sh
+PASS the image's cgn-entrypoint is byte-identical to the reviewed deploy/render/cgn-entrypoint.sh
+PASS the image's cgn-authorize is byte-identical to the reviewed deploy/render/cgn-authorize.sh
+   datatool (in the pinned image): cd5ec360591a928bc5943766dcf174eac31739be59a4f9edff2965af99555adb
+   SEED {"roomId":"room-mwk8xr1r-847381","warmGameId":"game-1","secondGameId":"game-2","entryId":"book-1","entrySources":["evt-11"],"hostPlayerId":"player-1","guestPlayerId":"player-2","questions":["trv-ever-097","trv-natu-064","trv-legacy-02","trv-geog-025","trv-scie-008","trv-geog-027","trv-lang-056","trv-legacy-12","trv-legacy-07","trv-scie-014"],"acked":[{"who":"guest","playerId":"player-2","questionId":"trv-ever-097","ackAt":"2026-11-17T05:23:00.238Z"},{"who":"guest","playerId":"player-2","questionId":"trv-natu-064","ackAt":"2026-11-17T05:23:00.242Z"},{"who":"host","playerId":"player-1","questionId":"trv-ever-097","ackAt":"2026-11-17T05:23:00.245Z"}]}
+   interrupted (SIGTERM)
+-- cleanup (run 20261117T052258Z-3cecf71a)
+   cleanup #1: proxy container 5848bf0b2149 volume w6-data-20261117T052258Z-3cecf71a private-files(code,keys,sessions,decrypted-copies)
+   cleanup #2: nothing owned left to remove
+   this run's containers left: 0; volumes left: 0; processes left: 0; listeners left on 18680/18643/18644: 0; private files left: no
+   files (the kept run folder and this run's own log) holding the access code, a session token, a gate cookie or an age secret key: 0
+   checks: 5 passed, 0 failed
+W6 REHEARSAL FAILED

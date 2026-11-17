@@ -20,7 +20,7 @@
 | `Dockerfile` | Three stages, every base image pinned by digest, **no `ARG`**:<ul><li>`age`: builds age v1.2.1 from source and checks the binary's pinned SHA-256;</li><li>`gate`: runs the artifact gate on the audited archive;</li><li>`runtime`: the slim Node 22.16.0 image with the verified release (read-only, owned by root), the three reviewed scripts, age, and the non-root user `cgn`.</li></ul> |
 | `.dockerignore` | An allowlist. Only the files the Dockerfile copies can enter the build context, so a file Render copies into the context (its "secret files") never reaches the image. |
 | `cgn-artifact-gate.sh` | The artifact gate. `gate` runs at build time; `installed` reruns on the finished image, and over SSH on the instance. The checks are listed at the top of the file. |
-| `cgn-entrypoint.sh`, `cgn-backup.sh`, `cgn-authorize.sh` | **Byte for byte the reviewed round-5 scripts** (`docs/evidence/beta-r4-hosting/backup-drill/deploy/*.sh.txt`, accepted in review 6919662222). The gate refuses any other bytes. In the image they are `/usr/local/bin/cgn-entrypoint`, `cgn-backup` and `cgn-authorize`. |
+| `cgn-entrypoint.sh`, `cgn-backup.sh`, `cgn-authorize.sh` | **`cgn-backup.sh`: byte for byte the reviewed round-5 script** (`docs/evidence/beta-r4-hosting/backup-drill/deploy/*.sh.txt`, accepted in review 6919662222). **`cgn-entrypoint.sh` and `cgn-authorize.sh`: the round-5 scripts plus the prepare / commit-or-abort data-folder switch of reviews 6939462697 and 6940435060** (PROPOSED in #49: abort only from the instance serving the approved folder; the record checked again before every server launch; see `docs/beta/render-w6.md`). The gate refuses any other bytes. In the image they are `/usr/local/bin/cgn-entrypoint`, `cgn-backup` and `cgn-authorize`. |
 | `operator/cgn-receive.sh` | The reviewed receiving-side script. It runs on the device that receives the backup, **never in the image**. |
 | `pins/` | `archive.sha256` (the audited archive), `release-7097ac2.inventory.sha256` (its 144 files), `scripts.sha256` (the three scripts), `age.sha256` (the age binary). |
 | `render.yaml` | The configuration below as a Render Blueprint. **A candidate, not applied.** The dashboard route is equivalent. |
@@ -40,7 +40,7 @@
 | Go toolchain | `docker.io/library/golang:1.24.4-bookworm@sha256:10f549dc8489597aa7ed2b62008199bb96717f52a8e8434ea035d5b44368f8a6` | `FROM … AS age` |
 | age | module `filippo.io/age v1.2.1` (`h1:X0TZjehAZylOIj4DubWYU1vWQxv9bJpo+Uu2/LGhi1o=`, checked by Go against `sum.golang.org`); its dependencies are recorded in the evidence | the Go module checksum database |
 | age binary | `linux/amd64`, `CGO_ENABLED=0`, `-trimpath`: SHA-256 `e9f29db5f16a0da8761d5945c93c9518d81cbaa3ab428277f4465793038613f0` (two separate builds were byte-identical) | `pins/age.sha256` |
-| Deploy scripts | `cgn-entrypoint.sh` `6c623dd0…6b4157`, `cgn-backup.sh` `accca178…c63c`, `cgn-authorize.sh` `b77c398e…20773` (full values in `pins/scripts.sha256`) | gate: step 1 |
+| Deploy scripts | `cgn-entrypoint.sh` `1cc5a436…514285`, `cgn-backup.sh` `accca178…c63c`, `cgn-authorize.sh` `e46f23e7…19061` (full values in `pins/scripts.sha256`) | gate: step 1 |
 
 **How the image digests were confirmed:** each image was pulled from two independent official mirrors, Google's (`mirror.gcr.io/library`) and AWS's (`public.ecr.aws/docker/library`), and both gave the same digests. Docker Hub itself answered 429 (rate limited) from this sandbox. A digest pin can only match exactly that content, so a wrong digest would fail the build; it can't be silently replaced.
 
@@ -126,7 +126,7 @@ See [the evidence](../../docs/evidence/beta-r4-render-package/README.md).
   - the production pin refuses that rebuild;
   - ten other refusals: a changed file, another revision, `-dirty`, a link, shipped `node_modules`, an extra file, a changed script, a second artifact, a wrong age pin, and a context file that must not reach the image;
   - the other archive layout is accepted.
-- **The container:** non-root, first install, `cgn-authorize`, the guard's five refusals, `SIGTERM`, restart with the room restored, `cgn-backup` → `BACKUP_OK` → `cgn-receive` → `RECEIPT_OK`, and a root-owned disk failing closed.
+- **The container:** non-root, first install, `cgn-authorize`, the guard's five refusals (the data-folder switch has its own self-tests, `scripts/beta/w6-guard-selftest.sh` and `w6-hold-selftest.sh`), `SIGTERM`, restart with the room restored, `cgn-backup` → `BACKUP_OK` → `cgn-receive` → `RECEIPT_OK`, and a root-owned disk failing closed.
 - **The W1 checker:** its self-test, against the image behind a Render-like local proxy, with right and deliberately wrong proxy counts, maintenance, no redirect, and a service that never comes back.
 
 **What it does not prove:** anything about Render itself. These are W1's job, and none is claimed here:

@@ -1,0 +1,354 @@
+== w4-selftest 2026-11-17T05:58:30Z, tag 88fd14, harness cd5078d7184ef94c, driver e59fab3dea244590, image cgn-render:check
+-- K0: the fault-injection tests of the restart and probe actions (mock docker)
+     | PASS stop-ok a graceful stop is reported (ok, graceful)
+     | PASS stop-ok the sentinel container and volume survive, untouched
+     | PASS stop-cli-fails fails closed (ok false: not a verified graceful stop: docker stop exit 1; state running, exit code 0, OOM-killed f)
+     | PASS stop-cli-fails starts no replacement (no docker run)
+     | PASS stop-cli-fails the sentinel container and volume survive, untouched
+     | PASS stop-forced fails closed (ok false: not a verified graceful stop: docker stop exit 0; state exited, exit code 137, OOM-killed )
+     | PASS stop-forced starts no replacement (no docker run)
+     | PASS stop-forced the sentinel container and volume survive, untouched
+     | PASS stop-oom fails closed (ok false: not a verified graceful stop: docker stop exit 0; state exited, exit code 0, OOM-killed tr)
+     | PASS stop-oom starts no replacement (no docker run)
+     | PASS stop-oom the sentinel container and volume survive, untouched
+     | PASS stop-inspect-fails fails closed (ok false: not a verified graceful stop: docker stop exit 0; the state could not be read back)
+     | PASS stop-inspect-fails starts no replacement (no docker run)
+     | PASS stop-inspect-fails the sentinel container and volume survive, untouched
+     | PASS stop-still-running fails closed (ok false: not a verified graceful stop: docker stop exit 0; state running, exit code 0, OOM-killed f)
+     | PASS stop-still-running starts no replacement (no docker run)
+     | PASS stop-still-running the sentinel container and volume survive, untouched
+     | PASS start-ok a stopped container starts with a new StartedAt (ok, restarted)
+     | PASS start-ok the sentinel container and volume survive, untouched
+     | PASS start-not-stopped fails closed, and never calls docker start
+     | PASS start-not-stopped the sentinel container and volume survive, untouched
+     | PASS start-same-startedat fails closed: no new start recorded
+     | PASS start-same-startedat the sentinel container and volume survive, untouched
+     | PASS start-before-unreadable fails closed, and never calls docker start (no readable baseline)
+     | PASS start-before-unreadable the sentinel container and volume survive, untouched
+     | PASS start-after-unreadable fails closed (the start time after the start is not readable)
+     | PASS start-after-unreadable the sentinel container and volume survive, untouched
+     | PASS start-before-empty fails closed, and never calls docker start (no readable baseline)
+     | PASS start-before-empty the sentinel container and volume survive, untouched
+     | PASS start-after-empty fails closed (the start time after the start is not readable)
+     | PASS start-after-empty the sentinel container and volume survive, untouched
+     | PASS fresh-ok replaces the container: graceful, removed, volume free, exactly one docker run after the removal
+     | PASS fresh-ok the sentinel container and volume survive, untouched
+     | PASS fresh-stop-cli-fails fails closed (ok false: the old container did not stop gracefully (docker stop exit 1; state running, exit code 0,)
+     | PASS fresh-stop-cli-fails starts no replacement (no docker run)
+     | PASS fresh-stop-cli-fails the sentinel container and volume survive, untouched
+     | PASS fresh-stop-cli-fails removes nothing after the failed stop (no docker rm; the old container left to the run's cleanup)
+     | PASS fresh-forced fails closed (ok false: the old container did not stop gracefully (docker stop exit 0; state exited, exit code 137)
+     | PASS fresh-forced starts no replacement (no docker run)
+     | PASS fresh-forced the sentinel container and volume survive, untouched
+     | PASS fresh-forced removes nothing after the failed stop (no docker rm; the old container left to the run's cleanup)
+     | PASS fresh-inspect-fails fails closed (ok false: the old container did not stop gracefully (docker stop exit 0; the state could not be read)
+     | PASS fresh-inspect-fails starts no replacement (no docker run)
+     | PASS fresh-inspect-fails the sentinel container and volume survive, untouched
+     | PASS fresh-inspect-fails removes nothing after the failed stop (no docker rm; the old container left to the run's cleanup)
+     | PASS fresh-removal-fails fails closed (ok false: the old container was not removed: container old-1 (REMOVAL FAILED); no replacement was st)
+     | PASS fresh-removal-fails starts no replacement (no docker run)
+     | PASS fresh-removal-fails the sentinel container and volume survive, untouched
+     | PASS fresh-removal-unconfirmed fails closed (ok false: the old container was not removed: container old-1 (REMOVAL NOT CONFIRMED: still present);)
+     | PASS fresh-removal-unconfirmed starts no replacement (no docker run)
+     | PASS fresh-removal-unconfirmed the sentinel container and volume survive, untouched
+     | PASS fresh-not-ours fails closed (ok false: the old container was not removed: container old-1 not removed (label 'someone-else'); no )
+     | PASS fresh-not-ours starts no replacement (no docker run)
+     | PASS fresh-not-ours the sentinel container and volume survive, untouched
+     | PASS fresh-not-ours never removes a container whose label is not this run's
+     | PASS fresh-volume-in-use fails closed (ok false: the volume w4-data-mockrun-a is still used by zombie-writer ; no replacement was started)
+     | PASS fresh-volume-in-use starts no replacement (no docker run)
+     | PASS fresh-volume-in-use the sentinel container and volume survive, untouched
+     | PASS guard-refuses ok: exit 78 with REFUSED, no server started
+     | PASS guard-refuses the probe never mounts the data volume (create mounts only its fixture volume)
+     | PASS guard-refuses its container and fixture volume are removed (labels read back first) and confirmed gone
+     | PASS guard-refuses the sentinel container and volume survive, untouched
+     | PASS guard-hangs fails at its deadline (ok false, exit null) and the request ends within 2 s + 3 s
+     | PASS guard-hangs the probe never mounts the data volume (create mounts only its fixture volume)
+     | PASS guard-hangs its container and fixture volume are removed (labels read back first) and confirmed gone
+     | PASS guard-hangs the sentinel container and volume survive, untouched
+     | PASS guard-serves fails: a server started (serverStarted true)
+     | PASS guard-serves the probe never mounts the data volume (create mounts only its fixture volume)
+     | PASS guard-serves its container and fixture volume are removed (labels read back first) and confirmed gone
+     | PASS guard-serves the sentinel container and volume survive, untouched
+     | PASS guard-exit-0 fails: exit 0 is not 78
+     | PASS guard-exit-0 the probe never mounts the data volume (create mounts only its fixture volume)
+     | PASS guard-exit-0 its container and fixture volume are removed (labels read back first) and confirmed gone
+     | PASS guard-exit-0 the sentinel container and volume survive, untouched
+     | PASS guard-78-no-refused fails: exit 78 without a REFUSED line
+     | PASS guard-78-no-refused the probe never mounts the data volume (create mounts only its fixture volume)
+     | PASS guard-78-no-refused its container and fixture volume are removed (labels read back first) and confirmed gone
+     | PASS guard-78-no-refused the sentinel container and volume survive, untouched
+     | PASS guard-teardown-fails fails: the probe's container could not be removed
+     | PASS guard-teardown-fails the sentinel container and volume survive, untouched
+     | PASS finish-empty (the control) PASSES, exit 0, with an inventory of 0 and 0
+     | PASS finish-empty the sentinel container and volume survive, untouched
+     | PASS finish-containers-unlistable reports the containers as UNVERIFIED (never 0) and FAILS, exit nonzero
+     | PASS finish-containers-unlistable the sentinel container and volume survive, untouched
+     | PASS finish-volumes-unlistable reports the volumes as UNVERIFIED (never 0) and FAILS, exit nonzero
+     | PASS finish-volumes-unlistable the sentinel container and volume survive, untouched
+     | PASS finish-container-left: a container of the run that could not be removed is counted (1) and FAILS the run
+     | PASS finish-container-left the sentinel container and volume survive, untouched
+     | -- 88 passed, 0 failed
+PASS K0 every injected failure fails closed (W4 CONTROL SELFTEST PASSED)
+-- K0M: the meta-control: the fault tests against a copy of w4-control.sh with the reviewed defects put back
+PASS K0M the defects were put back in the copy (6 weakened lines)
+     | FAIL stop-forced fails closed (ok false: undefined)
+     | FAIL stop-oom fails closed (ok false: undefined)
+     | FAIL stop-still-running fails closed (ok false: undefined)
+     | FAIL start-before-unreadable fails closed, and never calls docker start (no readable baseline) — undefined
+     | FAIL start-before-empty fails closed, and never calls docker start (no readable baseline) — undefined
+     | FAIL fresh-forced fails closed (ok false: undefined)
+     | FAIL fresh-forced starts no replacement (no docker run)
+     | FAIL fresh-forced removes nothing after the failed stop (no docker rm; the old container left to the run's cleanup)
+     | FAIL fresh-removal-fails fails closed (ok false: undefined)
+     | FAIL fresh-removal-fails starts no replacement (no docker run)
+     | FAIL fresh-removal-unconfirmed fails closed (ok false: undefined)
+     | FAIL fresh-removal-unconfirmed starts no replacement (no docker run)
+     | FAIL fresh-not-ours fails closed (ok false: undefined)
+     | FAIL fresh-not-ours starts no replacement (no docker run)
+     | FAIL fresh-volume-in-use fails closed (ok false: undefined)
+     | FAIL fresh-volume-in-use starts no replacement (no docker run)
+     | FAIL finish-containers-unlistable reports the containers as UNVERIFIED (never 0) and FAILS, exit nonzero — exit 0; this run's containers left: 0; volumes left: 0
+     | FAIL finish-volumes-unlistable reports the volumes as UNVERIFIED (never 0) and FAILS, exit nonzero — exit 0; this run's containers left: 0; volumes left: 0
+     | -- 70 passed, 18 failed
+PASS K0M the fault tests FAIL against the weakened copy
+PASS K0M a forced exit (137) is caught: stop-forced and fresh-forced fail
+PASS K0M an ignored removal is caught: fresh-removal-fails, fresh-removal-unconfirmed, fresh-not-ours and fresh-volume-in-use start a replacement and fail
+PASS K0M a start without a readable baseline is caught: start-before-unreadable and start-before-empty call docker start
+PASS K0M an unlistable inventory read as 0 is caught: finish-containers-unlistable and finish-volumes-unlistable PASS the run
+-- K1: the W3 mock cases against the W4 harness
+     | PASS M1 exits non-zero
+     | PASS M1 the pre-existing w3-svc container survives
+     | PASS M1 removes only a container its own docker run created
+     | PASS M1 never deletes by the shared name w3-svc
+     | PASS M1 leaves none of its own containers behind
+     | PASS M1 never authorizes (no docker exec)
+     | PASS M1 never starts the proxy or the driver (no node call)
+     | PASS M1 does not try the service after the failed start (no health probe)
+     | PASS M2 exits non-zero
+     | PASS M2 the pre-existing w3-svc container survives
+     | PASS M2 removes only a container its own docker run created
+     | PASS M2 never deletes by the shared name w3-svc
+     | PASS M2 leaves none of its own containers behind
+     | PASS M2 never authorizes (no docker exec)
+     | PASS M2 never starts the proxy or the driver (no node call)
+     | PASS M2 never runs a container
+     | PASS M3 exits non-zero
+     | PASS M3 the pre-existing w3-svc container survives
+     | PASS M3 removes only a container its own docker run created
+     | PASS M3 never deletes by the shared name w3-svc
+     | PASS M3 leaves none of its own containers behind
+     | PASS M3 never authorizes (no docker exec)
+     | PASS M3 never starts the proxy or the driver (no node call)
+     | PASS M4 exits non-zero
+     | PASS M4 the pre-existing w3-svc container survives
+     | PASS M4 removes only a container its own docker run created
+     | PASS M4 never deletes by the shared name w3-svc
+     | PASS M4 leaves none of its own containers behind
+     | PASS M4 never authorizes (no docker exec)
+     | PASS M4 never starts the proxy or the driver (no node call)
+     | PASS M5 exits non-zero
+     | PASS M5 the pre-existing w3-svc container survives
+     | PASS M5 removes only a container its own docker run created
+     | PASS M5 never deletes by the shared name w3-svc
+     | PASS M5 leaves none of its own containers behind
+     | PASS M5 never starts the proxy or the driver (no node call)
+     | -- mock-only: 36 passed, 0 failed
+PASS K1 the mock cases M1-M5 pass against the W4 harness
+   sentinels: container w4-svc 05df83ec9a9f, volume w4-data-sentinel, process 22033
+-- K2: the rehearsal (exit 1, run 20261117T055855Z-e7610d90)
+     | == w4-rehearsal 2026-11-17T05:58:55Z, run 20261117T055855Z-e7610d90, image cgn-render:check, driver e59fab3dea244590, proxy 06b1738ccd75d5f8
+     |    image id: sha256:3224ee81a69c
+     |    ports 18443/18480/18080 free
+     |    throwaway code, env file and TLS key in a private directory (mode 700), removed on exit
+     |    data volume w4-data-20261117T055855Z-e7610d90-a (label w4.owner=20261117T055855Z-e7610d90): throwaway data, removed on exit
+     |    container 0471da40f51c (name w4-svc-20261117T055855Z-e7610d90-1, label w4.owner=20261117T055855Z-e7610d90)
+     |    /health revision 7097ac2bb062925bb296a129f4771f1e68fd522d is the expected one
+     |    AUTHORIZED data_dir=/var/data/cgn-w1 public_origin=https://localhost:18443 trust_proxy=1 (the access code is kept only as a salted hash)
+     |    listeners on 18443/18480/18080 while running (positive control; expect 3): 3
+     | -- the rehearsal (bounded: timeout 900 s, and the driver's own --max-minutes)
+     |    MCHEZO_INFRA_ERROR: the browser for the pinned Playwright is not installed (expected /opt/pw-browsers/chromium_headless_shell-1248/chrome-headless-shell-linux64/chrome-headless-shell). Run "npx playwright install chromium", or set MCHEZO_CHROMIUM_PATH to an existing chrome-headless-shell build.
+     |    driver exit: 3
+     | -- cleanup (run 20261117T055855Z-e7610d90)
+     |    cleanup #1: proxy container 0471da40f51c volume w4-data-20261117T055855Z-e7610d90-a private-files
+     |    cleanup #2: nothing owned left to remove
+     |    this run's containers left: 0; volumes left: 0; processes left: 0; listeners left on 18443/18480/18080: 0; private files left: no
+     |    files holding the access code: 0; files holding a beta cookie value: 0
+     | W4 REHEARSAL HARNESS FAILED
+FAIL K2 the rehearsal PASSED — exit 1
+FAIL K2 R1's stop was a verified graceful stop (exited, exit code 0, not OOM-killed)
+FAIL K2 R2's old container stopped gracefully and was removed, confirmed gone, before the replacement started
+FAIL K2 the guard refused in its own container on its own fixture volume; the data volume's only user before and after was the container under test
+PASS K2 leaves none of its containers or volumes
+PASS K2 leaves no processes, listeners or private files
+PASS K2 cleanup ran again as a no-op
+PASS K2 the sentinel container w4-svc survives
+PASS K2 the sentinel volume survives
+PASS K2 the sentinel process survives
+-- K3: the negative control: a fresh container on EMPTY data (exit 1, run 20261117T055859Z-aa90c831)
+     | == w4-rehearsal 2026-11-17T05:58:59Z, run 20261117T055859Z-aa90c831, image cgn-render:check, driver e59fab3dea244590, proxy 06b1738ccd75d5f8
+     |    image id: sha256:3224ee81a69c
+     |    ports 18443/18480/18080 free
+     |    throwaway code, env file and TLS key in a private directory (mode 700), removed on exit
+     |    data volume w4-data-20261117T055859Z-aa90c831-a (label w4.owner=20261117T055859Z-aa90c831): throwaway data, removed on exit
+     |    container 25ff5b22c469 (name w4-svc-20261117T055859Z-aa90c831-1, label w4.owner=20261117T055859Z-aa90c831)
+     |    /health revision 7097ac2bb062925bb296a129f4771f1e68fd522d is the expected one
+     |    AUTHORIZED data_dir=/var/data/cgn-w1 public_origin=https://localhost:18443 trust_proxy=1 (the access code is kept only as a salted hash)
+     |    listeners on 18443/18480/18080 while running (positive control; expect 3): 3
+     | -- the rehearsal (bounded: timeout 900 s, and the driver's own --max-minutes)
+     |    MCHEZO_INFRA_ERROR: the browser for the pinned Playwright is not installed (expected /opt/pw-browsers/chromium_headless_shell-1248/chrome-headless-shell-linux64/chrome-headless-shell). Run "npx playwright install chromium", or set MCHEZO_CHROMIUM_PATH to an existing chrome-headless-shell build.
+     |    driver exit: 3
+     | -- cleanup (run 20261117T055859Z-aa90c831)
+     |    cleanup #1: proxy container 25ff5b22c469 volume w4-data-20261117T055859Z-aa90c831-a private-files
+     |    cleanup #2: nothing owned left to remove
+     |    this run's containers left: 0; volumes left: 0; processes left: 0; listeners left on 18443/18480/18080: 0; private files left: no
+     |    files holding the access code: 0; files holding a beta cookie value: 0
+     | W4 REHEARSAL HARNESS FAILED
+PASS K3 the run reports FAILED
+FAIL K3 exactly six checks failed, all after R2, none in R1 — 0 failed, 0 in R1
+FAIL K3 failed: sockets back
+FAIL K3 failed: the same room and seats
+FAIL K3 failed: the acknowledged answers kept
+FAIL K3 failed: the screens on a live connection
+FAIL K3 failed: play continues
+FAIL K3 failed: the Memory Book note reads back
+PASS K3 leaves none of its containers or volumes
+PASS K3 leaves no processes, listeners or private files
+PASS K3 cleanup ran again as a no-op
+PASS K3 the sentinel container w4-svc survives
+PASS K3 the sentinel volume survives
+PASS K3 the sentinel process survives
+-- K4: an unrelated listener already on 18443 (exit 1, run 20261117T055902Z-a17a638f)
+     | == w4-rehearsal 2026-11-17T05:59:02Z, run 20261117T055902Z-a17a638f, image cgn-render:check, driver e59fab3dea244590, proxy 06b1738ccd75d5f8
+     |    image id: sha256:3224ee81a69c
+     |    FAILED at port preflight: 1 listener(s) already on 18443/18480/18080 (another run or an unrelated service); nothing was started
+     | -- cleanup (run 20261117T055902Z-a17a638f)
+     |    cleanup #1: nothing owned left to remove
+     |    cleanup #2: nothing owned left to remove
+     |    this run's containers left: 0; volumes left: 0; processes left: 0; listeners left on 18443/18480/18080: not checked (this run started no listener); private files left: no
+     |    files holding the access code: 0; files holding a beta cookie value: 0
+     | W4 REHEARSAL HARNESS FAILED
+PASS K4 fails at the port preflight, starting no container
+PASS K4 never authorizes and never starts the browser work
+PASS K4 the unrelated listener got no connection and still runs
+PASS K4 leaves none of its containers or volumes
+PASS K4 leaves no processes, listeners or private files
+PASS K4 cleanup ran again as a no-op
+PASS K4 the sentinel container w4-svc survives
+PASS K4 the sentinel volume survives
+PASS K4 the sentinel process survives
+-- K5: an unexpected revision (exit 1, run 20261117T055903Z-d5c4f9c5)
+     | == w4-rehearsal 2026-11-17T05:59:03Z, run 20261117T055903Z-d5c4f9c5, image cgn-render:check, driver e59fab3dea244590, proxy 06b1738ccd75d5f8
+     |    image id: sha256:3224ee81a69c
+     |    ports 18443/18480/18080 free
+     |    throwaway code, env file and TLS key in a private directory (mode 700), removed on exit
+     |    data volume w4-data-20261117T055903Z-d5c4f9c5-a (label w4.owner=20261117T055903Z-d5c4f9c5): throwaway data, removed on exit
+     |    container 06ad2aeb2626 (name w4-svc-20261117T055903Z-d5c4f9c5-1, label w4.owner=20261117T055903Z-d5c4f9c5)
+     |    FAILED at readiness: revision '7097ac2bb062925bb296a129f4771f1e68fd522d', not the expected 0000000000000000000000000000000000000000
+     | -- cleanup (run 20261117T055903Z-d5c4f9c5)
+     |    cleanup #1: container 06ad2aeb2626 volume w4-data-20261117T055903Z-d5c4f9c5-a private-files
+     |    cleanup #2: nothing owned left to remove
+     |    this run's containers left: 0; volumes left: 0; processes left: 0; listeners left on 18443/18480/18080: 0; private files left: no
+     |    files holding the access code: 0; files holding a beta cookie value: 0
+     | W4 REHEARSAL HARNESS FAILED
+PASS K5 fails at readiness on the revision
+PASS K5 never authorizes and never starts the browser work
+PASS K5 leaves none of its containers or volumes
+PASS K5 leaves no processes, listeners or private files
+PASS K5 cleanup ran again as a no-op
+PASS K5 the sentinel container w4-svc survives
+PASS K5 the sentinel volume survives
+PASS K5 the sentinel process survives
+-- K6: a guard that never answers (deadline 20 s) (exit 1, run 20261117T055905Z-24a34d61)
+     | == w4-rehearsal 2026-11-17T05:59:05Z, run 20261117T055905Z-24a34d61, image cgn-render:check, driver e59fab3dea244590, proxy 06b1738ccd75d5f8
+     |    image id: sha256:3224ee81a69c
+     |    ports 18443/18480/18080 free
+     |    throwaway code, env file and TLS key in a private directory (mode 700), removed on exit
+     |    data volume w4-data-20261117T055905Z-24a34d61-a (label w4.owner=20261117T055905Z-24a34d61): throwaway data, removed on exit
+     |    container 6b063e7c0ca2 (name w4-svc-20261117T055905Z-24a34d61-1, label w4.owner=20261117T055905Z-24a34d61)
+     |    /health revision 7097ac2bb062925bb296a129f4771f1e68fd522d is the expected one
+     |    AUTHORIZED data_dir=/var/data/cgn-w1 public_origin=https://localhost:18443 trust_proxy=1 (the access code is kept only as a salted hash)
+     |    listeners on 18443/18480/18080 while running (positive control; expect 3): 3
+     | -- the rehearsal (bounded: timeout 900 s, and the driver's own --max-minutes)
+     |    MCHEZO_INFRA_ERROR: the browser for the pinned Playwright is not installed (expected /opt/pw-browsers/chromium_headless_shell-1248/chrome-headless-shell-linux64/chrome-headless-shell). Run "npx playwright install chromium", or set MCHEZO_CHROMIUM_PATH to an existing chrome-headless-shell build.
+     |    driver exit: 3
+     | -- cleanup (run 20261117T055905Z-24a34d61)
+     |    cleanup #1: proxy container 6b063e7c0ca2 volume w4-data-20261117T055905Z-24a34d61-a private-files
+     |    cleanup #2: nothing owned left to remove
+     |    this run's containers left: 0; volumes left: 0; processes left: 0; listeners left on 18443/18480/18080: 0; private files left: no
+     |    files holding the access code: 0; files holding a beta cookie value: 0
+     | W4 REHEARSAL HARNESS FAILED
+FAIL K6 the run reports FAILED with exactly one failed check: G the rollback guard — 0 failed
+FAIL K6 the rehearsal stopped there (ABORTED; the round was not played on)
+FAIL K6 G failed at its deadline: no exit within 20 s, no server started
+FAIL K6 the probe's container and fixture volume were torn down, bounded (teardown ? ms < 30000)
+FAIL K6 no simultaneous writer: the data volume's only user before and after the probe was the container under test
+PASS K6 leaves none of its containers or volumes
+PASS K6 leaves no processes, listeners or private files
+PASS K6 cleanup ran again as a no-op
+PASS K6 the sentinel container w4-svc survives
+PASS K6 the sentinel volume survives
+PASS K6 the sentinel process survives
+-- K7: a guard that lets a server start (the server without cgn-entrypoint; deadline 20 s) (exit 1, run 20261117T055908Z-c37360e0)
+     | == w4-rehearsal 2026-11-17T05:59:08Z, run 20261117T055908Z-c37360e0, image cgn-render:check, driver e59fab3dea244590, proxy 06b1738ccd75d5f8
+     |    image id: sha256:3224ee81a69c
+     |    ports 18443/18480/18080 free
+     |    throwaway code, env file and TLS key in a private directory (mode 700), removed on exit
+     |    data volume w4-data-20261117T055908Z-c37360e0-a (label w4.owner=20261117T055908Z-c37360e0): throwaway data, removed on exit
+     |    container 50bb0ec63ea2 (name w4-svc-20261117T055908Z-c37360e0-1, label w4.owner=20261117T055908Z-c37360e0)
+     |    /health revision 7097ac2bb062925bb296a129f4771f1e68fd522d is the expected one
+     |    AUTHORIZED data_dir=/var/data/cgn-w1 public_origin=https://localhost:18443 trust_proxy=1 (the access code is kept only as a salted hash)
+     |    listeners on 18443/18480/18080 while running (positive control; expect 3): 3
+     | -- the rehearsal (bounded: timeout 900 s, and the driver's own --max-minutes)
+     |    MCHEZO_INFRA_ERROR: the browser for the pinned Playwright is not installed (expected /opt/pw-browsers/chromium_headless_shell-1248/chrome-headless-shell-linux64/chrome-headless-shell). Run "npx playwright install chromium", or set MCHEZO_CHROMIUM_PATH to an existing chrome-headless-shell build.
+     |    driver exit: 3
+     | -- cleanup (run 20261117T055908Z-c37360e0)
+     |    cleanup #1: proxy container 50bb0ec63ea2 volume w4-data-20261117T055908Z-c37360e0-a private-files
+     |    cleanup #2: nothing owned left to remove
+     |    this run's containers left: 0; volumes left: 0; processes left: 0; listeners left on 18443/18480/18080: 0; private files left: no
+     |    files holding the access code: 0; files holding a beta cookie value: 0
+     | W4 REHEARSAL HARNESS FAILED
+FAIL K7 the run reports FAILED with exactly one failed check: G the rollback guard — 0 failed
+FAIL K7 the rehearsal stopped there (ABORTED; the round was not played on)
+FAIL K7 G failed: a server STARTED in the probe's container (on its fixture volume, not the data volume)
+FAIL K7 the probe's container and fixture volume were torn down, bounded (teardown ? ms < 30000)
+FAIL K7 no simultaneous writer: the data volume's only user before and after the probe was the container under test
+PASS K7 leaves none of its containers or volumes
+PASS K7 leaves no processes, listeners or private files
+PASS K7 cleanup ran again as a no-op
+PASS K7 the sentinel container w4-svc survives
+PASS K7 the sentinel volume survives
+PASS K7 the sentinel process survives
+-- K8: a forced stop (SIGKILL at once) (exit 1, run 20261117T055912Z-d51c745f)
+     | == w4-rehearsal 2026-11-17T05:59:12Z, run 20261117T055912Z-d51c745f, image cgn-render:check, driver e59fab3dea244590, proxy 06b1738ccd75d5f8
+     |    image id: sha256:3224ee81a69c
+     |    ports 18443/18480/18080 free
+     |    throwaway code, env file and TLS key in a private directory (mode 700), removed on exit
+     |    data volume w4-data-20261117T055912Z-d51c745f-a (label w4.owner=20261117T055912Z-d51c745f): throwaway data, removed on exit
+     |    container a8ea5066c554 (name w4-svc-20261117T055912Z-d51c745f-1, label w4.owner=20261117T055912Z-d51c745f)
+     |    /health revision 7097ac2bb062925bb296a129f4771f1e68fd522d is the expected one
+     |    AUTHORIZED data_dir=/var/data/cgn-w1 public_origin=https://localhost:18443 trust_proxy=1 (the access code is kept only as a salted hash)
+     |    listeners on 18443/18480/18080 while running (positive control; expect 3): 3
+     | -- the rehearsal (bounded: timeout 900 s, and the driver's own --max-minutes)
+     |    MCHEZO_INFRA_ERROR: the browser for the pinned Playwright is not installed (expected /opt/pw-browsers/chromium_headless_shell-1248/chrome-headless-shell-linux64/chrome-headless-shell). Run "npx playwright install chromium", or set MCHEZO_CHROMIUM_PATH to an existing chrome-headless-shell build.
+     |    driver exit: 3
+     | -- cleanup (run 20261117T055912Z-d51c745f)
+     |    cleanup #1: proxy container a8ea5066c554 volume w4-data-20261117T055912Z-d51c745f-a private-files
+     |    cleanup #2: nothing owned left to remove
+     |    this run's containers left: 0; volumes left: 0; processes left: 0; listeners left on 18443/18480/18080: 0; private files left: no
+     |    files holding the access code: 0; files holding a beta cookie value: 0
+     | W4 REHEARSAL HARNESS FAILED
+FAIL K8 the run reports FAILED with exactly one failed check: R1 the container stopped gracefully — 0 failed
+FAIL K8 the rehearsal stopped there (ABORTED; the round was not played on)
+FAIL K8 the stop is refused although docker stop exited 0: exit code 137
+PASS K8 nothing was started or replaced after the failed stop (no start, no fresh)
+PASS K8 leaves none of its containers or volumes
+PASS K8 leaves no processes, listeners or private files
+PASS K8 cleanup ran again as a no-op
+PASS K8 the sentinel container w4-svc survives
+PASS K8 the sentinel volume survives
+PASS K8 the sentinel process survives
+   removed this self-test's sentinel container 05df83ec9a9f
+   removed this self-test's sentinel volume w4-data-sentinel
+-- 57 passed, 24 failed
+W4 SELFTEST FAILED

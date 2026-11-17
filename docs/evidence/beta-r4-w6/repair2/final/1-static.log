@@ -1,0 +1,46 @@
+# W6 repair static checks on the clean checkout of bb24f4045dcc86c9c408e23234a2ea71215192a3 (status 0 lines), 2026-11-17T06:46:59Z
+## 1. everything changed since the reviewed head 47aa9aff25e4489e4c75a0799de50fc895ef15ab
+ deploy/render/README.md                            |   6 +-
+ deploy/render/cgn-authorize.sh                     |  14 +-
+ deploy/render/cgn-entrypoint.sh                    |  54 ++++--
+ deploy/render/pins/scripts.sha256                  |   4 +-
+ docs/PROGRESS.md                                   |  17 ++
+ docs/beta/beta-r4-hosting-proposal.md              |   2 +-
+ docs/beta/render-w6.md                             |  19 +-
+ docs/evidence/beta-r4-w6/README.md                 |  28 ++-
+ .../evidence/beta-r4-w6/repair2/dev/guard-dev1.log |  58 ++++++
+ docs/evidence/beta-r4-w6/repair2/dev/hold-dev1.log |  49 +++++
+ .../repair2/dev/hold-repro0-void-docker-down.log   |   8 +
+ .../beta-r4-w6/repair2/dev/hold-repro1-516bacb.log |  48 +++++
+ .../beta-r4-w6/repair2/dev/hold-repro2-516bacb.log |  49 +++++
+ docs/evidence/beta-r4-w6/repair2/dev/reh-dev1.log  | 171 +++++++++++++++++
+ docs/evidence/beta-r4-w6/runners/w6r-final.sh      |   6 +-
+ docs/evidence/beta-r4-w6/runners/w6r-static.sh     |   4 +-
+ scripts/beta/w6-guard-selftest.sh                  |   2 +-
+ scripts/beta/w6-hold-selftest.sh                   | 211 +++++++++++++++++++++
+ 18 files changed, 709 insertions(+), 41 deletions(-)
+PASS nothing outside docs/, scripts/beta/w6-*, and deploy/render's two guard scripts, their pins and README (empty)
+PASS the runtime (apps/, src/), tests, manifests and other scripts unchanged (empty)
+PASS the reused W5 seed (scripts/beta/w5-seed.mjs) unchanged (empty)
+PASS cgn-backup.sh, operator/cgn-receive.sh, the Dockerfile, .dockerignore, the artifact gate, render.yaml and the other pins unchanged (empty)
+PASS the artifact gate's REVISION is still the pin
+## 2. the deploy-side scripts and their pins
+accca1784e22570e30731e888890dad10d194da99d57809abe3244ae80ccc63c  deploy/render/cgn-backup.sh
+1cc5a4362d9bc416307bca2b99ccdecc31d47f8401d4729987b5c44d7c514285  deploy/render/cgn-entrypoint.sh
+e46f23e7539eed81b1bf612bff660d754a9d802bffd5aafa7dad362d5de19061  deploy/render/cgn-authorize.sh
+2fb3fe903f28707751485460689c4175ed7ea7cf682b505dec8bb74f41b084cd  deploy/render/operator/cgn-receive.sh
+1cc5a4362d9bc416307bca2b99ccdecc31d47f8401d4729987b5c44d7c514285  cgn-entrypoint.sh
+accca1784e22570e30731e888890dad10d194da99d57809abe3244ae80ccc63c  cgn-backup.sh
+e46f23e7539eed81b1bf612bff660d754a9d802bffd5aafa7dad362d5de19061  cgn-authorize.sh
+PASS cgn-backup.sh, cgn-entrypoint.sh and cgn-authorize.sh match their pins in deploy/render/pins/scripts.sha256
+PASS the record reader block is identical in cgn-authorize.sh and cgn-entrypoint.sh
+## 3. lint and syntax
+PASS eslint scripts/beta (exit 0)
+PASS bash -n on scripts/beta and the runners, sh -n on the deploy scripts, node --check w5-seed.mjs and w6-check.mjs
+## 4. relative links in the changed documents
+links: 65 missing: 0
+PASS no missing relative link
+## 5. secret scan of the changes since 47aa9aff25e4489e4c75a0799de50fc895ef15ab
+PASS no secret-shaped value (a real age secret key, a private key, an access code, a gate cookie, a token) or local scratch path in the added lines
+## verdict
+W6 REPAIR STATIC CHECKS PASSED

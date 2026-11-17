@@ -1,0 +1,41 @@
+# W6 static checks on the clean checkout of b4bba0994f725825ca190c7241c95df2ff2511e1 (status 0 lines), 2026-11-17T05:22:06Z
+## 1. everything changed since #48's head d2e7edfe31ef86dd4943424e2ae3384c5ab334ae
+ docs/PROGRESS.md                                  |  26 ++
+ docs/beta/render-w6.md                            | 138 +++++++
+ docs/evidence/beta-r4-w6/README.md                | 128 ++++++
+ docs/evidence/beta-r4-w6/dev/dev0-docker-down.log |  10 +
+ docs/evidence/beta-r4-w6/dev/dev1.log             | 122 ++++++
+ docs/evidence/beta-r4-w6/dev/dev2.log             | 123 ++++++
+ docs/evidence/beta-r4-w6/dev/dev3.log             | 117 ++++++
+ docs/evidence/beta-r4-w6/dev/selftest-dev1.log    |  77 ++++
+ docs/evidence/beta-r4-w6/dev/selftest-dev2.log    |  78 ++++
+ docs/evidence/beta-r4-w6/runners/w6-static.sh     |  42 ++
+ scripts/beta/w6-check.mjs                         | 115 ++++++
+ scripts/beta/w6-rehearsal.sh                      | 455 ++++++++++++++++++++++
+ scripts/beta/w6-selftest.sh                       | 103 +++++
+ 13 files changed, 1534 insertions(+)
+PASS nothing outside docs/ and scripts/beta/w6-* (empty)
+PASS the runtime (apps/, src/), tests, manifests and other scripts unchanged (empty)
+PASS the reused W5 seed (scripts/beta/w5-seed.mjs) unchanged (empty)
+PASS deploy/ unchanged from d2e7edfe31ef86dd4943424e2ae3384c5ab334ae (empty)
+PASS deploy/ unchanged from 2e2257c (the accepted deployment scripts) (empty)
+PASS the artifact gate's REVISION is still the pin
+## 2. the reviewed deploy-side scripts (hashes, unchanged)
+accca1784e22570e30731e888890dad10d194da99d57809abe3244ae80ccc63c  deploy/render/cgn-backup.sh
+6c623dd08bbf77ca556099d4f678f3900606d5e760f3231ab59cbc592b4b6157  deploy/render/cgn-entrypoint.sh
+b77c398e3fa65edef5d8915bb7e6f60ecff4fa5c023a1a98cb93b5cda4e20773  deploy/render/cgn-authorize.sh
+2fb3fe903f28707751485460689c4175ed7ea7cf682b505dec8bb74f41b084cd  deploy/render/operator/cgn-receive.sh
+6c623dd08bbf77ca556099d4f678f3900606d5e760f3231ab59cbc592b4b6157  cgn-entrypoint.sh
+accca1784e22570e30731e888890dad10d194da99d57809abe3244ae80ccc63c  cgn-backup.sh
+b77c398e3fa65edef5d8915bb7e6f60ecff4fa5c023a1a98cb93b5cda4e20773  cgn-authorize.sh
+PASS cgn-backup.sh, cgn-entrypoint.sh and cgn-authorize.sh match their pins in deploy/render/pins/scripts.sha256
+## 3. lint and syntax
+PASS eslint scripts/beta (exit 0)
+PASS bash -n scripts/beta/*.sh and the runners (13 files), node --check w5-seed.mjs and w6-check.mjs
+## 4. relative links in the changed documents
+links: 8 missing: 0
+PASS no missing relative link
+## 5. secret scan of the changes since d2e7edfe31ef86dd4943424e2ae3384c5ab334ae
+PASS no secret-shaped value (a real age secret key, a private key, an access code, a gate cookie, a token) or local scratch path in the added lines
+## verdict
+W6 STATIC CHECKS PASSED
