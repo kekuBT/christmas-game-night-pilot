@@ -1,0 +1,6 @@
+== final on b8b486c4d5ba8338da54f28262739463248fb901, status 0 lines, 2026-11-17T17:37:22Z
+1-owner-selftest: exit 0 ; == W7 OWNER TOOL SELFTEST PASSED, 61 checks, 2026-11-17T17:37:28Z
+2-repro-cleanup-retry: exit 0 ; REPRO PASSED: the retry touched no replacement
+3-local-run: exit 0 ; == verdict: LOCAL RUN PASSED (2026-11-17T17:39:45Z)
+4-w7-static-delta (base f62ce36): exit 0 ; W7 STATIC CHECKS PASSED
+== checkout still clean: 0 lines; 2026-11-17T17:39:47Z
