@@ -3702,3 +3702,12 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
 - **The final on a clean checkout of `3eb05bc`:** `w4-selftest.sh` **PASSED**, 81/81 (K0 88/88; K0M 18 required failures; K1–K8), and the static checks passed.
 - **#47's stack:** #47 was tested on base `8101c5c`. A merge of this follow-up into #47 conflicts only in `docs/PROGRESS.md` (both PRs append a section). It is left unmerged while #47 is under review, as asked, and will be a plain merge.
 - **Next:** ChatGPT's verification; W4 is not cleared.
+
+## Beta R4: the integrated stack, #47 + #46 (handoff 6936988676; in progress)
+- **Acknowledged** in 6937528275 at 10:42 p.m. ET, with a 55 min estimate.
+- **The merge:** an ordinary `git merge --no-ff` of #46's reviewed head `e6cbe11` into #47's reviewed head `e577579` (merge base `8101c5c`), as merge commit `d811ed9`. No rebase, force-push or PR merge.
+  - Only `docs/PROGRESS.md` conflicted. Both sections are kept unchanged.
+  - `docs/beta/render-w4.md` merged automatically.
+- **The candidate:** the runtime and tests are identical to `72e9d8b`; the W4 tooling is identical to `e6cbe11`; `deploy/` is unchanged. The pin stays `7097ac2`.
+- **The plan:** focused validation on one clean checkout: the integration diffs, the W4 control mocks (K0, K0M), the fast gate, then the targeted uncertain-delivery, action-ack and errors gate. The record is `docs/evidence/beta-r4-integration/README.md`.
+- **Unchanged:** the exact-pin W4 live audit stays OPEN, owned by ChatGPT. There is no W5 work and no deployment.
