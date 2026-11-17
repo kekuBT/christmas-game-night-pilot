@@ -1,0 +1,162 @@
+{
+ "tool": "scripts/beta/w4-rehearsal.mjs",
+ "toolSha256": "ba86c2fbd2b7a9ff57a0247b461520e7b7a71a88912c1097c4e308f72a665765",
+ "node": "v22.23.4",
+ "runId": "20261117T003217-fc3277",
+ "origin": "https://localhost:18443",
+ "startedAt": "2026-11-17T00:32:17.492Z",
+ "control": "empty-data",
+ "scope": "LOCAL rehearsal: the packaged pinned runtime on a run-owned Docker volume behind a local TLS proxy, restarted by the harness (docker stop/start; a fresh container on the same volume). Not Render, not a phone.",
+ "restarts": [
+  {
+   "action": "stop",
+   "ok": true,
+   "container": "46b22c55c352",
+   "state": "exited exit=0",
+   "ms": 298
+  },
+  {
+   "action": "start",
+   "ok": true,
+   "container": "46b22c55c352",
+   "revision": "7097ac2bb062925bb296a129f4771f1e68fd522d",
+   "ms": 523
+  },
+  {
+   "action": "fresh-empty",
+   "ok": true,
+   "container": "c0e97887db21",
+   "oldContainer": "46b22c55c352",
+   "volume": "w4-data-20261117T003215Z-31c5cb2b-empty",
+   "revision": "7097ac2bb062925bb296a129f4771f1e68fd522d",
+   "ms": 948
+  }
+ ],
+ "probes": {},
+ "seen": {
+  "seed": {
+   "firstRound": "finished",
+   "noteStatus": 201,
+   "noteId": "book-1"
+  },
+  "r1TapMessageWhileDown": "Request failed (502)",
+  "R1": {
+   "guestScreen": "Question 2 of 10",
+   "hostScreen": "Answer locked in",
+   "tvScreen": "Featured question (Q1 of 10) · each phone goes at its own pace"
+  },
+  "R2": {
+   "guestScreen": "Answer locked in",
+   "hostScreen": "Answer locked in",
+   "tvScreen": "Featured question (Q1 of 10) · each phone goes at its own pace"
+  }
+ },
+ "checks": [
+  {
+   "name": "S a first round finished and a synthetic Memory Book note citing it was saved and reads back (API)",
+   "ok": true,
+   "detail": "{\"round\":true,\"status\":201,\"readBack\":true}"
+  },
+  {
+   "name": "P a second round is playing; host and guest each answered question 1 and saw it locked in (acknowledged, rendered), recorded once (API)",
+   "ok": true,
+   "detail": "{\"start\":201,\"guestLocked\":true,\"hostLocked\":true,\"recorded\":{\"guest\":1,\"host\":1}}"
+  },
+  {
+   "name": "R1 while the service was down the guest's screen said it was reconnecting, and the tap was NOT shown as in (rendered)",
+   "ok": true,
+   "detail": "{\"stop\":\"exited exit=0\",\"banner\":true,\"shownIn\":false,\"message\":\"Request failed (502)\"}"
+  },
+  {
+   "name": "R1 the service is back with the pinned revision (harness: start, container 46b22c55c352)",
+   "ok": true,
+   "detail": "{\"ok\":true,\"revision\":\"7097ac2bb062925bb296a129f4771f1e68fd522d\",\"ms\":523}"
+  },
+  {
+   "name": "R1 each page (host, guest, TV) opened a new live socket after the restart",
+   "ok": true,
+   "detail": "{\"host\":true,\"guest\":true,\"tv\":true}"
+  },
+  {
+   "name": "R1 the same room, the same two seats and the same round, still playing (API)",
+   "ok": true,
+   "detail": "{\"sameRoom\":true,\"guestSeat\":true,\"hostSeat\":true,\"status\":\"playing\"}"
+  },
+  {
+   "name": "R1 the acknowledged answers are kept, each once (guest 1, host 1) (API)",
+   "ok": true,
+   "detail": "{\"guest\":1,\"host\":1}"
+  },
+  {
+   "name": "R1 each screen shows the playing round on a new live connection (rendered): guest Question 2 of 10, host locked in, TV the featured question",
+   "ok": true,
+   "detail": "{\"guest\":\"Question 2 of 10\",\"host\":\"Answer locked in\",\"tv\":\"Featured question (Q1 of 10) · each phone goes at its own pace\",\"live\":{\"guest\":true,\"host\":true,\"tv\":true}}"
+  },
+  {
+   "name": "R1 the unconfirmed tap was not saved: question 2 is not recorded for the guest (API)",
+   "ok": true,
+   "detail": "1 recorded"
+  },
+  {
+   "name": "R1 the guest answered question 2 again after the restart: locked in (rendered), recorded once (API)",
+   "ok": true,
+   "detail": "2 recorded"
+  },
+  {
+   "name": "R1 play continues: the host answers question 2 in its own page after the restart, locked in (rendered), recorded once (API)",
+   "ok": true,
+   "detail": "{\"shown\":true,\"locked\":true,\"recorded\":2}"
+  },
+  {
+   "name": "R2 the service is back with the pinned revision (harness: fresh-empty, container c0e97887db21)",
+   "ok": true,
+   "detail": "{\"ok\":true,\"revision\":\"7097ac2bb062925bb296a129f4771f1e68fd522d\",\"ms\":948}"
+  },
+  {
+   "name": "R2 each page (host, guest, TV) opened a new live socket after the restart",
+   "ok": false,
+   "detail": "{\"host\":false,\"guest\":false,\"tv\":false}"
+  },
+  {
+   "name": "R2 the same room, the same two seats and the same round, still playing (API)",
+   "ok": false,
+   "detail": "{\"sameRoom\":false,\"guestSeat\":false,\"hostSeat\":false,\"status\":null}"
+  },
+  {
+   "name": "R2 the acknowledged answers are kept, each once (guest 2, host 2) (API)",
+   "ok": false,
+   "detail": "{\"guest\":0,\"host\":0}"
+  },
+  {
+   "name": "R2 each screen shows the playing round on a new live connection (rendered): guest Answer locked in, host locked in, TV the featured question",
+   "ok": false,
+   "detail": "{\"guest\":\"Answer locked in\",\"host\":\"Answer locked in\",\"tv\":\"Featured question (Q1 of 10) · each phone goes at its own pace\",\"live\":{\"guest\":false,\"host\":false,\"tv\":false}}"
+  },
+  {
+   "name": "R2 play continues: the host answers question 3 in its own page after the restart, locked in (rendered), recorded once (API)",
+   "ok": false,
+   "detail": "{\"shown\":true,\"locked\":false,\"recorded\":0}"
+  },
+  {
+   "name": "R2 the seeded Memory Book note still reads back after the fresh container (API)",
+   "ok": false,
+   "detail": "{\"status\":404,\"found\":false}"
+  }
+ ],
+ "failures": [
+  "R2 each page (host, guest, TV) opened a new live socket after the restart",
+  "R2 the same room, the same two seats and the same round, still playing (API)",
+  "R2 the acknowledged answers are kept, each once (guest 2, host 2) (API)",
+  "R2 each screen shows the playing round on a new live connection (rendered): guest Answer locked in, host locked in, TV the featured question",
+  "R2 play continues: the host answers question 3 in its own page after the restart, locked in (rendered), recorded once (API)",
+  "R2 the seeded Memory Book note still reads back after the fresh container (API)"
+ ],
+ "screenshots": [
+  "r2-host.png",
+  "r2-guest.png",
+  "r2-tv.png"
+ ],
+ "finishedAt": "2026-11-17T00:33:45.414Z",
+ "durationS": 88,
+ "verdict": "FAILED"
+}

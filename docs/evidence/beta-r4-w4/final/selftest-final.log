@@ -1,0 +1,213 @@
+# FINAL W4 self-test on a clean checkout of 618f179329bedee04ffc5b7884f603d4c45c88dc (status 0 lines), 2026-11-17T00:31:35Z
+# command: MCHEZO_CHROMIUM_PATH=/opt/pw-browsers/chromium_headless_shell-1243/chrome-headless-shell-linux64/chrome-headless-shell bash scripts/beta/w4-selftest.sh cgn-render:check --work <scratch>/w4/final/st
+# image: sha256:7b53109a7d69; containers before: 0; volumes before: 0
+== w4-selftest 2026-11-17T00:31:36Z, tag f4c4dc, harness 9a55d6d3425f7dd6, driver ba86c2fbd2b7a9ff, image cgn-render:check
+-- K1: the W3 mock cases against the W4 harness
+     | PASS M1 exits non-zero
+     | PASS M1 the pre-existing w3-svc container survives
+     | PASS M1 removes only a container its own docker run created
+     | PASS M1 never deletes by the shared name w3-svc
+     | PASS M1 leaves none of its own containers behind
+     | PASS M1 never authorizes (no docker exec)
+     | PASS M1 never starts the proxy or the driver (no node call)
+     | PASS M1 does not try the service after the failed start (no health probe)
+     | PASS M2 exits non-zero
+     | PASS M2 the pre-existing w3-svc container survives
+     | PASS M2 removes only a container its own docker run created
+     | PASS M2 never deletes by the shared name w3-svc
+     | PASS M2 leaves none of its own containers behind
+     | PASS M2 never authorizes (no docker exec)
+     | PASS M2 never starts the proxy or the driver (no node call)
+     | PASS M2 never runs a container
+     | PASS M3 exits non-zero
+     | PASS M3 the pre-existing w3-svc container survives
+     | PASS M3 removes only a container its own docker run created
+     | PASS M3 never deletes by the shared name w3-svc
+     | PASS M3 leaves none of its own containers behind
+     | PASS M3 never authorizes (no docker exec)
+     | PASS M3 never starts the proxy or the driver (no node call)
+     | PASS M4 exits non-zero
+     | PASS M4 the pre-existing w3-svc container survives
+     | PASS M4 removes only a container its own docker run created
+     | PASS M4 never deletes by the shared name w3-svc
+     | PASS M4 leaves none of its own containers behind
+     | PASS M4 never authorizes (no docker exec)
+     | PASS M4 never starts the proxy or the driver (no node call)
+     | PASS M5 exits non-zero
+     | PASS M5 the pre-existing w3-svc container survives
+     | PASS M5 removes only a container its own docker run created
+     | PASS M5 never deletes by the shared name w3-svc
+     | PASS M5 leaves none of its own containers behind
+     | PASS M5 never starts the proxy or the driver (no node call)
+     | -- mock-only: 36 passed, 0 failed
+PASS K1 the mock cases M1-M5 pass against the W4 harness
+   sentinels: container w4-svc 18b524091535, volume w4-data-sentinel, process 21663
+-- K2: the rehearsal (exit 0, run 20261117T003140Z-d06ba320)
+     | == w4-rehearsal 2026-11-17T00:31:40Z, run 20261117T003140Z-d06ba320, image cgn-render:check, driver ba86c2fbd2b7a9ff, proxy 06b1738ccd75d5f8
+     |    image id: sha256:7b53109a7d69
+     |    ports 18443/18480/18080 free
+     |    throwaway code, env file and TLS key in a private directory (mode 700), removed on exit
+     |    data volume w4-data-20261117T003140Z-d06ba320-a (label w4.owner=20261117T003140Z-d06ba320): throwaway data, removed on exit
+     |    container ad4fcbedb271 (name w4-svc-20261117T003140Z-d06ba320-1, label w4.owner=20261117T003140Z-d06ba320)
+     |    /health revision 7097ac2bb062925bb296a129f4771f1e68fd522d is the expected one
+     |    AUTHORIZED data_dir=/var/data/cgn-w1 public_origin=https://localhost:18443 trust_proxy=1 (the access code is kept only as a salted hash)
+     |    listeners on 18443/18480/18080 while running (positive control; expect 3): 3
+     | -- the rehearsal (bounded: timeout 900 s, and the driver's own --max-minutes)
+     |    [restart] stop: docker stop exit 0 (graceful SIGTERM to cgn-entrypoint); container ad4fcbedb271 exited exit=0
+     |    [restart] start (the same container): {"ok":true,"action":"start","container":"ad4fcbedb271","revision":"7097ac2bb062925bb296a129f4771f1e68fd522d","ms":509}
+     |    [restart] fresh: docker stop exit 0 (graceful SIGTERM); removing container ad4fcbedb271
+     |    [restart] fresh: {"ok":true,"action":"fresh","container":"c7f1b58796ac","oldContainer":"ad4fcbedb271","volume":"w4-data-20261117T003140Z-d06ba320-a","revision":"7097ac2bb062925bb296a129f4771f1e68fd522d","ms":839}
+     |    [probe] lock-probe: a second server in the running container exited 2: Another server (pid 24) is using this data directory (/var/data/cgn-w1). Stop it first: one process writes a data directory at a time.
+     |    [probe] guard-probe: a second container on the same volume with a different public origin exited 78: cgn-entrypoint: REFUSED: MCHEZO_PUBLIC_ORIGIN is not the authorized origin ; removing container 0aa8a552a7e9
+     |    PASS S a first round finished and a synthetic Memory Book note citing it was saved and reads back (API) — {"round":true,"status":201,"readBack":true}
+     |    PASS P a second round is playing; host and guest each answered question 1 and saw it locked in (acknowledged, rendered), recorded once (API) — {"start":201,"guestLocked":true,"hostLocked":true,"recorded":{"guest":1,"host":1}}
+     |    [6.5s] R1: stop the container (graceful SIGTERM); the guest taps while it is down; start it again
+     |    PASS R1 while the service was down the guest's screen said it was reconnecting, and the tap was NOT shown as in (rendered) — {"stop":"exited exit=0","banner":true,"shownIn":false,"message":"Request failed (502)"}
+     |    NOTE R1 the phone's message for the tap made while the service was down: "Request failed (502)" (the friendly wording would be: "We couldn’t confirm that — check your connection. If it doesn’t show as in, try again.")
+     |    PASS R1 the service is back with the pinned revision (harness: start, container ad4fcbedb271) — {"ok":true,"revision":"7097ac2bb062925bb296a129f4771f1e68fd522d","ms":509}
+     |    PASS R1 each page (host, guest, TV) opened a new live socket after the restart — {"host":true,"guest":true,"tv":true}
+     |    PASS R1 the same room, the same two seats and the same round, still playing (API) — {"sameRoom":true,"guestSeat":true,"hostSeat":true,"status":"playing"}
+     |    PASS R1 the acknowledged answers are kept, each once (guest 1, host 1) (API) — {"guest":1,"host":1}
+     |    PASS R1 each screen shows the playing round on a new live connection (rendered): guest Question 2 of 10, host locked in, TV the featured question — {"guest":"Question 2 of 10","host":"Answer locked in","tv":"Featured question (Q1 of 10) · each phone goes at its own pace","live":{"guest":true,"host":true,"tv":true}}
+     |    PASS R1 the unconfirmed tap was not saved: question 2 is not recorded for the guest (API) — 1 recorded
+     |    PASS R1 the guest answered question 2 again after the restart: locked in (rendered), recorded once (API) — 2 recorded
+     |    PASS R1 play continues: the host answers question 2 in its own page after the restart, locked in (rendered), recorded once (API) — {"shown":true,"locked":true,"recorded":2}
+     |    [11.3s] R2: a fresh container of the same image on the SAME data
+     |    PASS R2 the service is back with the pinned revision (harness: fresh, container c7f1b58796ac) — {"ok":true,"revision":"7097ac2bb062925bb296a129f4771f1e68fd522d","ms":839}
+     |    PASS R2 each page (host, guest, TV) opened a new live socket after the restart — {"host":true,"guest":true,"tv":true}
+     |    PASS R2 the same room, the same two seats and the same round, still playing (API) — {"sameRoom":true,"guestSeat":true,"hostSeat":true,"status":"playing"}
+     |    PASS R2 the acknowledged answers are kept, each once (guest 2, host 2) (API) — {"guest":2,"host":2}
+     |    PASS R2 each screen shows the playing round on a new live connection (rendered): guest Answer locked in, host locked in, TV the featured question — {"guest":"Answer locked in","host":"Answer locked in","tv":"Featured question (Q1 of 10) · each phone goes at its own pace","live":{"guest":true,"host":true,"tv":true}}
+     |    PASS R2 play continues: the host answers question 3 in its own page after the restart, locked in (rendered), recorded once (API) — {"shown":true,"locked":true,"recorded":3}
+     |    PASS R2 the seeded Memory Book note still reads back after the fresh container (API) — {"status":200,"found":true}
+     |    PASS L a second server process on the same data, in the running container, is refused by the one-writer lock (harness) — {"exit":2,"output":"Another server (pid 24) is using this data directory (/var/data/cgn-w1). Stop it first: one process writes a data directory at a time."}
+     |    PASS G a second container on the same data with another public origin refuses to start (harness: cgn-entrypoint's rollback guard, exit 78) — {"exit":78,"output":"cgn-entrypoint: REFUSED: MCHEZO_PUBLIC_ORIGIN is not the authorized origin "}
+     |    [18.0s] F: the guest finishes through the UI, the host through the API
+     |    PASS F the round finished with all 10 of the guest's answers recorded once, and its score equal to the score of the recorded answers (API) — {"recorded":10,"score":360,"expected":360}
+     |    PASS F the TV's screen (rendered) shows the finished round with every recorded score — [{"name":"Guest-e88d55","score":"360"},{"name":"Host-e88d55","score":"120"}]
+     |    PASS F the host's screen (rendered) shows the finished round with every recorded score — [{"name":"Guest-e88d55","score":"360"},{"name":"You","score":"120"}]
+     |    PASS F the guest's screen (rendered) shows the finished round with every recorded score — [{"name":"You","score":"360"},{"name":"Host-e88d55","score":"120"}]
+     |    evidence: <scratch>/w4/final/st/K2-f4c4dc/run/evidence/w4-20261117T003141-e88d55.json
+     |    W4 REHEARSAL PASSED
+     |    driver exit: 0
+     | -- cleanup (run 20261117T003140Z-d06ba320)
+     |    cleanup #1: proxy container c7f1b58796ac volume w4-data-20261117T003140Z-d06ba320-a private-files
+     |    cleanup #2: nothing owned left to remove
+     |    this run's containers left: 0; volumes left: 0; processes left: 0; listeners left on 18443/18480/18080: 0; private files left: no
+     |    files holding the access code: 0; files holding a beta cookie value: 0
+     | W4 REHEARSAL HARNESS PASSED
+PASS K2 the rehearsal PASSED
+PASS K2 leaves none of its containers or volumes
+PASS K2 leaves no processes, listeners or private files
+PASS K2 cleanup ran again as a no-op
+PASS K2 the sentinel container w4-svc survives
+PASS K2 the sentinel volume survives
+PASS K2 the sentinel process survives
+-- K3: the negative control: a fresh container on EMPTY data (exit 1, run 20261117T003215Z-31c5cb2b)
+     | == w4-rehearsal 2026-11-17T00:32:15Z, run 20261117T003215Z-31c5cb2b, image cgn-render:check, driver ba86c2fbd2b7a9ff, proxy 06b1738ccd75d5f8
+     |    image id: sha256:7b53109a7d69
+     |    ports 18443/18480/18080 free
+     |    throwaway code, env file and TLS key in a private directory (mode 700), removed on exit
+     |    data volume w4-data-20261117T003215Z-31c5cb2b-a (label w4.owner=20261117T003215Z-31c5cb2b): throwaway data, removed on exit
+     |    container 46b22c55c352 (name w4-svc-20261117T003215Z-31c5cb2b-1, label w4.owner=20261117T003215Z-31c5cb2b)
+     |    /health revision 7097ac2bb062925bb296a129f4771f1e68fd522d is the expected one
+     |    AUTHORIZED data_dir=/var/data/cgn-w1 public_origin=https://localhost:18443 trust_proxy=1 (the access code is kept only as a salted hash)
+     |    listeners on 18443/18480/18080 while running (positive control; expect 3): 3
+     | -- the rehearsal (bounded: timeout 900 s, and the driver's own --max-minutes)
+     |    [restart] stop: docker stop exit 0 (graceful SIGTERM to cgn-entrypoint); container 46b22c55c352 exited exit=0
+     |    [restart] start (the same container): {"ok":true,"action":"start","container":"46b22c55c352","revision":"7097ac2bb062925bb296a129f4771f1e68fd522d","ms":523}
+     |    [restart] fresh-empty: docker stop exit 0 (graceful SIGTERM); removing container 46b22c55c352
+     |    [restart] NEGATIVE CONTROL: the new container gets a NEW, EMPTY volume w4-data-20261117T003215Z-31c5cb2b-empty (data lost)
+     |    [restart] fresh-empty: {"ok":true,"action":"fresh-empty","container":"c0e97887db21","oldContainer":"46b22c55c352","volume":"w4-data-20261117T003215Z-31c5cb2b-empty","revision":"7097ac2bb062925bb296a129f4771f1e68fd522d","ms":948}
+     |    PASS S a first round finished and a synthetic Memory Book note citing it was saved and reads back (API) — {"round":true,"status":201,"readBack":true}
+     |    PASS P a second round is playing; host and guest each answered question 1 and saw it locked in (acknowledged, rendered), recorded once (API) — {"start":201,"guestLocked":true,"hostLocked":true,"recorded":{"guest":1,"host":1}}
+     |    [5.7s] R1: stop the container (graceful SIGTERM); the guest taps while it is down; start it again
+     |    PASS R1 while the service was down the guest's screen said it was reconnecting, and the tap was NOT shown as in (rendered) — {"stop":"exited exit=0","banner":true,"shownIn":false,"message":"Request failed (502)"}
+     |    NOTE R1 the phone's message for the tap made while the service was down: "Request failed (502)" (the friendly wording would be: "We couldn’t confirm that — check your connection. If it doesn’t show as in, try again.")
+     |    PASS R1 the service is back with the pinned revision (harness: start, container 46b22c55c352) — {"ok":true,"revision":"7097ac2bb062925bb296a129f4771f1e68fd522d","ms":523}
+     |    PASS R1 each page (host, guest, TV) opened a new live socket after the restart — {"host":true,"guest":true,"tv":true}
+     |    PASS R1 the same room, the same two seats and the same round, still playing (API) — {"sameRoom":true,"guestSeat":true,"hostSeat":true,"status":"playing"}
+     |    PASS R1 the acknowledged answers are kept, each once (guest 1, host 1) (API) — {"guest":1,"host":1}
+     |    PASS R1 each screen shows the playing round on a new live connection (rendered): guest Question 2 of 10, host locked in, TV the featured question — {"guest":"Question 2 of 10","host":"Answer locked in","tv":"Featured question (Q1 of 10) · each phone goes at its own pace","live":{"guest":true,"host":true,"tv":true}}
+     |    PASS R1 the unconfirmed tap was not saved: question 2 is not recorded for the guest (API) — 1 recorded
+     |    PASS R1 the guest answered question 2 again after the restart: locked in (rendered), recorded once (API) — 2 recorded
+     |    PASS R1 play continues: the host answers question 2 in its own page after the restart, locked in (rendered), recorded once (API) — {"shown":true,"locked":true,"recorded":2}
+     |    [10.5s] R2: a fresh container of the same image on a NEW, EMPTY volume (negative control)
+     |    PASS R2 the service is back with the pinned revision (harness: fresh-empty, container c0e97887db21) — {"ok":true,"revision":"7097ac2bb062925bb296a129f4771f1e68fd522d","ms":948}
+     |    FAIL R2 each page (host, guest, TV) opened a new live socket after the restart — {"host":false,"guest":false,"tv":false}
+     |    FAIL R2 the same room, the same two seats and the same round, still playing (API) — {"sameRoom":false,"guestSeat":false,"hostSeat":false,"status":null}
+     |    FAIL R2 the acknowledged answers are kept, each once (guest 2, host 2) (API) — {"guest":0,"host":0}
+     |    FAIL R2 each screen shows the playing round on a new live connection (rendered): guest Answer locked in, host locked in, TV the featured question — {"guest":"Answer locked in","host":"Answer locked in","tv":"Featured question (Q1 of 10) · each phone goes at its own pace","live":{"guest":false,"host":false,"tv":false}}
+     |    FAIL R2 play continues: the host answers question 3 in its own page after the restart, locked in (rendered), recorded once (API) — {"shown":true,"locked":false,"recorded":0}
+     |    FAIL R2 the seeded Memory Book note still reads back after the fresh container (API) — {"status":404,"found":false}
+     |    evidence: <scratch>/w4/final/st/K3-f4c4dc/run/evidence/w4-20261117T003217-fc3277.json
+     |    CONTROL empty-data: failed checks: R2 each page (host, guest, TV) opened a new live socket after the restart | R2 the same room, the same two seats and the same round, still playing (API) | R2 the acknowledged answers are kept, each once (guest 2, host 2) (API) | R2 each screen shows the playing round on a new live connection (rendered): guest Answer locked in, host locked in, TV the featured question | R2 play continues: the host answers question 3 in its own page after the restart, locked in (rendered), recorded once (API) | R2 the seeded Memory Book note still reads back after the fresh container (API)
+     |    W4 REHEARSAL FAILED (6 failure(s))
+     |    driver exit: 1
+     | -- cleanup (run 20261117T003215Z-31c5cb2b)
+     |    cleanup #1: proxy container c0e97887db21 volume w4-data-20261117T003215Z-31c5cb2b-a volume w4-data-20261117T003215Z-31c5cb2b-empty private-files
+     |    cleanup #2: nothing owned left to remove
+     |    this run's containers left: 0; volumes left: 0; processes left: 0; listeners left on 18443/18480/18080: 0; private files left: no
+     |    files holding the access code: 0; files holding a beta cookie value: 0
+     | W4 REHEARSAL HARNESS FAILED
+PASS K3 the run reports FAILED
+PASS K3 exactly six checks failed, all after R2, none in R1
+PASS K3 failed: sockets back
+PASS K3 failed: the same room and seats
+PASS K3 failed: the acknowledged answers kept
+PASS K3 failed: the screens on a live connection
+PASS K3 failed: play continues
+PASS K3 failed: the Memory Book note reads back
+PASS K3 leaves none of its containers or volumes
+PASS K3 leaves no processes, listeners or private files
+PASS K3 cleanup ran again as a no-op
+PASS K3 the sentinel container w4-svc survives
+PASS K3 the sentinel volume survives
+PASS K3 the sentinel process survives
+-- K4: an unrelated listener already on 18443 (exit 1, run 20261117T003347Z-2d469a0d)
+     | == w4-rehearsal 2026-11-17T00:33:47Z, run 20261117T003347Z-2d469a0d, image cgn-render:check, driver ba86c2fbd2b7a9ff, proxy 06b1738ccd75d5f8
+     |    image id: sha256:7b53109a7d69
+     |    FAILED at port preflight: 1 listener(s) already on 18443/18480/18080 (another run or an unrelated service); nothing was started
+     | -- cleanup (run 20261117T003347Z-2d469a0d)
+     |    cleanup #1: nothing owned left to remove
+     |    cleanup #2: nothing owned left to remove
+     |    this run's containers left: 0; volumes left: 0; processes left: 0; listeners left on 18443/18480/18080: not checked (this run started no listener); private files left: no
+     |    files holding the access code: 0; files holding a beta cookie value: 0
+     | W4 REHEARSAL HARNESS FAILED
+PASS K4 fails at the port preflight, starting no container
+PASS K4 never authorizes and never starts the browser work
+PASS K4 the unrelated listener got no connection and still runs
+PASS K4 leaves none of its containers or volumes
+PASS K4 leaves no processes, listeners or private files
+PASS K4 cleanup ran again as a no-op
+PASS K4 the sentinel container w4-svc survives
+PASS K4 the sentinel volume survives
+PASS K4 the sentinel process survives
+-- K5: an unexpected revision (exit 1, run 20261117T003348Z-c94ead77)
+     | == w4-rehearsal 2026-11-17T00:33:48Z, run 20261117T003348Z-c94ead77, image cgn-render:check, driver ba86c2fbd2b7a9ff, proxy 06b1738ccd75d5f8
+     |    image id: sha256:7b53109a7d69
+     |    ports 18443/18480/18080 free
+     |    throwaway code, env file and TLS key in a private directory (mode 700), removed on exit
+     |    data volume w4-data-20261117T003348Z-c94ead77-a (label w4.owner=20261117T003348Z-c94ead77): throwaway data, removed on exit
+     |    container 2eda947c02f6 (name w4-svc-20261117T003348Z-c94ead77-1, label w4.owner=20261117T003348Z-c94ead77)
+     |    FAILED at readiness: revision '7097ac2bb062925bb296a129f4771f1e68fd522d', not the expected 0000000000000000000000000000000000000000
+     | -- cleanup (run 20261117T003348Z-c94ead77)
+     |    cleanup #1: container 2eda947c02f6 volume w4-data-20261117T003348Z-c94ead77-a private-files
+     |    cleanup #2: nothing owned left to remove
+     |    this run's containers left: 0; volumes left: 0; processes left: 0; listeners left on 18443/18480/18080: 0; private files left: no
+     |    files holding the access code: 0; files holding a beta cookie value: 0
+     | W4 REHEARSAL HARNESS FAILED
+PASS K5 fails at readiness on the revision
+PASS K5 never authorizes and never starts the browser work
+PASS K5 leaves none of its containers or volumes
+PASS K5 leaves no processes, listeners or private files
+PASS K5 cleanup ran again as a no-op
+PASS K5 the sentinel container w4-svc survives
+PASS K5 the sentinel volume survives
+PASS K5 the sentinel process survives
+   removed this self-test's sentinel container 18b524091535
+   removed this self-test's sentinel volume w4-data-sentinel
+-- 39 passed, 0 failed
+W4 SELFTEST PASSED
+selftest exit: 0
+# containers after: 0; volumes after: 0

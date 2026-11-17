@@ -1,0 +1,50 @@
+== w4-rehearsal 2026-11-17T00:17:48Z, run 20261117T001748Z-c38edde8, image cgn-render:check, driver 4b4dc04ab65265e9, proxy 06b1738ccd75d5f8
+   image id: sha256:7b53109a7d69
+   ports 18443/18480/18080 free
+   throwaway code, env file and TLS key in a private directory (mode 700), removed on exit
+   data volume w4-data-20261117T001748Z-c38edde8-a (label w4.owner=20261117T001748Z-c38edde8): throwaway data, removed on exit
+   container 8a98d0fc007c (name w4-svc-20261117T001748Z-c38edde8-1, label w4.owner=20261117T001748Z-c38edde8)
+   /health revision 7097ac2bb062925bb296a129f4771f1e68fd522d is the expected one
+   AUTHORIZED data_dir=/var/data/cgn-w1 public_origin=https://localhost:18443 trust_proxy=1 (the access code is kept only as a salted hash)
+   listeners on 18443/18480/18080 while running (positive control; expect 3): 3
+-- the rehearsal (bounded: timeout 900 s, and the driver's own --max-minutes)
+   [restart] stop: docker stop exit 0 (graceful SIGTERM to cgn-entrypoint); container 8a98d0fc007c exited exit=0
+   [restart] start (the same container): {"ok":true,"action":"start","container":"8a98d0fc007c","revision":"7097ac2bb062925bb296a129f4771f1e68fd522d","ms":525}
+   [restart] fresh: docker stop exit 0 (graceful SIGTERM); removing container 8a98d0fc007c
+   [restart] fresh: {"ok":true,"action":"fresh","container":"c8f8a3840093","oldContainer":"8a98d0fc007c","volume":"w4-data-20261117T001748Z-c38edde8-a","revision":"7097ac2bb062925bb296a129f4771f1e68fd522d","ms":828}
+   [probe] lock-probe: a second server in the running container exited 2: Another server (pid 23) is using this data directory (/var/data/cgn-w1). Stop it first: one process writes a data directory at a time.
+   [probe] guard-probe: a second container on the same volume with a different public origin exited 78: cgn-entrypoint: REFUSED: MCHEZO_PUBLIC_ORIGIN is not the authorized origin ; removing container e79c67405175
+   PASS S a first round finished and a synthetic Memory Book note citing it was saved and reads back (API) — {"round":true,"status":201,"readBack":true}
+   PASS P a second round is playing; host and guest each answered question 1 and saw it locked in (acknowledged, rendered), recorded once (API) — {"start":201,"guestLocked":true,"hostLocked":true,"recorded":{"guest":1,"host":1}}
+   [7.6s] R1: stop the container (graceful SIGTERM); the guest taps while it is down; start it again
+   FAIL R1 while the service was down the guest's screen said it was reconnecting, and the tap was NOT shown as in (rendered: couldn't confirm) — {"stop":"exited exit=0","banner":true,"couldntConfirm":false,"shownIn":false}
+   PASS R1 the service is back with the pinned revision (harness: start, container 8a98d0fc007c) — {"ok":true,"revision":"7097ac2bb062925bb296a129f4771f1e68fd522d","ms":525}
+   PASS R1 each page (host, guest, TV) opened a new live socket after the restart — {"host":6,"guest":6,"tv":6}
+   PASS R1 the same room, the same two seats and the same round, still playing (API) — {"sameRoom":true,"guestSeat":true,"hostSeat":true,"status":"playing"}
+   PASS R1 the acknowledged answers are kept, each once (guest 1, host 1) (API) — {"guest":1,"host":1}
+   PASS R1 the screens show the playing round (rendered): guest Question 2 of 10, host locked in on question 1, TV the featured question — {"guest":"Question 2 of 10","host":"Answer locked in","tv":"Featured question (Q1 of 10) · each phone goes at its own pace"}
+   PASS R1 the unconfirmed tap was not saved: question 2 is not recorded for the guest (API) — 1 recorded
+   PASS R1 the guest answered question 2 again after the restart: locked in (rendered), recorded once (API) — 2 recorded
+   [63.4s] R2: a fresh container of the same image on the SAME data
+   PASS R2 the service is back with the pinned revision (harness: fresh, container c8f8a3840093) — {"ok":true,"revision":"7097ac2bb062925bb296a129f4771f1e68fd522d","ms":828}
+   PASS R2 each page (host, guest, TV) opened a new live socket after the restart — {"host":7,"guest":7,"tv":7}
+   PASS R2 the same room, the same two seats and the same round, still playing (API) — {"sameRoom":true,"guestSeat":true,"hostSeat":true,"status":"playing"}
+   PASS R2 the acknowledged answers are kept, each once (guest 2, host 1) (API) — {"guest":2,"host":1}
+   PASS R2 the screens show the playing round (rendered): guest Answer locked in, host locked in on question 1, TV the featured question — {"guest":"Answer locked in","host":"Answer locked in","tv":"Featured question (Q1 of 10) · each phone goes at its own pace"}
+   PASS R2 the seeded Memory Book note still reads back after the fresh container (API) — {"status":200,"found":true}
+   PASS L a second server process on the same data, in the running container, is refused by the one-writer lock (harness) — {"exit":2,"output":"Another server (pid 23) is using this data directory (/var/data/cgn-w1). Stop it first: one process writes a data directory at a time."}
+   PASS G a second container on the same data with another public origin refuses to start (harness: cgn-entrypoint's rollback guard, exit 78) — {"exit":78,"output":"cgn-entrypoint: REFUSED: MCHEZO_PUBLIC_ORIGIN is not the authorized origin "}
+   [105.3s] F: the guest finishes through the UI, the host through the API
+   PASS F the round finished with all 10 of the guest's answers recorded once, and its score equal to the score of the recorded answers (API) — {"recorded":10,"score":360,"expected":360}
+   PASS F the TV's screen (rendered) shows the finished round with every recorded score — [{"name":"Host-7f255a","score":"600"},{"name":"Guest-7f255a","score":"360"}]
+   PASS F the host's screen (rendered) shows the finished round with every recorded score — [{"name":"You","score":"600"},{"name":"Guest-7f255a","score":"360"}]
+   PASS F the guest's screen (rendered) shows the finished round with every recorded score — [{"name":"Host-7f255a","score":"600"},{"name":"You","score":"360"}]
+   evidence: <scratch>/w4/dev/trial1/evidence/w4-20261117T001753-7f255a.json
+   W4 REHEARSAL FAILED (1 failure(s))
+   driver exit: 1
+-- cleanup (run 20261117T001748Z-c38edde8)
+   cleanup #1: proxy container c8f8a3840093 volume w4-data-20261117T001748Z-c38edde8-a private-files
+   cleanup #2: nothing owned left to remove
+   this run's containers left: 0; volumes left: 0; processes left: 0; listeners left on 18443/18480/18080: 0; private files left: no
+   files holding the access code: 0; files holding a beta cookie value: 0
+W4 REHEARSAL HARNESS FAILED

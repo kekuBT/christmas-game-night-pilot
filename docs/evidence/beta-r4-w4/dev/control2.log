@@ -1,0 +1,46 @@
+== w4-rehearsal 2026-11-17T00:24:09Z, run 20261117T002409Z-6962c2ae, image cgn-render:check, driver 7b628ad4fd8c08b5, proxy 06b1738ccd75d5f8
+   image id: sha256:7b53109a7d69
+   ports 18443/18480/18080 free
+   throwaway code, env file and TLS key in a private directory (mode 700), removed on exit
+   data volume w4-data-20261117T002409Z-6962c2ae-a (label w4.owner=20261117T002409Z-6962c2ae): throwaway data, removed on exit
+   container 0ebbbd90e591 (name w4-svc-20261117T002409Z-6962c2ae-1, label w4.owner=20261117T002409Z-6962c2ae)
+   /health revision 7097ac2bb062925bb296a129f4771f1e68fd522d is the expected one
+   AUTHORIZED data_dir=/var/data/cgn-w1 public_origin=https://localhost:18443 trust_proxy=1 (the access code is kept only as a salted hash)
+   listeners on 18443/18480/18080 while running (positive control; expect 3): 3
+-- the rehearsal (bounded: timeout 900 s, and the driver's own --max-minutes)
+   [restart] stop: docker stop exit 0 (graceful SIGTERM to cgn-entrypoint); container 0ebbbd90e591 exited exit=0
+   [restart] start (the same container): {"ok":true,"action":"start","container":"0ebbbd90e591","revision":"7097ac2bb062925bb296a129f4771f1e68fd522d","ms":556}
+   [restart] fresh-empty: docker stop exit 0 (graceful SIGTERM); removing container 0ebbbd90e591
+   [restart] NEGATIVE CONTROL: the new container gets a NEW, EMPTY volume w4-data-20261117T002409Z-6962c2ae-empty (data lost)
+   [restart] fresh-empty: {"ok":true,"action":"fresh-empty","container":"6c5bf07c7096","oldContainer":"0ebbbd90e591","volume":"w4-data-20261117T002409Z-6962c2ae-empty","revision":"7097ac2bb062925bb296a129f4771f1e68fd522d","ms":953}
+   PASS S a first round finished and a synthetic Memory Book note citing it was saved and reads back (API) — {"round":true,"status":201,"readBack":true}
+   PASS P a second round is playing; host and guest each answered question 1 and saw it locked in (acknowledged, rendered), recorded once (API) — {"start":201,"guestLocked":true,"hostLocked":true,"recorded":{"guest":1,"host":1}}
+   [5.6s] R1: stop the container (graceful SIGTERM); the guest taps while it is down; start it again
+   PASS R1 while the service was down the guest's screen said it was reconnecting, and the tap was NOT shown as in (rendered) — {"stop":"exited exit=0","banner":true,"shownIn":false,"message":"Request failed (502)"}
+   NOTE R1 the phone's message for the tap made while the service was down: "Request failed (502)" (the friendly wording would be: "We couldn’t confirm that — check your connection. If it doesn’t show as in, try again.")
+   PASS R1 the service is back with the pinned revision (harness: start, container 0ebbbd90e591) — {"ok":true,"revision":"7097ac2bb062925bb296a129f4771f1e68fd522d","ms":556}
+   PASS R1 each page (host, guest, TV) opened a new live socket after the restart — {"host":true,"guest":true,"tv":true}
+   PASS R1 the same room, the same two seats and the same round, still playing (API) — {"sameRoom":true,"guestSeat":true,"hostSeat":true,"status":"playing"}
+   PASS R1 the acknowledged answers are kept, each once (guest 1, host 1) (API) — {"guest":1,"host":1}
+   PASS R1 each screen shows the playing round on a new live connection (rendered): guest Question 2 of 10, host locked in, TV the featured question — {"guest":"Question 2 of 10","host":"Answer locked in","tv":"Featured question (Q1 of 10) · each phone goes at its own pace","live":{"guest":true,"host":true,"tv":true}}
+   PASS R1 the unconfirmed tap was not saved: question 2 is not recorded for the guest (API) — 1 recorded
+   PASS R1 the guest answered question 2 again after the restart: locked in (rendered), recorded once (API) — 2 recorded
+   PASS R1 play continues: the host answers question 2 in its own page after the restart, locked in (rendered), recorded once (API) — {"shown":true,"locked":true,"recorded":2}
+   [10.4s] R2: a fresh container of the same image on a NEW, EMPTY volume (negative control)
+   PASS R2 the service is back with the pinned revision (harness: fresh-empty, container 6c5bf07c7096) — {"ok":true,"revision":"7097ac2bb062925bb296a129f4771f1e68fd522d","ms":953}
+   FAIL R2 each page (host, guest, TV) opened a new live socket after the restart — {"host":false,"guest":false,"tv":false}
+   FAIL R2 the same room, the same two seats and the same round, still playing (API) — {"sameRoom":false,"guestSeat":false,"hostSeat":false,"status":null}
+   FAIL R2 the acknowledged answers are kept, each once (guest 2, host 2) (API) — {"guest":0,"host":0}
+   FAIL R2 each screen shows the playing round on a new live connection (rendered): guest Answer locked in, host locked in, TV the featured question — {"guest":"Answer locked in","host":"Answer locked in","tv":"Featured question (Q1 of 10) · each phone goes at its own pace","live":{"guest":false,"host":false,"tv":false}}
+   FAIL R2 play continues: the host answers question 3 in its own page after the restart, locked in (rendered), recorded once (API) — {"shown":true,"locked":false,"recorded":0}
+   FAIL R2 the seeded Memory Book note still reads back after the fresh container (API) — {"status":404,"found":false}
+   evidence: <scratch>/w4/dev/control2/evidence/w4-20261117T002410-d18aa2.json
+   CONTROL empty-data: failed checks: R2 each page (host, guest, TV) opened a new live socket after the restart | R2 the same room, the same two seats and the same round, still playing (API) | R2 the acknowledged answers are kept, each once (guest 2, host 2) (API) | R2 each screen shows the playing round on a new live connection (rendered): guest Answer locked in, host locked in, TV the featured question | R2 play continues: the host answers question 3 in its own page after the restart, locked in (rendered), recorded once (API) | R2 the seeded Memory Book note still reads back after the fresh container (API)
+   W4 REHEARSAL FAILED (6 failure(s))
+   driver exit: 1
+-- cleanup (run 20261117T002409Z-6962c2ae)
+   cleanup #1: proxy container 6c5bf07c7096 volume w4-data-20261117T002409Z-6962c2ae-a volume w4-data-20261117T002409Z-6962c2ae-empty private-files
+   cleanup #2: nothing owned left to remove
+   this run's containers left: 0; volumes left: 0; processes left: 0; listeners left on 18443/18480/18080: 0; private files left: no
+   files holding the access code: 0; files holding a beta cookie value: 0
+W4 REHEARSAL HARNESS FAILED

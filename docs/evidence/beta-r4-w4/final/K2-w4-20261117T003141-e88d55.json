@@ -1,0 +1,250 @@
+{
+ "tool": "scripts/beta/w4-rehearsal.mjs",
+ "toolSha256": "ba86c2fbd2b7a9ff57a0247b461520e7b7a71a88912c1097c4e308f72a665765",
+ "node": "v22.23.4",
+ "runId": "20261117T003141-e88d55",
+ "origin": "https://localhost:18443",
+ "startedAt": "2026-11-17T00:31:41.972Z",
+ "control": null,
+ "scope": "LOCAL rehearsal: the packaged pinned runtime on a run-owned Docker volume behind a local TLS proxy, restarted by the harness (docker stop/start; a fresh container on the same volume). Not Render, not a phone.",
+ "restarts": [
+  {
+   "action": "stop",
+   "ok": true,
+   "container": "ad4fcbedb271",
+   "state": "exited exit=0",
+   "ms": 270
+  },
+  {
+   "action": "start",
+   "ok": true,
+   "container": "ad4fcbedb271",
+   "revision": "7097ac2bb062925bb296a129f4771f1e68fd522d",
+   "ms": 509
+  },
+  {
+   "action": "fresh",
+   "ok": true,
+   "container": "c7f1b58796ac",
+   "oldContainer": "ad4fcbedb271",
+   "volume": "w4-data-20261117T003140Z-d06ba320-a",
+   "revision": "7097ac2bb062925bb296a129f4771f1e68fd522d",
+   "ms": 839
+  },
+  {
+   "action": "lock-probe",
+   "ok": true,
+   "exit": 2,
+   "output": "Another server (pid 24) is using this data directory (/var/data/cgn-w1). Stop it first: one process writes a data directory at a time."
+  },
+  {
+   "action": "guard-probe",
+   "ok": true,
+   "exit": 78,
+   "output": "cgn-entrypoint: REFUSED: MCHEZO_PUBLIC_ORIGIN is not the authorized origin "
+  }
+ ],
+ "probes": {
+  "lock": {
+   "ok": true,
+   "action": "lock-probe",
+   "exit": 2,
+   "output": "Another server (pid 24) is using this data directory (/var/data/cgn-w1). Stop it first: one process writes a data directory at a time."
+  },
+  "guard": {
+   "ok": true,
+   "action": "guard-probe",
+   "exit": 78,
+   "output": "cgn-entrypoint: REFUSED: MCHEZO_PUBLIC_ORIGIN is not the authorized origin "
+  }
+ },
+ "seen": {
+  "seed": {
+   "firstRound": "finished",
+   "noteStatus": 201,
+   "noteId": "book-1"
+  },
+  "r1TapMessageWhileDown": "Request failed (502)",
+  "R1": {
+   "guestScreen": "Question 2 of 10",
+   "hostScreen": "Answer locked in",
+   "tvScreen": "Featured question (Q1 of 10) · each phone goes at its own pace"
+  },
+  "R2": {
+   "guestScreen": "Answer locked in",
+   "hostScreen": "Answer locked in",
+   "tvScreen": "Featured question (Q1 of 10) · each phone goes at its own pace"
+  },
+  "final": {
+   "recorded": {
+    "Host-e88d55": 120,
+    "Guest-e88d55": 360
+   },
+   "distinctScores": true,
+   "tv": [
+    {
+     "name": "Guest-e88d55",
+     "score": "360"
+    },
+    {
+     "name": "Host-e88d55",
+     "score": "120"
+    }
+   ],
+   "host": [
+    {
+     "name": "Guest-e88d55",
+     "score": "360"
+    },
+    {
+     "name": "You",
+     "score": "120"
+    }
+   ],
+   "guest": [
+    {
+     "name": "You",
+     "score": "360"
+    },
+    {
+     "name": "Host-e88d55",
+     "score": "120"
+    }
+   ]
+  }
+ },
+ "checks": [
+  {
+   "name": "S a first round finished and a synthetic Memory Book note citing it was saved and reads back (API)",
+   "ok": true,
+   "detail": "{\"round\":true,\"status\":201,\"readBack\":true}"
+  },
+  {
+   "name": "P a second round is playing; host and guest each answered question 1 and saw it locked in (acknowledged, rendered), recorded once (API)",
+   "ok": true,
+   "detail": "{\"start\":201,\"guestLocked\":true,\"hostLocked\":true,\"recorded\":{\"guest\":1,\"host\":1}}"
+  },
+  {
+   "name": "R1 while the service was down the guest's screen said it was reconnecting, and the tap was NOT shown as in (rendered)",
+   "ok": true,
+   "detail": "{\"stop\":\"exited exit=0\",\"banner\":true,\"shownIn\":false,\"message\":\"Request failed (502)\"}"
+  },
+  {
+   "name": "R1 the service is back with the pinned revision (harness: start, container ad4fcbedb271)",
+   "ok": true,
+   "detail": "{\"ok\":true,\"revision\":\"7097ac2bb062925bb296a129f4771f1e68fd522d\",\"ms\":509}"
+  },
+  {
+   "name": "R1 each page (host, guest, TV) opened a new live socket after the restart",
+   "ok": true,
+   "detail": "{\"host\":true,\"guest\":true,\"tv\":true}"
+  },
+  {
+   "name": "R1 the same room, the same two seats and the same round, still playing (API)",
+   "ok": true,
+   "detail": "{\"sameRoom\":true,\"guestSeat\":true,\"hostSeat\":true,\"status\":\"playing\"}"
+  },
+  {
+   "name": "R1 the acknowledged answers are kept, each once (guest 1, host 1) (API)",
+   "ok": true,
+   "detail": "{\"guest\":1,\"host\":1}"
+  },
+  {
+   "name": "R1 each screen shows the playing round on a new live connection (rendered): guest Question 2 of 10, host locked in, TV the featured question",
+   "ok": true,
+   "detail": "{\"guest\":\"Question 2 of 10\",\"host\":\"Answer locked in\",\"tv\":\"Featured question (Q1 of 10) · each phone goes at its own pace\",\"live\":{\"guest\":true,\"host\":true,\"tv\":true}}"
+  },
+  {
+   "name": "R1 the unconfirmed tap was not saved: question 2 is not recorded for the guest (API)",
+   "ok": true,
+   "detail": "1 recorded"
+  },
+  {
+   "name": "R1 the guest answered question 2 again after the restart: locked in (rendered), recorded once (API)",
+   "ok": true,
+   "detail": "2 recorded"
+  },
+  {
+   "name": "R1 play continues: the host answers question 2 in its own page after the restart, locked in (rendered), recorded once (API)",
+   "ok": true,
+   "detail": "{\"shown\":true,\"locked\":true,\"recorded\":2}"
+  },
+  {
+   "name": "R2 the service is back with the pinned revision (harness: fresh, container c7f1b58796ac)",
+   "ok": true,
+   "detail": "{\"ok\":true,\"revision\":\"7097ac2bb062925bb296a129f4771f1e68fd522d\",\"ms\":839}"
+  },
+  {
+   "name": "R2 each page (host, guest, TV) opened a new live socket after the restart",
+   "ok": true,
+   "detail": "{\"host\":true,\"guest\":true,\"tv\":true}"
+  },
+  {
+   "name": "R2 the same room, the same two seats and the same round, still playing (API)",
+   "ok": true,
+   "detail": "{\"sameRoom\":true,\"guestSeat\":true,\"hostSeat\":true,\"status\":\"playing\"}"
+  },
+  {
+   "name": "R2 the acknowledged answers are kept, each once (guest 2, host 2) (API)",
+   "ok": true,
+   "detail": "{\"guest\":2,\"host\":2}"
+  },
+  {
+   "name": "R2 each screen shows the playing round on a new live connection (rendered): guest Answer locked in, host locked in, TV the featured question",
+   "ok": true,
+   "detail": "{\"guest\":\"Answer locked in\",\"host\":\"Answer locked in\",\"tv\":\"Featured question (Q1 of 10) · each phone goes at its own pace\",\"live\":{\"guest\":true,\"host\":true,\"tv\":true}}"
+  },
+  {
+   "name": "R2 play continues: the host answers question 3 in its own page after the restart, locked in (rendered), recorded once (API)",
+   "ok": true,
+   "detail": "{\"shown\":true,\"locked\":true,\"recorded\":3}"
+  },
+  {
+   "name": "R2 the seeded Memory Book note still reads back after the fresh container (API)",
+   "ok": true,
+   "detail": "{\"status\":200,\"found\":true}"
+  },
+  {
+   "name": "L a second server process on the same data, in the running container, is refused by the one-writer lock (harness)",
+   "ok": true,
+   "detail": "{\"exit\":2,\"output\":\"Another server (pid 24) is using this data directory (/var/data/cgn-w1). Stop it first: one process writes a data directory at a time.\"}"
+  },
+  {
+   "name": "G a second container on the same data with another public origin refuses to start (harness: cgn-entrypoint's rollback guard, exit 78)",
+   "ok": true,
+   "detail": "{\"exit\":78,\"output\":\"cgn-entrypoint: REFUSED: MCHEZO_PUBLIC_ORIGIN is not the authorized origin \"}"
+  },
+  {
+   "name": "F the round finished with all 10 of the guest's answers recorded once, and its score equal to the score of the recorded answers (API)",
+   "ok": true,
+   "detail": "{\"recorded\":10,\"score\":360,\"expected\":360}"
+  },
+  {
+   "name": "F the TV's screen (rendered) shows the finished round with every recorded score",
+   "ok": true,
+   "detail": "[{\"name\":\"Guest-e88d55\",\"score\":\"360\"},{\"name\":\"Host-e88d55\",\"score\":\"120\"}]"
+  },
+  {
+   "name": "F the host's screen (rendered) shows the finished round with every recorded score",
+   "ok": true,
+   "detail": "[{\"name\":\"Guest-e88d55\",\"score\":\"360\"},{\"name\":\"You\",\"score\":\"120\"}]"
+  },
+  {
+   "name": "F the guest's screen (rendered) shows the finished round with every recorded score",
+   "ok": true,
+   "detail": "[{\"name\":\"You\",\"score\":\"360\"},{\"name\":\"Host-e88d55\",\"score\":\"120\"}]"
+  }
+ ],
+ "failures": [],
+ "screenshots": [
+  "r2-host.png",
+  "r2-guest.png",
+  "r2-tv.png",
+  "final-host.png",
+  "final-guest.png",
+  "final-tv.png"
+ ],
+ "finishedAt": "2026-11-17T00:32:14.265Z",
+ "durationS": 32,
+ "verdict": "PASSED"
+}

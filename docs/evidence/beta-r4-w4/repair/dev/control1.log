@@ -1,0 +1,162 @@
+== w4-control-selftest 2026-11-17T01:50:17Z, control e5a308a1d5a48049
+-- stop-ok (stop; no faults) 26 ms
+     |    [restart] stop: docker stop exit 0; state exited, exit code 0, OOM-killed false: a verified graceful stop
+     | answer: {"ok":true,"action":"stop","container":"old-1","graceful":true,"state":"docker stop exit 0; state exited, exit code 0, OOM-killed false","ms":17}
+PASS stop-ok a graceful stop is reported (ok, graceful)
+PASS stop-ok the sentinel container and volume survive, untouched
+-- stop-cli-fails (stop; MOCK_STOP_RC=1) 28 ms
+     |    [restart] stop: docker stop exit 1; state running, exit code 0, OOM-killed false: FAILED: not a verified graceful stop
+     | answer: {"ok":false,"action":"stop","container":"old-1","graceful":false,"state":"docker stop exit 1; state running, exit code 0, OOM-killed false","why":"not a verified graceful stop: docker stop exit 1; state running, exit code 0, OOM-killed false","ms":18}
+PASS stop-cli-fails fails closed (ok false: not a verified graceful stop: docker stop exit 1; state running, exit code 0, OOM-killed f)
+PASS stop-cli-fails starts no replacement (no docker run)
+PASS stop-cli-fails the sentinel container and volume survive, untouched
+-- stop-forced (stop; MOCK_STOP_STATE=exited 137 false false) 29 ms
+     |    [restart] stop: docker stop exit 0; state exited, exit code 137, OOM-killed false: FAILED: not a verified graceful stop
+     | answer: {"ok":false,"action":"stop","container":"old-1","graceful":false,"state":"docker stop exit 0; state exited, exit code 137, OOM-killed false","why":"not a verified graceful stop: docker stop exit 0; state exited, exit code 137, OOM-killed false","ms":19}
+PASS stop-forced fails closed (ok false: not a verified graceful stop: docker stop exit 0; state exited, exit code 137, OOM-killed )
+PASS stop-forced starts no replacement (no docker run)
+PASS stop-forced the sentinel container and volume survive, untouched
+-- stop-oom (stop; MOCK_STOP_STATE=exited 0 true false) 31 ms
+     |    [restart] stop: docker stop exit 0; state exited, exit code 0, OOM-killed true: FAILED: not a verified graceful stop
+     | answer: {"ok":false,"action":"stop","container":"old-1","graceful":false,"state":"docker stop exit 0; state exited, exit code 0, OOM-killed true","why":"not a verified graceful stop: docker stop exit 0; state exited, exit code 0, OOM-killed true","ms":22}
+PASS stop-oom fails closed (ok false: not a verified graceful stop: docker stop exit 0; state exited, exit code 0, OOM-killed tr)
+PASS stop-oom starts no replacement (no docker run)
+PASS stop-oom the sentinel container and volume survive, untouched
+-- stop-inspect-fails (stop; MOCK_INSPECT_FAIL_AFTER_STOP=1) 25 ms
+     |    [restart] stop: docker stop exit 0; the state could not be read back: FAILED: not a verified graceful stop
+     | answer: {"ok":false,"action":"stop","container":"old-1","graceful":false,"state":"docker stop exit 0; the state could not be read back","why":"not a verified graceful stop: docker stop exit 0; the state could not be read back","ms":15}
+PASS stop-inspect-fails fails closed (ok false: not a verified graceful stop: docker stop exit 0; the state could not be read back)
+PASS stop-inspect-fails starts no replacement (no docker run)
+PASS stop-inspect-fails the sentinel container and volume survive, untouched
+-- stop-still-running (stop; MOCK_STOP_STATE=running 0 false true) 25 ms
+     |    [restart] stop: docker stop exit 0; state running, exit code 0, OOM-killed false: FAILED: not a verified graceful stop
+     | answer: {"ok":false,"action":"stop","container":"old-1","graceful":false,"state":"docker stop exit 0; state running, exit code 0, OOM-killed false","why":"not a verified graceful stop: docker stop exit 0; state running, exit code 0, OOM-killed false","ms":17}
+PASS stop-still-running fails closed (ok false: not a verified graceful stop: docker stop exit 0; state running, exit code 0, OOM-killed f)
+PASS stop-still-running starts no replacement (no docker run)
+PASS stop-still-running the sentinel container and volume survive, untouched
+-- start-ok (start; no faults) 51 ms
+     |    [restart] start (the same container, stopped before, a new start recorded): {"ok":true,"action":"start","container":"old-1","restarted":true,"revision":"{"ok":true,"revision":"7097ac2bb062925bb296a129f4771f1e68fd522d"}
+     | ok 7097ac2bb062925bb296a129f4771f1e68fd522d","ms":42}
+     | answer: {"ok":true,"action":"start","container":"old-1","restarted":true,"revision":"{"ok":true,"revision":"7097ac2bb062925bb296a129f4771f1e68fd522d"}
+ok 7097ac2bb062925bb296a129f4771f1e68fd522d","ms":42}
+FAIL start-ok a stopped container starts with a new StartedAt (ok, restarted)
+PASS start-ok the sentinel container and volume survive, untouched
+-- start-not-stopped (start; no faults) 17 ms
+     |    [restart] start: FAILED: the container is not stopped (state 'running true'); it was not started
+     | answer: {"ok":false,"action":"start","why":"the container is not stopped (state 'running true'); it was not started","ms":9}
+PASS start-not-stopped fails closed, and never calls docker start
+PASS start-not-stopped the sentinel container and volume survive, untouched
+-- start-same-startedat (start; MOCK_START_SAME=1) 30 ms
+     |    [restart] start: FAILED: no new start is recorded (StartedAt 'T0')
+     | answer: {"ok":false,"action":"start","why":"no new start is recorded (StartedAt 'T0')","ms":23}
+PASS start-same-startedat fails closed: no new start recorded
+PASS start-same-startedat the sentinel container and volume survive, untouched
+-- fresh-ok (fresh; no faults) 64 ms
+     |    [restart] fresh: the old container old-1 stopped gracefully (docker stop exit 0; state exited, exit code 0, OOM-killed false)
+     |    [restart] fresh: removed container old-1, confirmed gone
+     |    [restart] fresh: no container uses the data volume; starting the replacement
+     |    [restart] fresh: {"ok":true,"action":"fresh","container":"new-1","oldContainer":"old-1","graceful":true,"oldRemoved":true,"volumeFree":true,"volume":"w4-data-mockrun-a","revision":"{"ok":true,"revision":"7097ac2bb062925bb296a129f4771f1e68fd522d"}
+     | ok 7097ac2bb062925bb296a129f4771f1e68fd522d","ms":56}
+     | answer: {"ok":true,"action":"fresh","container":"new-1","oldContainer":"old-1","graceful":true,"oldRemoved":true,"volumeFree":true,"volume":"w4-data-mockrun-a","revision":"{"ok":true,"revision":"7097ac2bb062925bb296a129f4771f1e68fd522d"}
+ok 7097ac2bb062925bb296a129f4771f1e68fd522d","ms":56}
+FAIL fresh-ok replaces the container: graceful, removed, volume free, exactly one docker run after the removal
+PASS fresh-ok the sentinel container and volume survive, untouched
+-- fresh-stop-cli-fails (fresh; MOCK_STOP_RC=1) 29 ms
+     |    [restart] fresh: FAILED: the old container did not stop gracefully (docker stop exit 1; state running, exit code 0, OOM-killed false); it was left in place and no replacement was started
+     | answer: {"ok":false,"action":"fresh","why":"the old container did not stop gracefully (docker stop exit 1; state running, exit code 0, OOM-killed false); it was left in place and no replacement was started","ms":19}
+PASS fresh-stop-cli-fails fails closed (ok false: the old container did not stop gracefully (docker stop exit 1; state running, exit code 0,)
+PASS fresh-stop-cli-fails starts no replacement (no docker run)
+PASS fresh-stop-cli-fails the sentinel container and volume survive, untouched
+PASS fresh-stop-cli-fails removes nothing after the failed stop (no docker rm; the old container left to the run's cleanup)
+-- fresh-forced (fresh; MOCK_STOP_STATE=exited 137 false false) 28 ms
+     |    [restart] fresh: FAILED: the old container did not stop gracefully (docker stop exit 0; state exited, exit code 137, OOM-killed false); it was left in place and no replacement was started
+     | answer: {"ok":false,"action":"fresh","why":"the old container did not stop gracefully (docker stop exit 0; state exited, exit code 137, OOM-killed false); it was left in place and no replacement was started","ms":19}
+PASS fresh-forced fails closed (ok false: the old container did not stop gracefully (docker stop exit 0; state exited, exit code 137)
+PASS fresh-forced starts no replacement (no docker run)
+PASS fresh-forced the sentinel container and volume survive, untouched
+PASS fresh-forced removes nothing after the failed stop (no docker rm; the old container left to the run's cleanup)
+-- fresh-inspect-fails (fresh; MOCK_INSPECT_FAIL_AFTER_STOP=1) 26 ms
+     |    [restart] fresh: FAILED: the old container did not stop gracefully (docker stop exit 0; the state could not be read back); it was left in place and no replacement was started
+     | answer: {"ok":false,"action":"fresh","why":"the old container did not stop gracefully (docker stop exit 0; the state could not be read back); it was left in place and no replacement was started","ms":17}
+PASS fresh-inspect-fails fails closed (ok false: the old container did not stop gracefully (docker stop exit 0; the state could not be read)
+PASS fresh-inspect-fails starts no replacement (no docker run)
+PASS fresh-inspect-fails the sentinel container and volume survive, untouched
+PASS fresh-inspect-fails removes nothing after the failed stop (no docker rm; the old container left to the run's cleanup)
+-- fresh-removal-fails (fresh; MOCK_RM_FAIL=old) 41 ms
+     |    [restart] fresh: the old container old-1 stopped gracefully (docker stop exit 0; state exited, exit code 0, OOM-killed false)
+     |    [restart] fresh: FAILED: the old container was not removed: container old-1 (REMOVAL FAILED); no replacement was started
+     | answer: {"ok":false,"action":"fresh","why":"the old container was not removed: container old-1 (REMOVAL FAILED); no replacement was started","ms":32}
+PASS fresh-removal-fails fails closed (ok false: the old container was not removed: container old-1 (REMOVAL FAILED); no replacement was st)
+PASS fresh-removal-fails starts no replacement (no docker run)
+PASS fresh-removal-fails the sentinel container and volume survive, untouched
+-- fresh-removal-unconfirmed (fresh; MOCK_RM_KEEP=old) 44 ms
+     |    [restart] fresh: the old container old-1 stopped gracefully (docker stop exit 0; state exited, exit code 0, OOM-killed false)
+     |    [restart] fresh: FAILED: the old container was not removed: container old-1 (REMOVAL NOT CONFIRMED: still present); no replacement was started
+     | answer: {"ok":false,"action":"fresh","why":"the old container was not removed: container old-1 (REMOVAL NOT CONFIRMED: still present); no replacement was started","ms":33}
+PASS fresh-removal-unconfirmed fails closed (ok false: the old container was not removed: container old-1 (REMOVAL NOT CONFIRMED: still present);)
+PASS fresh-removal-unconfirmed starts no replacement (no docker run)
+PASS fresh-removal-unconfirmed the sentinel container and volume survive, untouched
+-- fresh-not-ours (fresh; no faults) 33 ms
+     |    [restart] fresh: the old container old-1 stopped gracefully (docker stop exit 0; state exited, exit code 0, OOM-killed false)
+     |    [restart] fresh: FAILED: the old container was not removed: container old-1 not removed (label 'someone-else'); no replacement was started
+     | answer: {"ok":false,"action":"fresh","why":"the old container was not removed: container old-1 not removed (label 'someone-else'); no replacement was started","ms":24}
+PASS fresh-not-ours fails closed (ok false: the old container was not removed: container old-1 not removed (label 'someone-else'); no )
+PASS fresh-not-ours starts no replacement (no docker run)
+PASS fresh-not-ours the sentinel container and volume survive, untouched
+PASS fresh-not-ours never removes a container whose label is not this run's
+-- fresh-volume-in-use (fresh; MOCK_VOL_EXTRA=zombie-writer) 50 ms
+     |    [restart] fresh: the old container old-1 stopped gracefully (docker stop exit 0; state exited, exit code 0, OOM-killed false)
+     |    [restart] fresh: removed container old-1, confirmed gone
+     |    [restart] fresh: FAILED: the volume w4-data-mockrun-a is still used by zombie-writer ; no replacement was started
+     | answer: {"ok":false,"action":"fresh","why":"the volume w4-data-mockrun-a is still used by zombie-writer ; no replacement was started","ms":42}
+PASS fresh-volume-in-use fails closed (ok false: the volume w4-data-mockrun-a is still used by zombie-writer ; no replacement was started)
+PASS fresh-volume-in-use starts no replacement (no docker run)
+PASS fresh-volume-in-use the sentinel container and volume survive, untouched
+-- guard-refuses (guard-probe; no faults) 110 ms
+     |    [probe] guard-probe (entrypoint): its own container on the fixture volume w4-data-mockrun-guard2 (the data volume never mounted); exit 78; server started: false; REFUSED as required
+     |    [probe] guard-probe: teardown in 29 ms: container guard-1; volume w4-data-mockrun-guard2; the data volume's only user before and after: the container under test
+     | answer: {"ok":true,"action":"guard-probe","exit":78,"output":"cgn-entrypoint: REFUSED: MCHEZO_PUBLIC_ORIGIN is not the authorized origin","serverStarted":false,"mode":"entrypoint","deadlineS":2,"fixtureVolume":"w4-data-mockrun-guard2","dataVolume":{"onlyTheWriterBefor
+PASS guard-refuses ok: exit 78 with REFUSED, no server started
+PASS guard-refuses the probe never mounts the data volume (create mounts only its fixture volume)
+PASS guard-refuses its container and fixture volume are removed (labels read back first) and confirmed gone
+PASS guard-refuses the sentinel container and volume survive, untouched
+-- guard-hangs (guard-probe; MOCK_WAIT=hang W4_GUARD_SECONDS=2) 2111 ms
+     |    [probe] guard-probe (entrypoint): its own container on the fixture volume w4-data-mockrun-guard2 (the data volume never mounted); exit null; server started: false; FAILED: the guard did not exit within 2 s
+     |    [probe] guard-probe: teardown in 30 ms: container guard-1; volume w4-data-mockrun-guard2; the data volume's only user before and after: the container under test
+     | answer: {"ok":false,"action":"guard-probe","exit":null,"output":"cgn-entrypoint: REFUSED: MCHEZO_PUBLIC_ORIGIN is not the authorized origin","serverStarted":false,"mode":"entrypoint","deadlineS":2,"fixtureVolume":"w4-data-mockrun-guard2","dataVolume":{"onlyTheWriterBe
+PASS guard-hangs fails at its deadline (ok false, exit null) and the request ends within 2 s + 3 s
+PASS guard-hangs the probe never mounts the data volume (create mounts only its fixture volume)
+PASS guard-hangs its container and fixture volume are removed (labels read back first) and confirmed gone
+PASS guard-hangs the sentinel container and volume survive, untouched
+-- guard-serves (guard-probe; MOCK_WAIT=hang MOCK_LISTEN=1 W4_GUARD_SECONDS=2) 2117 ms
+     |    [probe] guard-probe (entrypoint): its own container on the fixture volume w4-data-mockrun-guard2 (the data volume never mounted); exit null; server started: true; FAILED: the guard did not exit within 2 s; a server STARTED: the guard did not refuse
+     |    [probe] guard-probe: teardown in 35 ms: container guard-1; volume w4-data-mockrun-guard2; the data volume's only user before and after: the container under test
+     | answer: {"ok":false,"action":"guard-probe","exit":null,"output":"Listening on every interface; public origin https://other.invalid. cgn-entrypoint: REFUSED: MCHEZO_PUBLIC_ORIGIN is not the authorized origin","serverStarted":true,"mode":"entrypoint","deadlineS":2,"fixt
+PASS guard-serves fails: a server started (serverStarted true)
+PASS guard-serves the probe never mounts the data volume (create mounts only its fixture volume)
+PASS guard-serves its container and fixture volume are removed (labels read back first) and confirmed gone
+PASS guard-serves the sentinel container and volume survive, untouched
+-- guard-exit-0 (guard-probe; MOCK_WAIT=0) 132 ms
+     |    [probe] guard-probe (entrypoint): its own container on the fixture volume w4-data-mockrun-guard2 (the data volume never mounted); exit 0; server started: false; FAILED: exit 0, not 78
+     |    [probe] guard-probe: teardown in 31 ms: container guard-1; volume w4-data-mockrun-guard2; the data volume's only user before and after: the container under test
+     | answer: {"ok":false,"action":"guard-probe","exit":0,"output":"cgn-entrypoint: REFUSED: MCHEZO_PUBLIC_ORIGIN is not the authorized origin","serverStarted":false,"mode":"entrypoint","deadlineS":2,"fixtureVolume":"w4-data-mockrun-guard2","dataVolume":{"onlyTheWriterBefor
+PASS guard-exit-0 fails: exit 0 is not 78
+PASS guard-exit-0 the probe never mounts the data volume (create mounts only its fixture volume)
+PASS guard-exit-0 its container and fixture volume are removed (labels read back first) and confirmed gone
+PASS guard-exit-0 the sentinel container and volume survive, untouched
+-- guard-78-no-refused (guard-probe; MOCK_LOGS=) 140 ms
+     |    [probe] guard-probe (entrypoint): its own container on the fixture volume w4-data-mockrun-guard2 (the data volume never mounted); exit 78; server started: false; FAILED: exit 78 without a REFUSED line
+     |    [probe] guard-probe: teardown in 38 ms: container guard-1; volume w4-data-mockrun-guard2; the data volume's only user before and after: the container under test
+     | answer: {"ok":false,"action":"guard-probe","exit":78,"output":"","serverStarted":false,"mode":"entrypoint","deadlineS":2,"fixtureVolume":"w4-data-mockrun-guard2","dataVolume":{"onlyTheWriterBefore":true,"onlyTheWriterAfter":true},"teardown":"container guard-1; volume 
+PASS guard-78-no-refused fails: exit 78 without a REFUSED line
+PASS guard-78-no-refused the probe never mounts the data volume (create mounts only its fixture volume)
+PASS guard-78-no-refused its container and fixture volume are removed (labels read back first) and confirmed gone
+PASS guard-78-no-refused the sentinel container and volume survive, untouched
+-- guard-teardown-fails (guard-probe; MOCK_RM_FAIL=guard) 108 ms
+     |    [probe] guard-probe (entrypoint): its own container on the fixture volume w4-data-mockrun-guard2 (the data volume never mounted); exit 78; server started: false; FAILED: teardown: container guard-1 (REMOVAL FAILED)
+     |    [probe] guard-probe: teardown in 28 ms: container guard-1 (REMOVAL FAILED); volume w4-data-mockrun-guard2; the data volume's only user before and after: the container under test
+     | answer: {"ok":false,"action":"guard-probe","exit":78,"output":"cgn-entrypoint: REFUSED: MCHEZO_PUBLIC_ORIGIN is not the authorized origin","serverStarted":false,"mode":"entrypoint","deadlineS":2,"fixtureVolume":"w4-data-mockrun-guard2","dataVolume":{"onlyTheWriterBefo
+PASS guard-teardown-fails fails: the probe's container could not be removed
+PASS guard-teardown-fails the sentinel container and volume survive, untouched
+-- 70 passed, 2 failed
+W4 CONTROL SELFTEST FAILED

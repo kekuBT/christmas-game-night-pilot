@@ -3617,3 +3617,64 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
   - `tests/beta-r1.test.ts` **23/23**;
   - the static checks passed.
 - **Next:** ChatGPT resumes the audit by a validated route; W3 stays not cleared.
+
+## Beta R4: W4 restart preparation (handoff 6933392621; complete, tested `618f179`)
+- **The handoff:** W4 restart preparation and an isolated local rehearsal, as one unmerged draft PR stacked on #45 at `8b511b3`.
+- **Acknowledged** in 6933406957, at 7:12 p.m. ET, with a 2 h 15 min estimate.
+- **W3 local preparation was cleared** in 6933392621. Native C1–C4, Render W1–W8 and the go/no-go stay pending.
+- **Done:**
+  - `docs/beta/render-w4.md`: the runbook, with the local rehearsal kept apart from the real D1 (a manual deploy) and D2 (a dashboard restart), both pending. A real execution needs a same-window `BACKUP_OK` and `RECEIPT_OK`, maintenance and window controls, revision and data-folder checks, and the guard and rollback rules.
+  - `scripts/beta/w4-rehearsal.sh` (the harness: a run-owned volume and the restart actions) and `w4-rehearsal.mjs` (the driver: S, P, R1, R2, L, G and F).
+  - `scripts/beta/w4-selftest.sh` (K1–K5 with sentinels).
+- **The finding:** a tap made during a restart shows `Request failed (502)`, not the friendly wording. It is never shown as in and never saved. A bounded client repair is proposed, not made: the pin is unchanged.
+- **Dev runs:** see `docs/evidence/beta-r4-w4/README.md`. They include trial 1's wrong expectation and control 1's stale rendered check, both fixed.
+- **Finals on a clean checkout of `618f179`:**
+  - `w4-selftest.sh` **PASSED**: K1–K5, the sentinels kept; the rehearsal run is `20261117T003140Z-d06ba320`;
+  - the static checks passed.
+- **Review 6935165862: changes requested. W4 is not cleared.**
+  - **The findings:**
+    1. The fresh replacement ignored a failed stop or removal, and R1 trusted the Docker CLI's exit alone.
+    2. The guard probe mounted the active writer's volume, with no enclosing time limit.
+    3. Two runbook corrections: never record the code; a tap during a deploy may already be committed.
+    4. A bounded client repair for the raw 502 is authorized, as a separate PR after this one.
+  - **Acknowledged** in 6935192651 at 8:40 p.m. ET, with a 1 h 55 min estimate.
+
+## Beta R4: W4 repair (review 6935165862; complete, tested `5a5d287`)
+- **The restart and probe actions moved** into `scripts/beta/w4-control.sh`. The harness and the fault tests source it.
+- **They fail closed,** and every docker call is bounded:
+  - a stop counts only when the container reads back as `exited` with exit code 0, not OOM-killed;
+  - a start needs a stopped container, and a new `StartedAt` afterwards;
+  - a replacement needs a graceful stop, a removal confirmed gone (label first), and no container on the volume.
+
+  The driver asserts these for R1 and R2, and stops the rehearsal at the first failed action.
+- **The guard probe** runs its own container on a run-owned fixture volume holding only a tar copy of the authorization record. The data volume is never mounted twice.
+  - Its deadline is 60 s; it fails on a server starting, another exit, or the deadline.
+  - Its teardown is bounded and confirmed.
+  - The data volume's only user must be the writer under test.
+- **The tests:**
+  - `scripts/beta/w4-control-selftest.sh` (K0): 72 mock fault cases, all failing closed;
+  - K0M: the same tests against a copy with the reviewed defects put back must fail;
+  - K6, K7 and K8: real Docker, a hanging guard, a non-refusing guard and a forced stop.
+- **The runbook:**
+  - prerequisite 4 records the revision, the folder identity and the gate outcome, never the code;
+  - D1 and PASS separate the fully-down case from a lost response (reconcile, at most once);
+  - the 502 repair is now authorized as a separate PR.
+- **Finals on a clean checkout of `5a5d287`:**
+  - `w4-selftest.sh` **PASSED**, 79/79: K0, K0M, and K1–K8 with the sentinels kept. The rehearsal run is `20261117T020006Z-c4032f58`.
+  - The static checks passed.
+- **Next:** the report on #46, then the separate stacked client-repair PR. ChatGPT's independent verification follows. The real D1 and D2 stay pending.
+- **Reported** in 6935683708.
+- **Review 6935889459: two follow-up gaps, and W4 is still not cleared.**
+  - **The findings:**
+    1. The final cleanup could PASS when Docker couldn't list the inventory.
+    2. R1 could report a restart without a readable baseline.
+  - **Acknowledged** in 6936049251 at 9:26 p.m. ET. The work started after #47's full gate.
+
+## Beta R4: W4 follow-up (review 6935889459; complete, tested `3eb05bc`)
+- **The run's lifecycle** (`cleanup`, `finish`, and their helpers) moved into `w4-control.sh`, so the fault tests call the very `finish`.
+- **`count_owned`** checks each Docker query's status. An unlistable inventory is UNVERIFIED, and the run fails.
+- **`do_start`** requires a readable, non-empty `StartedAt` before the start (else no start), and a readable, non-empty, different one after it.
+- **The tests:** new fault cases (start before and after; finish empty, containers unlistable, volumes unlistable, a container left), and K0M with 6 weakened lines.
+- **The final on a clean checkout of `3eb05bc`:** `w4-selftest.sh` **PASSED**, 81/81 (K0 88/88; K0M 18 required failures; K1–K8), and the static checks passed.
+- **#47's stack:** #47 was tested on base `8101c5c`. A merge of this follow-up into #47 conflicts only in `docs/PROGRESS.md` (both PRs append a section). It is left unmerged while #47 is under review, as asked, and will be a plain merge.
+- **Next:** ChatGPT's verification; W4 is not cleared.

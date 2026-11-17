@@ -73,7 +73,7 @@ case "$1" in
     rc=0; for t in "$@"; do if c=$(find_c "$t"); then cid=$(sed -n 1p "$c"); rm -f "$c"; printf 'removed %s\n' "$cid" >> "$MOCK_LOG"; echo "$t"; else echo "Error: No such container: $t" >&2; rc=1; fi; done; exit $rc ;;
   inspect) shift; fmt=""; [ "${1:-}" = -f ] && { fmt=$2; shift 2; }
     c=$(find_c "${1:-}") || { echo "Error: No such object: ${1:-}" >&2; exit 1; }
-    case "$fmt" in *w3.owner*) l=$(sed -n 3p "$c"); echo "${l#w3.owner=}" ;; *State.Running*) echo "${MOCK_RUNNING:-true}" ;; *State.Status*) echo "exited exit=0" ;; *) echo "{}" ;; esac; exit 0 ;;
+    case "$fmt" in *.owner*) l=$(sed -n 3p "$c"); echo "${l#*=}" ;; *State.Running*) echo "${MOCK_RUNNING:-true}" ;; *State.Status*) echo "exited exit=0" ;; *) echo "{}" ;; esac; exit 0 ;;
   port) echo "127.0.0.1:18080"; exit 0 ;;
   exec) cat > /dev/null; [ "${MOCK_EXEC:-ok}" = fail ] && { echo "mock: cgn-authorize failed"; exit 1; }; echo "AUTHORIZED data_dir=/var/data/cgn-w1 (mock)"; exit 0 ;;
   ps) want=""; prev=""; for a in "$@"; do [ "$prev" = --filter ] && want=$a; prev=$a; done

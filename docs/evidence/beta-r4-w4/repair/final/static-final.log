@@ -1,0 +1,32 @@
+# FINAL static checks on the clean checkout of 5a5d2878b326451302dfd73d87f5719693a67075 (status 0 lines), 2026-11-17T02:04:01Z
+## 1. everything changed since the reviewed head 5fdc73c
+ docs/PROGRESS.md                                   |  34 +-
+ docs/beta/render-w4.md                             |  85 +++-
+ docs/evidence/beta-r4-w4/README.md                 |  51 ++-
+ docs/evidence/beta-r4-w4/repair/dev/control1.log   | 162 +++++++
+ docs/evidence/beta-r4-w4/repair/dev/control2.log   | 158 +++++++
+ docs/evidence/beta-r4-w4/repair/dev/forced.log     |  25 ++
+ docs/evidence/beta-r4-w4/repair/dev/hang.log       |  55 +++
+ .../beta-r4-w4/repair/dev/k0m-attempt1.log         | 175 ++++++++
+ .../beta-r4-w4/repair/dev/selftest-dev1.log        | 488 +++++++++++++++++++++
+ docs/evidence/beta-r4-w4/repair/dev/serve.log      |  55 +++
+ docs/evidence/beta-r4-w4/repair/dev/t1.log         |  59 +++
+ scripts/beta/w4-control-selftest.sh                | 184 ++++++++
+ scripts/beta/w4-control.sh                         | 233 ++++++++++
+ scripts/beta/w4-rehearsal.mjs                      |  36 +-
+ scripts/beta/w4-rehearsal.sh                       | 118 +----
+ scripts/beta/w4-selftest.sh                        |  66 ++-
+ 16 files changed, 1855 insertions(+), 129 deletions(-)
+## 2. runtime files changed since 7097ac2 (empty = unchanged)
+(end)
+## 3. deploy files changed since 2e2257c (empty = unchanged)
+(end)
+## 4. tools other than the W4 ones changed since 5fdc73c (empty = none)
+(end)
+## 5. lint and shell syntax
+eslint scripts/beta: exit 0
+shell syntax (scripts/beta/w4-control-selftest.sh scripts/beta/w4-control.sh scripts/beta/w4-rehearsal.sh scripts/beta/w4-selftest.sh ): ok
+## 6. relative links in the changed documents
+links: 24 missing: 0
+## 7. secret scan of the changes since 5fdc73c
+(end of secret scan)

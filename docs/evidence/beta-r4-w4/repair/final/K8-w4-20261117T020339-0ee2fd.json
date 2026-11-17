@@ -1,0 +1,53 @@
+{
+ "tool": "scripts/beta/w4-rehearsal.mjs",
+ "toolSha256": "e59fab3dea244590577780b6fccae39b7fc2fd6fe2e97260f0096e26b9877d0f",
+ "node": "v22.23.4",
+ "runId": "20261117T020339-0ee2fd",
+ "origin": "https://localhost:18443",
+ "startedAt": "2026-11-17T02:03:39.527Z",
+ "control": null,
+ "scope": "LOCAL rehearsal: the packaged pinned runtime on a run-owned Docker volume behind a local TLS proxy, restarted by the harness (docker stop/start; a fresh container on the same volume). Not Render, not a phone.",
+ "restarts": [
+  {
+   "action": "stop",
+   "ok": false,
+   "container": "4a74f2ade694",
+   "graceful": false,
+   "state": "docker stop exit 0; state exited, exit code 137, OOM-killed false",
+   "why": "not a verified graceful stop: docker stop exit 0; state exited, exit code 137, OOM-killed false",
+   "ms": 277
+  }
+ ],
+ "probes": {},
+ "seen": {
+  "seed": {
+   "firstRound": "finished",
+   "noteStatus": 201,
+   "noteId": "book-1"
+  }
+ },
+ "checks": [
+  {
+   "name": "S a first round finished and a synthetic Memory Book note citing it was saved and reads back (API)",
+   "ok": true,
+   "detail": "{\"round\":true,\"status\":201,\"readBack\":true}"
+  },
+  {
+   "name": "P a second round is playing; host and guest each answered question 1 and saw it locked in (acknowledged, rendered), recorded once (API)",
+   "ok": true,
+   "detail": "{\"start\":201,\"guestLocked\":true,\"hostLocked\":true,\"recorded\":{\"guest\":1,\"host\":1}}"
+  },
+  {
+   "name": "R1 the container stopped gracefully: the harness read it back as exited with exit code 0, not forced or OOM-killed (harness)",
+   "ok": false,
+   "detail": "{\"ok\":false,\"graceful\":false,\"state\":\"docker stop exit 0; state exited, exit code 137, OOM-killed false\",\"why\":\"not a verified graceful stop: docker stop exit 0; state exited, exit code 137, OOM-killed false\"}"
+  }
+ ],
+ "failures": [
+  "R1 the container stopped gracefully: the harness read it back as exited with exit code 0, not forced or OOM-killed (harness)"
+ ],
+ "aborted": "the harness reported a failed stop (not a verified graceful stop: docker stop exit 0; state exited, exit code 137, OOM-killed false); no further restart or probe was requested",
+ "finishedAt": "2026-11-17T02:03:45.515Z",
+ "durationS": 6,
+ "verdict": "FAILED"
+}
