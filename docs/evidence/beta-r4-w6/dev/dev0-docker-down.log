@@ -1,0 +1,10 @@
+== w6-rehearsal 2026-11-17T05:11:39Z, run 20261117T051139Z-6df95418, image cgn-render:check
+   scripts: w6-rehearsal.sh 0d200fb622b6b8e3, w6-check.mjs 609ee9ddda4d7bb1, w5-seed.mjs 660df9e1e4b1005d
+   FAILED at preflight: the image 'cgn-render:check' is not available locally
+-- cleanup (run 20261117T051139Z-6df95418)
+   cleanup #1: (docker could not list this run's containers) (docker could not list this run's volumes)
+   cleanup #2: (docker could not list this run's containers) (docker could not list this run's volumes)
+   this run's containers left: UNVERIFIED (docker could not list this run's containers); volumes left: UNVERIFIED (docker could not list this run's volumes); processes left: 0; listeners left on 18680/18643/18644: not checked (this run started no listener); private files left: no
+   files in the kept run folder holding the access code, a session token, a gate cookie or an age secret key: 0
+   checks: 0 passed, 1 failed
+W6 REHEARSAL FAILED

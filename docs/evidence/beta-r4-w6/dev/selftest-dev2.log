@@ -1,0 +1,78 @@
+== w6-selftest 2026-11-17T05:19:11Z, tag 2d0e7a, harness a430fd546ff1589c, seed 660df9e1e4b1005d, check 075adc94de6e6603, image cgn-render:check
+   before: containers 0, volumes 0
+-- T0: static
+PASS T0 bash -n on the W6 shell scripts and node --check on w5-seed.mjs and w6-check.mjs
+-- sentinels of another owner (label w6.sentinel=2d0e7a, never w6.owner)
+PASS sentinels created: a running container and a volume holding a file
+-- T1: a port already in use
+     |    FAILED at preflight: 1 listener(s) already on 18680/18643/18644; nothing was started
+     |    this run's containers left: 0; volumes left: 0; processes left: 0; listeners left on 18680/18643/18644: not checked (this run started no listener); private files left: no
+     | W6 REHEARSAL FAILED
+PASS T1 the rehearsal FAILED at its preflight, started nothing, and left nothing
+PASS T1 sentinels intact
+-- T2: the rehearsal
+     | PASS service A ready on /var/data/cgn-w1, /health on the pinned revision
+     | PASS maintenance on: the PUBLIC /health answers 503
+     | PASS the image's cgn-backup is byte-identical to the reviewed deploy/render/cgn-backup.sh
+     | PASS the image's cgn-entrypoint is byte-identical to the reviewed deploy/render/cgn-entrypoint.sh
+     | PASS the image's cgn-authorize is byte-identical to the reviewed deploy/render/cgn-authorize.sh
+     | PASS B1 (the backup to restore): cgn-backup exit 0, exactly one BACKUP_OK
+     | PASS the original service moved on after B1 (a new acknowledged answer): the current data differs from B1
+     | PASS B2 (a FRESH same-window backup of the CURRENT data): BACKUP_OK, then RECEIPT_OK on its fetched-back copy
+     | PASS N1a a changed fetched copy: RECEIPT_FAILED, no receipt record, the upload gate refuses
+     | PASS N1b B2's receipt offered for B1: the upload gate refuses (another backup's hash)
+     | PASS N1 nothing was uploaded by the refused cases (no staging folder)
+     | PASS B1 received: RECEIPT_OK on its fetched-back copy, with the hash from B1's BACKUP_OK line
+     | PASS N2 a(n) incomplete staged copy: datatool verify refuses (exit 1), and no restore target exists
+     | PASS N2 a(n) changed staged copy: datatool verify refuses (exit 1), and no restore target exists
+     | PASS the verified copy uploaded as the service user (LOCAL SURROGATE for scp -s): every file owned by cgn
+     | PASS datatool verify on the instance accepts the uploaded copy
+     | PASS datatool restore into a NEW folder (/var/data/cgn-w6), as the service user
+     | PASS datatool check on /var/data/cgn-w6, as the service user
+     | PASS the restored folder is the service user's and private (every file cgn, folder 700)
+     | PASS the restored folder holds B1's state exactly (files, ledger, answer values, approved entry; not the later answer)
+     | PASS N3 datatool restore into an occupied folder refuses (exit 1), and its file is unchanged
+     | PASS N4 the guard refuses the unauthorized target: exit 78, a REFUSED line, and no server started
+     | PASS N4 recovery: the original comes back on the pinned revision, its files unchanged by the refused attempt
+     | PASS preflight: a same-window B2 receipt, a checked target, a separate folder
+     | PASS cgn-authorize records the target (from the live instance, before the switch)
+     | PASS the original writer stopped gracefully (exit 0)
+     | PASS single writer: the old container removed and confirmed gone, no container on the volume before the start
+     | PASS startup evidence: the entrypoint says the environment matches the authorized configuration
+     | PASS N5 the reopen gate refuses a revision that isn't the expected one, and the PUBLIC side stays 503
+     | PASS the reopen gate: private probe UP on the pinned revision, then the ingress reopens (PUBLIC /health 200)
+     | PASS through the reopened ingress: the original seats, the approved entry, a repeated answer refused, a replay not doubled
+     | PASS the original folder is preserved: its fingerprint after the switch equals the one taken at the stop
+     | PASS fallback: authorize the original from the live instance, graceful stop, one writer
+     | PASS the fallback serves the retained folder's later state (the post-backup answer), the seats and the approved entry
+     | PASS N6 the broken target fails to start (the server exits; the container ends, as a crash-looping instance would)
+     | PASS N6 FINDING reproduced: the original is now refused too (exit 78), because the record names the broken target
+     | PASS N6 the original folder is untouched by the failed start and the refusal
+     | PASS N6 local-only recovery: re-authorized, the original serves the pinned revision again, and the ingress reopens
+     | PASS at the end: exactly one container on the volume (no competing writer)
+     |    this run's containers left: 0; volumes left: 0; processes left: 0; listeners left on 18680/18643/18644: 0; private files left: no
+     |    files (the kept run folder and this run's own log) holding the access code, a session token, a gate cookie or an age secret key: 0
+     |    checks: 39 passed, 0 failed
+     | W6 REHEARSAL PASSED
+PASS T2 W6 REHEARSAL PASSED (exit 0), nothing of the run left
+PASS T2 the run's own log (this file) was in its leak scan, and nothing secret was found
+PASS T2 sentinels intact
+-- T3: an inventory docker cannot give (a shim answers exit 124 to every listing filtered by the run's label)
+     |    cleanup #1: proxy (docker could not list this run's containers) container 5837ac711958 (docker could not list this run's volumes) volume w6-data-20261117T051932Z-bf7a448c private-files(code,keys,sessions,decrypted-copies)
+     |    cleanup #2: (docker could not list this run's containers) (docker could not list this run's volumes)
+     |    this run's containers left: UNVERIFIED (docker could not list this run's containers); volumes left: UNVERIFIED (docker could not list this run's volumes); processes left: 0; listeners left on 18680/18643/18644: 0; private files left: no
+     | W6 REHEARSAL FAILED
+PASS T3 the run reports the inventory UNVERIFIED and FAILS (exit nonzero), never 0
+PASS T3 real docker: the run's container and volume were removed all the same (tracked by id)
+PASS T3 sentinels intact
+-- T4: an interrupted run (SIGTERM as soon as seeding is done, as B1 starts)
+     |    interrupted (SIGTERM)
+     |    this run's containers left: 0; volumes left: 0; processes left: 0; listeners left on 18680/18643/18644: 0; private files left: no
+     | W6 REHEARSAL FAILED
+PASS T4 interrupted: exit 143, cleanup ran, nothing of the run left, no private files left
+PASS T4 sentinels intact
+-- removing this self-test's own sentinels (label read back first)
+PASS the sentinels removed (they were this self-test's own)
+   after: containers 0, volumes 0
+== 13 passed, 0 failed
+W6 SELFTEST PASSED

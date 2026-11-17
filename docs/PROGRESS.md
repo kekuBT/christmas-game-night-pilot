@@ -3789,3 +3789,12 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
   - negatives;
   - `docs/beta/render-w6.md`, with the Render disk snapshot kept separate and PENDING.
 - **Unchanged:** the runtime and the pin stay `7097ac2`, at $0. There is no Render operation and no W7.
+- **The candidate:**
+  - `scripts/beta/w6-rehearsal.sh`, `w6-check.mjs` and `w6-selftest.sh`;
+  - `docs/beta/render-w6.md`, the runbook. It requires C's fresh same-window `BACKUP_OK` and its independently verified `RECEIPT_OK` before any live switch, and keeps the Render disk snapshot separate and PENDING;
+  - `docs/evidence/beta-r4-w6/`, with its development runs:
+    - dev0 VOID (the docker daemon was down);
+    - dev1, dev2 and dev3 PASSED, 39/39 each;
+    - the selftest PASSED, 12/12, then 13/13 after the log leak-scan check was added.
+- **Finding F-W6-01 (OPEN, reproduced as case N6):** once `cgn-authorize` names the target, a failed start on it leaves the original refused by the guard (exit 78). Re-authorizing needs SSH on a running instance, and Render has no one-off job with the disk. So there is no supported recovery on Render. Locally, a one-off container recovered it. Nothing reviewed was changed. The options are listed for the owner in `render-w6.md`.
+- **Next:** the final on a clean checkout (static checks plus `w6-selftest.sh`), then the new report on #49.
