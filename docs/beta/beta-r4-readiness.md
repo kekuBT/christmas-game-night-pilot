@@ -71,10 +71,10 @@
 | Item | Status | Next actor |
 |---|---|---|
 | Render route and spend: Starter, a 1 GB disk, $7.25/month baseline, overages disclosed | Approved by the owner's ruling (handoff 6919813048) | — |
-| The existing workspace: verify it is on **Hobby** and empty; payment method; region | Connected and empty on 2026-11-16; the plan, payment and region are **unverified** | The owner (billing pages) |
+| The existing workspace: verify it is on **Hobby** and empty; payment method; region | **Hobby, with no services: verified by ChatGPT in the signed-in Render dashboard on 2026-11-17** (review-start 6955289084; nothing changed, no service created). The payment method and the region are **unverified**. | The owner (payment method, region) |
 | The owner's `age` key pair, and the receiving device | Pending | The owner |
 | The private deploy repository, with the audited archive or archives | Assigned to ChatGPT; its state isn't recorded in this repository | ChatGPT |
-| The pipeline spend limit, set as low as Render allows | At creation. **That minimum, and whether $0 is allowed, are still to verify.** | The owner |
+| The pipeline spend limit | **Set to $0 a month on the workspace's Starter build pipeline: verified by ChatGPT in the dashboard on 2026-11-17** (6955289084). Builds stop once the included minutes are used. **It caps pipeline purchases only:** not service, disk or bandwidth charges. | — (keep it at $0) |
 | **Execution windows** for W1–W8, with throwaway data and code | **Pending:** the decision in §3 | The owner |
 
 ## 2. The Render execution proposal (none of it executed)
@@ -127,7 +127,7 @@ This is the architect's decision in review 6954485280. Execution still needs the
 
 **Still needed, as one decision:** authorize **execution**. That means:
 - **the service:** create the one service, with its disk, in the existing workspace once it is verified as Hobby, with a payment method and a region chosen;
-- **the spend limit:** set the pipeline limit to the lowest Render allows (that minimum is still to verify);
+- **the spend limit:** keep the pipeline limit at the $0 that is already set (verified by ChatGPT on 2026-11-17). It doesn't cap service, disk or bandwidth charges;
 - **the windows:** run W1–W8 in approved windows, with throwaway data and a throwaway code, and maintenance on outside them.
 
 **A later, separate decision:** the go/no-go for the real folder and a real access code.
@@ -147,7 +147,7 @@ This is the architect's decision in review 6954485280. Execution still needs the
 
 **What can add to it:**
 - **Bandwidth beyond 5 GB a month,** at $0.15 per GB. **Render documents no spend limit for bandwidth:** the only one it documents is for pipeline minutes.
-- **Pipeline minutes beyond 500 a month** are bought automatically, and stop **only** at the configured pipeline spend limit. The lowest limit Render allows, and whether that can be $0, still needs verifying.
+- **Pipeline minutes beyond 500 a month** are bought automatically, and stop **only** at the configured pipeline spend limit. **It is set to $0** (ChatGPT's dashboard check, 2026-11-17), so builds stop instead of being bought. That limit doesn't cover service, disk or bandwidth charges.
 - **Custom domains beyond 2,** at $0.25 per domain per month. None are planned.
 
 ### The order of work, by dependency
@@ -162,7 +162,7 @@ Each step says what it waits for. None of it is executed or authorized here.
    - **ChatGPT:** the independent private archive audit, and the compatibility proof on the audited bytes.
 3. **The owner:**
    - the `age` key pair;
-   - the workspace plan, payment and region;
+   - the payment method and the region (the Hobby plan, the empty workspace and the $0 pipeline limit were verified by ChatGPT on 2026-11-17);
    - an SSH key on the account.
 4. **ChatGPT:** the private deploy repository, holding the audited archive (later, both).
 5. **The owner:** the execution decision above.
@@ -187,7 +187,7 @@ Each step says what it waits for. None of it is executed or authorized here.
 - No release-pair evidence. The surrogate `f93e9cb` is not a predecessor.
 - No hosted behaviour, and no device results.
 - No owner decision about where the W7 audit happens, or about starting hosted W1–W6 before B-W7-01. Neither is assumed.
-- The Render terms are as read on 2026-11-17 and can change. Tax and invoicing weren't checked, and neither was the lowest pipeline spend limit.
+- The Render terms are as read on 2026-11-17 and can change. Tax and invoicing weren't checked. The workspace's plan, its emptiness and its $0 pipeline limit were checked in the dashboard by ChatGPT, not by Claude; the payment method and region were not.
 
 ## 5. The unresolved preview audit: the smallest supported next action
 **No observation so far shows an application defect.** The exact-origin check accepted or refused as designed each time. What is open concerns the preview and the auditing browser: **infrastructure, not code.**

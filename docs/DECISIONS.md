@@ -2370,3 +2370,13 @@ Handoff 6813167965 (with the Stage 9.2 clearance). Spec: `docs/stage9/stage93.md
     - **The rehearsal's `f93e9cb` surrogate:** rejected. It has no audited identity to check, and it isn't the rollback target.
     - **The audited archive bytes `a693c543…`, where the operator holds them:** better, but not implemented. The tool builds from source, and `prepare`'s inventory check covers the same files.
   - **Reversible:** the pair is two constants in `scripts/beta/w7-owner-preview.sh`.
+- **D-R4W7-02 The operator tool deletes only what it recorded creating** (review 6955337359, P1 and P2).
+  - **The record:** `prepare` first writes `<work>/.w7op-owner`, mode 600, holding a marker, the canonical root and a token. Every resource is registered in it **before** it is created.
+  - **Every other command refuses** a folder without that record, or one whose record is a symlink, belongs to another user, isn't mode 600, or names another root.
+  - **`cleanup`** removes only recorded entries whose names are on a fixed list. It never removes a symlink, `src/`, `evidence/` or the record. It reports `REFUSED` with a non-zero exit, but still removes the safe entries, the code first.
+  - **`W7OP_LOCAL_TEST=1` is refused before anything** whenever any Codespaces variable is set.
+  - **Why:** a mistyped work folder must never cost another checkout its data, and an interrupted `prepare` must never strand the code.
+  - **Alternatives rejected:**
+    - **checking only for `src/.git`** (the defect itself);
+    - **refusing the whole cleanup on one bad entry:** that would strand the code;
+    - **a local-test flag that's merely ignored in a Codespace:** a silent mode change is worse than a refusal.

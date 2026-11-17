@@ -3970,3 +3970,11 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
 ## Beta R4: cost wording in the one-click exception (review 6954869766; docs only)
 - **Acknowledged** in 6955286653 at 12:13 p.m. ET. The estimate is about 10 min.
 - **`render-w7.md` and `beta-r4-readiness.md` §2** now agree with readiness §3: reusing the service and disk avoids a second service or disk charge, and the usual Render overages and tax may still apply. This replaces "no spend beyond the approved $7.25 baseline" and "no extra cost".
+- **Reported in 6955310363** (the cost wording, `a2f140b`); linked on #5 in 6955314045.
+
+## Beta R4 W7: operator-tool safeguards and an evidence correction (review 6955337359)
+- **Acknowledged** in 6955379257 at 12:16 p.m. ET. The estimate is about 70 min.
+- **The failing test first:** `scripts/beta/w7-owner-selftest.sh` (new), run against the `902407d` tool. It fails P1: `cleanup` of an unprepared root deletes foreign files. It also fails P2: the test flag is accepted in a Codespace.
+- **The repair** (D-R4W7-02) is in `scripts/beta/w7-owner-preview.sh`: the ownership record, registration before creation, guarded commands, a cleanup limited to recorded names with no symlinks, and the Codespace test-flag refusal. The report gate now runs before the release check.
+- **The evidence correction:** the `902407d` run's browser step never launched (verdict `INCOMPLETE`), so 6955277111's "driven HTTP probe returned UNSUITABLE" was false. The original log is kept. The driver now uses the preinstalled Chromium and fails loudly, and the runner requires the exact `UNSUITABLE` verdict.
+- **Readiness:** ChatGPT's dashboard check (6955289084) is recorded. The workspace is Hobby and empty, and the pipeline limit is $0, which caps only pipeline purchases. The payment method and region are still unverified.

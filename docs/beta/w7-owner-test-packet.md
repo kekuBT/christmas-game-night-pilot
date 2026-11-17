@@ -71,6 +71,7 @@ W=/workspaces/w7-owner-YYYYMMDD                       # new, empty
 git clone --branch claude/beta-r4-w7-rollback --single-branch https://github.com/kekuBT/christmas-game-night-pilot "$W/src"
 git -C "$W/src" checkout --detach <this packet's commit, named in the report>
 T="bash $W/src/scripts/beta/w7-owner-preview.sh"
+bash "$W/src/scripts/beta/w7-owner-selftest.sh"   # about 1 min: the tool's own safeguards, in a private temp folder
 $T inspect                      # read-only
 $T prepare "$W"                 # builds both phases; STOPS unless both inventories match (section 1)
 $T probe "$W"                   # Gate R (section 2); Ctrl-C after the owner's target page shows its verdict
@@ -83,6 +84,14 @@ $T start "$W" current           # refuses without a passing probe; waits for /he
 - keep the code out of every log and screenshot.
 
 **Every start and stop goes into `$W/evidence/phases.log`:** the revision, the origin, the data folder, the pid, and the startup's `[restore] …` line.
+
+**What the tool may touch** (review 6955337359):
+- **The record:** `prepare` first writes `$W/.w7op-owner`, mode 600. It holds a marker, the canonical root and a token. Every resource is registered in it **before** it is created, so an interrupted `prepare` can still be cleaned up.
+- **Every other command refuses a folder without that record,** or one whose record is a symlink, belongs to another user, isn't mode 600, or names another root.
+- **`cleanup` removes only the recorded entries named** `secret`, `data`, `backups`, `probe`, `run`, `compat-<label>`, `co-<sha>` and `rel-<sha>`.
+  - **It never touches** a symlink, `src/`, `evidence/`, the record, or anything unrecorded.
+  - **Anything unexpected is reported as `REFUSED`,** with a non-zero exit. The safe entries, the code first, are still removed.
+- **`W7OP_LOCAL_TEST=1` is refused outright** whenever any Codespaces variable is set. In a Codespace, the probe gate always applies.
 
 ## 4. The owner's checklist (phase A, current)
 **Set up three browser profiles,** or two profiles and one private window, **each signed in to GitHub once** (the port is private):
@@ -144,14 +153,23 @@ All of it is **LOCAL SURROGATE** (section 1). Leave the three tabs open througho
 - Room codes and names are synthetic and fine.
 
 ## 7. Tested here (Claude's machine, not a Codespace)
-`w7-owner-preview.sh` was run end to end with `W7OP_LOCAL_TEST=1`, on loopback with synthetic data. There was no GitHub forwarder and no owner's browser. The log is in [docs/evidence/beta-r4-w7/owner-packet/](../evidence/beta-r4-w7/owner-packet/README.md), and it covers:
-- both inventories matching;
-- the refusals:
-  - outside a Codespace;
-  - a second `prepare`;
-  - a `start` under the probe's `UNSUITABLE` verdict on plain `http`;
-  - a second writer;
-- the three phases, with a synthetic room driven through the API (`scripts/beta/w5-seed.mjs`). On the previous release, the same seats, the approved entry and the answers were kept, and one new answer was acknowledged. The current release's check then accepted the folder;
-- the cleanup, and a leak scan for the code.
+**A correction (review 6955337359).** The first reported run, at `902407d`, **did not test a browser.**
+- **What its log shows** (kept unchanged in `final/`): the driver's Chromium never launched (`Executable doesn't exist`). The probe verdict was therefore `INCOMPLETE`, and `start` refused on `INCOMPLETE`.
+- **What I reported instead:** that report (6955277111) said a driven HTTP probe returned `UNSUITABLE`. That was **false for that run.** `UNSUITABLE` came from an earlier scratch run that wasn't committed.
+- **What changed:**
+  - the driver now uses the preinstalled Chromium and exits non-zero if it can't launch;
+  - the runner requires the browser step to succeed and the verdict to be exactly `UNSUITABLE`.
+
+**The current evidence**, in [docs/evidence/beta-r4-w7/owner-packet/](../evidence/beta-r4-w7/owner-packet/README.md):
+- **[`scripts/beta/w7-owner-selftest.sh`](../../scripts/beta/w7-owner-selftest.sh)**, the focused negatives:
+  - P1 ownership isolation: an unprepared root, a record copied from another root, tampered records, unexpected and escaping paths, symlink escapes, an interrupted `prepare`;
+  - P2: the test flag inside a Codespace, refused;
+  - the probe-report gate on **synthetic report fixtures**, which are not browser results.
+- **The local run** of every operator step, with `W7OP_LOCAL_TEST=1` on loopback and synthetic data, with no GitHub forwarder and no owner's browser. It covers:
+  - both inventories matching;
+  - the refusals: outside a Codespace; a second `prepare`; a second writer;
+  - **a real headless-Chromium run of the probe on plain `http`, whose verdict must be exactly `UNSUITABLE`**, and `start` refused because of it;
+  - the three phases, with a synthetic room driven through the API (`w5-seed.mjs`, `w6-check.mjs`);
+  - the cleanup, and a leak scan for the code.
 
 **Not tested here:** GitHub's forwarder, the Ports panel, the owner's browser, and the Codespace's own Node version.

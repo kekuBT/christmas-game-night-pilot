@@ -1,5 +1,6 @@
 #!/bin/bash
 # Local validation of scripts/beta/w7-owner-preview.sh (W7OP_LOCAL_TEST=1; NOT a Codespace; no GitHub forwarder).
+# Review 6955337359: the browser step must launch and reach a verdict, and the verdict must be exactly UNSUITABLE.
 # Usage: bash local-run.sh <scratch dir holding r2/node (Node v22.16.0) and r4p5/> <clean checkout of the packet commit>
 set -uo pipefail
 SP=$1; REPO=$(cd "$2" && pwd); W=$SP/r4p5/work; T="bash $REPO/scripts/beta/w7-owner-preview.sh"
@@ -12,12 +13,14 @@ echo "-- 2 outside a Codespace without the test flag"; W7OP_LOCAL_TEST= $T prepa
 echo "-- 3 prepare (both releases)"; $T prepare "$W" 2>&1 | grep -v '^npm warn'; ok "${PIPESTATUS[0]}" "prepare: both inventories match"
 cat "$W/evidence/identity.txt"
 echo "-- 4 prepare again"; $T prepare "$W" 2>&1 | tail -1; [ "${PIPESTATUS[0]}" != 0 ]; ok $? "a second prepare into the same folder is refused"
-echo "-- 5 the probe, driven by headless Chromium on loopback http (expected: a refusal verdict)"
-( $T probe "$W" > "$SP/r4p5/probe.out" 2>&1 & echo $! > "$SP/r4p5/probe.pid" ); sleep 2
-node "$REPO/docs/evidence/beta-r4-w7/owner-packet/runners/probe-drive.cjs" "http://127.0.0.1:3158/" "http://127.0.0.1:3157/"; pkill -INT -f "probe.mjs --target-port 3157"
+echo "-- 5 the probe, driven by headless Chromium on plain http loopback (expected verdict: UNSUITABLE; not GitHub's forwarder)"
+( $T probe "$W" > "$SP/r4p5/probe.out" 2>&1 & ); sleep 2
+node "$REPO/docs/evidence/beta-r4-w7/owner-packet/runners/probe-drive.cjs" "http://127.0.0.1:3158/" "http://127.0.0.1:3157/"; ok $? "the browser launched and drove both probe pages to a verdict"
+pkill -INT -f "probe.mjs --target-port 3157"
 for _ in $(seq 1 20); do (exec 3<>/dev/tcp/127.0.0.1/3157) 2>/dev/null || break; sleep 0.5; done; (exec 3<>/dev/tcp/127.0.0.1/3157) 2>/dev/null; [ $? != 0 ]; ok $? "the probe stopped on SIGINT and freed 3157"
-v=$(node -e 'process.stdout.write(require(process.argv[1]).verdict)' "$W/evidence/probe-report.json"); echo "probe verdict: $v"
-out=$($T start "$W" current 2>&1); rc=$?; echo "$out" | tail -1; [ $rc != 0 ] && grep -q "verdict is $v" <<< "$out"; ok $? "start refused BECAUSE of the probe verdict $v (no HTTP allowance)"
+v=$(node -e 'process.stdout.write(require(process.argv[1]).verdict)' "$W/evidence/probe-report.json"); echo "probe report verdict: $v"
+[ "$v" = UNSUITABLE ]; ok $? "the browser-driven plain-http probe's verdict is exactly UNSUITABLE (got $v)"
+out=$($T start "$W" current 2>&1); rc=$?; echo "$out" | tail -1; [ $rc != 0 ] && grep -q "verdict is UNSUITABLE" <<< "$out"; ok $? "start refused because of that UNSUITABLE verdict (no HTTP allowance)"
 mv "$W/evidence/probe-report.json" "$W/evidence/probe-report-local-http.json"
 echo "-- 6 phase A: current"; $T start "$W" current; ok $? "start current: /health = 988c535"
 out=$($T start "$W" previous 2>&1); rc=$?; echo "$out" | tail -1; [ $rc != 0 ] && grep -q "already running" <<< "$out"; ok $? "a second writer is refused (one writer)"

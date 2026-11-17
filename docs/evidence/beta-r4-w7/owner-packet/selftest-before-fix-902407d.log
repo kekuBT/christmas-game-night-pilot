@@ -1,0 +1,55 @@
+# W7 owner tool self-test: <scratch>/wtw7/scripts/beta/w7-owner-preview.sh (sha256 2c4e6aef561076c8), 2026-11-17T17:17:55Z
+-- S1 an unprepared root (P1)
+FAIL S1 'cleanup' on an unprepared root is refused (exit 0) and the foreign files survive
+FAIL S1 'start current' on an unprepared root is refused (exit 1) and the foreign files survive
+FAIL S1 'stop' on an unprepared root is refused (exit 0) and the foreign files survive
+FAIL S1 'backup b1' on an unprepared root is refused (exit 1) and the foreign files survive
+FAIL S1 'compat b1' on an unprepared root is refused (exit 1) and the foreign files survive
+FAIL S1 'check current' on an unprepared root is refused (exit 1) and the foreign files survive
+FAIL S1 'status' on an unprepared root is refused (exit 1) and the foreign files survive
+FAIL S1 'probe' on an unprepared root is refused (exit 127)
+-- S2 a valid record copied to another root
+FAIL S2 cleanup with another root's record is refused (exit 0: w7op: deleted the synthetic data, backups, copies, the code and the build checkouts; kept )
+-- S3 a tampered record
+FAIL S3 a symlinked record is refused (exit 0)
+FAIL S3 a foreign marker is refused (exit 0)
+FAIL S3 a record readable by others (mode 644) is refused (exit 0)
+-- S4 unexpected inventory paths
+FAIL S4 cleanup refuses ../, absolute, nested, src, the record, evidence and malformed names (exit 0); outside, src, evidence and the record survive; the recorded secret is removed
+FAIL S4 each of the 8 unexpected entries is reported as REFUSED (0)
+-- S5 symlink escapes
+FAIL S5 symlinked entries are refused, nothing outside is touched, the owned secret is still removed (exit 0)
+-- S6 the happy path
+FAIL S6 only the recorded entries are removed; an unrecorded file, src and evidence survive; a recorded entry never made is 'not present' (exit 0)
+PASS S6 a second cleanup is a no-op (exit 0)
+-- S7 an interrupted prepare
+PASS S7 prepare created the secret and a build checkout before the interruption
+FAIL S7 cleanup after the interruption removes the recorded secret and checkout, prunes the worktree, keeps foreign files (exit 0)
+-- S8 the local-test flag inside a Codespace (P2)
+FAIL S8 [CODESPACES=true CODESPACE_NAME=cs GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN=app.github.dev] 'inspect' with W7OP_LOCAL_TEST=1 is refused before anything (exit 0)
+FAIL S8 [CODESPACES=true CODESPACE_NAME=cs GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN=app.github.dev] 'prepare' with W7OP_LOCAL_TEST=1 is refused before anything (exit 1)
+FAIL S8 [CODESPACES=true CODESPACE_NAME=cs GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN=app.github.dev] 'start' with W7OP_LOCAL_TEST=1 is refused before anything (exit 1)
+FAIL S8 [CODESPACES=true CODESPACE_NAME=cs GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN=app.github.dev] 'cleanup' with W7OP_LOCAL_TEST=1 is refused before anything (exit 0)
+FAIL S8 [CODESPACES=true] 'inspect' with W7OP_LOCAL_TEST=1 is refused before anything (exit 0)
+FAIL S8 [CODESPACES=true] 'prepare' with W7OP_LOCAL_TEST=1 is refused before anything (exit 1)
+FAIL S8 [CODESPACES=true] 'start' with W7OP_LOCAL_TEST=1 is refused before anything (exit 1)
+FAIL S8 [CODESPACES=true] 'cleanup' with W7OP_LOCAL_TEST=1 is refused before anything (exit 0)
+FAIL S8 [CODESPACE_NAME=cs] 'inspect' with W7OP_LOCAL_TEST=1 is refused before anything (exit 0)
+FAIL S8 [CODESPACE_NAME=cs] 'prepare' with W7OP_LOCAL_TEST=1 is refused before anything (exit 1)
+FAIL S8 [CODESPACE_NAME=cs] 'start' with W7OP_LOCAL_TEST=1 is refused before anything (exit 1)
+FAIL S8 [CODESPACE_NAME=cs] 'cleanup' with W7OP_LOCAL_TEST=1 is refused before anything (exit 0)
+FAIL S8 [GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN=app.github.dev] 'inspect' with W7OP_LOCAL_TEST=1 is refused before anything (exit 0)
+FAIL S8 [GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN=app.github.dev] 'prepare' with W7OP_LOCAL_TEST=1 is refused before anything (exit 1)
+FAIL S8 [GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN=app.github.dev] 'start' with W7OP_LOCAL_TEST=1 is refused before anything (exit 1)
+FAIL S8 [GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN=app.github.dev] 'cleanup' with W7OP_LOCAL_TEST=1 is refused before anything (exit 0)
+FAIL S8 the root is byte-for-byte unchanged
+-- S9 the probe-report gate (SYNTHETIC report fixtures, not a browser result)
+FAIL S9 SYNTHETIC no report: start refused with 'verdict is none' (exit 1)
+FAIL S9 SYNTHETIC UNSUITABLE: start refused with 'verdict is UNSUITABLE' (exit 1)
+FAIL S9 SYNTHETIC INCOMPLETE: start refused with 'verdict is INCOMPLETE' (exit 1)
+FAIL S9 SYNTHETIC UNSAFE: start refused with 'verdict is UNSAFE' (exit 1)
+FAIL S9 SYNTHETIC PRESERVED with an http origin: start refused with 'isn't https' (exit 1)
+FAIL S9 SYNTHETIC REWRITTEN_SAME_ORIGIN_ONLY with no origin: start refused with 'isn't https' (exit 1)
+PASS S9 SYNTHETIC a passing https report (the gate passes; no release is prepared here): start refused with 'current isn't prepared' (exit 1)
+PASS the outside sentinel survived every case
+== W7 OWNER TOOL SELFTEST FAILED, 44 checks, 2026-11-17T17:17:59Z
