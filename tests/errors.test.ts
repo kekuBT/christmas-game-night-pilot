@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { GENERIC_ERROR, NOT_DELIVERED, humanError } from "../apps/web/src/ui/mchezo/lib/errors.js";
+import { GENERIC_ERROR, NOT_DELIVERED, humanError, isKnownAppError } from "../apps/web/src/ui/mchezo/lib/errors.js";
 
 describe("humanError", () => {
   it("maps the intent rejection codes to human sentences", () => {
@@ -89,5 +89,20 @@ describe("humanError", () => {
     expect(NOT_DELIVERED).toMatch(/couldn’t confirm/);
     expect(NOT_DELIVERED).not.toMatch(/didn’t reach/); // it may have arrived: never claim either way
     expect(humanError(NOT_DELIVERED)).toBe(NOT_DELIVERED);
+  });
+});
+
+describe("isKnownAppError (review 6936791624): only Mchezo's existing app errors", () => {
+  it("recognises the exact entries, with or without the Not accepted prefix, and the two families", () => {
+    for (const e of ["PHASE_CLOSED", "ALREADY_ANSWERED", "UNKNOWN_QUESTION", "Display name already taken", "Unknown player slot",
+      "Not accepted: STALE_TURN", "  WRONG_ROOM  ", "Only host/cohost can start a game", "Need at least 2 connected players"]) {
+      expect(isKnownAppError(e), e).toBe(true);
+    }
+  });
+  it("does not recognise a gateway's generic text, unknown codes, empty text or inherited object keys", () => {
+    for (const e of ["Bad Gateway", "SERVICE_UNAVAILABLE", "upstream timeout", "Service Unavailable", "Gateway Timeout",
+      "MAINTENANCE", "no healthy upstream", "", "   ", "unknown", "Not accepted: ", "constructor", "toString", "__proto__", "hasOwnProperty"]) {
+      expect(isKnownAppError(e), JSON.stringify(e)).toBe(false);
+    }
   });
 });

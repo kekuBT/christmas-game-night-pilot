@@ -1,0 +1,31 @@
+Mchezo gate targeted | run 20261117-031018-34647fa4-3949
+  revision 34647fa4477b979169ca7f30c9e043a4502e4801 + 6 uncommitted change(s) | fingerprint 56dc2266fa63 (653 files)
+  plan     5 steps: 1 fast/build, 3 browser drivers, 1 other (E2E, fixtures, preflight) · 3 workers (auto: 4 CPUs, 15.0 GB available)
+  history  2 local run(s) in ./test-results/timing-history.jsonl + committed baseline (2026-11-10) · contention ×1.02 for 3 worker(s) (measured, 1 run(s))
+  estimate this run: 25–33s (low-confidence) · the same steps one after another: about 55s · longest step check-action-ack ~28s
+  method   each step's median (p10–p90 for the range) over up to 10 earlier sequential runs, ×1.02 contention, replayed through the scheduler (exclusive steps first, then longest first)
+  thin     only 1–2 samples for: check-uncertain-delivery
+  results  <scratch>/wtb1/test-results/20261117-031018-34647fa4-3949
+        start build-web on w1 (usually 5s)
+[ 1/5] PASS         4.6s  build-web  w1
+        start browser-preflight on w1 (usually 1s)
+[ 2/5] PASS         0.5s  browser-preflight  w1
+  browser  chrome-headless-shell 153.0.8010.12 (MCHEZO_CHROMIUM_PATH)
+  server   w1 http://localhost:38375 (pid 4071, data <scratch>/wtb1/test-results/20261117-031018-34647fa4-3949/server-data/w1)
+  server   w2 http://localhost:34441 (pid 4072, data <scratch>/wtb1/test-results/20261117-031018-34647fa4-3949/server-data/w2)
+  server   w3 http://localhost:40071 (pid 4073, data <scratch>/wtb1/test-results/20261117-031018-34647fa4-3949/server-data/w3)
+        start check-action-ack on w1 (usually 28s)
+        start check-uncertain-delivery on w2 (usually 18s)
+        start check-errors on w3 (usually 4s)
+[ 3/5] PASS         5.5s  check-errors  w3
+[ 4/5] PASS        27.2s  check-action-ack  w1
+[ 5/5] PASS        30.7s  check-uncertain-delivery  w2
+
+PASSED (exit 0) | targeted | run 20261117-031018-34647fa4-3949
+  5 passed, 0 failed, 0 timed out, 0 infrastructure, 0 invalid, 0 cancelled, 0 not run
+  timing   wall 37s · step time 1m 09s (sum) · 3 workers, 62% busy · 1.86× the same steps run one after another
+           predicted 26–33s (about 28s, low-confidence) → actual 37s (+32%)
+           longest  check-uncertain-delivery 31s, check-action-ack 27s, check-errors 6s · the longest step is 83% of the wall time
+           machine  CPU mean 28%, peak 83% · memory available ≥ 14276 MB · load peak 2.27
+           retries  none (the gate never retries a step)
+  report <scratch>/wtb1/test-results/20261117-031018-34647fa4-3949/report.json

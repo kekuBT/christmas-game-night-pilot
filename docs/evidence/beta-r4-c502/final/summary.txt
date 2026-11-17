@@ -1,0 +1,11 @@
+
+PASSED (exit 0) | full | run 20261117-021501-f4c558f7-19428
+  112 passed, 0 failed, 0 timed out, 0 infrastructure, 0 invalid, 0 cancelled, 0 not run
+  timing   wall 41m 20s · step time 2h 01m (sum) · 3 workers, 98% busy · 2.94× the same steps run one after another
+           predicted 23–73m (about 36m 25s, low-confidence) → actual 41m 20s (+14%)
+           longest  e2e-chromium 8m 10s, check-f5 7m 31s, check-leaderboard 6m 35s · the longest step is 20% of the wall time
+           machine  CPU mean 30%, peak 98% · memory available ≥ 13046 MB · load peak 5.6 · backpressure 3 wait(s), 21s
+           contention ×1.063 (median step time vs its sequential median)
+           baseline sequential full gate: about 1h 17m (mean of recorded sequential passes)
+           retries  none (the gate never retries a step)
+  report <scratch>/c502/final/repo/test-results/20261117-021501-f4c558f7-19428/report.json

@@ -89,6 +89,24 @@ const EXACT: Record<string, string> = {
     "We could not bring you back into your seat — rejoin with the room code.",
 };
 
+/**
+ * Beta R4 (review 6936791624): true when `raw` is one of Mchezo's existing app errors, an error with an
+ * established player-facing message here: an exact entry of the map (a server reason code such as
+ * PHASE_CLOSED, or a server sentence such as "Display name already taken"), or one of the two families
+ * ("Only host/cohost can …", "Need at least N connected players"), with or without the "Not accepted: "
+ * prefix. Anything else is NOT recognised as the app's: in particular a gateway's generic JSON
+ * ("Bad Gateway", "SERVICE_UNAVAILABLE", "upstream timeout"), which can look like an app error but is not.
+ * Own keys only, so "constructor" or "toString" are never taken for entries.
+ */
+export function isKnownAppError(raw: string): boolean {
+  let text = (raw ?? "").trim();
+  if (text.startsWith("Not accepted: ")) text = text.slice("Not accepted: ".length).trim();
+  if (text === "") return false;
+  if (Object.prototype.hasOwnProperty.call(EXACT, text)) return true;
+  if (text.startsWith("Only host/cohost can")) return true;
+  return text.startsWith("Need at least ") && text.includes(" connected players");
+}
+
 export function humanError(raw: string): string {
   let text = (raw ?? "").trim();
   if (text.startsWith("Not accepted: ")) text = text.slice("Not accepted: ".length).trim();

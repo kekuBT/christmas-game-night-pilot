@@ -1,0 +1,25 @@
+Mchezo gate targeted | run 20261117-021324-8101c5cb-18907
+  revision 8101c5cb8a493aefc93f1edbf6cdb9d8bc1c2dfe + 5 uncommitted change(s) | fingerprint 3ce7d8628df5 (653 files)
+  plan     3 steps: 1 fast/build, 1 browser drivers, 1 other (E2E, fixtures, preflight) · 3 workers (auto: 4 CPUs, 15.1 GB available)
+  history  1 local run(s) in ./test-results/timing-history.jsonl + committed baseline (2026-11-10) · contention ×1.02 for 3 worker(s) (measured, 1 run(s))
+  estimate this run: 15–29s (low-confidence) · the same steps one after another: about 25s · longest step check-uncertain-delivery ~19s
+  method   each step's median (p10–p90 for the range) over up to 10 earlier sequential runs, ×1.02 contention, replayed through the scheduler (exclusive steps first, then longest first)
+  thin     only 1–2 samples for: check-uncertain-delivery
+  results  <scratch>/wtb1/test-results/20261117-021324-8101c5cb-18907
+        start build-web on w1 (usually 5s)
+[ 1/3] PASS         4.1s  build-web  w1
+        start browser-preflight on w1 (usually 1s)
+[ 2/3] PASS         0.5s  browser-preflight  w1
+  browser  chrome-headless-shell 153.0.8010.12 (MCHEZO_CHROMIUM_PATH)
+  server   w1 http://localhost:34635 (pid 19029, data <scratch>/wtb1/test-results/20261117-021324-8101c5cb-18907/server-data/w1)
+        start check-uncertain-delivery on w1 (usually 19s)
+[ 3/3] PASS        16.9s  check-uncertain-delivery  w1
+
+PASSED (exit 0) | targeted | run 20261117-021324-8101c5cb-18907
+  3 passed, 0 failed, 0 timed out, 0 infrastructure, 0 invalid, 0 cancelled, 0 not run
+  timing   wall 22s · step time 22s (sum) · 3 workers, 32% busy · 1.00× the same steps run one after another
+           predicted 16–28s (about 20s, low-confidence) → actual 22s (+10%)
+           longest  check-uncertain-delivery 17s, build-web 4s, browser-preflight 1s · the longest step is 77% of the wall time
+           machine  CPU mean 22%, peak 55% · memory available ≥ 14863 MB · load peak 0.62
+           retries  none (the gate never retries a step)
+  report <scratch>/wtb1/test-results/20261117-021324-8101c5cb-18907/report.json

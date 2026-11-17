@@ -1,0 +1,51 @@
+$ node scripts/check-uncertain-delivery.mjs http://localhost:44237
+# timeout 600s | worker w1 | server http://localhost:44237 (data <scratch>/c502/before/test-results/20261117-021132-8101c5cb-18560/server-data/w1)
+
+[+3.6s] PASS A 502 (server down, nothing committed): the phone tried three times
+[+3.6s] PASS A 502 (server down, nothing committed): every try carried the same event id — 3 tries, 1 id(s)
+[+18.8s] FAIL A 502 (server down, nothing committed): the phone says it couldn't confirm it — not within 15000ms
+[+18.8s] FAIL A 502 (server down, nothing committed): no raw "Request failed (502)" or status code is shown — "Request failed (502)"
+[+18.8s] PASS A 502 (server down, nothing committed): the line never claims it wasn't received — "Request failed (502)"
+[+18.8s] PASS A 502 (server down, nothing committed): not shown as in (no LOCKED IN, the answers can still be tapped)
+[+18.8s] PASS A 502 (server down, nothing committed): the server has nothing
+[+19.0s] PASS A 502 (server down, nothing committed): tapping again after the restart locks it in
+[+19.0s] PASS A 502 (server down, nothing committed): the server recorded it once — 1
+[+19.0s] PASS A 502 (server down, nothing committed): the "couldn't confirm" line is gone
+[+21.9s] PASS A 503 (server down, nothing committed): the phone tried three times
+[+21.9s] PASS A 503 (server down, nothing committed): every try carried the same event id — 3 tries, 1 id(s)
+[+37.0s] FAIL A 503 (server down, nothing committed): the phone says it couldn't confirm it — not within 15000ms
+[+37.0s] FAIL A 503 (server down, nothing committed): no raw "Request failed (503)" or status code is shown — "Request failed (503)"
+[+37.0s] PASS A 503 (server down, nothing committed): the line never claims it wasn't received — "Request failed (503)"
+[+37.0s] PASS A 503 (server down, nothing committed): not shown as in (no LOCKED IN, the answers can still be tapped)
+[+37.0s] PASS A 503 (server down, nothing committed): the server has nothing
+[+37.2s] PASS A 503 (server down, nothing committed): tapping again after the restart locks it in
+[+37.2s] PASS A 503 (server down, nothing committed): the server recorded it once — 1
+[+37.2s] PASS A 503 (server down, nothing committed): the "couldn't confirm" line is gone
+[+40.1s] PASS A 504 (server down, nothing committed): the phone tried three times
+[+40.1s] PASS A 504 (server down, nothing committed): every try carried the same event id — 3 tries, 1 id(s)
+[+55.2s] FAIL A 504 (server down, nothing committed): the phone says it couldn't confirm it — not within 15000ms
+[+55.2s] FAIL A 504 (server down, nothing committed): no raw "Request failed (504)" or status code is shown — "Request failed (504)"
+[+55.2s] PASS A 504 (server down, nothing committed): the line never claims it wasn't received — "Request failed (504)"
+[+55.2s] PASS A 504 (server down, nothing committed): not shown as in (no LOCKED IN, the answers can still be tapped)
+[+55.2s] PASS A 504 (server down, nothing committed): the server has nothing
+[+55.4s] PASS A 504 (server down, nothing committed): tapping again after the restart locks it in
+[+55.4s] PASS A 504 (server down, nothing committed): the server recorded it once — 1
+[+55.4s] PASS A 504 (server down, nothing committed): the "couldn't confirm" line is gone
+[+58.2s] PASS B 502 (committed, reply lost): the phone tried three times
+[+58.2s] PASS B 502 (committed, reply lost): every try carried the same event id — 3 tries, 1 id(s)
+[+58.2s] PASS B 502 (committed, reply lost): the server recorded it exactly once — 1
+[+58.2s] PASS B 502 (committed, reply lost): no raw "Request failed (502)" is shown — ""
+[+58.2s] PASS B 502 (committed, reply lost): the screen shows the server's state: LOCKED IN
+[+58.3s] PASS B 502 (committed, reply lost): the line says it went through (the server's list of this player's accepted actions)
+[+58.3s] PASS B 502 (committed, reply lost): replaying the same request returns the original result — {"accepted":true,"result":{"gameStatus":"playing"}}
+[+58.3s] PASS B 502 (committed, reply lost): a fresh tap for the same answer doesn't count twice — 1
+[+61.2s] PASS C 503 with the app's own error: the typed error keeps its own wording
+[+61.2s] PASS C 503 with the app's own error: it is not turned into "couldn't confirm" — "We could not bring you back into your seat — rejoin with the room code."
+[+61.2s] PASS C 503 with the app's own error: the server has nothing
+[+62.4s] PASS D a real app rejection (UNKNOWN_QUESTION): the server's reason keeps its wording
+[+62.4s] PASS D a real app rejection (UNKNOWN_QUESTION): it is not turned into "couldn't confirm" — "That question is no longer open."
+[+62.4s] PASS D a real app rejection (UNKNOWN_QUESTION): nothing is recorded
+[+62.5s] UNCERTAIN DELIVERY FAILURES: 6
+[+62.5s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":6,"pages":6,"peakOpenPages":1}
+
+# FAIL (exit 1) in 62.5s | cpu 4.6s, peak memory 354 MB

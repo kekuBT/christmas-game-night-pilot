@@ -1,0 +1,34 @@
+# clean detached checkout of 0c42ed6564c1f920653e82233d828102d8091269 (git status --porcelain: 0 lines before and after), node_modules symlinked from the #47 worktree
+# command: MCHEZO_CHROMIUM_PATH=<chrome-headless-shell 1243> node scripts/gate.mjs targeted uncertain-delivery action-ack errors
+# started 2026-11-17T03:49:58Z (after the fast gate exited), ended 2026-11-17T03:50:35Z, exit 0
+Mchezo gate targeted | run 20261117-034958-0c42ed65-12859
+  revision 0c42ed6564c1f920653e82233d828102d8091269 (clean tree) | fingerprint 94031e6b099e (653 files)
+  plan     5 steps: 1 fast/build, 3 browser drivers, 1 other (E2E, fixtures, preflight) · 3 workers (auto: 4 CPUs, 15.0 GB available)
+  history  1 local run(s) in ./test-results/timing-history.jsonl + committed baseline (2026-11-10) · contention ×1.71 for 3 worker(s) (measured, 2 run(s))
+  estimate this run: 0–8m (low-confidence) · the same steps one after another: about 1m 37s · longest step check-uncertain-delivery ~1m 00s
+  method   each step's median (p10–p90 for the range) over up to 10 earlier sequential runs, ×1.71 contention, replayed through the scheduler (exclusive steps first, then longest first)
+  unknown  no timing history for 1 step(s), assumed ~60s each: check-uncertain-delivery
+  results  <scratch>/int-final/test-results/20261117-034958-0c42ed65-12859
+        start build-web on w1 (usually 5s)
+[ 1/5] PASS         4.8s  build-web  w1
+        start browser-preflight on w1 (usually 1s)
+[ 2/5] PASS         0.8s  browser-preflight  w1
+  browser  chrome-headless-shell 153.0.8010.12 (MCHEZO_CHROMIUM_PATH)
+  server   w1 http://localhost:43801 (pid 12978, data <scratch>/int-final/test-results/20261117-034958-0c42ed65-12859/server-data/w1)
+  server   w2 http://localhost:43131 (pid 12979, data <scratch>/int-final/test-results/20261117-034958-0c42ed65-12859/server-data/w2)
+  server   w3 http://localhost:39567 (pid 12980, data <scratch>/int-final/test-results/20261117-034958-0c42ed65-12859/server-data/w3)
+        start check-uncertain-delivery on w1 (no timing history)
+        start check-action-ack on w2 (usually 28s)
+        start check-errors on w3 (usually 4s)
+[ 3/5] PASS         5.3s  check-errors  w3
+[ 4/5] PASS        27.8s  check-action-ack  w2
+[ 5/5] PASS        30.8s  check-uncertain-delivery  w1
+
+PASSED (exit 0) | targeted | run 20261117-034958-0c42ed65-12859
+  5 passed, 0 failed, 0 timed out, 0 infrastructure, 0 invalid, 0 cancelled, 0 not run
+  timing   wall 37s · step time 1m 10s (sum) · 3 workers, 62% busy · 1.89× the same steps run one after another
+           predicted 0–8m (about 1m 42s, low-confidence) → actual 37s (-64%)
+           longest  check-uncertain-delivery 31s, check-action-ack 28s, check-errors 5s · the longest step is 83% of the wall time
+           machine  CPU mean 28%, peak 88% · memory available ≥ 14376 MB · load peak 3.5
+           retries  none (the gate never retries a step)
+  report <scratch>/int-final/test-results/20261117-034958-0c42ed65-12859/report.json

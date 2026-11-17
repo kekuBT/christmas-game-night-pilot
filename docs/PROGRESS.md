@@ -3670,6 +3670,30 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
     2. R1 could report a restart without a readable baseline.
   - **Acknowledged** in 6936049251 at 9:26 p.m. ET. The work started after #47's full gate.
 
+## Beta R4: uncertain delivery after an intermediary 5xx (review 6935165862 item 4; in progress, a separate stacked draft PR)
+- **The client fix:** a tap whose retries all end on a 502, 503 or 504 with no app error now shows "We couldn’t confirm that…" instead of `Request failed (502)`. Typed app errors keep their wording; the retries, event ids, pending state and exactly-once scoring are unchanged.
+  - The code is in `intentRetry.ts` and `App.tsx` `sendAction`.
+  - The decision is D-BR4-C502-01.
+- **The tests:**
+  - unit cases in `tests/correctness.test.ts`;
+  - a browser driver, `scripts/check-uncertain-delivery.mjs`, covering server down, committed and reply lost, a typed app error on a 5xx, and a real app rejection.
+- **The negative control:** on the unrepaired client the driver fails, 6 failures, all on the wording.
+- **The pin `7097ac2` is unchanged** until a candidate review.
+- **The final:** the full gate **PASSED (exit 0)**, 112 of 112, on a clean checkout of `f4c558f`, run `20261117-021501-f4c558f7-19428`.
+  - The unit tests: 2,077 passed.
+  - `check-uncertain-delivery`: 47 of 47.
+- **Next:** the report on #47, linked to #46 and #5, then ChatGPT's candidate review. The pin is unchanged.
+- **Reported** in 6936654226.
+- **Review 6936791624: changes requested.** A gateway's generic JSON got past the fix. Acknowledged in 6936808904 at 10:07 p.m. ET.
+- **The repair:** on 502, 503 and 504, only Mchezo's **existing app errors** (`isKnownAppError`) count as the app's. Generic JSON is unconfirmed.
+  - The boundary is documented: the endpoint never answers these statuses, and no reply header proves app origin.
+  - **The tests:** unit, plus browser case E (gateway JSON, server down and committed).
+  - **The new driver failed on `f4c558f`** with exactly the 6 E server-down failures.
+- **The focused validation** on a clean checkout of `72e9d8b` (base `8101c5c`):
+  - the fast gate **PASSED**, 5/5, with 2,085 unit tests;
+  - the targeted gate **PASSED**, 5/5, with `check-uncertain-delivery` at 81 of 81, plus `action-ack` and `errors`.
+- **Next:** the report on #47, then ChatGPT's review. The pin is unchanged. #46's review: the tooling fixes are verified, and W4 stays open for the live audit.
+
 ## Beta R4: W4 follow-up (review 6935889459; complete, tested `3eb05bc`)
 - **The run's lifecycle** (`cleanup`, `finish`, and their helpers) moved into `w4-control.sh`, so the fault tests call the very `finish`.
 - **`count_owned`** checks each Docker query's status. An unlistable inventory is UNVERIFIED, and the run fails.
@@ -3678,3 +3702,20 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
 - **The final on a clean checkout of `3eb05bc`:** `w4-selftest.sh` **PASSED**, 81/81 (K0 88/88; K0M 18 required failures; K1–K8), and the static checks passed.
 - **#47's stack:** #47 was tested on base `8101c5c`. A merge of this follow-up into #47 conflicts only in `docs/PROGRESS.md` (both PRs append a section). It is left unmerged while #47 is under review, as asked, and will be a plain merge.
 - **Next:** ChatGPT's verification; W4 is not cleared.
+
+## Beta R4: the integrated stack, #47 + #46 (handoff 6936988676; complete, tested `0c42ed6`)
+- **Acknowledged** in 6937528275 at 10:42 p.m. ET, with a 55 min estimate.
+- **The merge:** an ordinary `git merge --no-ff` of #46's reviewed head `e6cbe11` into #47's reviewed head `e577579` (merge base `8101c5c`), as merge commit `d811ed9`. No rebase, force-push or PR merge.
+  - Only `docs/PROGRESS.md` conflicted. Both sections are kept unchanged.
+  - `docs/beta/render-w4.md` merged automatically.
+- **The candidate:** the runtime and tests are identical to `72e9d8b`; the W4 tooling is identical to `e6cbe11`; `deploy/` is unchanged. The pin stays `7097ac2`.
+- **The plan:** focused validation on one clean checkout: the integration diffs, the W4 control mocks (K0, K0M), the fast gate, then the targeted uncertain-delivery, action-ack and errors gate. The record is `docs/evidence/beta-r4-integration/README.md`.
+- **The results** on a clean checkout of `0c42ed6`, run one after another:
+  - the integration checks **PASSED**, 25/25;
+  - the W4 control mocks **PASSED**, 7/7: K0 88/88, and K0M with its 18 required failures;
+  - the fast gate **PASSED (exit 0)**, `20261117-034840-0c42ed65-8445`, with 2,085 unit tests;
+  - the targeted gate **PASSED (exit 0)**, `20261117-034958-0c42ed65-12859`: `check-uncertain-delivery` 81/81, `action-ack` 52/52, `errors` 5/5.
+
+  No full gate was run, as the handoff asked.
+- **Unchanged:** the exact-pin W4 live audit stays OPEN, owned by ChatGPT. There is no W5 work and no deployment.
+- **Next:** the report on #47, linked on #5, then ChatGPT's review of the consolidated candidate.

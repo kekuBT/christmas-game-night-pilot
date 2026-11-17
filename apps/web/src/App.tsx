@@ -67,7 +67,7 @@ import { reactionIdToEmoji, toMzPlayers, toMzReactions } from "./components/mche
 import { previousGameScores } from "./ui/mchezo/lib/standings.js";
 import { humanError, NOT_DELIVERED } from "./ui/mchezo/lib/errors.js";
 import { midrank } from "./components/midrank.js";
-import { sendIntent } from "./components/intentRetry.js";
+import { describeIntentFailure, sendIntent } from "./components/intentRetry.js";
 import { connection, roomNotices, useConnection } from "./connectionStore.js";
 import { seats } from "./session.js";
 import { setRefreshNeeded } from "./components/RefreshBanner.js";
@@ -1033,13 +1033,18 @@ export function App() {
         return { status: resp.status, body: await resp.json().catch(() => ({})) };
       });
       const r = res.body as { accepted?: boolean; reason?: string; error?: string };
-      if (res.status >= 400) throw new Error(r.error || `Request failed (${res.status})`);
+      // An exhausted 502/503/504 from a proxy or the host's edge (no existing
+      // Mchezo app error in the body, so HTML, empty or a gateway's generic
+      // JSON) becomes "couldn't confirm": the action may already be recorded.
+      // A known app error stays itself (describeIntentFailure).
+      if (res.status >= 400) throw new Error(describeIntentFailure(res));
       if (!r.accepted) failed(r.reason === "PHASE_CLOSED" ? "Time was up for that one — it wasn’t counted." : r.reason === "READY_LOCKED" ? "The game has already started." : `Not accepted: ${r.reason || "unknown"}`); else setMsg("Saved.");
       await refresh();
       return r.accepted === true;
     } catch (e) {
       // A TypeError is fetch's "no answer" (offline, dropped connection) after
-      // every retry: the server never saw it. Say so, not "Failed to fetch".
+      // every retry: the server may or may not have seen it. Say that we
+      // couldn't confirm it, not "Failed to fetch".
       failed(e instanceof TypeError ? NOT_DELIVERED : e instanceof Error ? e.message : "Request failed");
       return false;
     }

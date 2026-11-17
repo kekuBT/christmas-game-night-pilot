@@ -2330,3 +2330,30 @@ Handoff 6813167965 (with the Stage 9.2 clearance). Spec: `docs/stage9/stage93.md
   - **Alternatives rejected:**
     - `set -e` in the blocks: it doesn't stop on failures inside `if` conditions or `&&` lists, and it would end the operator's interactive shell.
     - One long script: the operator's settings edit has to happen by hand between the parts, and the code mustn't pass through a script's arguments or logs.
+
+## Beta R4: uncertain delivery after an intermediary 5xx (review 6935165862, item 4; separate stacked draft PR)
+- **D-BR4-C502-01 An exhausted 502, 503 or 504 with no error of the app's own is "couldn't confirm", not `Request failed (502)`.**
+  - **Why:** the W4 rehearsal showed the raw text for a tap made while the server restarted behind a proxy.
+    - The server itself never answers 502, 503 or 504, so such an answer comes from an intermediary.
+    - The action may or may not have been recorded: a restart can lose the reply to a committed action.
+    - So the phone uses the existing `NOT_DELIVERED` wording, which never claims either way, and the screen then shows the server's state.
+  - **What decides it** (amended after review 6936791624): `isUnconfirmedIntermediaryFailure` in `apps/web/src/components/intentRetry.ts`. The status is 502, 503 or 504, **and** none of the body's `error`, `reason` or `code` strings is one of **Mchezo's existing app errors** (`isKnownAppError` in `errors.ts`: an error with an established message there). That means:
+    - an exact entry: a server reason code or sentence;
+    - or one of the two families ("Only host/cohost can …", "Need at least N connected players"), with or without "Not accepted: ".
+
+    A known app error is authoritative and keeps its wording.
+  - **The boundary, and why:**
+    - The intents endpoint (`src/server/http.ts`) answers only 200, 4xx `{error}` or 500 `{error}`, **never 502, 503 or 504**.
+    - Its replies carry **no header that proves app origin** (only `content-type` and `cache-control`).
+    - So no existing discriminator covers these statuses. A gateway's **generic JSON** (`{"error":"Bad Gateway"}`, `{"code":"SERVICE_UNAVAILABLE"}`, `{"reason":"upstream timeout"}`, …) looks like an app error but isn't one, and is unconfirmed like HTML or an empty body.
+    - **The first version** treated any non-empty `error`, `code` or `reason` as the app's, and showed "Bad Gateway", `Request failed (503)` or `Request failed (504)` for those bodies. Review 6936791624 reproduced this.
+    - **Other statuses are unchanged:** a 500 or 4xx still shows the body's error, or the bare status.
+  - **Unchanged:** the retries, the event id, the pending state, the server's dedupe and exactly-once scoring.
+  - **Alternatives rejected:**
+    - **Any non-empty `error`, `code` or `reason` field counts as the app's** (the first version): a gateway's generic JSON passes that test.
+    - **A new origin header on the server's replies:** it changes the server, and the server never answers these statuses anyway.
+    - **Mapping every 5xx:** a 500 is a real error and should say so.
+    - **"Not received" wording:** false in the committed, reply-lost case.
+    - **Changing the server or the retry count:** out of scope, and not needed.
+  - **The release pin `7097ac2` is unchanged** until an explicit candidate review.
+

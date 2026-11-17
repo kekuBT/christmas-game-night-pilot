@@ -1,0 +1,33 @@
+# clean detached checkout of 0c42ed6564c1f920653e82233d828102d8091269 (git status --porcelain: 0 lines before and after), node_modules symlinked from the #47 worktree
+# command: MCHEZO_CHROMIUM_PATH=<chrome-headless-shell 1243> node scripts/gate.mjs fast
+# started 2026-11-17T03:48:39Z, ended 2026-11-17T03:49:50Z, exit 0
+Mchezo gate fast | run 20261117-034840-0c42ed65-8445
+  revision 0c42ed6564c1f920653e82233d828102d8091269 (clean tree) | fingerprint 94031e6b099e (653 files)
+  plan     5 steps: 5 fast/build, 0 browser drivers · 3 workers (auto: 4 CPUs, 15.1 GB available)
+  history  0 local run(s) in ./test-results/timing-history.jsonl + committed baseline (2026-11-10) · contention ×1.02 for 3 worker(s) (measured, 1 run(s))
+  estimate this run: 21–29s (measured) · the same steps one after another: about 47s · longest step unit-tests ~24s
+  method   each step's median (p10–p90 for the range) over up to 10 earlier sequential runs, ×1.02 contention, replayed through the scheduler (exclusive steps first, then longest first)
+  results  <scratch>/int-final/test-results/20261117-034840-0c42ed65-8445
+        start typecheck-server on w1 (usually 5s)
+        start typecheck-web on w2 (usually 6s)
+        start lint on w3 (usually 8s)
+[ 1/5] PASS        13.6s  typecheck-server  w1
+        start unit-tests on w1 (usually 24s)
+[ 2/5] PASS          14s  typecheck-web  w2
+        start build-web on w2 (usually 5s)
+[ 3/5] PASS          21s  lint  w3
+[ 4/5] PASS         7.6s  build-web  w2
+── progress  4/5 done · 4 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 1m 00s
+   running   unit-tests 46s (w1)
+   remaining 15–15s · total 75–76s · done around 03:49–03:49 UTC (measured)
+[ 5/5] PASS        56.8s  unit-tests  w1
+
+PASSED (exit 0) | fast | run 20261117-034840-0c42ed65-8445
+  5 passed, 0 failed, 0 timed out, 0 infrastructure, 0 invalid, 0 cancelled, 0 not run
+  timing   wall 1m 11s · step time 1m 53s (sum) · 3 workers, 53% busy · 1.59× the same steps run one after another
+           predicted 21–28s (about 24s, measured) → actual 1m 11s (+196%)
+           longest  unit-tests 57s, lint 21s, typecheck-web 14s · the longest step is 80% of the wall time
+           machine  CPU mean 75%, peak 100% · memory available ≥ 13780 MB · load peak 4.14
+           contention ×2.392 (median step time vs its sequential median)
+           retries  none (the gate never retries a step)
+  report <scratch>/int-final/test-results/20261117-034840-0c42ed65-8445/report.json
