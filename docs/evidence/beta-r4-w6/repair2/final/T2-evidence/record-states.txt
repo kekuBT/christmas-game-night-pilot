@@ -1,0 +1,7 @@
+after the first cgn-authorize: STATUS data_dir=/var/data/cgn-w1 public_origin=https://localhost:18643 trust_proxy=1 pending_data_dir=none serving=/var/data/cgn-w1
+after --prepare /var/data/cgn-w6: STATUS data_dir=/var/data/cgn-w1 public_origin=https://localhost:18643 trust_proxy=1 pending_data_dir=/var/data/cgn-w6 serving=/var/data/cgn-w1
+the pending start: STATUS data_dir=/var/data/cgn-w1 public_origin=https://localhost:18643 trust_proxy=1 pending_data_dir=/var/data/cgn-w6 serving=/var/data/cgn-w6
+after --commit /var/data/cgn-w6: STATUS data_dir=/var/data/cgn-w6 public_origin=https://localhost:18643 trust_proxy=1 pending_data_dir=none serving=/var/data/cgn-w6
+after --prepare /var/data/cgn-w1 (the return): STATUS data_dir=/var/data/cgn-w6 public_origin=https://localhost:18643 trust_proxy=1 pending_data_dir=/var/data/cgn-w1 serving=/var/data/cgn-w6
+after --commit /var/data/cgn-w1 (the return): STATUS data_dir=/var/data/cgn-w1 public_origin=https://localhost:18643 trust_proxy=1 pending_data_dir=none serving=/var/data/cgn-w1
+after --abort /var/data/cgn-w6-n6: STATUS data_dir=/var/data/cgn-w1 public_origin=https://localhost:18643 trust_proxy=1 pending_data_dir=none serving=/var/data/cgn-w1

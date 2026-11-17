@@ -26,7 +26,22 @@
 | [guard-dev1.log](repair2/dev/guard-dev1.log) | `20261117T064329Z-09048d43` | W6 GUARD SELFTEST PASSED, 37/37 |
 | [reh-dev1.log](repair2/dev/reh-dev1.log) | `20261117T064420Z-2c9b48f7` | W6 REHEARSAL PASSED, 46/46 (N6, N7, the reopen gate, the three ledger negative controls) |
 
-**The final** of repair 2 is recorded below once it has run on the clean candidate (`runners/w6r-final.sh`, now with the hold self-test as step 3b).
+**The final of repair 2: one clean detached checkout of `bb24f4045dcc86c9c408e23234a2ea71215192a3`, status 0 lines before and after, 06:47–06:56Z** ([`repair2/final/`](repair2/final/), [summary](repair2/final/summary.txt)).
+- Every run below is on that one revision, by `runners/w6r-final.sh` (the static base is the reviewed head `47aa9af`).
+- The image under test was built from that checkout: `cgn-render:check` = `sha256:332933c781a2…`.
+
+| Step | Log | Run | Verdict |
+|---|---|---|---|
+| 1 | [1-static.log](repair2/final/1-static.log) | 2 s | **PASSED** (scope since `47aa9af`, pins, reader identity, eslint, syntax, links, secret scan) |
+| 2 | [2-image-checks.log](repair2/final/2-image-checks.log) | 61 s | **IMAGE CHECKS PASSED, 30/30** |
+| 3 | [3-guard-selftest.log](repair2/final/3-guard-selftest.log) | `20261117T064802Z-212fd3a4`, 53 s | **W6 GUARD SELFTEST PASSED, 37/37** |
+| 3b | [3b-hold-selftest.log](repair2/final/3b-hold-selftest.log) | `20261117T064855Z-d73966ed`, 19 s | **W6 HOLD SELFTEST PASSED, 12/12** |
+| 4 | [4-w6-selftest.log](repair2/final/4-w6-selftest.log) | tag `141390`, 55 s | **W6 SELFTEST PASSED, 13/13.** Rehearsal [`20261117T064916Z-3227a8b3`](repair2/final/w6-T2-rehearsal.log): **46/46** (N6, N7, the reopen gate, the three ledger negative controls). |
+| 5 | [5-w5-selftest.log](repair2/final/5-w5-selftest.log) | tag `a09e0c`, 34 s | **W5 SELFTEST PASSED, 12/12** |
+| 6 | [6-w4-selftest.log](repair2/final/6-w4-selftest.log) | tag `1bba84`, 247 s, `MCHEZO_CHROMIUM_PATH` set | **W4 SELFTEST PASSED, 81/81** |
+| 7 | [7-backup-drill.log](repair2/final/7-backup-drill.log) | 100 s | **FOCUSED PASSED, 19/19** |
+
+**[`repair2/final/T2-evidence/`](repair2/final/T2-evidence/)** holds the final rehearsal's record states, B1–B3 sessions and receipts, fingerprints and summaries.
 
 ## The repair (review 6939462697)
 **Review 6939462697 found two problems in the first candidate:**

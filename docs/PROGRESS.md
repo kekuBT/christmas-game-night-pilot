@@ -3849,3 +3849,13 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
   - The pins and the deploy README are updated.
 - **Dev results:** the hold self-test 12/12, the guard self-test 37/37, the rehearsal 46/46.
 - **Docs:** the runbook's abort rule and recovery step, the hold self-test, the proposal's guard text, and the evidence README's repair-2 section. `runners/w6r-final.sh` adds the hold self-test as step 3b.
+- **The final** on one clean checkout of the candidate `bb24f40` (06:47–06:56Z), every step PASSED:
+  - static;
+  - image checks, 30/30;
+  - guard self-test, 37/37;
+  - **hold self-test, 12/12**;
+  - W6 self-test, 13/13 (its rehearsal 46/46);
+  - W5 self-test, 12/12;
+  - W4 self-test, 81/81;
+  - the round-5 drill, 19/19.
+- **Next:** the new report on #49, linked on #5 and #48.

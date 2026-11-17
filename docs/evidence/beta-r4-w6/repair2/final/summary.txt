@@ -1,0 +1,10 @@
+== w6r-final on bb24f4045dcc86c9c408e23234a2ea71215192a3 (status 0 lines), 2026-11-17T06:46:59Z
+1-static: exit 0 in 2 s; last line: W6 REPAIR STATIC CHECKS PASSED
+2-image-checks: exit 0 in 61 s; last line: IMAGE CHECKS PASSED
+3-guard-selftest: exit 0 in 53 s; last line: W6 GUARD SELFTEST PASSED
+3b-hold-selftest: exit 0 in 19 s; last line: W6 HOLD SELFTEST PASSED
+4-w6-selftest: exit 0 in 55 s; last line: W6 SELFTEST PASSED
+5-w5-selftest: exit 0 in 34 s; last line: W5 SELFTEST PASSED
+6-w4-selftest: exit 0 in 247 s; last line: W4 SELFTEST PASSED
+7-backup-drill: exit 0 in 100 s; last line: FOCUSED PASSED (exit 0)
+== image under test: sha256:332933c781a24f38b49dcf126154d9bd3db34e570d10cbc4aad63989bab0e5c1; checkout still clean: 0 lines; 2026-11-17T06:56:30Z

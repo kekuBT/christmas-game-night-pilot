@@ -1,0 +1,171 @@
+== w6-rehearsal 2026-11-17T06:49:16Z, run 20261117T064916Z-3227a8b3, image cgn-render:check
+   scripts: w6-rehearsal.sh 53214492009f1a56, w6-check.mjs 1a1d0c0ecb8f1903, w5-seed.mjs 660df9e1e4b1005d
+   throwaway code, a DISPOSABLE test identity (receiving side), TLS key and the runbook's probe in a private folder (mode 700), removed on exit
+PASS service A ready on /var/data/cgn-w1, /health on the pinned revision
+   AUTHORIZED data_dir=/var/data/cgn-w1 public_origin=https://localhost:18643 trust_proxy=1 (the access code is kept only as a salted hash)
+PASS maintenance on: the PUBLIC /health answers 503
+PASS the image's cgn-backup is byte-identical to the reviewed deploy/render/cgn-backup.sh
+PASS the image's cgn-entrypoint is byte-identical to the reviewed deploy/render/cgn-entrypoint.sh
+PASS the image's cgn-authorize is byte-identical to the reviewed deploy/render/cgn-authorize.sh
+   datatool (in the pinned image): cd5ec360591a928bc5943766dcf174eac31739be59a4f9edff2965af99555adb
+   SEED {"roomId":"room-mwkc0qp3-116773","warmGameId":"game-1","secondGameId":"game-2","entryId":"book-1","entrySources":["evt-11"],"hostPlayerId":"player-1","guestPlayerId":"player-2","questions":["trv-hist-035","trv-scie-123","trv-ever-097","trv-scie-005","trv-spac-022","trv-geog-026","trv-lite-048","trv-lite-044","trv-hist-041","trv-spac-021"],"acked":[{"who":"guest","playerId":"player-2","questionId":"trv-hist-035","ackAt":"2026-11-17T06:49:18.567Z"},{"who":"guest","playerId":"player-2","questionId":"trv-scie-123","ackAt":"2026-11-17T06:49:18.571Z"},{"who":"host","playerId":"player-1","questionId":"trv-hist-035","ackAt":"2026-11-17T06:49:18.577Z"}]}
+   [B1] cgn-backup: stopping the server (pid 10)
+   [B1] cgn-backup: server stopped
+   [B1] backup OK: 1 room(s), 1 Memory Book(s), 3 file(s), verified
+   [B1] verify OK: 3 file(s) match the manifest of 2026-11-17T06:49:18.885Z
+   [B1] cgn-backup: hold released
+   [B1] BACKUP_OK /var/data/backups/cgn-20261117T064918Z.tar.age sha256=88867c18365f66c535e5c64701a808831d3905a6307e9a88a59ea601ab60abf3 files=4 server_stopped_s=0
+PASS B1 (the backup to restore): cgn-backup exit 0, exactly one BACKUP_OK
+   PASS the room answers after the backup, with the host's existing seat (no rejoin) — HTTP 200
+   PASS the guest's existing seat still works (no rejoin) — HTTP 200
+   PASS the approved "W5 seed" entry is still there and approved — HTTP 200
+   PASS a NEW answer after the backup is acknowledged (the original service resumed) — HTTP 200 accepted=true
+   RESUME OK (0 failed)
+PASS the original service moved on after B1 (a new acknowledged answer): the current data differs from B1
+   [B2] cgn-backup: stopping the server (pid 165)
+   [B2] cgn-backup: server stopped
+   [B2] backup OK: 1 room(s), 1 Memory Book(s), 3 file(s), verified
+   [B2] verify OK: 3 file(s) match the manifest of 2026-11-17T06:49:20.348Z
+   [B2] cgn-backup: hold released
+   [B2] BACKUP_OK /var/data/backups/cgn-20261117T064920Z.tar.age sha256=5a32f3bfbcfd3adcd1d95a56dc26fe9fc5dc61edc57394cb7d3e4a2360a64ecd files=4 server_stopped_s=0
+   [chain b2] RECEIPT_OK <work>/w6-20261117T064916Z-3227a8b3/chain-b2/fetched/cgn-20261117T064920Z.tar.age sha256=5a32f3bfbcfd3adcd1d95a56dc26fe9fc5dc61edc57394cb7d3e4a2360a64ecd files=4 copy=<private>/receive-b2/20261117T064920Z
+PASS B2 (a FRESH same-window backup of the CURRENT data): BACKUP_OK, then RECEIPT_OK on its fetched-back copy
+-- N1: a receipt must exist for EXACTLY the backup being restored, or nothing is uploaded
+   [chain b1-changed] RECEIPT_FAILED: the archive's SHA-256 is e6439b628b260ea907f3f9d6d840a309f0461eaf06bd79dbbadcce29eab28e69, not the expected 88867c18365f66c535e5c64701a808831d3905a6307e9a88a59ea601ab60abf3
+PASS N1a a changed fetched copy: RECEIPT_FAILED, no receipt record, the upload gate refuses
+PASS N1b B2's receipt offered for B1: the upload gate refuses (another backup's hash)
+PASS N1 nothing was uploaded by the refused cases (no staging folder)
+   [chain b1] RECEIPT_OK <work>/w6-20261117T064916Z-3227a8b3/chain-b1/fetched/cgn-20261117T064918Z.tar.age sha256=88867c18365f66c535e5c64701a808831d3905a6307e9a88a59ea601ab60abf3 files=4 copy=<private>/receive-b1/20261117T064918Z
+PASS B1 received: RECEIPT_OK on its fetched-back copy, with the hash from B1's BACKUP_OK line
+-- N2: an invalid or incomplete staged copy is refused by datatool verify; nothing is restored
+PASS N2 a(n) incomplete staged copy: datatool verify refuses (exit 1), and no restore target exists
+PASS N2 a(n) changed staged copy: datatool verify refuses (exit 1), and no restore target exists
+PASS the verified copy uploaded as the service user (LOCAL SURROGATE for scp -s): every file owned by cgn
+   [verify] verify OK: 3 file(s) match the manifest of 2026-11-17T06:49:18.885Z
+PASS datatool verify on the instance accepts the uploaded copy
+   [restore] restore OK: 1 room(s), 1 Memory Book(s) restored and verified. Next, as the user the server runs as: datatool check --data /var/data/cgn-w6
+PASS datatool restore into a NEW folder (/var/data/cgn-w6), as the service user
+   [check] check OK: 1 room(s), 1 Memory Book(s); owned by this user (uid 10001) and private; the lock and a test write worked. A server run by this user can use it.
+PASS datatool check on /var/data/cgn-w6, as the service user
+PASS the restored folder is the service user's and private (every file cgn, folder 700)
+   PASS the restored folder holds exactly B1's data files (the manifest aside) — 3 file(s)
+   PASS the score ledger is identical to B1's — 16 event(s)
+   PASS the second game keeps its answers where the pinned runtime stores them (extra.answers)
+   PASS the guest's pre-backup answer to trv-hist-035 is restored with its submitted value
+   PASS the guest's pre-backup answer to trv-scie-123 is restored with its submitted value
+   PASS the host's pre-backup answer to trv-hist-035 is restored with its submitted value
+   PASS the post-backup answer is ABSENT (the restore is B1's point in time)
+   PASS the approved "W5 seed" entry is restored, linked to the warm-up game's finish
+   RESTORED OK (0 failed)
+PASS the restored folder holds B1's state exactly (files, ledger, answer values, approved entry; not the later answer)
+-- N3: an occupied target is refused; what is there stays
+PASS N3 datatool restore into an occupied folder refuses (exit 1), and its file is unchanged
+-- N4: a start on the target WITHOUT authorizing it: refused (exit 78); recovery onto the original
+PASS N4 the guard refuses the unauthorized target: exit 78, a REFUSED line, and no server started
+PASS N4 recovery: the original comes back on the pinned revision, its files unchanged by the refused attempt
+-- CUTOVER: maintenance on; preflight; --prepare the target; graceful stop; one writer; the PENDING start; private checks; commit; reopen
+   preflight: B2 receipt for this window: yes; target checked: yes; target differs from the original: yes
+PASS preflight: a same-window B2 receipt, a checked target, a separate folder
+   PREPARED pending_data_dir=/var/data/cgn-w6 approved_data_dir=/var/data/cgn-w1 (the approved folder still starts with its own MCHEZO_DATA_DIR; start /var/data/cgn-w6, check it, then commit or abort before reopening)
+PASS cgn-authorize --prepare (from the live instance) records the target as the ONE pending folder; the original stays approved and served
+   stop: docker stop exit 0; state exited, exit code 0, OOM-killed false
+PASS the original writer stopped gracefully (exit 0)
+PASS single writer: the old container removed and confirmed gone, no container on the volume before the start
+   [start] cgn-entrypoint: the environment matches the authorized configuration: the PENDING data folder /var/data/cgn-w6 (not committed: the approved folder stays /var/data/cgn-w1; commit or abort before reopening)
+PASS startup evidence: the entrypoint starts the target as the PENDING data folder (not committed)
+-- N5: the reopen gate refuses a switch still pending, and a revision mismatch: the ingress stays in maintenance
+   [reopen gate] private probe: PROBE 2026-11-17T06:49:27.282Z UP 7097ac2bb062925bb296a129f4771f1e68fd522d; expected 7097ac2bb062925bb296a129f4771f1e68fd522d
+   [reopen gate] record: STATUS data_dir=/var/data/cgn-w1 public_origin=https://localhost:18643 trust_proxy=1 pending_data_dir=/var/data/cgn-w6 serving=/var/data/cgn-w6; expected data_dir=/var/data/cgn-w6, nothing pending, served /var/data/cgn-w6
+PASS N5a the reopen gate refuses while the switch is still pending (neither committed nor aborted), and the PUBLIC side stays 503
+   [private] PASS the access gate admits the throwaway code
+   [private] PASS the original HOST seat works, with no rejoin — HTTP 200
+   [private] PASS the original GUEST seat works, with no rejoin — HTTP 200
+   [private] PASS the approved "W5 seed" entry is there
+   [private] PASS the data being served is the RESTORED copy: each pre-backup answer is there with its submitted value
+   [private] PASS …and the post-backup answer is absent (not the original folder's later state)
+   [private] LIVE selected OK (0 failed)
+PASS before the decision, on the private side: the PENDING folder serves the restored copy (the seats, the approved entry, each pre-backup answer with its value, not the later one)
+   COMMITTED data_dir=/var/data/cgn-w6 (the previous folder /var/data/cgn-w1 is no longer authorized)
+PASS the decision, still in maintenance: --commit from the instance serving the target; the record approves it, nothing pending
+   [reopen gate] private probe: PROBE 2026-11-17T06:49:28.010Z UP 7097ac2bb062925bb296a129f4771f1e68fd522d; expected 0000000000000000000000000000000000000000
+   [reopen gate] record: STATUS data_dir=/var/data/cgn-w6 public_origin=https://localhost:18643 trust_proxy=1 pending_data_dir=none serving=/var/data/cgn-w6; expected data_dir=/var/data/cgn-w6, nothing pending, served /var/data/cgn-w6
+PASS N5b the reopen gate refuses a revision that isn't the expected one, and the PUBLIC side stays 503
+   [reopen gate] private probe: PROBE 2026-11-17T06:49:28.361Z UP 7097ac2bb062925bb296a129f4771f1e68fd522d; expected 7097ac2bb062925bb296a129f4771f1e68fd522d
+   [reopen gate] record: STATUS data_dir=/var/data/cgn-w6 public_origin=https://localhost:18643 trust_proxy=1 pending_data_dir=none serving=/var/data/cgn-w6; expected data_dir=/var/data/cgn-w6, nothing pending, served /var/data/cgn-w6
+PASS the reopen gate: the private probe UP on the pinned revision, the record approving the target with nothing pending, the target served; then the ingress reopens (PUBLIC /health 200)
+   PASS the access gate admits the throwaway code
+   PASS the original HOST seat works, with no rejoin — HTTP 200
+   PASS the original GUEST seat works, with no rejoin — HTTP 200
+   PASS the approved "W5 seed" entry is there
+   PASS a repeated answer to an already-restored answer is refused (ALREADY_ANSWERED) — HTTP 200 ALREADY_ANSWERED
+   PASS …and the restored answer keeps its submitted value
+   PASS a NEW answer on the restored data is acknowledged — HTTP 200
+   PASS a replay of the same event id records nothing twice (one answer, its value) — HTTP 200 accepted=true reason=
+   PASS the host has exactly its pre-backup answer and the new one — 2
+   PASS the round is played to its end: every remaining answer acknowledged — 16 sent, 0 not accepted
+   PASS the restored round finished
+   PASS a replay of the last event id after the finish is answered (it must not be recorded again: see the persisted check) — HTTP 200 accepted=true reason=
+   PASS a NEW answer to the finished game is not accepted — HTTP 200 reason=PHASE_CLOSED
+   LIVE restored OK (0 failed)
+PASS through the reopened ingress: the original seats, the approved entry, a repeated answer refused, a replay not doubled; the round played to its end; a replay after the finish and a late answer not recorded
+PASS the original folder is preserved: its fingerprint after the switch equals the one taken at the stop
+-- RETURN to the retained original after gameplay resumed on the target: a NEW backup and receipt, then an authorized switch
+   [B3] cgn-backup: stopping the server (pid 13)
+   [B3] cgn-backup: server stopped
+   [B3] backup OK: 1 room(s), 1 Memory Book(s), 3 file(s), verified
+   [B3] verify OK: 3 file(s) match the manifest of 2026-11-17T06:49:30.040Z
+   [B3] cgn-backup: hold released
+   [B3] BACKUP_OK /var/data/backups/cgn-20261117T064929Z.tar.age sha256=80070c6cc6a3405a0e468fcd296059d06a61fd8bf6f5d32e3268d95cd528d75a files=4 server_stopped_s=1
+   [chain b3] RECEIPT_OK <work>/w6-20261117T064916Z-3227a8b3/chain-b3/fetched/cgn-20261117T064929Z.tar.age sha256=80070c6cc6a3405a0e468fcd296059d06a61fd8bf6f5d32e3268d95cd528d75a files=4 copy=<private>/receive-b3/20261117T064929Z
+PASS B3 (the CURRENT data, after gameplay on the target): BACKUP_OK, then RECEIPT_OK on its fetched-back copy, before any switch back
+   PASS the restored round is FINISHED in the persisted state, with its recorded scores
+   PASS exactly one game-finished event for it — 1
+   PASS exactly one score-awarded event per player (no duplicate scoring after the replays) — 2 event(s), 2 player(s)
+   PASS every question answered exactly once per player — 10 question(s)
+   PASS each player's awarded points equal the game's recorded score AND the score recomputed from the persisted questions and answers (values not printed)
+   SCORES OK (0 failed)
+PASS the AUTHORITATIVE persisted state after the replays: the round finished once, one score-awarded event per player, each equal to the recorded and the recomputed score
+   [negative control extra-score] exit 1: FAIL exactly one score-awarded event per player (no duplicate scoring after the replays) — 3 event(s), 2 player(s)
+   [negative control changed-points] exit 1: FAIL each player's awarded points equal the game's recorded score AND the score recomputed from the persisted questions and answers (values 
+   [negative control second-finish] exit 1: FAIL exactly one game-finished event for it — 2
+PASS the score check's OWN negative controls: a synthetic extra score event, changed points and a second finish event each make it FAIL
+-- N7: after the commit, booting the PRIOR folder is refused
+PASS N7 a start on the original after the commit: exit 78, a REFUSED line, no server
+   PREPARED pending_data_dir=/var/data/cgn-w1 approved_data_dir=/var/data/cgn-w6 (the approved folder still starts with its own MCHEZO_DATA_DIR; start /var/data/cgn-w1, check it, then commit or abort before reopening)
+PASS with B3's receipt from this window, --prepare names the original as the pending folder (the target stays approved)
+PASS the return: graceful stop, one writer, the original starts as the PENDING folder
+   [private] PASS the access gate admits the throwaway code
+   [private] PASS the original HOST seat works, with no rejoin — HTTP 200
+   [private] PASS the original GUEST seat works, with no rejoin — HTTP 200
+   [private] PASS the approved "W5 seed" entry is there
+   [private] PASS the retained folder's later state is back: the post-backup answer, with its value
+   [private] PASS the host's pre-backup answer keeps its submitted value
+   [private] LIVE fallback OK (0 failed)
+   COMMITTED data_dir=/var/data/cgn-w1 (the previous folder /var/data/cgn-w6 is no longer authorized)
+   [reopen gate] private probe: PROBE 2026-11-17T06:49:34.440Z UP 7097ac2bb062925bb296a129f4771f1e68fd522d; expected 7097ac2bb062925bb296a129f4771f1e68fd522d
+   [reopen gate] record: STATUS data_dir=/var/data/cgn-w1 public_origin=https://localhost:18643 trust_proxy=1 pending_data_dir=none serving=/var/data/cgn-w1; expected data_dir=/var/data/cgn-w1, nothing pending, served /var/data/cgn-w1
+   PASS the access gate admits the throwaway code
+   PASS the original HOST seat works, with no rejoin — HTTP 200
+   PASS the original GUEST seat works, with no rejoin — HTTP 200
+   PASS the approved "W5 seed" entry is there
+   PASS the retained folder's later state is back: the post-backup answer, with its value
+   PASS the host's pre-backup answer keeps its submitted value
+   LIVE fallback OK (0 failed)
+PASS the return: checked privately, committed in maintenance, the reopen gate passed; the original's later state, the seats and the approved entry are served
+-- N6: a pending folder that breaks after its preparation fails to start; recovery is an ORDINARY start with the original environment
+   PREPARED pending_data_dir=/var/data/cgn-w6-n6 approved_data_dir=/var/data/cgn-w1 (the approved folder still starts with its own MCHEZO_DATA_DIR; start /var/data/cgn-w6-n6, check it, then commit or abort before reopening)
+   [N6 pending start] exited 2; last log lines: cgn-entrypoint: the environment matches the authorized configuration: the PENDING data folder /var/data/cgn-w6-n6 (not committed: the approved folder stays /var/data/cgn-w1; commit or abort before reopening) This user (uid 10001) can't use the data directory /var/data/cgn-w6-n6: the directory is not
+PASS N6 the broken pending folder fails to start (accepted by the guard as PENDING, then the server exits non-zero, as a failing deploy would)
+PASS N6 recovery is an ORDINARY start with the original environment: the approved original serves the pinned revision, its files unchanged; the record is byte-identical to the one --prepare wrote (no special container, no edit after the failure)
+   ABORTED pending_data_dir=/var/data/cgn-w6-n6 (no longer authorized); the approved folder stays /var/data/cgn-w1
+   [reopen gate] private probe: PROBE 2026-11-17T06:49:38.570Z UP 7097ac2bb062925bb296a129f4771f1e68fd522d; expected 7097ac2bb062925bb296a129f4771f1e68fd522d
+   [reopen gate] record: STATUS data_dir=/var/data/cgn-w1 public_origin=https://localhost:18643 trust_proxy=1 pending_data_dir=none serving=/var/data/cgn-w1; expected data_dir=/var/data/cgn-w1, nothing pending, served /var/data/cgn-w1
+PASS N6 then --abort from the approved instance, still in maintenance; the reopen gate passes (pinned revision, the original served, nothing pending)
+PASS at the end: exactly one container on the volume (no competing writer)
+-- cleanup (run 20261117T064916Z-3227a8b3)
+   cleanup #1: proxy container 52e224f050a3 volume w6-data-20261117T064916Z-3227a8b3 private-files(code,keys,sessions,decrypted-copies)
+   cleanup #2: nothing owned left to remove
+   this run's containers left: 0; volumes left: 0; processes left: 0; listeners left on 18680/18643/18644: 0; private files left: no
+   files (the kept run folder and this run's own log) holding the access code, a session token, a gate cookie or an age secret key: 0
+   checks: 46 passed, 0 failed
+W6 REHEARSAL PASSED

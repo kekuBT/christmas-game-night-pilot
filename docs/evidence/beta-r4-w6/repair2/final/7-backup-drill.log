@@ -1,0 +1,302 @@
+== focused negatives started 2026-11-17T06:54:50Z; scripts in <scratch>/w6r2/final/drill-scripts
+== repo a4bfdf925aebe3fd9801a9ad32aeb8452ec1e623 (0 uncommitted paths); runtime vs 7097ac2: 0 files differ
+== scripts: e46f23e7539e cgn-authorize.sh; accca1784e22 cgn-backup.sh; 1cc5a4362d9b cgn-entrypoint.sh; 2fb3fe903f28 cgn-receive.sh; 
+   seeded 3 rooms
+== P0 a normal backup
+   cgn-backup: stopping the server (pid 27860)
+   cgn-backup: server stopped
+   backup OK: 3 room(s), 0 Memory Book(s), 6 file(s), verified
+   verify OK: 6 file(s) match the manifest of 2026-11-17T06:54:51.277Z
+   cgn-backup: hold released
+   BACKUP_OK /tmp/cgn-r4focus-SoWm4W/var/data/backups/cgn-20261117T065451Z.tar.age sha256=c5789678191db81a575a06df830fd6483516e8ae7394a514b0d4a510e8999a58 files=7 server_stopped_s=0
+PASS P0 BACKUP_OK (exit 0), an archive, no hold, server back; new entries: 20261117T065451Z 20261117T065451Z.SHA256SUMS cgn-20261117T065451Z.tar.age 
+== X1 the archiver fails after partial output, the encryptor succeeds
+   cgn-backup: stopping the server (pid 28012)
+   cgn-backup: server stopped
+   backup OK: 3 room(s), 0 Memory Book(s), 6 file(s), verified
+   verify OK: 6 file(s) match the manifest of 2026-11-17T06:54:53.678Z
+   cgn-backup: hold released
+   tar: (stub) simulated failure after partial output
+   BACKUP_FAILED: the archiver failed
+PASS X1 BACKUP_FAILED (exit 1), no BACKUP_OK, nothing new left in the backup folder [], no hold, server back
+== X2 the encryptor fails after partial output
+   cgn-backup: stopping the server (pid 28160)
+   cgn-backup: server stopped
+   backup OK: 3 room(s), 0 Memory Book(s), 6 file(s), verified
+   verify OK: 6 file(s) match the manifest of 2026-11-17T06:54:56.056Z
+   cgn-backup: hold released
+   age: (stub) simulated encryption failure
+   BACKUP_FAILED: encryption failed
+PASS X2 BACKUP_FAILED (exit 1), no BACKUP_OK, nothing new left in the backup folder [], no hold, server back
+== X3 hashing the archive fails
+   cgn-backup: stopping the server (pid 28315)
+   cgn-backup: server stopped
+   backup OK: 3 room(s), 0 Memory Book(s), 6 file(s), verified
+   verify OK: 6 file(s) match the manifest of 2026-11-17T06:54:58.442Z
+   cgn-backup: hold released
+   sha256sum: (stub) simulated failure
+   BACKUP_FAILED: could not hash the archive
+PASS X3 BACKUP_FAILED (exit 1), no BACKUP_OK, nothing new left in the backup folder [], no hold, server back
+== X4 publishing the archive fails
+   cgn-backup: stopping the server (pid 28482)
+   cgn-backup: server stopped
+   backup OK: 3 room(s), 0 Memory Book(s), 6 file(s), verified
+   verify OK: 6 file(s) match the manifest of 2026-11-17T06:55:00.817Z
+   cgn-backup: hold released
+   mv: (stub) simulated failure
+   BACKUP_FAILED: could not publish the archive
+PASS X4 BACKUP_FAILED (exit 1), no BACKUP_OK, nothing new left in the backup folder [], no hold, server back
+== H0 two backups started at the same instant, 5 times: exactly one takes the hold each time
+   round 1: exits 0/1, BACKUP_OK x1, refused by the hold x1 (BACKUP_FAILED: another backup holds the server (/tmp/cgn-r4focus-SoWm4W/run/hold exists))
+   round 2: exits 0/1, BACKUP_OK x1, refused by the hold x1 (BACKUP_FAILED: another backup holds the server (/tmp/cgn-r4focus-SoWm4W/run/hold exists))
+   round 3: exits 0/1, BACKUP_OK x1, refused by the hold x1 (BACKUP_FAILED: another backup holds the server (/tmp/cgn-r4focus-SoWm4W/run/hold exists))
+   round 4: exits 0/1, BACKUP_OK x1, refused by the hold x1 (BACKUP_FAILED: another backup holds the server (/tmp/cgn-r4focus-SoWm4W/run/hold exists))
+   round 5: exits 0/1, BACKUP_OK x1, refused by the hold x1 (BACKUP_FAILED: another backup holds the server (/tmp/cgn-r4focus-SoWm4W/run/hold exists))
+PASS H0 in all 5 rounds, one BACKUP_OK and one refusal by the hold, and no hold left (5/5)
+== H1 a second backup while the first holds
+   B: BACKUP_FAILED: another backup holds the server (/tmp/cgn-r4focus-SoWm4W/run/hold exists)
+   A: cgn-backup: stopping the server (pid 29351)
+   A: cgn-backup: server stopped
+   A: backup OK: 3 room(s), 0 Memory Book(s), 6 file(s), verified
+   A: verify OK: 6 file(s) match the manifest of 2026-11-17T06:55:14.581Z
+   A: cgn-backup: hold released
+   A: BACKUP_OK /tmp/cgn-r4focus-SoWm4W/var/data/backups/cgn-20261117T065511Z.tar.age sha256=14dc041d5ccdd585f60dee85e6bb06cd1a6e93a779a77bd02fd5e55394bf66ba files=7 server_stopped_s=3
+PASS H1 B refused by the hold itself (exit 1); A's hold still in place after B exited (yes), server still stopped (000); A then BACKUP_OK (exit 0)
+== H2 a second backup takes the hold while the first is still encrypting
+   A: 1794898516796 cgn-backup: stopping the server (pid 29520)
+   A: 1794898516897 cgn-backup: server stopped
+   A: 1794898516981 backup OK: 3 room(s), 0 Memory Book(s), 6 file(s), verified
+   A: 1794898517048 verify OK: 6 file(s) match the manifest of 2026-11-17T06:55:16.972Z
+   A: 1794898517059 cgn-backup: hold released
+   A: 1794898521141 BACKUP_OK /tmp/cgn-r4focus-SoWm4W/var/data/backups/cgn-20261117T065516Z.tar.age sha256=efcdf8f81006a8c161fa7cfa455ecb3da00fd0d87f9603097cacea6aecbb252b files=7 server_stopped_s=1
+   B: 1794898518010 cgn-backup: run 29542-dd983275970753ec7798f856 (pid 29542) is still running: its files are left
+   B: 1794898518020 cgn-backup: stopping the server (pid 29837)
+   B: 1794898518122 cgn-backup: server stopped
+   B: 1794898522187 backup OK: 3 room(s), 0 Memory Book(s), 6 file(s), verified
+   B: 1794898522262 verify OK: 6 file(s) match the manifest of 2026-11-17T06:55:22.180Z
+   B: 1794898522269 cgn-backup: hold released
+   B: 1794898522335 BACKUP_OK /tmp/cgn-r4focus-SoWm4W/var/data/backups/cgn-20261117T065518Z.tar.age sha256=75708b433368a814ed36015b9f6eb3d6fa880e23754d9ba198c5aa2ad535b79f files=7 server_stopped_s=4
+   B stopped the server at 1794898518122, A ended at 1794898521141, B released at 1794898522269 (its hold ends at 1794898522269); samples with a live server inside B's hold: 0
+PASS H2 A ended inside B's hold, yet no server ran until B released it; both BACKUP_OK
+== H5 a second backup in the same second, after the first released but while it still encrypts
+   B: cgn-backup: run 30763-006979e1fed950e96001f4ae (pid 30763) is still running: its files are left
+BACKUP_FAILED: /tmp/cgn-r4focus-SoWm4W/var/data/backups/20991231T235959Z already exists (another backup in the same second)
+cgn-backup: hold released
+   A: cgn-backup: stopping the server (pid 30727)
+   A: cgn-backup: server stopped
+   A: backup OK: 3 room(s), 0 Memory Book(s), 6 file(s), verified
+   A: verify OK: 6 file(s) match the manifest of 2026-11-17T06:55:24.650Z
+   A: cgn-backup: hold released
+   A: BACKUP_OK /tmp/cgn-r4focus-SoWm4W/var/data/backups/cgn-20991231T235959Z.tar.age sha256=22338edb8fc491ed9e1bfebb84758d268106525bee49c49a6facfb05f0fb5719 files=7 server_stopped_s=0
+PASS H5 B refused (exit 1) without touching A's files; A BACKUP_OK (exit 0) with its copy, checksum list and archive intact
+== H3 an abandoned session: the backup killed outright while it holds
+<scratch>/w6r2/final/focused.sh: line 188: 30953 Killed                  STUB="timeout-slow=6" setsid sh -c 'exec env PATH="$0:$1" CGN_REAL_PATH="$1" CGN_STUB="$2" sh "$3"' "$T/stubs" "$REAL_PATH" "timeout-slow=6" "$D/deploy/cgn-backup.sh" > "$T/h3.log" 2>&1
+   cgn-backup: stopping the server (pid 30890)
+   cgn-backup: server stopped
+   backup OK: 3 room(s), 0 Memory Book(s), 6 file(s), verified
+   entrypoint: [restore] 3 room(s) restored, 0 not loaded (data: /tmp/cgn-r4focus-SoWm4W/var/data/cgn)
+   entrypoint: Christmas Game Night server on http://localhost:42861 (web app at / after npm run build:web)
+   entrypoint: Listening on 127.0.0.1; public origin http://127.0.0.1:42861.
+   reconcile: cgn-backup: reconciled an abandoned run (token 30953-433d2b0cd8ecc4af06b38248, pid 30953): its recorded files removed cgn-backup: hold released RECONCILED removed=1 kept=0 
+PASS H3 server back 6599 ms after the session was killed (yes); no BACKUP_OK, no hold; after reconciliation nothing left in the backup folder []
+== H4 an interrupted session: SIGHUP to the session's process group while it holds
+   cgn-backup: stopping the server (pid 31842)
+   cgn-backup: server stopped
+   Hangup
+   BACKUP_FAILED: interrupted
+   cgn-backup: hold released
+PASS H4 server back 1114 ms after the hang-up (yes); no BACKUP_OK, no hold, nothing left in the backup folder []
+== K: the neighbouring successful backup is cgn-20261117T065451Z.tar.age (fingerprint 3196a455a2ef51ea)
+== K1a killed outright at the copy checkpoint (shell)
+   K1a at the checkpoint, new in the backup folder: [.cgn-run-20261117T065545Z 20261117T065545Z ]
+<scratch>/w6r2/final/focused.sh: line 217: 32230 Killed                  setsid env PATH="$T/stubs:$REAL_PATH" CGN_REAL_PATH="$REAL_PATH" CGN_STUB="$mode" CGN_CHECKPOINT="$ck" CGN_BACKUP_LIMIT_S="$lim" sh "$D/deploy/cgn-backup.sh" > "$log" 2>&1
+   K1a reconcile at once: BACKUP_FAILED: another backup holds the server (/tmp/cgn-r4focus-SoWm4W/run/hold exists) 
+   K1a reconcile after: cgn-backup: reconciled an abandoned run (token 32230-840e5b647329cc9e24cffe24, pid 32230): its recorded files removed cgn-backup: hold released RECONCILED removed=1 kept=0 
+   K1a backup: cgn-backup: stopping the server (pid 32182)
+   K1a backup: cgn-backup: server stopped
+   K1a left after the first reconcile: [.cgn-run-20261117T065545Z 20261117T065545Z ]; after the second: []; server back after 8774 ms (yes)
+PASS K1a files existed at the checkpoint (yes); no BACKUP_OK; server back in 8774 ms; the run's files removed by reconciliation [left: ]; no hold; neighbour intact
+PASS K1a while the copy still ran, reconciliation was refused or deferred and the files stayed [.cgn-run-20261117T065545Z 20261117T065545Z ]
+== K1b killed outright at the copy checkpoint (group)
+   K1b at the checkpoint, new in the backup folder: [.cgn-run-20261117T065556Z 20261117T065556Z ]
+<scratch>/w6r2/final/focused.sh: line 217:  1766 Killed                  setsid env PATH="$T/stubs:$REAL_PATH" CGN_REAL_PATH="$REAL_PATH" CGN_STUB="$mode" CGN_CHECKPOINT="$ck" CGN_BACKUP_LIMIT_S="$lim" sh "$D/deploy/cgn-backup.sh" > "$log" 2>&1
+   K1b reconcile at once: BACKUP_FAILED: another backup holds the server (/tmp/cgn-r4focus-SoWm4W/run/hold exists) 
+   K1b reconcile after: cgn-backup: reconciled an abandoned run (token 1766-837bd49e0b9131240c1eb69f, pid 1766): its recorded files removed cgn-backup: hold released RECONCILED removed=1 kept=0 
+   K1b backup: cgn-backup: stopping the server (pid 945)
+   K1b backup: cgn-backup: server stopped
+   K1b left after the first reconcile: [.cgn-run-20261117T065556Z 20261117T065556Z ]; after the second: []; server back after 8477 ms (yes)
+PASS K1b files existed at the checkpoint (yes); no BACKUP_OK; server back in 8477 ms; the run's files removed by reconciliation [left: ]; no hold; neighbour intact
+PASS K1b while the copy still ran, reconciliation was refused or deferred and the files stayed [.cgn-run-20261117T065556Z 20261117T065556Z ]
+== K2a killed outright at the encryption checkpoint (shell)
+   K2a at the checkpoint, new in the backup folder: [.cgn-20261117T065606Z.list .cgn-20261117T065606Z.tar.age.part .cgn-20261117T065606Z.tar.tmp .cgn-20261117T065606Z.tarlist .cgn-run-20261117T065606Z 20261117T065606Z 20261117T065606Z.SHA256SUMS ]
+<scratch>/w6r2/final/focused.sh: line 217:  3272 Killed                  setsid env PATH="$T/stubs:$REAL_PATH" CGN_REAL_PATH="$REAL_PATH" CGN_STUB="$mode" CGN_CHECKPOINT="$ck" CGN_BACKUP_LIMIT_S="$lim" sh "$D/deploy/cgn-backup.sh" > "$log" 2>&1
+   K2a reconcile at once: cgn-backup: run 3272-ce5e3cc4962ab9c333b3c542 (pid 3272) is still running: its files are left cgn-backup: hold released RECONCILED removed=0 kept=1 
+   K2a ending the run's leftover processes: 3369
+   K2a reconcile after: cgn-backup: reconciled an abandoned run (token 3272-ce5e3cc4962ab9c333b3c542, pid 3272): its recorded files removed cgn-backup: hold released RECONCILED removed=1 kept=0 
+   K2a backup: cgn-backup: stopping the server (pid 2448)
+   K2a backup: cgn-backup: server stopped
+   K2a backup: backup OK: 3 room(s), 0 Memory Book(s), 6 file(s), verified
+   K2a backup: verify OK: 6 file(s) match the manifest of 2026-11-17T06:56:07.031Z
+   K2a backup: cgn-backup: hold released
+   K2a left after the first reconcile: [.cgn-20261117T065606Z.list .cgn-20261117T065606Z.tar.age.part .cgn-20261117T065606Z.tar.tmp .cgn-20261117T065606Z.tarlist .cgn-run-20261117T065606Z 20261117T065606Z 20261117T065606Z.SHA256SUMS ]; after the second: []; server back after 857 ms (yes)
+PASS K2a files existed at the checkpoint (yes); no BACKUP_OK; server back in 857 ms; the run's files removed by reconciliation [left: ]; no hold; neighbour intact
+PASS K2a while the encryptor still ran, reconciliation left the run's files [.cgn-20261117T065606Z.list .cgn-20261117T065606Z.tar.age.part .cgn-20261117T065606Z.tar.tmp .cgn-20261117T065606Z.tarlist .cgn-run-20261117T065606Z 20261117T065606Z 20261117T065606Z.SHA256SUMS ]
+== K2b killed outright at the encryption checkpoint (group)
+   K2b at the checkpoint, new in the backup folder: [.cgn-20261117T065623Z.list .cgn-20261117T065623Z.tar.age.part .cgn-20261117T065623Z.tar.tmp .cgn-20261117T065623Z.tarlist .cgn-run-20261117T065623Z 20261117T065623Z 20261117T065623Z.SHA256SUMS ]
+<scratch>/w6r2/final/focused.sh: line 217: 17853 Killed                  setsid env PATH="$T/stubs:$REAL_PATH" CGN_REAL_PATH="$REAL_PATH" CGN_STUB="$mode" CGN_CHECKPOINT="$ck" CGN_BACKUP_LIMIT_S="$lim" sh "$D/deploy/cgn-backup.sh" > "$log" 2>&1
+   K2b reconcile at once: cgn-backup: reconciled an abandoned run (token 17853-09ba985f2047c4f7f07c8b97, pid 17853): its recorded files removed cgn-backup: hold released RECONCILED removed=1 kept=0 
+   K2b reconcile after: cgn-backup: hold released RECONCILED removed=0 kept=0 
+   K2b backup: cgn-backup: stopping the server (pid 3513)
+   K2b backup: cgn-backup: server stopped
+   K2b backup: backup OK: 3 room(s), 0 Memory Book(s), 6 file(s), verified
+   K2b backup: verify OK: 6 file(s) match the manifest of 2026-11-17T06:56:23.851Z
+   K2b backup: cgn-backup: hold released
+   K2b left after the first reconcile: []; after the second: []; server back after 871 ms (yes)
+PASS K2b files existed at the checkpoint (yes); no BACKUP_OK; server back in 871 ms; the run's files removed by reconciliation [left: ]; no hold; neighbour intact
+== K3 reconciliation while a healthy backup is still encrypting
+   reconcile: cgn-backup: run 18832-c22cb04f3721af726039eaed (pid 18832) is still running: its files are left cgn-backup: hold released RECONCILED removed=0 kept=1 
+   A: cgn-backup: stopping the server (pid 18207)
+   A: cgn-backup: server stopped
+   A: backup OK: 3 room(s), 0 Memory Book(s), 6 file(s), verified
+   A: verify OK: 6 file(s) match the manifest of 2026-11-17T06:56:26.613Z
+   A: cgn-backup: hold released
+   A: BACKUP_OK /tmp/cgn-r4focus-SoWm4W/var/data/backups/cgn-20261117T065626Z.tar.age sha256=1b1d6783c53410802b89afe3bdd345ed156bd7596222cb5c13d6f86a6a624d67 files=7 server_stopped_s=0
+PASS K3 the running backup was left alone (reported still running), then BACKUP_OK (exit 0) with its archive intact; neighbour intact
+== entrypoint log
+   cgn-entrypoint: WARNING first install: no authorized configuration yet and no data; run cgn-authorize after the acceptance checks
+   Christmas Game Night server on http://localhost:42861 (web app at / after npm run build:web)
+   Listening on 127.0.0.1; public origin http://127.0.0.1:42861.
+   received SIGTERM, closing server
+   cgn-entrypoint: server stopped for a backup (exit 0); holding until the backup ends
+   cgn-entrypoint: WARNING first install: still no authorized configuration; run cgn-authorize after the acceptance checks
+   [restore] 3 room(s) restored, 0 not loaded (data: /tmp/cgn-r4focus-SoWm4W/var/data/cgn)
+   Christmas Game Night server on http://localhost:42861 (web app at / after npm run build:web)
+   Listening on 127.0.0.1; public origin http://127.0.0.1:42861.
+   received SIGTERM, closing server
+   cgn-entrypoint: server stopped for a backup (exit 0); holding until the backup ends
+   cgn-entrypoint: WARNING first install: still no authorized configuration; run cgn-authorize after the acceptance checks
+   [restore] 3 room(s) restored, 0 not loaded (data: /tmp/cgn-r4focus-SoWm4W/var/data/cgn)
+   Christmas Game Night server on http://localhost:42861 (web app at / after npm run build:web)
+   Listening on 127.0.0.1; public origin http://127.0.0.1:42861.
+   received SIGTERM, closing server
+   cgn-entrypoint: server stopped for a backup (exit 0); holding until the backup ends
+   cgn-entrypoint: WARNING first install: still no authorized configuration; run cgn-authorize after the acceptance checks
+   [restore] 3 room(s) restored, 0 not loaded (data: /tmp/cgn-r4focus-SoWm4W/var/data/cgn)
+   Christmas Game Night server on http://localhost:42861 (web app at / after npm run build:web)
+   Listening on 127.0.0.1; public origin http://127.0.0.1:42861.
+   received SIGTERM, closing server
+   cgn-entrypoint: server stopped for a backup (exit 0); holding until the backup ends
+   cgn-entrypoint: WARNING first install: still no authorized configuration; run cgn-authorize after the acceptance checks
+   [restore] 3 room(s) restored, 0 not loaded (data: /tmp/cgn-r4focus-SoWm4W/var/data/cgn)
+   Christmas Game Night server on http://localhost:42861 (web app at / after npm run build:web)
+   Listening on 127.0.0.1; public origin http://127.0.0.1:42861.
+   received SIGTERM, closing server
+   cgn-entrypoint: server stopped for a backup (exit 0); holding until the backup ends
+   cgn-entrypoint: WARNING first install: still no authorized configuration; run cgn-authorize after the acceptance checks
+   [restore] 3 room(s) restored, 0 not loaded (data: /tmp/cgn-r4focus-SoWm4W/var/data/cgn)
+   Christmas Game Night server on http://localhost:42861 (web app at / after npm run build:web)
+   Listening on 127.0.0.1; public origin http://127.0.0.1:42861.
+   received SIGTERM, closing server
+   cgn-entrypoint: server stopped for a backup (exit 0); holding until the backup ends
+   cgn-entrypoint: WARNING first install: still no authorized configuration; run cgn-authorize after the acceptance checks
+   [restore] 3 room(s) restored, 0 not loaded (data: /tmp/cgn-r4focus-SoWm4W/var/data/cgn)
+   Christmas Game Night server on http://localhost:42861 (web app at / after npm run build:web)
+   Listening on 127.0.0.1; public origin http://127.0.0.1:42861.
+   received SIGTERM, closing server
+   cgn-entrypoint: server stopped for a backup (exit 0); holding until the backup ends
+   cgn-entrypoint: WARNING first install: still no authorized configuration; run cgn-authorize after the acceptance checks
+   [restore] 3 room(s) restored, 0 not loaded (data: /tmp/cgn-r4focus-SoWm4W/var/data/cgn)
+   Christmas Game Night server on http://localhost:42861 (web app at / after npm run build:web)
+   Listening on 127.0.0.1; public origin http://127.0.0.1:42861.
+   received SIGTERM, closing server
+   cgn-entrypoint: server stopped for a backup (exit 0); holding until the backup ends
+   cgn-entrypoint: WARNING first install: still no authorized configuration; run cgn-authorize after the acceptance checks
+   [restore] 3 room(s) restored, 0 not loaded (data: /tmp/cgn-r4focus-SoWm4W/var/data/cgn)
+   Christmas Game Night server on http://localhost:42861 (web app at / after npm run build:web)
+   Listening on 127.0.0.1; public origin http://127.0.0.1:42861.
+   received SIGTERM, closing server
+   cgn-entrypoint: server stopped for a backup (exit 0); holding until the backup ends
+   cgn-entrypoint: WARNING first install: still no authorized configuration; run cgn-authorize after the acceptance checks
+   [restore] 3 room(s) restored, 0 not loaded (data: /tmp/cgn-r4focus-SoWm4W/var/data/cgn)
+   Christmas Game Night server on http://localhost:42861 (web app at / after npm run build:web)
+   Listening on 127.0.0.1; public origin http://127.0.0.1:42861.
+   received SIGTERM, closing server
+   cgn-entrypoint: server stopped for a backup (exit 0); holding until the backup ends
+   cgn-entrypoint: WARNING first install: still no authorized configuration; run cgn-authorize after the acceptance checks
+   [restore] 3 room(s) restored, 0 not loaded (data: /tmp/cgn-r4focus-SoWm4W/var/data/cgn)
+   Christmas Game Night server on http://localhost:42861 (web app at / after npm run build:web)
+   Listening on 127.0.0.1; public origin http://127.0.0.1:42861.
+   received SIGTERM, closing server
+   cgn-entrypoint: server stopped for a backup (exit 0); holding until the backup ends
+   cgn-entrypoint: WARNING first install: still no authorized configuration; run cgn-authorize after the acceptance checks
+   [restore] 3 room(s) restored, 0 not loaded (data: /tmp/cgn-r4focus-SoWm4W/var/data/cgn)
+   Christmas Game Night server on http://localhost:42861 (web app at / after npm run build:web)
+   Listening on 127.0.0.1; public origin http://127.0.0.1:42861.
+   received SIGTERM, closing server
+   cgn-entrypoint: server stopped for a backup (exit 0); holding until the backup ends
+   cgn-entrypoint: WARNING first install: still no authorized configuration; run cgn-authorize after the acceptance checks
+   [restore] 3 room(s) restored, 0 not loaded (data: /tmp/cgn-r4focus-SoWm4W/var/data/cgn)
+   Christmas Game Night server on http://localhost:42861 (web app at / after npm run build:web)
+   Listening on 127.0.0.1; public origin http://127.0.0.1:42861.
+   received SIGTERM, closing server
+   cgn-entrypoint: server stopped for a backup (exit 0); holding until the backup ends
+   cgn-entrypoint: WARNING first install: still no authorized configuration; run cgn-authorize after the acceptance checks
+   [restore] 3 room(s) restored, 0 not loaded (data: /tmp/cgn-r4focus-SoWm4W/var/data/cgn)
+   Christmas Game Night server on http://localhost:42861 (web app at / after npm run build:web)
+   Listening on 127.0.0.1; public origin http://127.0.0.1:42861.
+   received SIGTERM, closing server
+   cgn-entrypoint: server stopped for a backup (exit 0); holding until the backup ends
+   cgn-entrypoint: WARNING first install: still no authorized configuration; run cgn-authorize after the acceptance checks
+   [restore] 3 room(s) restored, 0 not loaded (data: /tmp/cgn-r4focus-SoWm4W/var/data/cgn)
+   Christmas Game Night server on http://localhost:42861 (web app at / after npm run build:web)
+   Listening on 127.0.0.1; public origin http://127.0.0.1:42861.
+   received SIGTERM, closing server
+   cgn-entrypoint: server stopped for a backup (exit 0); holding until the backup ends
+   cgn-entrypoint: the hold's owner (pid 30953) is gone, but a process it started still runs: waiting
+   cgn-entrypoint: releasing a stale hold (its owner, pid 30953, is gone)
+   cgn-entrypoint: WARNING first install: still no authorized configuration; run cgn-authorize after the acceptance checks
+   [restore] 3 room(s) restored, 0 not loaded (data: /tmp/cgn-r4focus-SoWm4W/var/data/cgn)
+   Christmas Game Night server on http://localhost:42861 (web app at / after npm run build:web)
+   Listening on 127.0.0.1; public origin http://127.0.0.1:42861.
+   received SIGTERM, closing server
+   cgn-entrypoint: server stopped for a backup (exit 0); holding until the backup ends
+   cgn-entrypoint: WARNING first install: still no authorized configuration; run cgn-authorize after the acceptance checks
+   [restore] 3 room(s) restored, 0 not loaded (data: /tmp/cgn-r4focus-SoWm4W/var/data/cgn)
+   Christmas Game Night server on http://localhost:42861 (web app at / after npm run build:web)
+   Listening on 127.0.0.1; public origin http://127.0.0.1:42861.
+   received SIGTERM, closing server
+   cgn-entrypoint: server stopped for a backup (exit 0); holding until the backup ends
+   cgn-entrypoint: the hold's owner (pid 32230) is gone, but a process it started still runs: waiting
+   cgn-entrypoint: releasing a stale hold (its owner, pid 32230, is gone)
+   cgn-entrypoint: WARNING first install: still no authorized configuration; run cgn-authorize after the acceptance checks
+   [restore] 3 room(s) restored, 0 not loaded (data: /tmp/cgn-r4focus-SoWm4W/var/data/cgn)
+   Christmas Game Night server on http://localhost:42861 (web app at / after npm run build:web)
+   Listening on 127.0.0.1; public origin http://127.0.0.1:42861.
+   received SIGTERM, closing server
+   cgn-entrypoint: server stopped for a backup (exit 0); holding until the backup ends
+   cgn-entrypoint: the hold's owner (pid 1766) is gone, but a process it started still runs: waiting
+   cgn-entrypoint: releasing a stale hold (its owner, pid 1766, is gone)
+   cgn-entrypoint: WARNING first install: still no authorized configuration; run cgn-authorize after the acceptance checks
+   [restore] 3 room(s) restored, 0 not loaded (data: /tmp/cgn-r4focus-SoWm4W/var/data/cgn)
+   Christmas Game Night server on http://localhost:42861 (web app at / after npm run build:web)
+   Listening on 127.0.0.1; public origin http://127.0.0.1:42861.
+   received SIGTERM, closing server
+   cgn-entrypoint: server stopped for a backup (exit 0); holding until the backup ends
+   cgn-entrypoint: WARNING first install: still no authorized configuration; run cgn-authorize after the acceptance checks
+   [restore] 3 room(s) restored, 0 not loaded (data: /tmp/cgn-r4focus-SoWm4W/var/data/cgn)
+   Christmas Game Night server on http://localhost:42861 (web app at / after npm run build:web)
+   Listening on 127.0.0.1; public origin http://127.0.0.1:42861.
+   received SIGTERM, closing server
+   cgn-entrypoint: server stopped for a backup (exit 0); holding until the backup ends
+   cgn-entrypoint: WARNING first install: still no authorized configuration; run cgn-authorize after the acceptance checks
+   [restore] 3 room(s) restored, 0 not loaded (data: /tmp/cgn-r4focus-SoWm4W/var/data/cgn)
+   Christmas Game Night server on http://localhost:42861 (web app at / after npm run build:web)
+   Listening on 127.0.0.1; public origin http://127.0.0.1:42861.
+   received SIGTERM, closing server
+   cgn-entrypoint: server stopped for a backup (exit 0); holding until the backup ends
+   cgn-entrypoint: WARNING first install: still no authorized configuration; run cgn-authorize after the acceptance checks
+   [restore] 3 room(s) restored, 0 not loaded (data: /tmp/cgn-r4focus-SoWm4W/var/data/cgn)
+   Christmas Game Night server on http://localhost:42861 (web app at / after npm run build:web)
+   Listening on 127.0.0.1; public origin http://127.0.0.1:42861.
+== focused negatives finished 2026-11-17T06:56:30Z: 19 passed, 0 failed
+FOCUSED PASSED (exit 0)
