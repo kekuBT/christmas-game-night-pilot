@@ -36,13 +36,14 @@ function startServer(publicOrigin) {
   const env = { ...process.env, NODE_ENV: "production", PORT: "0", MCHEZO_LISTEN_HOST: "127.0.0.1", MCHEZO_DATA_DIR: data,
     MCHEZO_PUBLIC_ORIGIN: publicOrigin, MCHEZO_BETA_ACCESS_CODE: CODE, MCHEZO_BUILD_REVISION: "origin-cases" };
   for (const k of ["MCHEZO_TRUST_PROXY", "CODESPACE_NAME", "GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN"]) delete env[k];
-  const p = spawn(join(ROOT, "node_modules/.bin/tsx"), ["src/server/serve.ts"], { cwd: ROOT, env, stdio: ["ignore", "pipe", "pipe"] });
+  // `node --import tsx`, not the tsx command: its IPC pipe failed with EADDRINUSE under a long temp path (final/run1).
+  const p = spawn(process.execPath, ["--import", "tsx", "src/server/serve.ts"], { cwd: ROOT, env, stdio: ["ignore", "pipe", "pipe"] });
   let out = "";
   return new Promise((ok, bad) => {
     const t = setTimeout(() => bad(new Error(`server didn't start: ${out.slice(-400)}`)), 30000);
     const on = (d) => { out += d; const m = /server on http:\/\/localhost:(\d+)/.exec(out); if (m) { clearTimeout(t); ok({ p, port: Number(m[1]), data, log: () => out }); } };
     p.stdout.on("data", on); p.stderr.on("data", on);
-    p.once("exit", (c) => { clearTimeout(t); bad(new Error(`server exited ${c}: ${out.slice(-400)}`)); });
+    p.once("exit", (c) => { clearTimeout(t); rmSync(data, { recursive: true, force: true }); bad(new Error(`server exited ${c}: ${out.slice(-400)}`)); });
   });
 }
 async function stopServer(s) { const e = new Promise((r) => s.p.once("exit", r)); s.p.kill("SIGTERM"); await e; rmSync(s.data, { recursive: true, force: true }); }

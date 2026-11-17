@@ -1,0 +1,8 @@
+run started 2026-11-17T19:01:14Z on a clean checkout of ba33d03ddc5880a9a084337fe23430de07b2a6d1 (tracked changes: 0); node v22.16.0
+
+== C0: MCHEZO_PUBLIC_ORIGIN=https://cs-example-3157.app.github.dev, requests sent directly
+FAIL the run completed -> Error: server exited 1: <repo>/node_modules/tsx/dist/cli.mjs:53:32152) |     at async file://<repo>/node_modules/tsx/dist/cli.mjs:55:542 { |   code: 'EADDRINUSE',
+
+ORIGIN CASES: 1 check(s) FAILED
+exit 1
+run ended 2026-11-17T19:01:14Z
