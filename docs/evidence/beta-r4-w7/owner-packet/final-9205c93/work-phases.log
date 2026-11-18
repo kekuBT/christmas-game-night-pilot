@@ -1,0 +1,27 @@
+== start current at 2026-11-17T17:55:43Z: /health revision 988c53558bbbcc1545fe0ca32882f30c1970794b; origin http://127.0.0.1:3157; data <scratch>/r4p5/work/w7op-5b34be3ae989aff1bf2623c4611e6fd9/data; pid 989
+Listening on 127.0.0.1; public origin http://127.0.0.1:3157.
+== stop current at 2026-11-17T17:55:46Z: pid 989 exited; port 3157 free
+== backup before-rollback at 2026-11-17T17:55:46Z
+backup OK: 1 room(s), 1 Memory Book(s), 3 file(s), verified
+verify OK: 3 file(s) match the manifest of 2026-11-17T17:55:46.282Z
+verify OK: 3 file(s) match the manifest of 2026-11-17T17:55:46.282Z
+receipt (local surrogate: no off-host transfer): manifest SHA-256 6f2809e8459254df6350a1d57ac9827811dff31593e740a054ca0581fc0e668e
+== compat before-rollback at 2026-11-17T17:55:46Z: the PREVIOUS release (7097ac2bb062925bb296a129f4771f1e68fd522d) reads the backup
+verify OK: 3 file(s) match the manifest of 2026-11-17T17:55:46.282Z
+restore OK: 1 room(s), 1 Memory Book(s) restored and verified. Next, as the user the server runs as: datatool check --data <scratch>/r4p5/work/w7op-5b34be3ae989aff1bf2623c4611e6fd9/compat-before-rollback
+check OK: 1 room(s), 1 Memory Book(s); owned by this user (uid 0) and private; the lock and a test write worked. A server run by this user can use it.
+== start previous at 2026-11-17T17:55:47Z: /health revision 7097ac2bb062925bb296a129f4771f1e68fd522d; origin http://127.0.0.1:3157; data <scratch>/r4p5/work/w7op-5b34be3ae989aff1bf2623c4611e6fd9/data; pid 1280
+[restore] 1 room(s) restored, 0 not loaded (data: <scratch>/r4p5/work/w7op-5b34be3ae989aff1bf2623c4611e6fd9/data)
+Listening on 127.0.0.1; public origin http://127.0.0.1:3157.
+== stop previous at 2026-11-17T17:55:49Z: pid 1280 exited; port 3157 free
+== backup before-return at 2026-11-17T17:55:49Z
+backup OK: 1 room(s), 1 Memory Book(s), 3 file(s), verified
+verify OK: 3 file(s) match the manifest of 2026-11-17T17:55:49.342Z
+verify OK: 3 file(s) match the manifest of 2026-11-17T17:55:49.342Z
+receipt (local surrogate: no off-host transfer): manifest SHA-256 d572d0130d466b73003a79d841cb955086c7eac0095e4aac282cea9e9f1590e8
+== check by current at 2026-11-17T17:55:49Z
+check OK: 1 room(s), 1 Memory Book(s); owned by this user (uid 0) and private; the lock and a test write worked. A server run by this user can use it.
+== start current at 2026-11-17T17:55:50Z: /health revision 988c53558bbbcc1545fe0ca32882f30c1970794b; origin http://127.0.0.1:3157; data <scratch>/r4p5/work/w7op-5b34be3ae989aff1bf2623c4611e6fd9/data; pid 1507
+[restore] 1 room(s) restored, 0 not loaded (data: <scratch>/r4p5/work/w7op-5b34be3ae989aff1bf2623c4611e6fd9/data)
+Listening on 127.0.0.1; public origin http://127.0.0.1:3157.
+== stop current at 2026-11-17T17:55:52Z: pid 1507 exited; port 3157 free

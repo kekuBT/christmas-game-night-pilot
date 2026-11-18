@@ -1,0 +1,88 @@
+$ node scripts/check-uncertain-delivery.mjs http://localhost:39221
+# timeout 600s | worker w1 | server http://localhost:39221 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/b7w/gate-src/test-results/20261117-231232-72e9d8ba-471/server-data/w1)
+
+[+4.0s] PASS A 502 (server down, nothing committed): the phone tried three times
+[+4.0s] PASS A 502 (server down, nothing committed): every try carried the same event id — 3 tries, 1 id(s)
+[+4.0s] PASS A 502 (server down, nothing committed): the phone says it couldn't confirm it
+[+4.0s] PASS A 502 (server down, nothing committed): no raw "Request failed (502)" or status code is shown — "We couldn’t confirm that — check your connection. If it doesn’t show as in, try again."
+[+4.0s] PASS A 502 (server down, nothing committed): the line never claims it wasn't received — "We couldn’t confirm that — check your connection. If it doesn’t show as in, try again."
+[+4.0s] PASS A 502 (server down, nothing committed): not shown as in (no LOCKED IN, the answers can still be tapped)
+[+4.0s] PASS A 502 (server down, nothing committed): the server has nothing
+[+4.1s] PASS A 502 (server down, nothing committed): the answer tiles are back in place (none overlapping)
+[+4.6s] PASS A 502 (server down, nothing committed): tapping again after the restart locks it in
+[+4.6s] PASS A 502 (server down, nothing committed): the server recorded it once — 1
+[+4.6s] PASS A 502 (server down, nothing committed): the "couldn't confirm" line is gone
+[+7.5s] PASS A 503 (server down, nothing committed): the phone tried three times
+[+7.5s] PASS A 503 (server down, nothing committed): every try carried the same event id — 3 tries, 1 id(s)
+[+7.5s] PASS A 503 (server down, nothing committed): the phone says it couldn't confirm it
+[+7.5s] PASS A 503 (server down, nothing committed): no raw "Request failed (503)" or status code is shown — "We couldn’t confirm that — check your connection. If it doesn’t show as in, try again."
+[+7.5s] PASS A 503 (server down, nothing committed): the line never claims it wasn't received — "We couldn’t confirm that — check your connection. If it doesn’t show as in, try again."
+[+7.5s] PASS A 503 (server down, nothing committed): not shown as in (no LOCKED IN, the answers can still be tapped)
+[+7.5s] PASS A 503 (server down, nothing committed): the server has nothing
+[+7.7s] PASS A 503 (server down, nothing committed): the answer tiles are back in place (none overlapping)
+[+8.1s] PASS A 503 (server down, nothing committed): tapping again after the restart locks it in
+[+8.1s] PASS A 503 (server down, nothing committed): the server recorded it once — 1
+[+8.1s] PASS A 503 (server down, nothing committed): the "couldn't confirm" line is gone
+[+11.0s] PASS A 504 (server down, nothing committed): the phone tried three times
+[+11.0s] PASS A 504 (server down, nothing committed): every try carried the same event id — 3 tries, 1 id(s)
+[+11.0s] PASS A 504 (server down, nothing committed): the phone says it couldn't confirm it
+[+11.0s] PASS A 504 (server down, nothing committed): no raw "Request failed (504)" or status code is shown — "We couldn’t confirm that — check your connection. If it doesn’t show as in, try again."
+[+11.0s] PASS A 504 (server down, nothing committed): the line never claims it wasn't received — "We couldn’t confirm that — check your connection. If it doesn’t show as in, try again."
+[+11.0s] PASS A 504 (server down, nothing committed): not shown as in (no LOCKED IN, the answers can still be tapped)
+[+11.0s] PASS A 504 (server down, nothing committed): the server has nothing
+[+11.2s] PASS A 504 (server down, nothing committed): the answer tiles are back in place (none overlapping)
+[+11.6s] PASS A 504 (server down, nothing committed): tapping again after the restart locks it in
+[+11.6s] PASS A 504 (server down, nothing committed): the server recorded it once — 1
+[+11.6s] PASS A 504 (server down, nothing committed): the "couldn't confirm" line is gone
+[+14.4s] PASS B 502 (committed, reply lost): the phone tried three times
+[+14.4s] PASS B 502 (committed, reply lost): every try carried the same event id — 3 tries, 1 id(s)
+[+14.4s] PASS B 502 (committed, reply lost): the server recorded it exactly once — 1
+[+14.4s] PASS B 502 (committed, reply lost): no raw "Request failed (502)" is shown — ""
+[+14.4s] PASS B 502 (committed, reply lost): the screen shows the server's state: LOCKED IN
+[+14.5s] PASS B 502 (committed, reply lost): the line says it went through (the server's list of this player's accepted actions)
+[+14.5s] PASS B 502 (committed, reply lost): replaying the same request returns the original result — {"accepted":true,"result":{"gameStatus":"playing"}}
+[+14.5s] PASS B 502 (committed, reply lost): a fresh tap for the same answer doesn't count twice — 1
+[+16.9s] PASS E 502 {"error":"Bad Gateway"} (gateway JSON, server down): the phone tried three times
+[+16.9s] PASS E 502 {"error":"Bad Gateway"} (gateway JSON, server down): every try carried the same event id — 3 tries, 1 id(s)
+[+16.9s] PASS E 502 {"error":"Bad Gateway"} (gateway JSON, server down): the phone says it couldn't confirm it
+[+16.9s] PASS E 502 {"error":"Bad Gateway"} (gateway JSON, server down): the gateway's text, a raw "Request failed" or a status code is never shown — "We couldn’t confirm that — check your connection. If it doesn’t show as in, try again."
+[+16.9s] PASS E 502 {"error":"Bad Gateway"} (gateway JSON, server down): not shown as in (no LOCKED IN, the answers can still be tapped)
+[+16.9s] PASS E 502 {"error":"Bad Gateway"} (gateway JSON, server down): the server has nothing
+[+17.1s] PASS E 502 {"error":"Bad Gateway"} (gateway JSON, server down): the answer tiles are back in place (none overlapping)
+[+17.5s] PASS E 502 {"error":"Bad Gateway"} (gateway JSON, server down): tapping again after the restart locks it in
+[+17.5s] PASS E 502 {"error":"Bad Gateway"} (gateway JSON, server down): the server recorded it once — 1
+[+17.5s] PASS E 502 {"error":"Bad Gateway"} (gateway JSON, server down): the "couldn't confirm" line is gone
+[+20.4s] PASS E 503 {"code":"SERVICE_UNAVAILABLE"} (gateway JSON, server down): the phone tried three times
+[+20.4s] PASS E 503 {"code":"SERVICE_UNAVAILABLE"} (gateway JSON, server down): every try carried the same event id — 3 tries, 1 id(s)
+[+20.4s] PASS E 503 {"code":"SERVICE_UNAVAILABLE"} (gateway JSON, server down): the phone says it couldn't confirm it
+[+20.4s] PASS E 503 {"code":"SERVICE_UNAVAILABLE"} (gateway JSON, server down): the gateway's text, a raw "Request failed" or a status code is never shown — "We couldn’t confirm that — check your connection. If it doesn’t show as in, try again."
+[+20.4s] PASS E 503 {"code":"SERVICE_UNAVAILABLE"} (gateway JSON, server down): not shown as in (no LOCKED IN, the answers can still be tapped)
+[+20.4s] PASS E 503 {"code":"SERVICE_UNAVAILABLE"} (gateway JSON, server down): the server has nothing
+[+21.5s] PASS E 503 {"code":"SERVICE_UNAVAILABLE"} (gateway JSON, server down): tapping again after the restart locks it in
+[+21.5s] PASS E 503 {"code":"SERVICE_UNAVAILABLE"} (gateway JSON, server down): the server recorded it once — 1
+[+21.5s] PASS E 503 {"code":"SERVICE_UNAVAILABLE"} (gateway JSON, server down): the "couldn't confirm" line is gone
+[+23.9s] PASS E 504 {"reason":"upstream timeout"} (gateway JSON, server down): the phone tried three times
+[+23.9s] PASS E 504 {"reason":"upstream timeout"} (gateway JSON, server down): every try carried the same event id — 3 tries, 1 id(s)
+[+23.9s] PASS E 504 {"reason":"upstream timeout"} (gateway JSON, server down): the phone says it couldn't confirm it
+[+23.9s] PASS E 504 {"reason":"upstream timeout"} (gateway JSON, server down): the gateway's text, a raw "Request failed" or a status code is never shown — "We couldn’t confirm that — check your connection. If it doesn’t show as in, try again."
+[+23.9s] PASS E 504 {"reason":"upstream timeout"} (gateway JSON, server down): not shown as in (no LOCKED IN, the answers can still be tapped)
+[+23.9s] PASS E 504 {"reason":"upstream timeout"} (gateway JSON, server down): the server has nothing
+[+25.0s] PASS E 504 {"reason":"upstream timeout"} (gateway JSON, server down): tapping again after the restart locks it in
+[+25.0s] PASS E 504 {"reason":"upstream timeout"} (gateway JSON, server down): the server recorded it once — 1
+[+25.0s] PASS E 504 {"reason":"upstream timeout"} (gateway JSON, server down): the "couldn't confirm" line is gone
+[+27.3s] PASS E-committed 502 {"error":"Bad Gateway"} (gateway JSON, reply lost after the server recorded it): the phone tried three times
+[+27.3s] PASS E-committed 502 {"error":"Bad Gateway"} (gateway JSON, reply lost after the server recorded it): every try carried the same event id — 3 tries, 1 id(s)
+[+27.3s] PASS E-committed 502 {"error":"Bad Gateway"} (gateway JSON, reply lost after the server recorded it): the server recorded it exactly once — 1
+[+27.3s] PASS E-committed 502 {"error":"Bad Gateway"} (gateway JSON, reply lost after the server recorded it): the screen shows the server's state: LOCKED IN
+[+27.3s] PASS E-committed 502 {"error":"Bad Gateway"} (gateway JSON, reply lost after the server recorded it): the line says it went through, and the gateway's text is not on screen
+[+27.4s] PASS E-committed 502 {"error":"Bad Gateway"} (gateway JSON, reply lost after the server recorded it): a fresh tap for the same answer doesn't count twice — 1
+[+29.7s] PASS C 503 with the app's own error: the typed error keeps its own wording
+[+29.7s] PASS C 503 with the app's own error: it is not turned into "couldn't confirm" — "We could not bring you back into your seat — rejoin with the room code."
+[+29.7s] PASS C 503 with the app's own error: the server has nothing
+[+31.1s] PASS D a real app rejection (UNKNOWN_QUESTION): the server's reason keeps its wording
+[+31.1s] PASS D a real app rejection (UNKNOWN_QUESTION): it is not turned into "couldn't confirm" — "That question is no longer open."
+[+31.1s] PASS D a real app rejection (UNKNOWN_QUESTION): nothing is recorded
+[+31.1s] UNCERTAIN DELIVERY ALL PASSED
+[+31.1s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":10,"pages":10,"peakOpenPages":1}
+
+# PASS (exit 0) in 31.1s | cpu 4.8s, peak memory 365 MB

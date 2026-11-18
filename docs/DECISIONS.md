@@ -2357,3 +2357,62 @@ Handoff 6813167965 (with the Stage 9.2 clearance). Spec: `docs/stage9/stage93.md
     - **Changing the server or the retry count:** out of scope, and not needed.
   - **The release pin `7097ac2` is unchanged** until an explicit candidate review.
 
+
+## Beta R4 W7: the owner-run browser test packet (handoff 6954764073; docs/beta/w7-owner-test-packet.md)
+- **D-R4W7-01 The packet's previous phase is a local rebuild of `7097ac2`, checked against the audited inventory.**
+  - **The pair:** the current phase is `988c535`, the runtime review candidate. The previous phase is `7097ac2`, rebuilt locally. Its 144-file inventory must equal the audited `fe6d74f8…`, and `prepare` refuses to serve otherwise.
+  - **Why:**
+    - `7097ac2` is the real rollback target;
+    - its files can be checked against the audited record;
+    - it has the same server as `988c535` (`git diff 7097ac2 988c535 -- src` is empty). Compatibility is still checked (`compat`, `check`).
+  - **Its label:** a LOCAL SURROGATE pair, since the current side is an unaudited local pack. It can't clear B-W7-01.
+  - **Alternatives:**
+    - **The rehearsal's `f93e9cb` surrogate:** rejected. It has no audited identity to check, and it isn't the rollback target.
+    - **The audited archive bytes `a693c543…`, where the operator holds them:** better, but not implemented. The tool builds from source, and `prepare`'s inventory check covers the same files.
+  - **Reversible:** the pair is two constants in `scripts/beta/w7-owner-preview.sh`.
+- **D-R4W7-02 The operator tool deletes only what it recorded creating** (review 6955337359, P1 and P2).
+  - **The record:** `prepare` first writes `<work>/.w7op-owner`, mode 600, holding a marker, the canonical root and a token. Every resource is registered in it **before** it is created.
+  - **Every other command refuses** a folder without that record, or one whose record is a symlink, belongs to another user, isn't mode 600, or names another root.
+  - **`cleanup`** removes only recorded entries whose names are on a fixed list. It never removes a symlink, `src/`, `evidence/` or the record. It reports `REFUSED` with a non-zero exit, but still removes the safe entries, the code first.
+  - **`W7OP_LOCAL_TEST=1` is refused before anything** whenever any Codespaces variable is set.
+  - **Why:** a mistyped work folder must never cost another checkout its data, and an interrupted `prepare` must never strand the code.
+  - **Alternatives rejected:**
+    - **checking only for `src/.git`** (the defect itself);
+    - **refusing the whole cleanup on one bad entry:** that would strand the code;
+    - **a local-test flag that's merely ignored in a Codespace:** a silent mode change is worse than a refusal.
+- **D-R4W7-03 One exclusive run folder, identified, then retired** (review 6955682854; it supersedes D-R4W7-02's per-entry inventory).
+  - **The folder:** `prepare` creates `<work>/w7op-<token>` with a plain `mkdir`. It writes a token file inside it, and records the folder's device:inode:birth time. Every resource of the run lives inside it.
+  - **The checks:** every command verifies that identity first.
+  - **`cleanup`:** it removes the code, then the rest, then the token file and the folder. Only then does it retire the record. A retired record removes nothing.
+  - **Why:**
+    - a per-entry list kept stale ownership after a removal, so a retry deleted replacements (34 of 34 in the reproduction);
+    - `mkdir -p` of shared names could take over a pre-existing folder;
+    - an inode number alone is reused when a folder is recreated, and a birth time isn't.
+  - **Alternatives rejected:**
+    - **removing `own` lines one by one:** a crash between a removal and its line still leaves a window;
+    - **an inode alone:** reuse was observed;
+    - **trusting the token file alone:** it can be copied.
+  - **Where birth time is unavailable,** a filesystem reports 0. Identity then rests on device:inode plus the token file.
+- **D-R4W7-04 The run folder stays provable through its last step** (review 6956209006).
+  - **`prepare`** records the identity (device:inode:birth time) right after the `mkdir`, before the token file.
+  - **`cleanup`** records `finalizing` before it deletes the token file.
+  - **A cleanup that finds no token file proceeds only if** the recorded identity matches and the birth time is known and non-zero. Even then it only `rmdir`s the empty folder, so a replacement is refused.
+  - **With no recorded identity, nothing is removed or retired.** The message gives the by-hand recovery.
+  - **Why:** removing the token before the `rmdir` made a failed or interrupted final step permanently unretryable. An empty folder without a recorded identity is no proof of ownership, so it is left alone.
+  - **Alternatives rejected:**
+    - **moving the token file outside the run folder before the `rmdir`:** it leaves another file to clean up;
+    - **trusting the token file alone when there's no identity:** it can be copied;
+    - **a recursive delete without the token file:** only an empty folder is safe to remove on identity alone.
+- **D-R4W7-05 W7's browser route is Route B, with an explicit operator entry** (review and handoff 6957990858).
+  - **What:** `w7-owner-preview.sh` gains `routeb`, `bstart` and `firefox`. `stop`, `status` and `cleanup` cover them.
+    - **The origin:** both pinned releases run on 127.0.0.1:3171, behind `render-like-proxy.mjs` (it passes Host and Origin unchanged) on 127.0.0.1:3173, with `MCHEZO_PUBLIC_ORIGIN=https://beta.localhost:3173`.
+    - **The certificate:** a session CA issues one 2-day certificate for `beta.localhost`, and its key is deleted at once.
+    - **The trust:** only the run's host, guest and TV Firefox profiles trust the CA.
+    - **Where it all lives:** in the run folder, so the existing ownership checks and cleanup apply. Cleanup stops only processes whose command line names this run folder.
+  - **Why:** the reviewer rejected the origin adapter, which depends on an undocumented forwarder distinction. Route B keeps the browser's genuine origin and normal certificate checks, and it worked in this Codespace before (6904986723).
+  - **Unchanged:** Route A's `start` and its `UNSUITABLE` refusal; the inventories; one writer; the runtime.
+  - **Alternatives rejected:**
+    - **a separate Route B script:** it would duplicate the ownership and cleanup machinery;
+    - **reusing ports 3157 and 3158:** they are already forwarded;
+    - **keeping the CA key for re-issue:** a new session gets a new run folder and a new CA.
+

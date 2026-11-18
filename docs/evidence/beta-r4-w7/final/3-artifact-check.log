@@ -1,0 +1,21 @@
+== w7-artifact-check 2026-11-17T07:38:12Z: predecessor f93e9cba8613859be9891706ead1c60157c73de2 (LOCAL SURROGATE), archive e34c6c1cde04d022..., current-release archive e57380943f7bf8c0...
+-- A1: the predecessor through the same gate
+PRED_CONTEXT_OK revision=f93e9cba8613859be9891706ead1c60157c73de2 archive=e34c6c1cde04d022cff8b161a6edb4d89b298f2bd049e9b58961b2cddaf16210 inventory=338e693179d285033198369f133d285ac2438bf7a7f1cce4e118daf81ddfd1d3 files=144 guard-scripts=reviewed
+PASS A1 the predecessor context: only the artifact pins differ from deploy/render; the guard scripts are the reviewed ones
+   ARTIFACT_GATE_OK archive=e34c6c1cde04d022cff8b161a6edb4d89b298f2bd049e9b58961b2cddaf16210 revision=f93e9cba8613859be9891706ead1c60157c73de2 inventory=338e693179d285033198369f133d285ac2438bf7a7f1cce4e118daf81ddfd1d3 deps="ws@8.22.1 zod@3.25.76"
+   INSTALLED_OK revision=f93e9cba8613859be9891706ead1c60157c73de2 inventory=338e693179d285033198369f133d285ac2438bf7a7f1cce4e118daf81ddfd1d3 deps="ws@8.22.1 zod@3.25.76" node=v22.16.0
+PASS A1 the build ran the gate and passed it: ARTIFACT_GATE_OK and INSTALLED_OK for revision f93e9cb (not cached)
+PASS A1 the image's /app/release.json names the predecessor revision and Node v22.16.0
+PASS A1 the image's guard scripts are byte-identical to the reviewed deploy/render ones
+   image cgn-render:w7-pred: sha256:d3b91ae7eec093c983be6dc68d4a648500ed1c089f6e09fbf686718c5e1720fa
+-- A2: the current release's archive under the predecessor's name
+   [a2] build exit 1; ARTIFACT_GATE_FAILED: the archive is not the audited one (its SHA-256 differs from pins/archive.sha256)
+PASS A2 the gate refuses a wrong archive (SHA-256 differs from the pin)
+-- A3: the predecessor context with its archive pin pointed at the current release's archive
+   [a3] build exit 1; ARTIFACT_GATE_FAILED: the inventory differs from the pinned one: 4,6c4,6 < aba8a0ecf1ec595469955ccb10ff590a768edc33eddd30a33874dddedbb877a6  ./apps/web/dist/assets/index-CGfkWF2l.css < 9080cf015f889ac
+PASS A3 the gate refuses a wrong archive even when the archive pin was changed to match it (inventory and revision are the predecessor's)
+-- A4: the canonical (current) context given the predecessor's archive
+   [a4] build exit 1; ARTIFACT_GATE_FAILED: the archive is not the audited one (its SHA-256 differs from pins/archive.sha256)
+PASS A4 the canonical context refuses the predecessor's archive
+== 7 passed, 0 failed
+W7 ARTIFACT CHECK PASSED (LOCAL SURROGATE f93e9cb: the protocol only; the actual predecessor-artifact check is NOT passed: no audited predecessor exists)

@@ -1,0 +1,175 @@
+{
+  "probe": "forwarded-origin",
+  "targetUrl": "http://127.0.0.1:3157",
+  "otherUrl": "http://127.0.0.1:3158",
+  "targetPort": 3157,
+  "otherPort": 3158,
+  "verdict": "UNSUITABLE",
+  "why": "the target's own fetch POST arrived with Origin \"http://127.0.0.1:3157\", not a valid https origin",
+  "evidence": {
+    "own": {
+      "fetch-post": [
+        "http://127.0.0.1:3157"
+      ],
+      "form-post": [
+        "http://127.0.0.1:3157"
+      ],
+      "ws": [
+        "http://127.0.0.1:3157"
+      ]
+    },
+    "comparison": {
+      "xorigin-fetch-post": [
+        "http://127.0.0.1:3158"
+      ],
+      "xorigin-form-post": [
+        "http://127.0.0.1:3158",
+        "http://127.0.0.1:3158"
+      ],
+      "xorigin-ws": [
+        "http://127.0.0.1:3158"
+      ]
+    },
+    "expectedComparisonOrigin": "http://127.0.0.1:3158",
+    "forwardedTargetOrigin": "http://127.0.0.1:3157"
+  },
+  "hint": "The other page reported finishing its script; that is only a hint, not evidence.",
+  "entries": [
+    {
+      "at": "2026-11-17T17:24:46.377Z",
+      "where": "target",
+      "kind": "xorigin-fetch-post",
+      "method": "POST",
+      "label": null,
+      "origin": "http://127.0.0.1:3158",
+      "host": "127.0.0.1:3157",
+      "xForwardedHost": null,
+      "xForwardedProto": null,
+      "secFetchSite": "same-site",
+      "secFetchMode": "no-cors",
+      "refererOrigin": "http://127.0.0.1:3158",
+      "secFetchDest": "empty",
+      "secFetchUser": null,
+      "cookiePresent": false
+    },
+    {
+      "at": "2026-11-17T17:24:46.410Z",
+      "where": "target",
+      "kind": "xorigin-form-post",
+      "method": "POST",
+      "label": "iframe",
+      "origin": "http://127.0.0.1:3158",
+      "host": "127.0.0.1:3157",
+      "xForwardedHost": null,
+      "xForwardedProto": null,
+      "secFetchSite": "same-site",
+      "secFetchMode": "navigate",
+      "refererOrigin": "http://127.0.0.1:3158",
+      "secFetchDest": "iframe",
+      "secFetchUser": null,
+      "cookiePresent": false
+    },
+    {
+      "at": "2026-11-17T17:24:46.438Z",
+      "where": "target",
+      "kind": "xorigin-ws",
+      "method": "GET",
+      "label": null,
+      "origin": "http://127.0.0.1:3158",
+      "host": "127.0.0.1:3157",
+      "xForwardedHost": null,
+      "xForwardedProto": null,
+      "secFetchSite": null,
+      "secFetchMode": null,
+      "refererOrigin": null,
+      "secFetchDest": null,
+      "secFetchUser": null,
+      "cookiePresent": false
+    },
+    {
+      "at": "2026-11-17T17:24:46.452Z",
+      "where": "other",
+      "kind": "done",
+      "method": "POST",
+      "label": null,
+      "origin": "http://127.0.0.1:3158",
+      "host": "127.0.0.1:3158",
+      "xForwardedHost": null,
+      "xForwardedProto": null,
+      "secFetchSite": "same-origin",
+      "secFetchMode": "cors",
+      "refererOrigin": "http://127.0.0.1:3158",
+      "secFetchDest": "empty",
+      "secFetchUser": null,
+      "cookiePresent": false
+    },
+    {
+      "at": "2026-11-17T17:24:46.599Z",
+      "where": "target",
+      "kind": "xorigin-form-post",
+      "method": "POST",
+      "label": "top-control",
+      "origin": "http://127.0.0.1:3158",
+      "host": "127.0.0.1:3157",
+      "xForwardedHost": null,
+      "xForwardedProto": null,
+      "secFetchSite": "same-site",
+      "secFetchMode": "navigate",
+      "refererOrigin": "http://127.0.0.1:3158",
+      "secFetchDest": "document",
+      "secFetchUser": "?1",
+      "cookiePresent": false
+    },
+    {
+      "at": "2026-11-17T17:24:46.659Z",
+      "where": "target",
+      "kind": "fetch-post",
+      "method": "POST",
+      "label": null,
+      "origin": "http://127.0.0.1:3157",
+      "host": "127.0.0.1:3157",
+      "xForwardedHost": null,
+      "xForwardedProto": null,
+      "secFetchSite": "same-origin",
+      "secFetchMode": "cors",
+      "refererOrigin": "http://127.0.0.1:3157",
+      "secFetchDest": "empty",
+      "secFetchUser": null,
+      "cookiePresent": false
+    },
+    {
+      "at": "2026-11-17T17:24:46.671Z",
+      "where": "target",
+      "kind": "form-post",
+      "method": "POST",
+      "label": "iframe",
+      "origin": "http://127.0.0.1:3157",
+      "host": "127.0.0.1:3157",
+      "xForwardedHost": null,
+      "xForwardedProto": null,
+      "secFetchSite": "same-origin",
+      "secFetchMode": "navigate",
+      "refererOrigin": "http://127.0.0.1:3157",
+      "secFetchDest": "iframe",
+      "secFetchUser": null,
+      "cookiePresent": false
+    },
+    {
+      "at": "2026-11-17T17:24:46.690Z",
+      "where": "target",
+      "kind": "ws",
+      "method": "GET",
+      "label": null,
+      "origin": "http://127.0.0.1:3157",
+      "host": "127.0.0.1:3157",
+      "xForwardedHost": null,
+      "xForwardedProto": null,
+      "secFetchSite": null,
+      "secFetchMode": null,
+      "refererOrigin": null,
+      "secFetchDest": null,
+      "secFetchUser": null,
+      "cookiePresent": false
+    }
+  ]
+}

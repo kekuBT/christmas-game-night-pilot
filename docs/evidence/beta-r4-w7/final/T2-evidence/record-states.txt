@@ -1,0 +1,6 @@
+the authorized current service: STATUS data_dir=/var/data/cgn-w1 public_origin=https://localhost:18743 trust_proxy=1 pending_data_dir=none serving=/var/data/cgn-w1
+D6: a switch pending: STATUS data_dir=/var/data/cgn-w1 public_origin=https://localhost:18743 trust_proxy=1 pending_data_dir=/var/data/cgn-w7-other serving=/var/data/cgn-w1
+D6 aborted: STATUS data_dir=/var/data/cgn-w1 public_origin=https://localhost:18743 trust_proxy=1 pending_data_dir=none serving=/var/data/cgn-w1
+the previous release started: STATUS data_dir=/var/data/cgn-w1 public_origin=https://localhost:18743 trust_proxy=1 pending_data_dir=none serving=/var/data/cgn-w1
+the return to the reviewed release: STATUS data_dir=/var/data/cgn-w1 public_origin=https://localhost:18743 trust_proxy=1 pending_data_dir=none serving=/var/data/cgn-w1
+the recovery (an ordinary start of the reviewed release): STATUS data_dir=/var/data/cgn-w1 public_origin=https://localhost:18743 trust_proxy=1 pending_data_dir=none serving=/var/data/cgn-w1

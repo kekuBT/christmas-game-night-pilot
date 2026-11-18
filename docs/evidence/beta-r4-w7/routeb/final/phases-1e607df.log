@@ -1,0 +1,31 @@
+== route B set up at 2026-11-17T19:20:08Z: origin https://beta.localhost:3173; session CA SHA-256 92:64:E9:41:3C:5B:ED:F0:E6:D2:02:EC:76:42:87:7C:0A:15:61:B0:D5:D0:58:56:7B:FB:73:78:04:1D:E2:3E (its key deleted after issuing one certificate)
+subject=CN = beta.localhost X509v3 Subject Alternative Name:      DNS:beta.localhost notAfter=Nov 19 19:20:08 2026 GMT 
+profiles host, guest, tv: the session CA is their only added trust
+== bstart current FAILED at 2026-11-17T19:20:32Z: /health through https://beta.localhost:3173 said 'nothing', expected 988c53558bbbcc1545fe0ca32882f30c1970794b; this run's app and proxy stopped; logs kept: server-current-20261117T192010Z.log, proxy-current-20261117T192010Z.log
+== bstart current at 2026-11-17T19:20:32Z: /health through https://beta.localhost:3173 (session CA verified) revision 988c53558bbbcc1545fe0ca32882f30c1970794b; data <scratch>/r4rb/work/w7op-fec3a1034b9c538f2bd9a192440955d3/data; app pid 13998 on 127.0.0.1:3171; proxy pid 13999 on 127.0.0.1:3173
+Listening on 127.0.0.1; public origin https://beta.localhost:3173.
+== stop current at 2026-11-17T19:20:42Z: pid 13998 exited; port 3171 free; TLS proxy stopped
+== backup before-rollback at 2026-11-17T19:20:42Z
+backup OK: 3 room(s), 1 Memory Book(s), 5 file(s), verified
+verify OK: 5 file(s) match the manifest of 2026-11-17T19:20:42.379Z
+verify OK: 5 file(s) match the manifest of 2026-11-17T19:20:42.379Z
+receipt (local surrogate: no off-host transfer): manifest SHA-256 0d26ba8bb06a76be199304d7f05e117d3f7a0d1cb59ab3f451e9f39288cf1640
+== compat before-rollback at 2026-11-17T19:20:42Z: the PREVIOUS release (7097ac2bb062925bb296a129f4771f1e68fd522d) reads the backup
+verify OK: 5 file(s) match the manifest of 2026-11-17T19:20:42.379Z
+restore OK: 3 room(s), 1 Memory Book(s) restored and verified. Next, as the user the server runs as: datatool check --data <scratch>/r4rb/work/w7op-fec3a1034b9c538f2bd9a192440955d3/compat-before-rollback
+check OK: 3 room(s), 1 Memory Book(s); owned by this user (uid 0) and private; the lock and a test write worked. A server run by this user can use it.
+== bstart previous at 2026-11-17T19:20:43Z: /health through https://beta.localhost:3173 (session CA verified) revision 7097ac2bb062925bb296a129f4771f1e68fd522d; data <scratch>/r4rb/work/w7op-fec3a1034b9c538f2bd9a192440955d3/data; app pid 14817 on 127.0.0.1:3171; proxy pid 14818 on 127.0.0.1:3173
+[restore] 3 room(s) restored, 0 not loaded (data: <scratch>/r4rb/work/w7op-fec3a1034b9c538f2bd9a192440955d3/data)
+Listening on 127.0.0.1; public origin https://beta.localhost:3173.
+== stop previous at 2026-11-17T19:20:50Z: pid 14817 exited; port 3171 free; TLS proxy stopped
+== backup before-return at 2026-11-17T19:20:50Z
+backup OK: 3 room(s), 1 Memory Book(s), 5 file(s), verified
+verify OK: 5 file(s) match the manifest of 2026-11-17T19:20:50.609Z
+verify OK: 5 file(s) match the manifest of 2026-11-17T19:20:50.609Z
+receipt (local surrogate: no off-host transfer): manifest SHA-256 51cf649e591b4e9fa5316020fc48632c1fe59eaae8d6ef35860e947b35e490b8
+== check by current at 2026-11-17T19:20:50Z
+check OK: 3 room(s), 1 Memory Book(s); owned by this user (uid 0) and private; the lock and a test write worked. A server run by this user can use it.
+== bstart current at 2026-11-17T19:20:51Z: /health through https://beta.localhost:3173 (session CA verified) revision 988c53558bbbcc1545fe0ca32882f30c1970794b; data <scratch>/r4rb/work/w7op-fec3a1034b9c538f2bd9a192440955d3/data; app pid 15424 on 127.0.0.1:3171; proxy pid 15425 on 127.0.0.1:3173
+[restore] 3 room(s) restored, 0 not loaded (data: <scratch>/r4rb/work/w7op-fec3a1034b9c538f2bd9a192440955d3/data)
+Listening on 127.0.0.1; public origin https://beta.localhost:3173.
+== stop current at 2026-11-17T19:20:58Z: pid 15424 exited; port 3171 free; TLS proxy stopped

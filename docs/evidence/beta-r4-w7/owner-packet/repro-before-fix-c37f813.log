@@ -1,0 +1,9 @@
+# repro: tool <scratch>/r4p7/oldtool/w7-owner-preview.sh (sha256 45457c7bd6ae4872), 2026-11-17T17:29:52Z
+prepare: exit 0
+directories the run created (depth <= 2): 34
+first cleanup: exit 0 (w7op: removed 7 recorded entries; kept <tmp>/w/evidence, src/ and the record; nothing unrecor)
+replacement directories created by another task, each with a sentinel: 34
+second cleanup (retry): exit 0 (w7op: removed 7 recorded entries; kept <tmp>/w/evidence, src/ and the record; nothing unrecor)
+replacement sentinels surviving: 0 of 34
+REPRO FAILED: the retry deleted 34 replacement(s)
+exit 1

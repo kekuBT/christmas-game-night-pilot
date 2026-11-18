@@ -1,0 +1,19 @@
+node v22.16.0, npm 10.9.2
+HEAD f93e9cba8613859be9891706ead1c60157c73de2
+uncommitted: 0
+
+added 253 packages in 7s
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+release f93e9cba8613859be9891706ead1c60157c73de2 packed into <scratch>/w7/pred-build/cgn-f93e9cba8613859be9891706ead1c60157c73de2 in 12.3 s
+{
+  "revision": "f93e9cba8613859be9891706ead1c60157c73de2",
+  "builtAt": "2026-11-17T07:16:06.192Z",
+  "node": "v22.16.0"
+}
+
+e34c6c1cde04d022cff8b161a6edb4d89b298f2bd049e9b58961b2cddaf16210  ../mchezo-pred.tgz
+inventory: 144 files, SHA-256 338e693179d285033198369f133d285ac2438bf7a7f1cce4e118daf81ddfd1d3

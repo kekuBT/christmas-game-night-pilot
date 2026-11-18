@@ -1,0 +1,17 @@
+Handoff 6957990858: Route B for W7, local validation. Every run, in order. Claude's machine, W7OP_LOCAL_TEST=1, no Firefox.
+
+dev1  working tree, before 1e607df  FAILED, 92 PASS / 2 FAIL (kept in ../dev/dev1-FAILED-driver-headers.log). Its one real
+      failure was in the test driver: Playwright's request.headers() omits Origin, so the host's room request showed "Origin
+      undefined" (the second FAIL is that step's summary line). The driver now reads allHeaders(). The tool was unchanged.
+dev2  working tree                   PASSED, 94 PASS / 0 FAIL (not kept; superseded by the final runs below).
+
+final, both on a clean checkout of 1e607df3579be83f26df062e9567f024d45e7978 (0 tracked changes), Node v22.16.0:
+  selftest-1e607df.log       scripts/beta/w7-owner-selftest.sh: PASSED, 70 checks (exit 0). The existing safeguards, unchanged.
+  routeb-local-1e607df.log   runners/routeb-local.sh: ROUTE B LOCAL RUN PASSED, 94 PASS / 0 FAIL (exit 0).
+  phases-1e607df.log         that run's evidence/phases.log: the session CA fingerprint, the failed start (test hook), and
+                             each bstart/stop/backup/compat/check, with the revision read through the session CA.
+  identity-1e607df.txt       both inventories: previous 144 files fe6d74f8... (= audited), current 144 files 4f58b323...
+  host-390-<rev>.png         the host profile at 390 x 844, signed in, on current (988c535) and previous (7097ac2).
+
+The local run left no process naming its run folder, kept the foreign sentinels alive, and found the access code in no file.
+These verdicts cover 1e607df only. They are local evidence, not a Codespace run, Firefox, or independent testing.

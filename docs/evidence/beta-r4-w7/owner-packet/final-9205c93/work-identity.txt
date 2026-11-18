@@ -1,0 +1,14 @@
+# W7 owner test: release identities (LOCAL TEST (not a Codespace)), 2026-11-17T17:54:46Z
+node v22.16.0, npm 10.9.2
+packet checkout 9205c9335b738084fb0430e2fbcbd6f876215a07
+run folder w7op-5b34be3ae989aff1bf2623c4611e6fd9
+previous: revision 7097ac2bb062925bb296a129f4771f1e68fd522d; release.json {
+  "revision": "7097ac2bb062925bb296a129f4771f1e68fd522d",
+  "builtAt": "2026-11-17T17:55:10.384Z",
+  "node": "v22.16.0"
+}; inventory 144 files, SHA-256 fe6d74f8df7280a52102f70ab1d356428e810dfa614f45b53a60596d8e89a61c (expected fe6d74f8df7280a52102f70ab1d356428e810dfa614f45b53a60596d8e89a61c)
+current: revision 988c53558bbbcc1545fe0ca32882f30c1970794b; release.json {
+  "revision": "988c53558bbbcc1545fe0ca32882f30c1970794b",
+  "builtAt": "2026-11-17T17:55:37.646Z",
+  "node": "v22.16.0"
+}; inventory 144 files, SHA-256 4f58b3239f04f9ea074c15993371effee6fac1295dd8124924ea00fefb19daef (expected 4f58b3239f04f9ea074c15993371effee6fac1295dd8124924ea00fefb19daef)

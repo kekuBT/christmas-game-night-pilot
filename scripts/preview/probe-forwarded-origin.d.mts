@@ -10,4 +10,6 @@ export interface ProbeClassification {
 }
 export const OWN: Record<string, string>;
 export const COMPARISON: Record<string, string>;
+/** The only labels an observation may carry (the iframe form posts and the top-level form control). */
+export const LABELS: Set<string>;
 export function classify(entries: ProbeEntry[], urls: { targetUrl: string; otherUrl: string }): ProbeClassification;

@@ -1,0 +1,86 @@
+== w7-selftest 2026-11-17T07:32:54Z, tag c623c5, harness 5226c22c98118adf, seed 660df9e1e4b1005d, check a06c3452704a63c4, images cgn-render:check and cgn-render:w7-pred
+   before: containers 0, volumes 0
+-- T0: static
+PASS T0 bash -n on the W7 shell scripts and node --check on w5-seed.mjs, w6-check.mjs and w7-check.mjs
+-- sentinels of another owner (label w7.sentinel=c623c5, never w7.owner)
+PASS sentinels created: a running container and a volume holding a file
+-- T1: a port already in use
+     |    FAILED at preflight: 1 listener(s) already on 18780/18781/18743/18744; nothing was started
+     |    this run's containers left: 0; volumes left: 0; processes left: 0; listeners left on 18780/18781/18743/18744: not checked (this run started no listener); private files left: no
+     | W7 REHEARSAL FAILED
+PASS T1 the rehearsal FAILED at its preflight, started nothing, and left nothing
+PASS T1 sentinels intact
+-- T2: the rehearsal
+     | PASS the current service is ready on /var/data/cgn-w1, /health on the reviewed revision
+     | PASS the service is live: the PUBLIC /health answers 200
+     | PASS both images carry the reviewed cgn-backup, cgn-entrypoint and cgn-authorize, byte for byte
+     | PASS the images' release.json: the current names 7097ac2, the previous names f93e9cb
+     | PASS B0 (an earlier backup, as from a nightly run): BACKUP_OK and its RECEIPT_OK
+     | PASS maintenance on: the PUBLIC /health answers 503
+     | PASS D6 with a switch pending (even with B1's receipt), the preflight refuses
+     | PASS D6 the switch aborted from the instance serving the approved folder; nothing pending
+     | PASS D1 with no receipt yet for the window's backup, the preflight refuses
+     | PASS D2a a changed fetched copy: RECEIPT_FAILED, no receipt record, the preflight refuses
+     | PASS D2b B0's receipt (an earlier backup) offered for this window's backup: the preflight refuses
+     | PASS D2c B1's receipt (taken earlier in this window, before the abort) offered for the window's backup: the preflight refuses
+     | PASS the window's backup: BACKUP_OK, then the independent RECEIPT_OK on its fetched-back copy
+     | PASS before the compatibility evidence exists, the preflight refuses
+     | PASS COMPAT the previous release's datatool: verify, restore into a new folder, check (as the service user), each exit 0
+     | PASS COMPAT the previous release starts on the copy: /health on f93e9cb, the room restored, nothing unloaded or quarantined
+     | PASS COMPAT on the copy, the previous release serves the seats, the approved entry, each answer's value and the completed ledger, and acknowledges a new action
+     | PASS COMPAT what the previous release wrote: stopped gracefully, persisted (ledger kept, action persisted), and the CURRENT release's datatool check accepts it
+     | PASS COMPAT_OK: the previous release can safely read the current format, and the current release reads what it writes (the disposable volume removed)
+     | PASS the rollback preflight PASSES: maintenance on, the receipt for exactly the window's backup, compatibility evidence, the record approving /var/data/cgn-w1 with nothing pending, served
+     | PASS D5a the start gate refuses while the current writer is still on the volume
+     | PASS D5b a second writer on the same instance (the previous release, in the instance's network namespace, same folder): the data lock refuses it (no server), and the current writer keeps serving
+     | PASS the current writer stopped gracefully (exit 0)
+     | PASS the window's backup is exactly the data at the stop (every file, the manifest aside)
+     | PASS one writer: the old container removed and confirmed gone; no container on the volume before the start
+     | PASS the previous start: the guard accepts the CURRENT environment (the APPROVED folder /var/data/cgn-w1), the server restores the room with nothing unloaded, and /health names f93e9cb
+     | PASS D4 expecting the reviewed revision while the previous one serves: the reopen gate refuses, the PUBLIC side stays 503
+     | PASS the reopen gate: the private probe UP on the expected PREVIOUS revision, the approved folder served, nothing pending; the ingress reopens (PUBLIC 200)
+     | PASS after the rollback, through the ingress: the original host and guest seats, the completed score ledger, the approved entry, each answer's value, a NEW action acknowledged once
+     | PASS an OLD (rotated) code does not open the gate (401, no gate cookie)
+     | PASS B2 (on the previous release, of the CURRENT data): BACKUP_OK, RECEIPT_OK, and the preflight passes
+     | PASS the previous release stopped gracefully; the AUTHORITATIVE persisted state: the completed ledger kept, no score or finish added, the new action persisted with its value, the approved entry
+     | PASS the persisted check's OWN negative controls: a dropped action, changed points and a lost score event each make it FAIL
+     | PASS the current start: the guard accepts the CURRENT environment (the APPROVED folder /var/data/cgn-w1), the server restores the room with nothing unloaded, and /health names 7097ac2
+     | PASS the return: the reopen gate passes on the reviewed revision; the seats, the completed ledger, the entry, and the action written by the previous release are served
+     | PASS B3: BACKUP_OK, RECEIPT_OK, and the preflight passes
+     | PASS S1 an OLD data folder (the validation folder): refused (78) before any server
+     | PASS S2 an OLD (rotated) access code: refused (78)
+     | PASS S3 an OLD public origin: refused (78)
+     | PASS S4 an OLD proxy count: refused (78)
+     | PASS S5 every old value at once (a one-click rollback across a configuration change): refused (78)
+     | PASS after S1-S5: the disk record byte-identical, the data folder's files unchanged, maintenance kept closed (PUBLIC 503)
+     | PASS F the killed start: exited 137; the record byte-identical, the folder's files unchanged, maintenance kept closed
+     | PASS the recovery start: the guard accepts the CURRENT environment (the APPROVED folder /var/data/cgn-w1), the server restores the room with nothing unloaded, and /health names 7097ac2
+     | PASS the recovery is an ORDINARY start of the reviewed release with the current environment: the reopen gate passes, and the seats, ledger, entry and action are served
+     | PASS at the end: exactly one container on the volume (no competing writer)
+     |    this run's containers left: 0; volumes left: 0; processes left: 0; listeners left on 18780/18781/18743/18744: 0; private files left: no
+     |    files (the kept run folder and this run's own log) holding an access code (current or old), a session token, a gate cookie or an age secret key: 0
+     |    checks: 46 passed, 0 failed
+     | W7 REHEARSAL PASSED
+PASS T2 W7 REHEARSAL PASSED (exit 0), nothing of the run left
+PASS T2 the run's own log (this file) was in its leak scan, and nothing secret was found
+PASS T2 sentinels intact
+-- T3: an inventory docker cannot give (a shim answers exit 124 to every listing filtered by the run's label)
+     |    cleanup #1: proxy (docker could not list this run's containers) container 6a269dc8ff99 (docker could not list this run's volumes) volume w7-data-20261117T073331Z-9cc2fc04 private-files(codes,keys,sessions,decrypted-copies)
+     |    cleanup #2: (docker could not list this run's containers) (docker could not list this run's volumes)
+     |    this run's containers left: UNVERIFIED (docker could not list this run's containers); volumes left: UNVERIFIED (docker could not list this run's volumes); processes left: 0; listeners left on 18780/18781/18743/18744: 0; private files left: no
+     | W7 REHEARSAL FAILED
+PASS T3 the run reports the inventory UNVERIFIED and FAILS (exit nonzero), never 0
+PASS T3 real docker: the run's container and volume were removed all the same (tracked by id)
+PASS T3 sentinels intact
+-- T4: an interrupted run (SIGTERM as soon as seeding is done)
+     |    interrupted (SIGTERM)
+     |    this run's containers left: 0; volumes left: 0; processes left: 0; listeners left on 18780/18781/18743/18744: 0; private files left: no
+     | W7 REHEARSAL FAILED
+PASS T4 interrupted: exit 143, cleanup ran, nothing of the run left, no private files left
+PASS T4 sentinels intact
+-- removing this self-test's own sentinels (label read back first)
+PASS the sentinels removed (they were this self-test's own)
+   after: containers 0, volumes 0
+== 13 passed, 0 failed
+W7 SELFTEST PASSED
+exit 0

@@ -1,0 +1,8 @@
+# repro: tool <scratch>/r4p7/co/scripts/beta/w7-owner-preview.sh (sha256 889e0e4f4640988d), 2026-11-17T17:37:42Z
+prepare: exit 0
+directories the run created (depth <= 2): 8
+first cleanup: exit 0 (w7op: removed the run folder <tmp>/w/w7op-1bd32ffa3dcc576ae8a816c0ba09e776 and retired the re)
+replacement directories created by another task, each with a sentinel: 8
+second cleanup (retry): exit 0 (w7op: this run was already cleaned up at 2026-11-17T17:38:22Z; nothing removed, nothing else touched)
+replacement sentinels surviving: 8 of 8
+REPRO PASSED: the retry touched no replacement

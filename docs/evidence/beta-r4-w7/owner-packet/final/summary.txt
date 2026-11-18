@@ -1,0 +1,6 @@
+== final on 902407d6e7ee7a85a78ab69c38fff7e919f0ce3f, status 0 lines, 2026-11-17T17:09:28Z
+1-w7-static: exit 1 ; W7 STATIC CHECKS FAILED
+2-local-run: exit 0 ; == verdict: LOCAL RUN PASSED (2026-11-17T17:10:43Z)
+== checkout still clean: 0 lines; 2026-11-17T17:10:43Z
+3-w7-static-delta (base a9965dc): exit 0 ; W7 STATIC CHECKS PASSED
+== checkout still clean: 0 lines; 2026-11-17T17:11:14Z

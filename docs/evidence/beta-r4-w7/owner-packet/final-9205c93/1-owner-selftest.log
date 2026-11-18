@@ -1,0 +1,90 @@
+# W7 owner tool self-test: <scratch>/r4p8/co/scripts/beta/w7-owner-preview.sh (sha256 94df506c0d46848e), 2026-11-17T17:53:04Z
+-- S1 an unprepared root
+PASS S1 'cleanup' on an unprepared root is refused as unprepared (exit 1) and the foreign files survive
+PASS S1 'start current' on an unprepared root is refused as unprepared (exit 1) and the foreign files survive
+PASS S1 'stop' on an unprepared root is refused as unprepared (exit 1) and the foreign files survive
+PASS S1 'backup b1' on an unprepared root is refused as unprepared (exit 1) and the foreign files survive
+PASS S1 'compat b1' on an unprepared root is refused as unprepared (exit 1) and the foreign files survive
+PASS S1 'check current' on an unprepared root is refused as unprepared (exit 1) and the foreign files survive
+PASS S1 'status' on an unprepared root is refused as unprepared (exit 1) and the foreign files survive
+PASS S1 'probe' on an unprepared root is refused (exit 1)
+-- S2 a valid record copied to another root
+PASS S2 cleanup with another root's record is refused (exit 1), and touches neither root
+-- S3 a tampered record
+PASS S3 a symlinked record is refused (exit 1)
+PASS S3 a foreign marker is refused (exit 1)
+PASS S3 a record readable by others (mode 644) is refused (exit 1)
+-- S4 a replaced run folder
+PASS S4 'cleanup' with a replaced run folder (no token file) is refused as not this run's (token or identity; exit 1); the replacement survives
+PASS S4 'start current' with a replaced run folder (no token file) is refused as not this run's (token or identity; exit 1); the replacement survives
+PASS S4 'stop' with a replaced run folder (no token file) is refused as not this run's (token or identity; exit 1); the replacement survives
+PASS S4 'backup b1' with a replaced run folder (no token file) is refused as not this run's (token or identity; exit 1); the replacement survives
+PASS S4 'compat b1' with a replaced run folder (no token file) is refused as not this run's (token or identity; exit 1); the replacement survives
+PASS S4 'check current' with a replaced run folder (no token file) is refused as not this run's (token or identity; exit 1); the replacement survives
+PASS S4 'status' with a replaced run folder (no token file) is refused as not this run's (token or identity; exit 1); the replacement survives
+PASS S4 a replacement carrying a copied token file is refused on its identity, even if its inode number is reused (exit 1); the replacement survives
+-- S5 a symlinked run folder
+PASS S5 a symlinked run folder is refused (exit 1); nothing outside is touched
+-- S6 the happy path, then S6b a retry with a replacement
+PASS S6 cleanup removes the run folder and retires the record; the pre-existing shared-name folders, an unrelated file, src and evidence survive (exit 0)
+PASS S6b a cleanup RETRY after success is a no-op: the replacement run folder and its sentinels survive (exit 0)
+PASS S6b 'start current' on a retired run is refused as retired (exit 1)
+PASS S6b 'backup b2' on a retired run is refused as retired (exit 1)
+PASS S6b 'status' on a retired run is refused as retired (exit 1)
+-- S7 an interrupted prepare
+PASS S7 prepare created the run folder, the code and a build checkout before the interruption
+scripts/beta/w7-owner-selftest.sh: line 107: 30880 Killed                  env -u CODESPACES -u CODESPACE_NAME -u GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN W7OP_LOCAL_TEST=1 setsid bash "$TOOL" prepare "$R" > "$B/s7-prepare.out" 2>&1
+PASS S7 the whole prepare process group was killed (kill exit 0; none left)
+PASS S7 cleanup after the interruption removes the run folder (code and checkout), prunes the worktree, keeps foreign files (exit 0)
+     w7op: removed the code (<tmp>/s7/w7op-c8af3d63c68651dba238a26a8e3a3b4c/secret)
+     w7op: removed the run folder <tmp>/s7/w7op-c8af3d63c68651dba238a26a8e3a3b4c and retired the record; kept <tmp>/s7/evidence, src/ and the record; nothing outside the run folder was touched
+PASS S7 then a retry with a replacement is a no-op (exit 0)
+-- S8 a partial cleanup, then a retry
+PASS S8 the interrupted cleanup removed the code first and stopped (exit 3); the rest is still there and the record isn't retired
+PASS S8 the retry finishes the removal and retires the record; the foreign folders survive (exit 0)
+PASS S8 then another retry with a replacement is a no-op (exit 0)
+-- S9 pre-existing unowned directories with the shared names
+PASS S9 backup works inside the run folder only; the pre-existing shared backups folder is not adopted (exit 1: no release here)
+PASS S9 probe works inside the run folder only; the pre-existing shared probe folder is not adopted (exit 1)
+PASS S9 cleanup removes the run folder and none of the pre-existing shared-name folders (exit 0)
+-- S10 the local-test flag inside a Codespace
+PASS S10 [CODESPACES=true CODESPACE_NAME=cs GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN=app.github.dev] 'inspect' with W7OP_LOCAL_TEST=1 is refused before anything (exit 1)
+PASS S10 [CODESPACES=true CODESPACE_NAME=cs GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN=app.github.dev] 'prepare' with W7OP_LOCAL_TEST=1 is refused before anything (exit 1)
+PASS S10 [CODESPACES=true CODESPACE_NAME=cs GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN=app.github.dev] 'start' with W7OP_LOCAL_TEST=1 is refused before anything (exit 1)
+PASS S10 [CODESPACES=true CODESPACE_NAME=cs GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN=app.github.dev] 'cleanup' with W7OP_LOCAL_TEST=1 is refused before anything (exit 1)
+PASS S10 [CODESPACES=true] 'inspect' with W7OP_LOCAL_TEST=1 is refused before anything (exit 1)
+PASS S10 [CODESPACES=true] 'prepare' with W7OP_LOCAL_TEST=1 is refused before anything (exit 1)
+PASS S10 [CODESPACES=true] 'start' with W7OP_LOCAL_TEST=1 is refused before anything (exit 1)
+PASS S10 [CODESPACES=true] 'cleanup' with W7OP_LOCAL_TEST=1 is refused before anything (exit 1)
+PASS S10 [CODESPACE_NAME=cs] 'inspect' with W7OP_LOCAL_TEST=1 is refused before anything (exit 1)
+PASS S10 [CODESPACE_NAME=cs] 'prepare' with W7OP_LOCAL_TEST=1 is refused before anything (exit 1)
+PASS S10 [CODESPACE_NAME=cs] 'start' with W7OP_LOCAL_TEST=1 is refused before anything (exit 1)
+PASS S10 [CODESPACE_NAME=cs] 'cleanup' with W7OP_LOCAL_TEST=1 is refused before anything (exit 1)
+PASS S10 [GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN=app.github.dev] 'inspect' with W7OP_LOCAL_TEST=1 is refused before anything (exit 1)
+PASS S10 [GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN=app.github.dev] 'prepare' with W7OP_LOCAL_TEST=1 is refused before anything (exit 1)
+PASS S10 [GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN=app.github.dev] 'start' with W7OP_LOCAL_TEST=1 is refused before anything (exit 1)
+PASS S10 [GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN=app.github.dev] 'cleanup' with W7OP_LOCAL_TEST=1 is refused before anything (exit 1)
+PASS S10 the root is byte-for-byte unchanged
+-- S11 the probe-report gate (SYNTHETIC report fixtures, not a browser result)
+PASS S11 SYNTHETIC no report: start refused with 'verdict is none' (exit 1)
+PASS S11 SYNTHETIC UNSUITABLE: start refused with 'verdict is UNSUITABLE' (exit 1)
+PASS S11 SYNTHETIC INCOMPLETE: start refused with 'verdict is INCOMPLETE' (exit 1)
+PASS S11 SYNTHETIC UNSAFE: start refused with 'verdict is UNSAFE' (exit 1)
+PASS S11 SYNTHETIC PRESERVED with an http origin: start refused with 'isn't https' (exit 1)
+PASS S11 SYNTHETIC REWRITTEN_SAME_ORIGIN_ONLY with no origin: start refused with 'isn't https' (exit 1)
+PASS S11 SYNTHETIC a passing https report (the gate passes; no release is prepared here): start refused with 'current isn't prepared' (exit 1)
+-- S12 the final rmdir fails, then a retry
+PASS S12 a failing final rmdir: exit 1, the code is gone, the folder remains, the record isn't retired
+PASS S12 the normal retry finishes the removal and retires the record (exit 0: w7op: removed the run folder <tmp>/s12/w7op-18eefef279178a1e)
+-- S13 an interruption after the token file is deleted, then a retry; a replacement during recovery
+PASS S13 the interrupted cleanup stopped after deleting the token (exit 3); the empty folder remains, not retired
+PASS S13 the retry finishes the removal and retires the record (exit 0)
+PASS S13 a replacement with a sentinel made during recovery is refused (exit 1); it survives, the record isn't retired
+PASS S13 an EMPTY replacement made during recovery is refused on its identity (exit 1); it survives
+-- S14 an interrupted prepare with no recorded identity
+PASS S14 an empty folder without a recorded identity is left untouched, not retired, with a precise message (exit 1)
+PASS S14 the same folder with only a token file, still without a recorded identity, is left untouched (exit 1)
+-- S15 an interrupted prepare after its identity was recorded, before the token file
+PASS S15 the folder is proven by its recorded identity, removed with rmdir, and the record retired (exit 0)
+PASS the outside sentinel survived every case
+== W7 OWNER TOOL SELFTEST PASSED, 70 checks, 2026-11-17T17:53:20Z

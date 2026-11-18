@@ -1,0 +1,3 @@
+Christmas Game Night server on http://localhost:3199 (web app at / after npm run build:web)
+Listening on 127.0.0.1; public origin https://beta.localhost:3199.
+received SIGTERM, closing server

@@ -1,0 +1,27 @@
+== R2 package of 72e9d8ba59ef3271d756bc2bf77b40ea4d6ee74d, 2026-11-17T23:54:45Z
+node v22.16.0 (/tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/r2/node/node-v22.16.0-linux-x64/bin/node), npm 10.9.2
+checkout 72e9d8ba59ef3271d756bc2bf77b40ea4d6ee74d, tracked changes: 0
+
+added 253 packages in 3s
+npm ci OK
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+release 72e9d8ba59ef3271d756bc2bf77b40ea4d6ee74d packed into /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/b7w/cgn-72e9d8ba59ef3271d756bc2bf77b40ea4d6ee74d in 9.1 s
+pack OK
+-- release.json
+{
+  "revision": "72e9d8ba59ef3271d756bc2bf77b40ea4d6ee74d",
+  "builtAt": "2026-11-17T23:54:58.655Z",
+  "node": "v22.16.0"
+}
+-- archive
+f3bd00ea2f2c17e1f84e0b413822f5cd181247774f9872923860c1120f4d72ca  /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/b7w/cgn-72e9d8ba59ef3271d756bc2bf77b40ea4d6ee74d.tgz
+-rw-r--r-- 1 root root 1185263 Nov 17 23:54 /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/b7w/cgn-72e9d8ba59ef3271d756bc2bf77b40ea4d6ee74d.tgz
+-- inventory
+files: 144
+4f58b3239f04f9ea074c15993371effee6fac1295dd8124924ea00fefb19daef  /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/b7w/cgn-72e9d8ba59ef3271d756bc2bf77b40ea4d6ee74d.inventory.sha256
+exit 0
+== end 2026-11-17T23:54:58Z

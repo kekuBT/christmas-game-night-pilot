@@ -1,0 +1,27 @@
+# W7 static checks on the clean checkout of 902407d6e7ee7a85a78ab69c38fff7e919f0ce3f (status 0 lines), 2026-11-17T17:11:12Z
+## 1. everything changed since the base a9965dc0c6fc1cf897aae1728ab693ff1d9fabbc
+ docs/DECISIONS.md                                  |  13 ++
+ docs/PROGRESS.md                                   |  14 ++
+ docs/beta/beta-r4-readiness.md                     |   2 +-
+ docs/beta/w7-owner-test-packet.md                  | 157 +++++++++++++++++++++
+ docs/evidence/beta-r4-w7/owner-packet/README.md    |  28 ++++
+ .../beta-r4-w7/owner-packet/runners/local-run.sh   |  41 ++++++
+ .../owner-packet/runners/probe-drive.cjs           |  10 ++
+ scripts/beta/w7-owner-preview.sh                   | 150 ++++++++++++++++++++
+ 8 files changed, 414 insertions(+), 1 deletion(-)
+PASS nothing outside docs/ and scripts/beta/w7-* (empty)
+PASS deploy/ unchanged: the guard scripts, the Dockerfile, the artifact gate, render.yaml and every pin (the canonical release pins stay 7097ac2) (empty)
+PASS the runtime (apps/, src/), tests, manifests and the other scripts (the W5 seed, W6 tools) unchanged (empty)
+PASS the artifact gate's REVISION is still the pin 7097ac2bb062925bb296a129f4771f1e68fd522d
+PASS pins/archive.sha256 still names the audited archive a693c543...
+PASS the guard scripts match their pins (pins/scripts.sha256)
+## 2. lint and syntax
+PASS eslint scripts/beta (exit 0)
+PASS bash -n on scripts/beta and the W7 runners; node --check w5-seed.mjs, w6-check.mjs and w7-check.mjs
+## 3. relative links in the changed documents
+links: 27 missing: 0
+PASS no missing relative link
+## 4. secret scan of the changes since a9965dc0c6fc1cf897aae1728ab693ff1d9fabbc
+PASS no secret-shaped value (a real age secret key, a private key, an access code, a gate cookie, a token) or local scratch path in the added lines
+## verdict
+W7 STATIC CHECKS PASSED

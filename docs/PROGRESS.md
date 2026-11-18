@@ -3859,3 +3859,218 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
   - W4 self-test, 81/81;
   - the round-5 drill, 19/19.
 - **Next:** the new report on #49, linked on #5 and #48.
+- **Reported** in 6941122210 (repair 2); linked on #5 and #48.
+- **Review 6941129590: W6 local preparation CLEARED.** The non-blocking observation is that the TV entry screen's optional spectator action sits lower than the name field. W7 was handed off in the same comment.
+
+## Beta R4: W7 rollback preparation (handoff 6941129590; in progress)
+- **Acknowledged** in 6941405417 at 2:14 a.m. ET. The estimate is about 2 h, plus 1 h of contingency.
+- **The branch** is `claude/beta-r4-w7-rollback`, from #49's head `d2b1242`, as a stacked draft PR.
+- **The scope** (local only, $0, throwaway fixtures):
+  - the predecessor artifact and its data-format compatibility;
+  - the revert-commit path through the same artifact gate, inside a W5 backup/receipt window under the W6 guard;
+  - the provider one-click rollback modelled as stale environment values;
+  - the denials;
+  - the runbook `docs/beta/render-w7.md`.
+- **Unchanged:** the runtime and the canonical release pins stay `7097ac2`. There is no Render operation, no production data and no owner key.
+- **The predecessor:** there is NO audited predecessor artifact. `7097ac2` (archive `a693c543…`) is the first audited archive of this route, so the actual predecessor-artifact check cannot pass. To test the protocol, a clearly labelled LOCAL SURROGATE is built from `f93e9cb`, the commit before the R5 UI changes (`docs/evidence/beta-r4-w7/runners/build-predecessor.sh`):
+  - archive SHA-256 `e34c6c1c…16210`;
+  - inventory 144 files, SHA-256 `338e6931…d1d3`;
+  - the differences from `7097ac2`: only the web bundle (`apps/web/dist`), with the server, content and packages identical (`git diff f93e9cb 7097ac2 -- src package.json package-lock.json` is empty).
+- **The draft PR** is #50 (stacked on #49), subscribed, and linked on #5 (6941495066) and #49 (6941495706).
+- **The candidate:**
+  - `scripts/beta/w7-pred-context.sh`: the previous release's build context as a revert commit makes it (only the artifact pins change).
+  - `scripts/beta/w7-artifact-check.sh`: A1, the predecessor through the same gate; A2–A4, the wrong-artifact refusals.
+  - `scripts/beta/w7-rehearsal.sh` and `w7-check.mjs`: three windows. The rollback, with COMPAT on a disposable copy and the denials D1, D2, D4, D5 and D6. The return, with the persisted state and its negative controls. The one-click model S1–S5, and F, a killed start with an ordinary recovery.
+  - `scripts/beta/w7-selftest.sh`: T0–T4, with sentinels.
+  - `docs/beta/render-w7.md`: the runbook, with B-W7-01, the provider steps for a throwaway window, and the remaining prerequisites.
+  - `docs/evidence/beta-r4-w7/`: the README, the dev runs and the runners.
+- **Dev runs:**
+  - the artifact check PASSED, 7/7;
+  - the rehearsal `20261117T073050Z-f7382c08` PASSED, 46/46 (a display-only count bug was fixed afterwards);
+  - the self-test PASSED, 13/13.
+- **Next:** the final on one clean checkout (`runners/w7-final.sh`: static, the image checks, the artifact check, the W7 self-test, and the W6 guard, hold and switch and W5 receipt regressions), then the report on #50.
+- **The final** on one clean checkout of the candidate `988c535` (07:37–07:42Z), every step PASSED:
+  - static, 10/10;
+  - image checks, 30/30;
+  - the artifact check, 7/7 (LOCAL SURROGATE);
+  - **the W7 self-test, 13/13**, with its rehearsal `20261117T073823Z-90aed9d8` at 46/46;
+  - the W6 guard self-test, 37/37;
+  - the W6 hold self-test, 12/12;
+  - the W6 self-test, 13/13;
+  - the W5 self-test, 12/12.
+- **Open:** B-W7-01, no audited predecessor artifact. The actual predecessor check can't pass until a second audited release exists.
+- **Next:** the report on #50, linked on #5 and #49. The real W7, Render, production data and owner keys stay with the owner.
+- **Reported** in 6942141320; linked on #5 and #49.
+- **Review 6942165008:** W7 stays open. ChatGPT accepted the code and evidence as developer-run results. Its private browser audit was blocked on preview access.
+- **Review 6951143760 (with 6951209887):**
+  - B-W7-01's prerequisites were answered in 6951228654 (candidate `72e9d8b`). `render-w7.md` now records that the rollback target `7097ac2` is audited, and that preparing and auditing the newer release is engineering work.
+  - The preview's `FOREIGN_ORIGIN` was diagnosed in 6951298104. It is a configuration fault: GitHub's forwarder rewrites the page's own Origin (F1). The fix is route A.
+  - ChatGPT's probe then returned `INCOMPLETE`: the sibling iframe form arrived with `Origin: null` (POST, same-site, navigate, no Referer). The analysis and one proposed control are in 6951594256.
+- **Review 6951923886: implement the control.** Acknowledged in 6951947263 at 10:08 a.m. ET, estimated at about 25 min.
+  - **The change** (`scripts/preview/probe-forwarded-origin.mjs` and its `.d.mts` only, commit `20adc10`):
+    - the OTHER page shows a visible button;
+    - pressed once, it sets the page's referrer policy with a meta element, then sends one empty form POST to the target as a top-level navigation, labelled `top-control`;
+    - observations record their label (`iframe` or `top-control`; any other value is dropped), plus `Sec-Fetch-Dest` and `Sec-Fetch-User`;
+    - `classify()` is unchanged.
+  - **The focused checks on a clean checkout of `20adc10`,** all passing ([log](evidence/beta-r4-w7/probe-control/checks-20adc10.log)):
+    - `node --check`;
+    - eslint;
+    - `tests/preview-probe-verdict.test.ts`, 16/16;
+    - both served pages' inline scripts, through `node --check`;
+    - a synthetic local recording check: the label, dest and user fields are kept, an unknown label is dropped, and no cookie value, body or extra URL value is stored.
+  - **Next:** the report on #50. ChatGPT runs the control in the private Codespace.
+- **Reported** in 6952076569 (the probe control, tested `20adc10`).
+- **Review 6952207048:**
+  - the tunnel diagnostic passed (`REWRITTEN_SAME_ORIGIN_ONLY`, twice);
+  - the owner's $10/month Codespaces budget fixed the billing blocker;
+  - ChatGPT's live browser audit was then blocked by its browser tool's URL policy;
+  - W7 stays INCOMPLETE.
+
+## Beta R4: readiness matrix and Render execution proposal (handoff 6954127832; planning only)
+- **Acknowledged** in 6954179846 at 11:31 a.m. ET. The estimate is about 75 min, plus 30 min of contingency.
+- **The document:** `docs/beta/beta-r4-readiness.md` (new; it reuses the existing runbooks). It contains:
+  - the readiness matrix, in four groups: product journeys, the B-W7-01 release pair (no provider needed), provider-only checks, and account prerequisites;
+  - the execution proposal: validate on `7097ac2`, then go forward to `72e9d8b` once it is audited, with W7 between the two;
+  - why the free tier doesn't fit;
+  - the owner decision (execution windows; the route and spend were already approved in 6919813048) and the cost (Render $7.25/month, plus Codespaces up to $10/month, scoped separately);
+  - the order of work before and after deployment;
+  - the smallest next step for the preview audit.
+- **Render terms** were re-read from the official pages at 2026-11-17 16:31Z, and are unchanged from 2026-11-16. The hashes are appended to `docs/evidence/beta-r4-hosting/render-fetch-log.txt`.
+- **Two precisions:**
+  - Render documents no bandwidth spend limit;
+  - Render doesn't document passing `Origin` through: it is expected, and W1 checks it.
+- **Unchanged:** no runtime, security, deploy or pin change. W7 stays OPEN, and there is no W8.
+- **Reported in 6954353201** (the readiness matrix and Render execution proposal, head `2b26520`, docs only). Linked on #5 in 6954358089.
+
+## Beta R4: readiness proposal documentation corrections (review 6954485280; docs only)
+- **Acknowledged** in 6954497172 at 11:42 a.m. ET. The estimate is about 20 min.
+- **The changes,** to `docs/beta/beta-r4-readiness.md` (revision 2) and `docs/beta/render-w7.md`:
+  1. **The order follows dependencies.** B-W7-01 (the second release's gate, package, private archive audit and compatibility proof, and the forward and revert commits) blocks promotion and W7's release-pair test, not hosted W1–W6 on `7097ac2`. Starting W1–W6 earlier is a proposal only, conditional on the owner's execution approval and on the outstanding private W7 audit. Any change to where that audit happens is pending the owner.
+  2. **The one-click check: the synthetic-phase exception** (the architect's decision). It runs on the single planned service, only while no family data or real code has ever been on it. The exception ends once real data has existed. Recovery and cleanup are stated in both documents.
+  3. **The cost wording:** the $7.25 Render baseline plus up to $10 Codespaces, before Render overages and tax. That is not a ceiling. Pipeline purchases stop only at the configured limit, whose minimum is unverified.
+  4. **§5 keeps its uncertainty:** the owner's address bar and the error-page explanation are hypotheses. No new navigation is asserted as permitted, and the audit isn't relocated. ChatGPT owns the browser restriction, and the owner owns any audit-location exception.
+  5. **The $0 statement** is narrowed to the existing application on Render's free web-service tier. Report 6954353201's mangled log links are repaired.
+- **Unchanged:** no runtime, security, deploy or pin change. W7 stays OPEN, and there is no W8.
+- **Reported in 6954773296** (head `a9965dc`, docs only); linked on #5 in 6954791513.
+
+## Beta R4 W7: the owner-run browser test packet (handoff 6954764073)
+- **Acknowledged** in 6954815435 at 11:55 a.m. ET. The estimate is about 75 min.
+- **The handoff:** the owner accepted owner-run browser testing, reviewed by ChatGPT, in place of ChatGPT's interactive audit, for this checkpoint only. It is recorded as owner-run evidence, never independent. It changes the tester only.
+- **The packet:** `docs/beta/w7-owner-test-packet.md`. It covers:
+  - the phases and their identities: `988c535`, an unaudited local pack, inventory `4f58b323…`; and `7097ac2`, rebuilt, inventory equal to the audited `fe6d74f8…`. They are a LOCAL SURROGATE pair (D-R4W7-01);
+  - the route's feasibility: route A in the owner's own browser, opened at the forwarded `https` address, with Gate R (the probe in that session). It fails closed, and the exact blocker is named;
+  - the operator's steps in the existing Codespace;
+  - the owner's checklist O1–O7;
+  - the W7 pause points P1–P3;
+  - the evidence template.
+- **The tool:** `scripts/beta/w7-owner-preview.sh`, the operator's: `inspect`, `prepare`, `probe`, `start`, `stop`, `backup`, `compat`, `check`, `status`, `cleanup`.
+- **The local test:** `docs/evidence/beta-r4-w7/owner-packet/`. W7 stays OPEN, and B-W7-01 is open.
+- **Reported in 6955277111** (the packet, tested `902407d`, head `8760d19`).
+
+## Beta R4: cost wording in the one-click exception (review 6954869766; docs only)
+- **Acknowledged** in 6955286653 at 12:13 p.m. ET. The estimate is about 10 min.
+- **`render-w7.md` and `beta-r4-readiness.md` §2** now agree with readiness §3: reusing the service and disk avoids a second service or disk charge, and the usual Render overages and tax may still apply. This replaces "no spend beyond the approved $7.25 baseline" and "no extra cost".
+- **Reported in 6955310363** (the cost wording, `a2f140b`); linked on #5 in 6955314045.
+
+## Beta R4 W7: operator-tool safeguards and an evidence correction (review 6955337359)
+- **Acknowledged** in 6955379257 at 12:16 p.m. ET. The estimate is about 70 min.
+- **The failing test first:** `scripts/beta/w7-owner-selftest.sh` (new), run against the `902407d` tool. It fails P1: `cleanup` of an unprepared root deletes foreign files. It also fails P2: the test flag is accepted in a Codespace.
+- **The repair** (D-R4W7-02) is in `scripts/beta/w7-owner-preview.sh`: the ownership record, registration before creation, guarded commands, a cleanup limited to recorded names with no symlinks, and the Codespace test-flag refusal. The report gate now runs before the release check.
+- **The evidence correction:** the `902407d` run's browser step never launched (verdict `INCOMPLETE`), so 6955277111's "driven HTTP probe returned UNSUITABLE" was false. The original log is kept. The driver now uses the preinstalled Chromium and fails loudly, and the runner requires the exact `UNSUITABLE` verdict.
+- **Readiness:** ChatGPT's dashboard check (6955289084) is recorded. The workspace is Hobby and empty, and the pipeline limit is $0, which caps only pipeline purchases. The payment method and region are still unverified.
+- **Reported in 6955651595** (the operator-tool safeguards, tested `c37f813`, head `f62ce36`).
+
+## Beta R4 W7: one exclusive run folder for the operator tool (review 6955682854)
+- **Acknowledged** in 6955720590 at 12:29 p.m. ET. The estimate is about 45 min.
+- **The failing reproduction first:** `runners/repro-cleanup-retry.sh` (a real `prepare`, a cleanup, replacements, a second cleanup). Against the `c37f813` tool it reports **REPRO FAILED**: 34 of 34 replacements deleted.
+- **The repair** (D-R4W7-03) is in `scripts/beta/w7-owner-preview.sh`:
+  - one exclusive run folder `w7op-<token>`, created with `mkdir`, holding a token file, with its device:inode:birth time recorded;
+  - identity checks on every command;
+  - a cleanup that removes the code first, then the rest, then the token file, and retires the record last;
+  - a retry after cleanup is a no-op;
+  - nothing outside the folder is created or taken over.
+- **`w7-owner-selftest.sh`, now S1–S11 (61 checks), adds:**
+  - a replaced run folder, including one with a copied token file and a reused inode;
+  - a symlinked run folder;
+  - a retry with replacements, and a retired run refused;
+  - an interrupted cleanup followed by a retry;
+  - pre-existing shared-name folders never adopted.
+
+  The loops that took arguments now pass them in the right order, and each refusal is checked for its reason.
+- **Reported in 6956005161** (the run-folder repair, tested `b8b486c`, head `a519e8b`).
+
+## Beta R4 W7: retryable final cleanup, no ownership guess (review 6956209006)
+- **Acknowledged** in 6956229455 at 12:50 p.m. ET. The estimate is about 30 min.
+- **The failing tests first:** S12–S15 in `w7-owner-selftest.sh`, run against the unchanged `b8b486c` tool, fail. They cover:
+  - a final `rmdir` failure (a `PATH` shim) and its retry;
+  - an interruption after the token is deleted, and its retry;
+  - a replacement made during recovery;
+  - an interrupted `prepare` without identity;
+  - an interrupted `prepare` after its identity was recorded.
+- **The repair** (D-R4W7-04) is in `scripts/beta/w7-owner-preview.sh`:
+  - the identity is recorded before the token file;
+  - `finalizing` is recorded before the token is deleted;
+  - a token-less recovery requires the identity, with a known birth time, and does only an `rmdir`;
+  - with no identity, nothing is removed or retired.
+
+  The empty-folder shortcut is removed.
+
+## Beta R4 W7: the private-preview Origin compatibility (handoff 6957705907; investigation only)
+- **Recorded first:**
+  - Reported in 6956378984: the cleanup recovery, tested `9205c93`, head `7103962`.
+  - Review 6956496260 accepted the bounded operator repair. That is not W7 clearance.
+  - **The owner-run Gate R failed twice, `UNSUITABLE`:** 6957040472, then the retry 6957204655 → 6957543881 with the address bar shown.
+    - The page's own fetch, form and WebSocket requests arrived with Origin `http://localhost:3157`. Its cross-origin requests kept their https origin.
+    - The cause within the forwarding and browser path isn't proven.
+  - Phase A was not started.
+- **Acknowledged** in 6957718793 at 1:53 p.m. ET. The estimate is about 50 min.
+- **Found** (`docs/evidence/beta-r4-w7/preview-compat/README.md`):
+  - **What stopped the run is our tooling's https rule:** the probe at `probe-forwarded-origin.mjs:90-91`, and `start` at `w7-owner-preview.sh:146-147`.
+  - **The runtime accepts an `http` public origin.** Its only consequence is that the beta cookie loses `Secure`, because one value sets both the matched origin and the cookie flag.
+  - With the address-bar origin configured, the runtime refuses the rewritten own requests (403 `FOREIGN_ORIGIN`).
+- **Recommended, for architecture review:** C2, a preview-only adapter outside the release.
+  - **What it does:** it restores the one exact value `http://localhost:<port>` to the external `https://<codespace>-<port>.app.github.dev`.
+  - **What it refuses:** an unrewritten external Origin, and a POST or WebSocket with no Origin.
+  - **What it leaves alone:** everything else passes unchanged to the runtime's exact-origin check, and the cookie stays `Secure`.
+  - **Rejected:** C1 (the configuration-only route; the cookie isn't `Secure`); a runtime change (it would touch both pinned releases); the HTTPS port protocol (a hypothesis only). Route B stays the fallback.
+- **Validation:** `repro-origin-cases.mjs` sends the real runtime, in production mode, the as-received cases under C0, C1 and C2 (an adapter model). Its runs are in `preview-compat/final/`.
+- **Not implemented:** the adapter, the probe verdict and the `start` change all wait for the review. Nothing ran in the Codespace. W7 and B-W7-01 stay OPEN.
+
+## Beta R4 W7: the Route B operator recipe (review and handoff 6957990858)
+- **The review:**
+  - the compatibility diagnosis (6957956131) was accepted;
+  - the adapter was **rejected** and stays unimplemented;
+  - W7's browser route is Route B, the existing private Firefox ESR / noVNC desktop, with ChatGPT as the hands-on tester.
+- **Acknowledged** in 6958007461 at 2:05 p.m. ET. The estimate is about 90 min.
+- **Added** (D-R4W7-05):
+  - `routeb`, `bstart` and `firefox` in `scripts/beta/w7-owner-preview.sh`, with route-aware `stop`, `status` and `cleanup`;
+  - the recipe, `docs/beta/w7-routeb-recipe.md`;
+  - a banner on the owner packet pointing to it.
+- **Validation:** `docs/evidence/beta-r4-w7/routeb/`, its local runner and its driver. Chromium stands in for Firefox, through copies of the profiles' NSS databases; this container has no Firefox. The existing self-test (70 checks) is rerun as well.
+- **Unchanged:** Route A's refusal, the runtime and the pins. Nothing ran in the Codespace. W7 and B-W7-01 stay OPEN.
+
+- **Review 6958719378, P1:** the recipe's rollback and return snippets were `;` lists, so `bstart` ran even after a failed `backup`, `compat` or `check`.
+  - **Acknowledged** in 6958735491 at 2:34 p.m. ET. The estimate is about 20 min.
+  - **The repair:** every dependent sequence in `w7-routeb-recipe.md` and `w7-owner-test-packet.md` is now one `&&` chain, and each fenced block holds at most one state-changing line. Inspection steps stay on their own.
+  - **The check:** `routeb/runners/snippet-check.py` reads the documents themselves and runs each chain against a stub operator, failing every step in turn.
+    - against the unrepaired `31f68a2` documents: 11 FAIL;
+    - against the repaired ones: all PASS.
+
+## Beta R4 W7 / B-W7-01: the newer release `72e9d8b`, developer gate and package (handoffs 6963579755, 6964628237)
+- **The Route B private W7 browser rehearsal passed** (ChatGPT, 6963579755), on disposable data with the local surrogate pair. Native iPhone Safari and Android Chrome are untested.
+- **Handoff 6963579755,** acknowledged in 6963613560 and reported in 6964590222. These are developer-run results:
+  - **The full gate** on a fresh clean clone of `72e9d8ba59ef3271d756bc2bf77b40ea4d6ee74d`: run `20261117-231232-72e9d8ba-471`, **PASSED (exit 0)**, 112/112, unit 2,085/2,085, Node v22.23.4, chrome-headless-shell 153, 41m 39s.
+  - **The R2 package** under Node v22.16.0:
+    - archive SHA-256 `f3bd00ea2f2c17e1f84e0b413822f5cd181247774f9872923860c1120f4d72ca`;
+    - inventory: 144 files, `4f58b3239f04f9ea074c15993371effee6fac1295dd8124924ea00fefb19daef`;
+    - `release.json` names `72e9d8b`, Node v22.16.0.
+    - Against `7097ac2`, only web-client files differ.
+  - **The transfer** of the archive bytes was blocked: there's no private channel.
+- **Review and handoff 6964628237** (acknowledged in 6964635939) chose option (a): ChatGPT builds and audits its own archive in the Codespace, and `f3bd00ea…` stays a developer reference. It asked for the existing evidence to be published, with no reruns.
+  - **Published:** `docs/evidence/beta-r4-w7/release-72e9d8b/` holds 142 files, copied unchanged after a scan for secrets, which found none.
+  - **The manifests:** the published manifest is `b9b0b4ff…`; the original 696-file bundle manifest is `4abbb2e2…`, kept separately. All 142 files match their original lines.
+  - **Not published:** the archive bytes and 63 of the 66 screenshot folders.
+- **Pending:**
+  - ChatGPT's evidence read, independent archive build and audit, private-browser start check, and compatibility proof on a received copy;
+  - then the pins-only forward commit and its revert.
+  - W7 and B-W7-01 stay OPEN.
