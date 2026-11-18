@@ -4055,3 +4055,22 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
   - **The check:** `routeb/runners/snippet-check.py` reads the documents themselves and runs each chain against a stub operator, failing every step in turn.
     - against the unrepaired `31f68a2` documents: 11 FAIL;
     - against the repaired ones: all PASS.
+
+## Beta R4 W7 / B-W7-01: the newer release `72e9d8b`, developer gate and package (handoffs 6963579755, 6964628237)
+- **The Route B private W7 browser rehearsal passed** (ChatGPT, 6963579755), on disposable data with the local surrogate pair. Native iPhone Safari and Android Chrome are untested.
+- **Handoff 6963579755,** acknowledged in 6963613560 and reported in 6964590222. These are developer-run results:
+  - **The full gate** on a fresh clean clone of `72e9d8ba59ef3271d756bc2bf77b40ea4d6ee74d`: run `20261117-231232-72e9d8ba-471`, **PASSED (exit 0)**, 112/112, unit 2,085/2,085, Node v22.23.4, chrome-headless-shell 153, 41m 39s.
+  - **The R2 package** under Node v22.16.0:
+    - archive SHA-256 `f3bd00ea2f2c17e1f84e0b413822f5cd181247774f9872923860c1120f4d72ca`;
+    - inventory: 144 files, `4f58b3239f04f9ea074c15993371effee6fac1295dd8124924ea00fefb19daef`;
+    - `release.json` names `72e9d8b`, Node v22.16.0.
+    - Against `7097ac2`, only web-client files differ.
+  - **The transfer** of the archive bytes was blocked: there's no private channel.
+- **Review and handoff 6964628237** (acknowledged in 6964635939) chose option (a): ChatGPT builds and audits its own archive in the Codespace, and `f3bd00ea…` stays a developer reference. It asked for the existing evidence to be published, with no reruns.
+  - **Published:** `docs/evidence/beta-r4-w7/release-72e9d8b/` holds 142 files, copied unchanged after a scan for secrets, which found none.
+  - **The manifests:** the published manifest is `b9b0b4ff…`; the original 696-file bundle manifest is `4abbb2e2…`, kept separately. All 142 files match their original lines.
+  - **Not published:** the archive bytes and 63 of the 66 screenshot folders.
+- **Pending:**
+  - ChatGPT's evidence read, independent archive build and audit, private-browser start check, and compatibility proof on a received copy;
+  - then the pins-only forward commit and its revert.
+  - W7 and B-W7-01 stay OPEN.

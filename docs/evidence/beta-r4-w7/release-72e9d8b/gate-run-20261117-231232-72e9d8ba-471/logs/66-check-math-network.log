@@ -1,0 +1,34 @@
+$ node scripts/check-math-network.mjs http://localhost:39221
+# timeout 600s | worker w1 | server http://localhost:39221 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/b7w/gate-src/test-results/20261117-231232-72e9d8ba-471/server-data/w1)
+
+[+6.6s] PASS 1 hidden at start: nothing is opened while the page is hidden — opens 0
+[+7.9s] PASS 1 hidden at start: the phone can answer within 1.5 s of the server opening it — 52 ms
+[+7.9s] PASS 1 hidden at start: a 1 s answer earns 120 (+20) — 120
+[+13.1s] PASS 2 delayed open: the clock starts when the server opens it, not when the phone asked — 34 ms
+[+13.1s] PASS 2 delayed open: +20 still reachable — 120
+[+15.2s] PASS 3 stalled reply: the prompt still arrives (pushed) within 1.5 s of the open — 41 ms
+[+15.2s] PASS 3 stalled reply: +20 still reachable — 120
+[+22.6s] PASS 4 polling only: the prompt arrives within one poll (≤ 3 s) — 2028 ms
+[+22.6s] PASS 4 polling only: a 1 s answer still earns +20 (the poll's delay is within the 5 s bracket) — 120
+[+26.3s] PASS 5 retries: the open lands and the clock starts then (≤ 1.5 s to answerable) — 21 ms
+[+26.3s] PASS 5 retries: +20 still reachable — 120
+[+29.1s] PASS 6 reload mid-question: a reload never restarts the server's clock (one open time) — 1794959277992 vs 1794959277992
+[+30.1s] PASS 6 reload: the time before the reload still counts (the clock is not reset) — 2709 ms
+[+38.8s] PASS 7 brackets: an answer at 6084 ms earns 110 — 110
+[+50.8s] PASS 7 brackets: an answer at 11064 ms earns 100 — 100
+[+50.8s] PASS 7 normal: a 1 s answer earns 120 (+20)
+[+50.8s] MATH TIMING TABLE
+[+50.8s] | condition | answerable after open (ms) | tapped after open (ms) | server measured (ms) | points |
+[+50.8s] | 1 hidden at start | 52 | 1055 | 1101 | 120 |
+[+50.8s] | 2 open request delayed 3 s | 34 | 1035 | 1067 | 120 |
+[+50.8s] | 3 open accepted, reply stalls 15 s | 41 | 1043 | 1071 | 120 |
+[+50.8s] | 4 socket silent + reply stalls 15 s (polling only) | 2028 | 3030 | 3050 | 120 |
+[+50.8s] | 5 first two opens lost, phone retries | 21 | 1025 | 1052 | 120 |
+[+50.8s] | 6 reload mid-question | 40 | 2689 | 2709 | 120 |
+[+50.8s] | 7 normal, answered at ~1 s | 41 | 1043 | 1072 | 120 |
+[+50.8s] | 7 normal, answered at ~6 s | — | — | 6084 | 110 |
+[+50.8s] | 7 normal, answered at ~11 s | — | — | 11064 | 100 |
+[+50.8s] MATH NETWORK ALL PASSED
+[+50.8s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":14,"pages":14,"peakOpenPages":2}
+
+# PASS (exit 0) in 50.8s | cpu 6.7s, peak memory 360 MB

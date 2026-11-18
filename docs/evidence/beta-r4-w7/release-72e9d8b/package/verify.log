@@ -1,0 +1,32 @@
+== archive verification, 2026-11-17T23:55:21Z, node v22.16.0
+archive sha256: f3bd00ea2f2c17e1f84e0b413822f5cd181247774f9872923860c1120f4d72ca
+tar entries: 163 (files: 145, dirs: 18, other: 0)
+duplicate entries: 0
+absolute or .. entries: 0
+node_modules entries: 0
+-- release.json (extracted)
+{
+  "revision": "72e9d8ba59ef3271d756bc2bf77b40ea4d6ee74d",
+  "builtAt": "2026-11-17T23:54:58.655Z",
+  "node": "v22.16.0"
+}
+extracted inventory: 144 files, digest 4f58b3239f04f9ea074c15993371effee6fac1295dd8124924ea00fefb19daef
+extracted inventory == recorded inventory: identical
+-- against the audited 7097ac2 inventory (docs/beta/release-7097ac2.inventory.sha256)
+path lists differ
+  differs: ./apps/web/dist/index.html
+  differs: ./apps/web/dist/sw.js
+  only in one: 	./apps/web/dist/assets/index-5tPs9-TY.js
+  only in one: ./apps/web/dist/assets/index-D9T9JWWD.js
+  only in one: 	./apps/web/dist/assets/index.es-D1uRMQBM.js
+  only in one: ./apps/web/dist/assets/index.es-mGdfCPi1.js
+-- runtime install
++-- ws@8.22.1
+`-- zod@3.25.76
+
+-- production start smoke (synthetic code, temp data, loopback)
+/health: {"ok":true,"revision":"72e9d8ba59ef3271d756bc2bf77b40ea4d6ee74d"}
+gated page without the code: HTTP 401
+server stopped
+code in server log: 0
+== end 2026-11-17T23:55:23Z

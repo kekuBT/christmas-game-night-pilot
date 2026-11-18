@@ -1,0 +1,41 @@
+$ node scripts/check-beta-gate-https.mjs http://localhost:35803
+# timeout 600s | worker w2 | server http://localhost:35803 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/b7w/gate-src/test-results/20261117-231232-72e9d8ba-471/server-data/w2)
+
+[+13.9s] [33m
+[+13.9s] (!) Some chunks are larger than 500 kB after minification. Consider:
+[+13.9s] - Using dynamic import() to code-split the application
+[+13.9s] - Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+[+13.9s] - Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.[39m
+[+14.7s] PASS P the release is packed and installed (runtime packages only) — 72e9d8ba59ef3271d756bc2bf77b40ea4d6ee74d
+[+15.4s] PASS T the packed server runs in production behind the TLS proxy, public origin https://beta.test:<port> — Listening on 127.0.0.1; public origin https://beta.test:45387.
+[+15.7s] PASS H1 320px: over HTTPS, a page load without the cookie gets the gate (401) at beta.test — https://beta.test:45387/?join=ABCD
+[+15.7s] PASS H1 320px: it fits the screen (no sideways scroll; the card is inside the viewport) — {"scroll":320,"width":320,"left":13,"right":307}
+[+15.8s] PASS H1 320px: the code field is labelled, and the field and button are at least 44 px tall — field 47, button 48
+[+15.9s] PASS H2 320px: the code form posts with the page's own origin and is answered by the gate (401), not refused as another site — {"status":401,"code":"","origin":"https://beta.test:<port>"}
+[+15.9s] PASS H2 320px: a wrong code is refused with a plain message (role=alert), and the page still fits — That code didn’t work. Check it and try again.
+[+16.0s] PASS H2 320px: no cookie is set, and the site is still gated
+[+16.1s] PASS H1 390px: over HTTPS, a page load without the cookie gets the gate (401) at beta.test — https://beta.test:45387/?join=ABCD
+[+16.1s] PASS H1 390px: it fits the screen (no sideways scroll; the card is inside the viewport) — {"scroll":390,"width":390,"left":16,"right":374}
+[+16.1s] PASS H1 390px: the code field is labelled, and the field and button are at least 44 px tall — field 47, button 48
+[+16.2s] PASS H2 390px: the code form posts with the page's own origin and is answered by the gate (401), not refused as another site — {"status":401,"code":"","origin":"https://beta.test:<port>"}
+[+16.2s] PASS H2 390px: a wrong code is refused with a plain message (role=alert), and the page still fits — That code didn’t work. Check it and try again.
+[+16.2s] PASS H2 390px: no cookie is set, and the site is still gated
+[+16.7s] PASS H3 the right code is accepted (303) on a post carrying the page's own origin — {"status":303,"code":"","origin":"https://beta.test:<port>"}
+[+16.7s] PASS H3 the right code returns to the page that was asked for, over HTTPS, query kept — https://beta.test:45387/?join=ABCD
+[+16.7s] PASS H3 the cookie is Secure, HttpOnly and SameSite=Lax, host-only for beta.test, and isn't the code — {"secure":true,"httpOnly":true,"sameSite":"Lax","domain":"beta.test","path":"/"}
+[+16.8s] PASS H3 the app loads after the gate
+[+17.0s] PASS H4 after entry: the same-origin API creates a room and a wss:// socket opens with a live update — {"status":201,"url":"wss://beta.test:45387/?roomId=…&audience=tv","ws":"open, live update received"}
+[+17.6s] PASS H4 the app's own live connection is wss:// to the public origin, and the lobby loads — ["wss://beta.test:45387/?…","wss://beta.test:45387/?…"]
+[+17.7s] PASS H5 a browser without the cookie: the API refuses (401 BETA_ACCESS_REQUIRED) and the wss:// socket is refused — {"status":401,"code":"BETA_ACCESS_REQUIRED","ws":"refused"}
+[+17.7s] PASS H6 control, Origin https://beta.test:<port>: the API answers 201, the code form signs in (303 + cookie), the wss:// handshake opens — 201 / 303 / open
+[+17.7s] PASS H6 foreign Origin https://evil.test, with a valid cookie: API 403 FOREIGN_ORIGIN, code form 403 with no cookie, wss:// handshake 403 — 403 FOREIGN_ORIGIN / 403 no cookie / 403
+[+17.7s] PASS H6 foreign Origin http://beta.test:<port>, with a valid cookie: API 403 FOREIGN_ORIGIN, code form 403 with no cookie, wss:// handshake 403 — 403 FOREIGN_ORIGIN / 403 no cookie / 403
+[+17.7s] PASS H6 foreign Origin https://beta.test:45388, with a valid cookie: API 403 FOREIGN_ORIGIN, code form 403 with no cookie, wss:// handshake 403 — 403 FOREIGN_ORIGIN / 403 no cookie / 403
+[+17.7s] PASS H6 foreign Origin https://localhost:<port>, with a valid cookie: API 403 FOREIGN_ORIGIN, code form 403 with no cookie, wss:// handshake 403 — 403 FOREIGN_ORIGIN / 403 no cookie / 403
+[+17.8s] PASS H6 foreign Origin null, with a valid cookie: API 403 FOREIGN_ORIGIN, code form 403 with no cookie, wss:// handshake 403 — 403 FOREIGN_ORIGIN / 403 no cookie / 403
+[+17.8s] PASS the server never printed the access code
+[+17.9s] cleanup: server stopped (0), proxy closed, 3 temporary dir(s) removed
+[+17.9s] HTTPS BETA GATE PASSED
+[+17.9s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":5,"pages":5,"peakOpenPages":2}
+
+# PASS (exit 0) in 17.9s | cpu 25.5s, peak memory 668 MB

@@ -1,0 +1,31 @@
+$ node scripts/check-relay.mjs http://localhost:40125
+# timeout 600s | worker w3 | server http://localhost:40125 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/b7w/gate-src/test-results/20261117-231232-72e9d8ba-471/server-data/w3)
+
+[+3.0s] PASS A the briefing names the teams
+[+3.7s] PASS A the TV shows a lane per team
+[+3.7s] PASS B the runner's phone says it's their leg
+[+3.7s] PASS B the teammate sees the same sum and is told to help
+[+3.9s] PASS B the runner's leg line: leg 1 of 12, the baton passes in at most 20 s
+[+4.0s] PASS B a right answer passes the baton (Coral leg 1, the other runner)
+[+4.0s] PASS C Sun is still on leg 0
+[+4.0s] PASS C Baraka's phone never shows Coral's next sum — 96 − 17 = ?
+[+4.0s] PASS C Wanjiru's phone never shows Coral's next sum — 96 − 17 = ?
+[+4.0s] PASS C the TV's data has no sum, option or answer
+[+4.1s] PASS D a wrong answer freezes the runner, counting down from at most 3
+[+4.1s] PASS D the wrong option is greyed out
+[+4.1s] PASS D (12.15-R) the TV's lane says the runner is frozen
+[+7.4s] PASS D the freeze ends
+[+7.6s] PASS D (12.15-R) the TV's lane stops saying frozen when the freeze ends, with no other answer
+[+7.6s] PASS D after the freeze, the right answer passes the baton
+[+23.6s] PASS E a Sun runner who doesn't answer in 20 s is passed over on the same sum
+[+23.6s] PASS E the game clock counts down: under 3:45 left after the pass
+[+23.9s] PASS F the race finished with Coral home first — ["team-coral","team-sun"]
+[+23.9s] PASS F every player scored their team's points — {"player-1":150,"player-2":150,"player-3":140,"player-4":140}
+[+23.9s] PASS F phones: the results with the team results card and a team-led heading
+[+23.9s] PASS F the TV leads with the winning team
+[+23.9s] PASS F the team results show points, not an average (phone and TV)
+[+24.7s] PASS F 320 px: the results have no sideways scroll
+[+24.8s] check-relay: all passed
+[+24.8s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":5,"pages":5,"peakOpenPages":5}
+
+# PASS (exit 0) in 24.8s | cpu 3.1s, peak memory 281 MB
