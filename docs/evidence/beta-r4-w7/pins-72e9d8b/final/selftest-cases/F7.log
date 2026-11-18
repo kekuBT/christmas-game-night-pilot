@@ -1,0 +1,2 @@
+PINS_PAIR_FAILED: the patch folder pins archive_sha256=aac13a8a5e89f56013cfd8905a7c7f6216c640b98d51d25476b22141eddce2a6, not the selected f3bd00ea2f2c17e1f84e0b413822f5cd181247774f9872923860c1120f4d72ca
+exit 1

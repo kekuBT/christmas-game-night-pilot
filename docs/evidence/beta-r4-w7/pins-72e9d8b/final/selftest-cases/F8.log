@@ -1,0 +1,2 @@
+PINS_PAIR_FAILED: the revert did not restore the baseline: M  cgn-artifact-gate.sh 
+exit 1

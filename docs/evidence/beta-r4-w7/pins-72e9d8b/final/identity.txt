@@ -1,0 +1,4 @@
+tested b041bf48fd169c555806f12ff3f11b7adddde646 dirty=[0]
+selftest exit 0
+gate-archives exit 0
+after: dirty=[0] head b041bf48fd169c555806f12ff3f11b7adddde646

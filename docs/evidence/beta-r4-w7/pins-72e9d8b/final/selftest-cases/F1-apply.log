@@ -1,0 +1,2 @@
+error: patch failed: deploy/render/cgn-artifact-gate.sh:26
+error: deploy/render/cgn-artifact-gate.sh: patch does not apply

@@ -1,0 +1,6 @@
+ M deploy/render/.dockerignore
+ M deploy/render/Dockerfile
+ M deploy/render/cgn-artifact-gate.sh
+ M deploy/render/pins/archive.sha256
+ D deploy/render/pins/release-7097ac2.inventory.sha256
+?? deploy/render/pins/release-72e9d8b.inventory.sha256
