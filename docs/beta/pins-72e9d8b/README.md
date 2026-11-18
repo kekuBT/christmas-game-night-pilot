@@ -1,6 +1,6 @@
 # The pins-only forward change to `72e9d8b`, and its revert (B-W7-01, handoff 6966073894)
 
-**A proposal for review. Nothing here is applied.**
+**Reviewed, with its exact positive gates passed on the retained archives** (review [6966711883](https://github.com/kekuBT/christmas-game-night-pilot/pull/51#issuecomment-6966711883)). **Nothing here is applied.**
 - **The canonical deploy context is unchanged:** `deploy/render` on this branch still pins `7097ac2`.
 - **The two patches are preparation artifacts.** Applying them in the private deploy repository is a later step, outside this handoff. Nothing here authorizes that step, a promotion or a deploy.
 - **The selected identity** (handoff 6966073894):
@@ -81,9 +81,11 @@ bash scripts/beta/w7-pins-pair.sh verify deploy/render docs/beta/pins-72e9d8b 72
 
 **The self-test:** `bash scripts/beta/w7-pins-selftest.sh` runs it on an isolated clean clone of the base, with its failure controls. **The gate checks:** the archive checks are in [the evidence](../../evidence/beta-r4-w7/pins-72e9d8b/README.md).
 
-## ChatGPT's actual-pair checks (next; not done here)
-1. **Check the forward context against the exact retained `aac13a8a…` archive,** through the unchanged gate: `ARTIFACT_GATE_OK` and `INSTALLED_OK` for `72e9d8b`.
-2. **Check the reverted context against the exact `a693c543…` archive,** the same way, for `7097ac2`.
-3. **Run the focused actual-pair protocol check** it chooses.
+## ChatGPT's actual-pair checks: PASSED (review 6966711883; independent, private Codespace)
+1. **The forward context against the exact retained `aac13a8a…`:** `ARTIFACT_GATE_OK`, then `INSTALLED_OK`, for `72e9d8b`.
+2. **The reverted context against the exact `a693c543…`:** `ARTIFACT_GATE_OK`, then `INSTALLED_OK`, for `7097ac2`.
+3. **The focused actual-pair protocol check,** on the gate-installed packages: `ACTUAL_ARCHIVE_PAIR_COMPATIBILITY_PASSED`.
 
-**What this session can't do:** it has neither archive. Both positive checks stay ChatGPT's. That is not a defect in the pair, and it is no reason to rebuild.
+**How they ran:** the gate script directly under Node v22.16.0, not a Docker image build. The raw lines and their attribution are in [release-72e9d8b.md](../release-72e9d8b.md).
+
+**This session** had neither archive. Its own checks are the developer and LOCAL SURROGATE runs in the evidence.

@@ -3,6 +3,7 @@
 **What this is:** Claude's developer-run checks of the pair in [docs/beta/pins-72e9d8b/](../../../beta/pins-72e9d8b/README.md).
 - **Where they ran:** this session's machine.
 - **What they are not:** independent evidence, and not a check of the audited archives. Neither `aac13a8a…` (`72e9d8b`) nor `a693c543…` (`7097ac2`) is here. **Their positive checks are ChatGPT's,** on the retained bytes.
+  - **Those positive checks have since PASSED,** independently, in review 6966711883: the exact forward and reverted gates, and the focused actual-pair check. They ran in ChatGPT's private Codespace, and their record is `docs/beta/release-72e9d8b.md`. The logs here are unchanged.
 - **No full gate** was run (the handoff): this is docs and pin-patch preparation, with no app or runtime change.
 
 ## The runners

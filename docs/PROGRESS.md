@@ -4098,3 +4098,17 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
   - the focused actual-pair protocol check;
   - the archive's `builtAt`.
   - B-W7-01 and W7 stay OPEN.
+
+## Beta R4 W7 / B-W7-01: release-pair records closeout (review and handoff 6966711883)
+- **The review:** ChatGPT's review 6966711883 passed the engineering checks with no remaining code blocker. It ran privately in its Codespace:
+  - its own self-test, 29/29, with the same patch hashes;
+  - the forward context installing the exact `aac13a8a…`, and the reverted context installing the exact `a693c543…`, each through its own unchanged gate (`ARTIFACT_GATE_OK`, `INSTALLED_OK`). This was the gate script directly, not a Docker image;
+  - the focused actual-pair protocol check on the gate-installed packages, with a same-Codespace local copy as the receipt;
+  - a Firefox ESR revision check over private noVNC.
+- **The metadata, read from the selected bytes:** `builtAt` `2026-11-18T01:07:42.001Z`; 1,188,930 bytes; 163 entries (145 regular files including `release.json`, and 18 folders).
+- **The handoff:** acknowledged in 6966721056, with an estimate of about 30 min. It is one docs-only commit on #51, from base `8d01be6`:
+  - **`release-72e9d8b.md`:** the metadata, the retained path, the raw independent verdict lines, and an attribution table separating developer, independent, local and real-device results;
+  - **the readiness matrix (revision 4) and `render-w7.md`:** the current state is that B-W7-01's local engineering proof has PASSED. The forward and revert patches are unapplied preparation. Hosted W7 and native W8 are NOT RUN and owner execution-gated. The superseded claims ("cannot pass today", "the browser journey hasn't run", "the preview is blocked", the pending relocation and tester decisions) are now dated history;
+  - **also updated:** the pins README and the evidence README. The developer logs are unchanged.
+- **Checks:** focused document checks only, for links, identities and stale wording. No unit tests, gate, package, image, browser or compatibility rerun.
+- **Next:** ChatGPT verifies the delta and delivers the readiness result. Deploying needs the owner's explicit execution approval.
