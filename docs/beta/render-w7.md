@@ -1,6 +1,10 @@
 # W7 on Render: rolling back to the previous release (Beta R4, handoff 6941129590)
 
-**Status: prepared; the rollback protocol is rehearsed locally. The real W7 is PENDING, and it is BLOCKED on a prerequisite: no audited previous release exists yet (B-W7-01 below).** Nothing here has run on Render, over SSH, against production data, with the owner's keys, or as a provider-side rollback.
+**Status (2026-11-18, review [6966711883](https://github.com/kekuBT/christmas-game-night-pilot/pull/51#issuecomment-6966711883)): B-W7-01's local engineering proof has PASSED. The real W7 is NOT RUN; it waits for the owner's execution approval.**
+- **The release pair is audited:** `72e9d8b` (`aac13a8a…`) forward, `7097ac2` (`a693c543…`) to roll back to.
+- **What passed:** the compatibility on a received copy, the reviewed pins-only forward and revert patches, and the exact positive gates and protocol check on the retained archives.
+- **Not applied yet:** the forward and revert patches are preparation artifacts only.
+- **Nothing here has run** on Render, over SSH, against production data, with the owner's keys, or as a provider-side rollback.
 - **What W7 is:** the proposal's row ([beta-r4-hosting-proposal.md](beta-r4-hosting-proposal.md)): "a revert-commit deploy of the previous release, then the acceptance checks. And one deliberate one-click rollback across a configuration change, to see the guard refuse it." The pass condition is "the previous release serves the current configuration; the one-click rollback fails closed".
 - **The rules** (the proposal's "Rollback" section, unchanged):
   - **Never use Render's one-click rollback.** It brings back the old deploy's environment values, but never the disk.
@@ -12,20 +16,35 @@
 
   Claude doesn't operate the account, the storage or the keys.
 
-## B-W7-01: there is no audited previous release (a prerequisite, open)
-- **The facts:** `7097ac2` is the **first** audited archive of this route: SHA-256 `a693c5433d8dd8c17368e9c02fd8092b316d67b6e62ac9c0070a60b99c3a5131`, recorded in [release-7097ac2.md](release-7097ac2.md). No earlier archive was audited, pinned or received.
-- **So the actual predecessor-artifact check cannot pass today.** There is nothing to identify by revision and digest, and so no data-format evidence for a real predecessor.
-- **What unblocks it:** an audited release **newer** than `7097ac2`, to deploy first and roll back from. The rollback target, `7097ac2` (`a693c543…`), is already audited. Preparing and independently auditing the newer release is engineering work. Only the hosted execution and any spending need the owner's decision (clarified in [6951228654](https://github.com/kekuBT/christmas-game-night-pilot/pull/50#issuecomment-6951228654)).
-  - **The proposed candidate:** `72e9d8b`, the reviewed uncertain-delivery repair. Its runtime differs from `7097ac2` only in three web-client files; the server, the content and the packages are identical. It is still unpackaged and unaudited as an archive.
+## B-W7-01: the audited release pair (local engineering proof PASSED; hosted W7 pending)
+- **Where it stands** (handoff [6966073894](https://github.com/kekuBT/christmas-game-night-pilot/pull/50#issuecomment-6966073894)):
+  - **Done (local engineering):**
+    - the full gate on `72e9d8b`: developer-run, 112/112, its raw evidence read independently;
+    - its independent archive audit: archive `aac13a8a5e89f56013cfd8905a7c7f6216c640b98d51d25476b22141eddce2a6`, inventory `4f58b323…`, `builtAt` `2026-11-18T01:07:42.001Z`, recorded in [release-72e9d8b.md](release-72e9d8b.md);
+    - the exact-pair compatibility check on a received copy (review 6966023566);
+    - the pins-only forward patch and its revert, in [pins-72e9d8b/](pins-72e9d8b/README.md). They were reviewed, and checked independently in review 6966711883:
+      - the proposed forward context installed the exact `aac13a8a…` through its own unchanged gate (`ARTIFACT_GATE_OK`, `INSTALLED_OK`);
+      - the reverted context installed the exact `a693c543…` the same way;
+      - the focused actual-pair protocol check passed on those gate-installed packages.
+  - **Not done, and owner-gated:**
+    - **applying the patches** in the private deploy repository. The forward and revert commits are not made; the patches are preparation only;
+    - **the hosted operation below;**
+    - **native W8.**
+- **History (as written on 2026-11-17; superseded by the above):**
+  - `7097ac2` was then the **only** audited archive of this route: SHA-256 `a693c5433d8dd8c17368e9c02fd8092b316d67b6e62ac9c0070a60b99c3a5131`, recorded in [release-7097ac2.md](release-7097ac2.md). No other archive had been audited, pinned or received.
+  - So the actual predecessor-artifact check **could not pass then**: there was nothing to identify by revision and digest, and no data-format evidence for a real release pair.
+  - It has since passed locally, with `72e9d8b` as the newer release.
+- **What was needed (history):** an audited release **newer** than `7097ac2`, to deploy first and roll back from. The rollback target, `7097ac2` (`a693c543…`), is already audited. Preparing and independently auditing the newer release is engineering work. Only the hosted execution and any spending need the owner's decision (clarified in [6951228654](https://github.com/kekuBT/christmas-game-night-pilot/pull/50#issuecomment-6951228654)).
+  - **The proposed candidate:** `72e9d8b`, the reviewed uncertain-delivery repair. Its runtime differs from `7097ac2` only in three web-client files; the server, the content and the packages are identical. It was unpackaged then; it is now audited (above).
   - **The engineering steps:**
-    1. a full gate on it;
-    2. the package and its release record;
-    3. the independent private audit of the archive;
-    4. a pins-only forward commit, and its revert prepared in advance;
-    5. the local checks under test pins;
-    6. the real predecessor check on the audited `a693c543…`, where that archive is kept.
+    1. a full gate on it: **done** (developer-run, independently read);
+    2. the package and its release record: **done** ([release-72e9d8b.md](release-72e9d8b.md); `builtAt` recorded from the selected bytes, 6966711883);
+    3. the independent private audit of the archive: **done** (6966023566);
+    4. a pins-only forward commit, and its revert prepared in advance: **prepared as patches and reviewed** ([pins-72e9d8b/](pins-72e9d8b/README.md)). They are not applied: the commits are made in the deploy repository only in the owner-approved forward deploy;
+    5. the local checks under test pins: **done for the pair** (the LOCAL SURROGATE gate check L1 in [the evidence](../evidence/beta-r4-w7/pins-72e9d8b/README.md));
+    6. the real predecessor check on the audited `a693c543…`, where that archive is kept: **done** (6966711883: the reverted context's exact gate and the focused actual-pair check). The received-copy compatibility part passed in 6966023566.
   - **The owner-gated hosted operation:** the forward deploy, then W7's rollback and return, and separately the deliberate one-click check. That check runs on the single planned service, and only in its synthetic-data phase ([the exception below](#the-synthetic-phase-exception)). Any new resource needs approval too.
-  - Until then, a W7 on Render could only "roll back" to the release that is already running, which proves nothing.
+  - **Why the pair was needed (history):** without it, a W7 on Render could only "roll back" to the release already running, which proves nothing.
 - **For the local rehearsal only,** a clearly labelled **LOCAL SURROGATE** stands in for the predecessor, built from `f93e9cba8613859be9891706ead1c60157c73de2`, the commit before the R5 UI changes. Its identity and build:
   - built by [build-predecessor.sh](../evidence/beta-r4-w7/runners/build-predecessor.sh), the same procedure as the R2 rebuild (Node 22.16.0, `npm ci`, `pack.mjs`);
   - archive SHA-256 `e34c6c1cde04d022cff8b161a6edb4d89b298f2bd049e9b58961b2cddaf16210`;
@@ -159,7 +178,7 @@ The architect's decision is in review [6954485280](https://github.com/kekuBT/chr
 - the owner's approval of the window (the execution decision). Reusing the service and disk avoids a second service or disk charge. The usual Render overages and tax may still apply ([beta-r4-readiness.md](beta-r4-readiness.md) §3);
 - the exception's condition, checked first: no real data or real code has ever been on the service;
 - a throwaway access code and `age` identity created for it;
-- B-W7-01 for the revert-commit half (a second audited release);
+- the revert-commit half's release pair: **done locally** (B-W7-01, above). The forward deploy of `72e9d8b` has to come first, in its own owner-approved step;
 - the hosted validation of the W6 switch, which is still open.
 
 ## The local rehearsal (preparation only)
@@ -193,13 +212,13 @@ The architect's decision is in review [6954485280](https://github.com/kekuBT/chr
 - The self-test adds a port conflict, an unlistable inventory, an interruption, and sentinels of another owner that must survive.
 
 **The limits of the rehearsal:**
-- **The previous release is a LOCAL SURROGATE** with an identical server (B-W7-01).
+- **The previous release is a LOCAL SURROGATE** with an identical server. That was the rehearsal's limit; the actual pair has since been checked separately (B-W7-01).
 - **The data lock is per network namespace.** A second container on the same volume in its own namespace is NOT excluded by the lock. On Render, one instance per disk and stop-before-start deploys exclude it, and the runbook's one-writer rule checks it. The rehearsal proves the in-instance lock (D5b) and the start gate (D5a), not the platform's guarantee.
 - **Maintenance, the build service, the deploy events and the one-click rollback** are Render's, and are only modelled here.
 
 Evidence: [docs/evidence/beta-r4-w7/](../evidence/beta-r4-w7/).
 
 ## Pending
-- **B-W7-01,** a second audited release, before any real W7.
+- **B-W7-01:** the local engineering proof PASSED (6966711883). What remains is the owner-gated forward deploy that applies the reviewed patches.
 - **The real W7** (the revert-commit deploy and the deliberate one-click check), in owner-approved windows. The one-click check runs only under the synthetic-phase exception.
 - Render, production data, owner keys and provider-side execution all stay gated on separate owner approval.

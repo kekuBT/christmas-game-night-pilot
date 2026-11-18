@@ -1,0 +1,21 @@
+B-W7-01 pins-only forward/revert pair: final local checks (handoff 6966073894). Developer-run, not independent.
+Tested commit: b041bf48fd169c555806f12ff3f11b7adddde646 (a fresh clone, detached, clean before and after: identity.txt)
+Base of the pair: 71d02009a1b7ed537824b20a0c23d62b157046db (#50)
+Selected identity: 72e9d8ba59ef3271d756bc2bf77b40ea4d6ee74d, archive aac13a8a5e89f56013cfd8905a7c7f6216c640b98d51d25476b22141eddce2a6,
+  inventory 4f58b3239f04f9ea074c15993371effee6fac1295dd8124924ea00fefb19daef (144 files)
+Patches: forward-7097ac2-to-72e9d8b.patch 632125750b7dc9cd159cd93fefd3bf827b203b37ee5a411dedcdd62a69cae04f
+         revert-72e9d8b-to-7097ac2.patch  26d897523c38ce8521abef7a62e06456e15b03b6a1dbdb101264c1e823905afe
+         SHA256SUMS                       11af1e9b24f17d3d3ef426d2361cf8f76450d1dd805aa075cab4932e05f9b30d
+
+1. scripts/beta/w7-pins-selftest.sh, 2026-11-18T01:41:02Z: W7 PINS SELFTEST PASSED, exit 0, 29 passed / 0 failed
+   (selftest-b041bf4.log; per-case logs in selftest-cases/)
+2. runners/gate-archives.sh, 2026-11-18T01:41:33Z, Node v22.16.0, sh = dash: W7 PINS GATE CHECK PASSED, exit 0,
+   13 passed / 0 failed (gate-archives-b041bf4.log; per-case gate logs in gate-cases/)
+   - G1: the developer archive f3bd00ea... under the proposed aac13a8a... pin: ARTIFACT_GATE_FAILED (archive SHA-256)
+   - L1 is a LOCAL SURROGATE: the f3bd00ea... TEST pin, never the proposal.
+
+Not here: the audited archives aac13a8a... and a693c543... (their positive checks are ChatGPT's); a docker build;
+the full gate (not repeated, per the handoff); any hosted or provider step.
+Cleanup: the helper's private folders were empty after every case (I1, I2); the gate run removed its installed package,
+npm caches, input folders and clone (its last check). The work folders with the forward/reverted contexts stayed in the
+session's scratchpad and are not published.

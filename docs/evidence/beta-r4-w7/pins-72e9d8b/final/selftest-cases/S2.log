@@ -1,0 +1,9 @@
+-- the forward change (forward-7097ac2-to-72e9d8b.patch):
+    .dockerignore                         |   4 +-
+    Dockerfile                            |   2 +-
+    cgn-artifact-gate.sh                  |  12 +--
+    pins/archive.sha256                   |   2 +-
+    pins/release-7097ac2.inventory.sha256 | 144 ----------------------------------
+    pins/release-72e9d8b.inventory.sha256 | 144 ++++++++++++++++++++++++++++++++++
+    6 files changed, 154 insertions(+), 154 deletions(-)
+PINS_PAIR_MADE revision=72e9d8ba59ef3271d756bc2bf77b40ea4d6ee74d archive=aac13a8a5e89f56013cfd8905a7c7f6216c640b98d51d25476b22141eddce2a6 inventory=4f58b3239f04f9ea074c15993371effee6fac1295dd8124924ea00fefb19daef files=144 forward=632125750b7dc9cd159cd93fefd3bf827b203b37ee5a411dedcdd62a69cae04f revert=26d897523c38ce8521abef7a62e06456e15b03b6a1dbdb101264c1e823905afe base-tree=106ba330772aa5abfb45a7f43711c026aea569ec forward-tree=c282c08adbbf9429379bcc32d4043c4acf415de0

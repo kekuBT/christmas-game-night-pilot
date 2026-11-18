@@ -1,0 +1,4 @@
+cgn-entrypoint.sh: OK
+cgn-backup.sh: OK
+cgn-authorize.sh: OK
+ARTIFACT_GATE_FAILED: artifact/ must hold exactly mchezo-72e9d8b.tgz (it holds: )

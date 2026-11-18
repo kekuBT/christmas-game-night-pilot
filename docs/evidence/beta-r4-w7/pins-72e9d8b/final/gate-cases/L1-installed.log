@@ -1,0 +1,4 @@
+artifact-gate: inventory: 144 files, SHA-256 4f58b3239f04f9ea074c15993371effee6fac1295dd8124924ea00fefb19daef (the pinned one)
+artifact-gate: release.json: revision 72e9d8ba59ef3271d756bc2bf77b40ea4d6ee74d, node v22.16.0, built 2026-11-17T23:54:58.655Z
+artifact-gate: runtime packages: ws@8.22.1 zod@3.25.76, nothing else
+INSTALLED_OK revision=72e9d8ba59ef3271d756bc2bf77b40ea4d6ee74d inventory=4f58b3239f04f9ea074c15993371effee6fac1295dd8124924ea00fefb19daef deps="ws@8.22.1 zod@3.25.76" node=v22.16.0

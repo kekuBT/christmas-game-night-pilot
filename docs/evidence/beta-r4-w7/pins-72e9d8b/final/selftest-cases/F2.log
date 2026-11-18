@@ -1,0 +1,2 @@
+PINS_PAIR_FAILED: the context is not the recorded baseline: cgn-backup.sh: FAILED 
+exit 1

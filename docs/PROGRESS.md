@@ -4074,3 +4074,41 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
   - ChatGPT's evidence read, independent archive build and audit, private-browser start check, and compatibility proof on a received copy;
   - then the pins-only forward commit and its revert.
   - W7 and B-W7-01 stay OPEN.
+
+## Beta R4 W7 / B-W7-01: release record and pins-only forward/revert pair (handoff 6966073894)
+- **Inspected first:** PROGRESS, and the local work at #50's head `71d0200`, which was clean.
+- **Before it:** review 6966023566 audited ChatGPT's own archive, `aac13a8a…` (Node v22.16.0, inventory `4f58b323…`). The exact-pair compatibility check passed on a received copy.
+- **Acknowledged** in 6966082847 at 8:22 p.m. ET, with an estimate of about 90 min. New draft PR stacked on #50, branch `claude/beta-r4-b7w01-pins`.
+- **The records:**
+  - **new:** `docs/beta/release-72e9d8b.md`, which pins `aac13a8a…`. **Its `builtAt` and other package metadata are PENDING ChatGPT verification:** the bytes aren't in this session, and review 6966023566 doesn't quote them. Also new: `docs/beta/release-72e9d8b.inventory.sha256`, the published inventory unchanged.
+  - **updated:** the readiness matrix (revision 3), the B-W7-01 text in `render-w7.md`, and #50's status.
+- **The pair:** `docs/beta/pins-72e9d8b/`.
+  - **forward** `632125750b7d…`, **revert** `26d897523c38…`, against the exact baseline: the 11-file deploy context at `71d0200`, tree `106ba330…`. The forward tree is `c282c08a…`.
+  - **It changes six paths:** the gate's identity lines (and its two digest comments), `pins/archive.sha256`, the inventory pin (deleted and added), and the archive names in `.dockerignore` and the `Dockerfile`.
+  - **Unchanged:** the guards and their pins, the images, `render.yaml`, `INVENTORY_FILES`, and every check.
+- **New tools:**
+  - `scripts/beta/w7-pins-pair.sh` (`make`, `verify`);
+  - `scripts/beta/w7-pins-selftest.sh` (S0–S4, F1–F9, I1–I2);
+  - `docs/evidence/beta-r4-w7/pins-72e9d8b/runners/gate-archives.sh`.
+- **The checks** are in `docs/evidence/beta-r4-w7/pins-72e9d8b/`. The developer archive `f3bd00ea…` is refused under the proposed pin. The only positive gate run is LOCAL SURROGATE, under an `f3bd00ea…` test pin.
+- **No full gate** (the handoff). No app, runtime or canonical pin change.
+- **Pending (ChatGPT):**
+  - the review of the pair;
+  - the forward context against the retained `aac13a8a…`, and the reverted context against `a693c543…`;
+  - the focused actual-pair protocol check;
+  - the archive's `builtAt`.
+  - B-W7-01 and W7 stay OPEN.
+
+## Beta R4 W7 / B-W7-01: release-pair records closeout (review and handoff 6966711883)
+- **The review:** ChatGPT's review 6966711883 passed the engineering checks with no remaining code blocker. It ran privately in its Codespace:
+  - its own self-test, 29/29, with the same patch hashes;
+  - the forward context installing the exact `aac13a8a…`, and the reverted context installing the exact `a693c543…`, each through its own unchanged gate (`ARTIFACT_GATE_OK`, `INSTALLED_OK`). This was the gate script directly, not a Docker image;
+  - the focused actual-pair protocol check on the gate-installed packages, with a same-Codespace local copy as the receipt;
+  - a Firefox ESR revision check over private noVNC.
+- **The metadata, read from the selected bytes:** `builtAt` `2026-11-18T01:07:42.001Z`; 1,188,930 bytes; 163 entries (145 regular files including `release.json`, and 18 folders).
+- **The handoff:** acknowledged in 6966721056, with an estimate of about 30 min. It is one docs-only commit on #51, from base `8d01be6`:
+  - **`release-72e9d8b.md`:** the metadata, the retained path, the raw independent verdict lines, and an attribution table separating developer, independent, local and real-device results;
+  - **the readiness matrix (revision 4) and `render-w7.md`:** the current state is that B-W7-01's local engineering proof has PASSED. The forward and revert patches are unapplied preparation. Hosted W7 and native W8 are NOT RUN and owner execution-gated. The superseded claims ("cannot pass today", "the browser journey hasn't run", "the preview is blocked", the pending relocation and tester decisions) are now dated history;
+  - **also updated:** the pins README and the evidence README. The developer logs are unchanged.
+- **Checks:** focused document checks only, for links, identities and stale wording. No unit tests, gate, package, image, browser or compatibility rerun.
+- **Next:** ChatGPT verifies the delta and delivers the readiness result. Deploying needs the owner's explicit execution approval.

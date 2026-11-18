@@ -1,0 +1,71 @@
+== w7-pins-selftest 2026-11-18T01:41:02Z: helper ee004e3d70c2ba66, patch folder /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/pins-final/src/docs/beta/pins-72e9d8b, base 71d02009a1b7ed537824b20a0c23d62b157046db
+-- S0: static
+PASS S0 bash -n on the helper and this script
+-- S1: an isolated clean copy of the base
+PASS S1 a fresh clone, detached at 71d02009a1b7ed537824b20a0c23d62b157046db, clean
+-- S2: make reproduces the committed pair
+PINS_PAIR_MADE revision=72e9d8ba59ef3271d756bc2bf77b40ea4d6ee74d archive=aac13a8a5e89f56013cfd8905a7c7f6216c640b98d51d25476b22141eddce2a6 inventory=4f58b3239f04f9ea074c15993371effee6fac1295dd8124924ea00fefb19daef files=144 forward=632125750b7dc9cd159cd93fefd3bf827b203b37ee5a411dedcdd62a69cae04f revert=26d897523c38ce8521abef7a62e06456e15b03b6a1dbdb101264c1e823905afe base-tree=106ba330772aa5abfb45a7f43711c026aea569ec forward-tree=c282c08adbbf9429379bcc32d4043c4acf415de0
+PASS S2 make exits 0 and its output is byte for byte the committed docs/beta/pins-72e9d8b (README.md aside)
+PASS S2 the private temporary root is empty
+-- S3: verify
+PINS_PAIR_VERIFIED revision=72e9d8ba59ef3271d756bc2bf77b40ea4d6ee74d archive=aac13a8a5e89f56013cfd8905a7c7f6216c640b98d51d25476b22141eddce2a6 inventory=4f58b3239f04f9ea074c15993371effee6fac1295dd8124924ea00fefb19daef files=144 forward=632125750b7dc9cd159cd93fefd3bf827b203b37ee5a411dedcdd62a69cae04f revert=26d897523c38ce8521abef7a62e06456e15b03b6a1dbdb101264c1e823905afe base-tree=106ba330772aa5abfb45a7f43711c026aea569ec forward-tree=c282c08adbbf9429379bcc32d4043c4acf415de0 changed=6 guards=unchanged reverted=byte-identical
+PASS S3 PINS_PAIR_VERIFIED (exit 0)
+PASS S3 the private temporary root is empty, and the copy is untouched
+-- S4: the repository layout
+    M deploy/render/.dockerignore
+    M deploy/render/Dockerfile
+    M deploy/render/cgn-artifact-gate.sh
+    M deploy/render/pins/archive.sha256
+    D deploy/render/pins/release-7097ac2.inventory.sha256
+   ?? deploy/render/pins/release-72e9d8b.inventory.sha256
+PASS S4 forward applies to the clean copy and changes exactly the six allowlisted paths
+PASS S4 the guards, their pins, render.yaml, README.md and operator/ are untouched
+PASS S4 the revert applies and the copy is clean at the base again, every deploy/render file and mode as before
+-- F1: a base changed inside a hunk's context (NODE_VERSION, next to REVISION)
+   error: patch failed: deploy/render/cgn-artifact-gate.sh:26
+   error: deploy/render/cgn-artifact-gate.sh: patch does not apply
+   PINS_PAIR_FAILED: the context is not the recorded baseline: cgn-artifact-gate.sh: FAILED 
+PASS F1 git apply refuses the changed base
+PASS F1 verify refuses it (not the recorded baseline), and the dependent step didn't run
+-- F2: a base changed outside every hunk (one byte of cgn-backup.sh)
+   PINS_PAIR_FAILED: the context is not the recorded baseline: cgn-backup.sh: FAILED 
+PASS F2 git apply alone would apply (exit 0), so the baseline check is what refuses
+PASS F2 verify refuses it, naming cgn-backup.sh, and the dependent step didn't run
+-- F3: an already-forwarded base
+   PINS_PAIR_FAILED: the context at /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/pins-final/selftest-work/F3/deploy/render has no regular file pins/release-7097ac2.inventory.sha256
+PASS F3 git apply refuses the forward twice
+PASS F3 verify refuses an already-forwarded context
+-- F4: a mismatched substitution
+   PINS_PAIR_FAILED: cgn-artifact-gate.sh: expected 1 occurrence(s) of 'REVISION=7097ac2bb062925bb296a129f4771f1e68fd522d', found 0
+PASS F4 the revision line moved: refused (expected 1 occurrence, found 0), no output, no dependent step
+   PINS_PAIR_FAILED: cgn-artifact-gate.sh: expected 3 occurrence(s) of 'release-7097ac2.inventory.sha256', found 4
+PASS F4 a fourth mention of the inventory pin: refused (expected 3, found 4), no output
+-- F5: an unexpected changed file
+   PINS_PAIR_FAILED: forward-7097ac2-to-72e9d8b.patch touches [.dockerignore Dockerfile cgn-artifact-gate.sh cgn-entrypoint.sh pins/archive.sha256 pins/release-7097ac2.inventory.sha256 pins/release-72e9d8b.inventory.sha256], not exactly the allowlist [.dockerignore Dockerfile cgn-artifact-gate.sh pins/archive.sha256 pins/release-7097ac2.inventory.sha256 pins/release-72e9d8b.inventory.sha256]
+PASS F5 forward also changing cgn-entrypoint.sh (SHA256SUMS matching): refused by the allowlist
+   PINS_PAIR_FAILED: forward-7097ac2-to-72e9d8b.patch touches [.dockerignore Dockerfile cgn-artifact-gate.sh pins/archive.sha256 pins/release-7097ac2.inventory.sha256 pins/release-72e9d8b.inventory.sha256 pins/scripts.sha256], not exactly the allowlist [.dockerignore Dockerfile cgn-artifact-gate.sh pins/archive.sha256 pins/release-7097ac2.inventory.sha256 pins/release-72e9d8b.inventory.sha256]
+PASS F5 forward also changing the guard pin pins/scripts.sha256: refused by the allowlist
+   PINS_PAIR_FAILED: revert-72e9d8b-to-7097ac2.patch touches [.dockerignore Dockerfile cgn-artifact-gate.sh pins/archive.sha256 pins/release-7097ac2.inventory.sha256 pins/release-72e9d8b.inventory.sha256 render.yaml], not exactly the allowlist [.dockerignore Dockerfile cgn-artifact-gate.sh pins/archive.sha256 pins/release-7097ac2.inventory.sha256 pins/release-72e9d8b.inventory.sha256]
+PASS F5 the revert also changing render.yaml (provider configuration): refused by the allowlist
+-- F6: a non-identity change inside an allowlisted file
+   PINS_PAIR_FAILED: Dockerfile differs from the baseline beyond the identity tokens: < # Every base image is pinned by digest; there is no ARG (Render turns the service's environment variables into build > # Every base image is pinned by digest; there is an ARG (Render turns the service's environment variables into build 
+PASS F6 forward also rewording the Dockerfile's no-ARG line (applies cleanly): refused, beyond the identity tokens
+-- F7: another build's identity
+   PINS_PAIR_FAILED: the patch folder pins archive_sha256=aac13a8a5e89f56013cfd8905a7c7f6216c640b98d51d25476b22141eddce2a6, not the selected f3bd00ea2f2c17e1f84e0b413822f5cd181247774f9872923860c1120f4d72ca
+PASS F7 the developer archive f3bd00ea... as the selected pin: refused (the folder pins aac13a8a...)
+-- F8: a revert that doesn't restore the baseline
+   PINS_PAIR_FAILED: the revert did not restore the baseline: M  cgn-artifact-gate.sh 
+PASS F8 a revert that writes ARCHIVE=mchezo-7097ac3.tgz: refused (the baseline is not restored)
+-- F9: the output folder already exists
+   PINS_PAIR_FAILED: /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/pins-final/selftest-work/F9-out already exists
+PASS F9 refused, and the existing folder is left as it was
+-- I1: interrupted
+   held /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/pins-final/selftest-work/tmp/w7pins.QNH30POP (present: yes); exit 143; after: gone
+PASS I1 SIGTERM: exit 143, the private folder is gone, no output, no process names a w7pins folder
+-- I2: isolation
+PASS I2 the private temporary root is empty after every case
+PASS I2 the sentinel is unchanged
+PASS I2 this checkout is unchanged (HEAD, status, worktrees, branches and tags, stash)
+PASS I2 the isolated copy is clean at the base
+== 29 passed, 0 failed (work folder /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/pins-final/selftest-work)
+W7 PINS SELFTEST PASSED

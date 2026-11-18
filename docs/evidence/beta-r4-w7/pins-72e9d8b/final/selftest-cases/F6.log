@@ -1,0 +1,2 @@
+PINS_PAIR_FAILED: Dockerfile differs from the baseline beyond the identity tokens: < # Every base image is pinned by digest; there is no ARG (Render turns the service's environment variables into build > # Every base image is pinned by digest; there is an ARG (Render turns the service's environment variables into build 
+exit 1

@@ -1,0 +1,10 @@
+diff -r /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/pins-final/gate-work/ctx-forward/cgn-artifact-gate.sh /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/pins-final/gate-work/ctx-surrogate/cgn-artifact-gate.sh
+10c10
+< #          (pins/archive.sha256): aac13a8a..., recorded in docs/beta/release-72e9d8b.md, nothing else;
+---
+> #          (pins/archive.sha256): f3bd00ea..., recorded in docs/beta/release-72e9d8b.md, nothing else;
+diff -r /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/pins-final/gate-work/ctx-forward/pins/archive.sha256 /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/pins-final/gate-work/ctx-surrogate/pins/archive.sha256
+1c1
+< aac13a8a5e89f56013cfd8905a7c7f6216c640b98d51d25476b22141eddce2a6  mchezo-72e9d8b.tgz
+---
+> f3bd00ea2f2c17e1f84e0b413822f5cd181247774f9872923860c1120f4d72ca  mchezo-72e9d8b.tgz

@@ -1,0 +1,2 @@
+PINS_PAIR_FAILED: revert-72e9d8b-to-7097ac2.patch touches [.dockerignore Dockerfile cgn-artifact-gate.sh pins/archive.sha256 pins/release-7097ac2.inventory.sha256 pins/release-72e9d8b.inventory.sha256 render.yaml], not exactly the allowlist [.dockerignore Dockerfile cgn-artifact-gate.sh pins/archive.sha256 pins/release-7097ac2.inventory.sha256 pins/release-72e9d8b.inventory.sha256]
+exit 1

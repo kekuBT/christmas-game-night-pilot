@@ -1,0 +1,6 @@
+cgn-entrypoint.sh: OK
+cgn-backup.sh: OK
+cgn-authorize.sh: OK
+mchezo-72e9d8b.tgz: FAILED
+sha256sum: WARNING: 1 computed checksum did NOT match
+ARTIFACT_GATE_FAILED: the archive is not the audited one (its SHA-256 differs from pins/archive.sha256)

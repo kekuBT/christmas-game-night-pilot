@@ -1,0 +1,49 @@
+== gate-archives 2026-11-18T01:41:33Z: node v22.16.0, sh -> /usr/bin/dash, helper ee004e3d70c2ba66, patch folder SHA256SUMS 11af1e9b24f17d3d
+   developer archive f3bd00ea2f2c17e1f84e0b413822f5cd181247774f9872923860c1120f4d72ca
+   local 7097ac2 rebuild d827e14da84be8df7733a4eff043c6788f5150ed02402690ba518b8c7197ea7d (one of the three R2 rebuilds, NOT the audited a693c543...)
+-- the contexts, on an isolated clean copy of the base 71d02009a1b7ed537824b20a0c23d62b157046db
+PASS the copy is clean at the base
+PINS_PAIR_VERIFIED revision=72e9d8ba59ef3271d756bc2bf77b40ea4d6ee74d archive=aac13a8a5e89f56013cfd8905a7c7f6216c640b98d51d25476b22141eddce2a6 inventory=4f58b3239f04f9ea074c15993371effee6fac1295dd8124924ea00fefb19daef files=144 forward=632125750b7dc9cd159cd93fefd3bf827b203b37ee5a411dedcdd62a69cae04f revert=26d897523c38ce8521abef7a62e06456e15b03b6a1dbdb101264c1e823905afe base-tree=106ba330772aa5abfb45a7f43711c026aea569ec forward-tree=c282c08adbbf9429379bcc32d4043c4acf415de0 changed=6 guards=unchanged reverted=byte-identical forward-context=/tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/pins-final/gate-work/ctx-forward
+PASS the proposed pair verifies, and its forward context is written
+PASS the reverted context (forward, then revert, by plain git apply outside a repository) is byte for byte the canonical one
+   forward gate 5e0930dee8b29810..., reverted gate 5205fca2c1a81f18... (canonical 5205fca2c1a81f18...)
+-- G1-G3: the proposed forward context
+   [G1] gate exit 1; ARTIFACT_GATE_FAILED: the archive is not the audited one (its SHA-256 differs from pins/archive.sha256)
+PASS G1 the developer archive f3bd00ea... under the proposed aac13a8a... pin is REFUSED (archive SHA-256), no output
+   [G2] gate exit 1; ARTIFACT_GATE_FAILED: artifact/ must hold exactly mchezo-72e9d8b.tgz (it holds: )
+PASS G2 an archive under the old name is not admitted, and the gate refuses an artifact/ without mchezo-72e9d8b.tgz
+   [G3] gate exit 1; ARTIFACT_GATE_FAILED: the inventory differs from the pinned one: 5,6c5,6 < 29f8bef65f3f8a1502217b5ddeb53f363a485e508e51d781e1fc66e4174b135a  ./apps/web/dist/assets/index-5tPs9-TY.js < 36f3d53c46ebae908480795eb4a383cf0272
+PASS G3 a 7097ac2 rebuild with the archive pin re-pointed to it is REFUSED by the inventory (not the 72e9d8b files)
+-- G4-G5: the reverted (canonical) context
+   [G4] gate exit 1; ARTIFACT_GATE_FAILED: the archive is not the audited one (its SHA-256 differs from pins/archive.sha256)
+PASS G4 the reverted context refuses a local 7097ac2 rebuild: only the audited a693c543... passes
+   [G5] gate exit 1; ARTIFACT_GATE_FAILED: the archive is not the audited one (its SHA-256 differs from pins/archive.sha256)
+PASS G5 the reverted context refuses the 72e9d8b developer archive
+-- L1: LOCAL SURROGATE (the TEST pin f3bd00ea..., never the proposal)
+   PINS_PAIR_MADE revision=72e9d8ba59ef3271d756bc2bf77b40ea4d6ee74d archive=f3bd00ea2f2c17e1f84e0b413822f5cd181247774f9872923860c1120f4d72ca inventory=4f58b3239f04f9ea074c15993371effee6fac1295dd8124924ea00fefb19daef files=144 forward=f04955dfd6b4de7c042b9bec32b31d66d5847bfc1adad216201ae696eed9af59 revert=a039da316e28178a6f97a8b6709ee4da754de00e80f4f9fd9946305bf99e438a base-tree=106ba330772aa5abfb45a7f43711c026aea569ec forward-tree=dce992745f912cc9ece63594521ec29ada047b15
+   PINS_PAIR_VERIFIED revision=72e9d8ba59ef3271d756bc2bf77b40ea4d6ee74d archive=f3bd00ea2f2c17e1f84e0b413822f5cd181247774f9872923860c1120f4d72ca inventory=4f58b3239f04f9ea074c15993371effee6fac1295dd8124924ea00fefb19daef files=144 forward=f04955dfd6b4de7c042b9bec32b31d66d5847bfc1adad216201ae696eed9af59 revert=a039da316e28178a6f97a8b6709ee4da754de00e80f4f9fd9946305bf99e438a base-tree=106ba330772aa5abfb45a7f43711c026aea569ec forward-tree=dce992745f912cc9ece63594521ec29ada047b15 changed=6 guards=unchanged reverted=byte-identical forward-context=/tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/pins-final/gate-work/ctx-surrogate
+   | diff -r /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/pins-final/gate-work/ctx-forward/cgn-artifact-gate.sh /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/pins-final/gate-work/ctx-surrogate/cgn-artifact-gate.sh
+   | 10c10
+   | < #          (pins/archive.sha256): aac13a8a..., recorded in docs/beta/release-72e9d8b.md, nothing else;
+   | ---
+   | > #          (pins/archive.sha256): f3bd00ea..., recorded in docs/beta/release-72e9d8b.md, nothing else;
+   | diff -r /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/pins-final/gate-work/ctx-forward/pins/archive.sha256 /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/pins-final/gate-work/ctx-surrogate/pins/archive.sha256
+   | 1c1
+   | < aac13a8a5e89f56013cfd8905a7c7f6216c640b98d51d25476b22141eddce2a6  mchezo-72e9d8b.tgz
+   | ---
+   | > f3bd00ea2f2c17e1f84e0b413822f5cd181247774f9872923860c1120f4d72ca  mchezo-72e9d8b.tgz
+PASS L1 the surrogate pair is made and verified, and its context differs from the proposal's only in the archive pin and the gate's archive comment
+   artifact-gate: archive: f3bd00ea2f2c17e1f84e0b413822f5cd181247774f9872923860c1120f4d72ca (the pinned SHA-256)
+   artifact-gate: listing: 163 entries, files and folders only, no absolute path, no '..', no duplicate
+   artifact-gate: inventory: 144 files, SHA-256 4f58b3239f04f9ea074c15993371effee6fac1295dd8124924ea00fefb19daef (the pinned one)
+   artifact-gate: release.json: revision 72e9d8ba59ef3271d756bc2bf77b40ea4d6ee74d, node v22.16.0, built 2026-11-17T23:54:58.655Z
+   artifact-gate: runtime packages: ws@8.22.1 zod@3.25.76, nothing else
+   ARTIFACT_GATE_OK archive=f3bd00ea2f2c17e1f84e0b413822f5cd181247774f9872923860c1120f4d72ca revision=72e9d8ba59ef3271d756bc2bf77b40ea4d6ee74d inventory=4f58b3239f04f9ea074c15993371effee6fac1295dd8124924ea00fefb19daef deps="ws@8.22.1 zod@3.25.76"
+PASS L1 LOCAL SURROGATE: f3bd00ea... passes the gate under its own test pin: ARTIFACT_GATE_OK for 72e9d8b, inventory 4f58b323...
+   INSTALLED_OK revision=72e9d8ba59ef3271d756bc2bf77b40ea4d6ee74d inventory=4f58b3239f04f9ea074c15993371effee6fac1295dd8124924ea00fefb19daef deps="ws@8.22.1 zod@3.25.76" node=v22.16.0
+PASS L1 LOCAL SURROGATE: `installed` on the result: INSTALLED_OK for 72e9d8b
+PASS L1 the gate's own temporary folders are removed (npm keeps its compile cache, node-compile-cache, under TMPDIR: npm's, not the gate's; removed below)
+-- cleanup
+PASS the installed package, the npm caches, the inputs folders and the copy are removed; the temporary root holds only empty folders
+== 13 passed, 0 failed
+W7 PINS GATE CHECK PASSED (developer-run; L1 is a LOCAL SURROGATE under the f3bd00ea... TEST pin; the positive checks of the audited aac13a8a... and a693c543... archives are ChatGPT's)

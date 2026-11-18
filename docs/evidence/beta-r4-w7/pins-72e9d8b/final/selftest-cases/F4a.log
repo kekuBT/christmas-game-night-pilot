@@ -1,0 +1,2 @@
+PINS_PAIR_FAILED: cgn-artifact-gate.sh: expected 1 occurrence(s) of 'REVISION=7097ac2bb062925bb296a129f4771f1e68fd522d', found 0
+exit 1

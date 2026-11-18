@@ -1,0 +1,7 @@
+cgn-entrypoint.sh: OK
+cgn-backup.sh: OK
+cgn-authorize.sh: OK
+mchezo-72e9d8b.tgz: OK
+artifact-gate: archive: d827e14da84be8df7733a4eff043c6788f5150ed02402690ba518b8c7197ea7d (the pinned SHA-256)
+artifact-gate: listing: 163 entries, files and folders only, no absolute path, no '..', no duplicate
+ARTIFACT_GATE_FAILED: the inventory differs from the pinned one: 5,6c5,6 < 29f8bef65f3f8a1502217b5ddeb53f363a485e508e51d781e1fc66e4174b135a  ./apps/web/dist/assets/index-5tPs9-TY.js < 36f3d53c46ebae908480795eb4a383cf027254234092c6e69a5b21cc2bc78575  ./apps/web/dist/assets/index.es-D1uRMQBM.js --- > 9c1864d09b4979babc0fc69d9523af066429b256098f2c4deae0bf325b16a5df  ./apps/web/dist/assets/index-D9T9JWWD.js 

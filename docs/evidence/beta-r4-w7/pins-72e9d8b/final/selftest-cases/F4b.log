@@ -1,0 +1,2 @@
+PINS_PAIR_FAILED: cgn-artifact-gate.sh: expected 3 occurrence(s) of 'release-7097ac2.inventory.sha256', found 4
+exit 1
