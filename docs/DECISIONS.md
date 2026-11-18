@@ -2416,3 +2416,16 @@ Handoff 6813167965 (with the Stage 9.2 clearance). Spec: `docs/stage9/stage93.md
     - **reusing ports 3157 and 3158:** they are already forwarded;
     - **keeping the CA key for re-issue:** a new session gets a new run folder and a new CA.
 
+
+- **D-R4W7-06 The pins-only forward change and its revert are named patches against an exact baseline** (handoff 6966073894).
+  - **What:** `scripts/beta/w7-pins-pair.sh make` writes both patches from the deploy context, together with `IDENTITY`, `baseline.sha256`, `forward.sha256` and `SHA256SUMS`, into `docs/beta/pins-72e9d8b/`. `verify` checks them in a private copy.
+    - The canonical `deploy/render` stays at `7097ac2` on the branch.
+    - The forward and revert are never two successive commits on the PR branch, so the proposal doesn't cancel out of its own diff.
+  - **The substitutions:** the exact, counted ones of `w7-pred-context.sh` (revision, archive name, inventory digest, the inventory pin's name three times, the two `.dockerignore` names, the Dockerfile's comment), **plus** the gate's two comment lines that state the pinned digests.
+    - **Alternative:** leave those comments stale. It would make the diff two lines smaller, but the forward gate's header would then name `a693c543...` and `fe6d74f8...` while it enforces `aac13a8a...` and `4f58b323...`.
+    - **Kept unchanged on purpose:** the gate's reference to `docs/beta/release-7097ac2.md` for how the inventory is computed. It describes a method that is still true.
+  - **What `verify` takes:** the identity on the command line, and the folder must pin exactly that identity. A folder made for another build of the same files is refused (self-test F7).
+  - **Why a second check besides `git apply`:** `git apply` alone accepts a base changed outside every hunk (self-test F2, a guard script). So `verify` first requires the whole context to match `baseline.sha256`. It then maps every new identity token back and requires the baseline byte for byte, so a change hidden inside an allowlisted file is refused (F6).
+  - **Paths:** relative to the context's root, as in the deploy repository. In this repository, use `git apply --directory=deploy/render`.
+  - **The archive bytes are not in the patches.** Swapping `artifact/` is a companion step for ChatGPT, where the bytes are kept. The gate refuses any other archive.
+  - **The gate checks run without docker:** each context's own `cgn-artifact-gate.sh`, run as the Dockerfile's gate stage runs it (`sh` is dash, Node v22.16.0, the inputs filtered by `.dockerignore`). The script is the same; docker would only add the image layers already reviewed in the render-package evidence.

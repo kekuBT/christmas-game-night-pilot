@@ -1,6 +1,6 @@
 # W7 on Render: rolling back to the previous release (Beta R4, handoff 6941129590)
 
-**Status: prepared; the rollback protocol is rehearsed locally. The real W7 is PENDING, and it is BLOCKED on a prerequisite: no audited previous release exists yet (B-W7-01 below).** Nothing here has run on Render, over SSH, against production data, with the owner's keys, or as a provider-side rollback.
+**Status: prepared; the rollback protocol is rehearsed locally. The real W7 is PENDING, and it is BLOCKED on a prerequisite, B-W7-01 below.** The newer release `72e9d8b` is now independently audited (archive `aac13a8a…`), and its pins-only forward and revert pair is prepared for review. B-W7-01 stays open until that review and ChatGPT's focused actual-pair checks are done. Nothing here has run on Render, over SSH, against production data, with the owner's keys, or as a provider-side rollback.
 - **What W7 is:** the proposal's row ([beta-r4-hosting-proposal.md](beta-r4-hosting-proposal.md)): "a revert-commit deploy of the previous release, then the acceptance checks. And one deliberate one-click rollback across a configuration change, to see the guard refuse it." The pass condition is "the previous release serves the current configuration; the one-click rollback fails closed".
 - **The rules** (the proposal's "Rollback" section, unchanged):
   - **Never use Render's one-click rollback.** It brings back the old deploy's environment values, but never the disk.
@@ -12,18 +12,29 @@
 
   Claude doesn't operate the account, the storage or the keys.
 
-## B-W7-01: there is no audited previous release (a prerequisite, open)
-- **The facts:** `7097ac2` is the **first** audited archive of this route: SHA-256 `a693c5433d8dd8c17368e9c02fd8092b316d67b6e62ac9c0070a60b99c3a5131`, recorded in [release-7097ac2.md](release-7097ac2.md). No earlier archive was audited, pinned or received.
+## B-W7-01: the audited release pair (a prerequisite, open)
+- **Where it stands** (handoff [6966073894](https://github.com/kekuBT/christmas-game-night-pilot/pull/50#issuecomment-6966073894)):
+  - **Done:**
+    - the full gate on `72e9d8b`: developer-run, 112/112, its raw evidence read independently;
+    - its independent archive audit: archive `aac13a8a5e89f56013cfd8905a7c7f6216c640b98d51d25476b22141eddce2a6`, inventory `4f58b323…`, recorded in [release-72e9d8b.md](release-72e9d8b.md);
+    - the exact-pair compatibility check on a received copy (review 6966023566).
+  - **Prepared, under review:** the pins-only forward patch and its revert, in [pins-72e9d8b/](pins-72e9d8b/README.md).
+  - **Pending:**
+    - ChatGPT's review of the pair;
+    - ChatGPT's checks of both contexts against the retained archives, and its focused actual-pair protocol check;
+    - the archive's `builtAt`;
+    - then the owner-gated hosted operation below.
+- **The facts when W7 was written:** `7097ac2` is the **first** audited archive of this route: SHA-256 `a693c5433d8dd8c17368e9c02fd8092b316d67b6e62ac9c0070a60b99c3a5131`, recorded in [release-7097ac2.md](release-7097ac2.md). No earlier archive was audited, pinned or received.
 - **So the actual predecessor-artifact check cannot pass today.** There is nothing to identify by revision and digest, and so no data-format evidence for a real predecessor.
 - **What unblocks it:** an audited release **newer** than `7097ac2`, to deploy first and roll back from. The rollback target, `7097ac2` (`a693c543…`), is already audited. Preparing and independently auditing the newer release is engineering work. Only the hosted execution and any spending need the owner's decision (clarified in [6951228654](https://github.com/kekuBT/christmas-game-night-pilot/pull/50#issuecomment-6951228654)).
-  - **The proposed candidate:** `72e9d8b`, the reviewed uncertain-delivery repair. Its runtime differs from `7097ac2` only in three web-client files; the server, the content and the packages are identical. It is still unpackaged and unaudited as an archive.
+  - **The proposed candidate:** `72e9d8b`, the reviewed uncertain-delivery repair. Its runtime differs from `7097ac2` only in three web-client files; the server, the content and the packages are identical. It was unpackaged then; it is now audited (above).
   - **The engineering steps:**
-    1. a full gate on it;
-    2. the package and its release record;
-    3. the independent private audit of the archive;
-    4. a pins-only forward commit, and its revert prepared in advance;
-    5. the local checks under test pins;
-    6. the real predecessor check on the audited `a693c543…`, where that archive is kept.
+    1. a full gate on it: **done** (developer-run, independently read);
+    2. the package and its release record: **done** ([release-72e9d8b.md](release-72e9d8b.md); `builtAt` pending ChatGPT);
+    3. the independent private audit of the archive: **done** (6966023566);
+    4. a pins-only forward commit, and its revert prepared in advance: **prepared as patches, under review** ([pins-72e9d8b/](pins-72e9d8b/README.md));
+    5. the local checks under test pins: **done for the pair** (the LOCAL SURROGATE gate check L1 in [the evidence](../evidence/beta-r4-w7/pins-72e9d8b/README.md));
+    6. the real predecessor check on the audited `a693c543…`, where that archive is kept: **pending (ChatGPT).** The received-copy compatibility part passed in 6966023566.
   - **The owner-gated hosted operation:** the forward deploy, then W7's rollback and return, and separately the deliberate one-click check. That check runs on the single planned service, and only in its synthetic-data phase ([the exception below](#the-synthetic-phase-exception)). Any new resource needs approval too.
   - Until then, a W7 on Render could only "roll back" to the release that is already running, which proves nothing.
 - **For the local rehearsal only,** a clearly labelled **LOCAL SURROGATE** stands in for the predecessor, built from `f93e9cba8613859be9891706ead1c60157c73de2`, the commit before the R5 UI changes. Its identity and build:
