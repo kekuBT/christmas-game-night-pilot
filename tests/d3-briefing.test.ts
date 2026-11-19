@@ -275,6 +275,13 @@ describe("D3 T1 + S4: Start now needs 20 s and explicit, server-checked consent"
     const err = refusal(() => engine.startNow(ids[0]!, g.id, {}));
     expect(err.code).toBe("READINESS_CHANGED");
     expect([...err.needsConfirmation].sort()).toEqual([ids[1]!, ids[2]!, ids[3]!].sort());
+    // Fair starts (review 7007413347): why each of them needs confirming, at the refusal itself.
+    expect(err.needsStatus.map((s) => s.id)).toEqual(err.needsConfirmation);
+    expect(Object.fromEntries(err.needsStatus.map((s) => [s.id, { ready: s.ready, presence: s.presence }]))).toEqual({
+      [ids[1]!]: { ready: true, presence: "reconnecting" },
+      [ids[2]!]: { ready: false, presence: "connected" },
+      [ids[3]!]: { ready: false, presence: "connected" },
+    });
     expect(engine.games.get(g.id)!.status).toBe("briefing");
   });
 

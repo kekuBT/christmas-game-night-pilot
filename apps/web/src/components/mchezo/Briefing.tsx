@@ -7,7 +7,7 @@
  * display; the server decides when play starts, refuses a stale or early
  * Start now, and cancels an unstarted briefing.
  */
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { PublicGame, PublicPlayer, RegistryGame } from "../../types.js";
 import { CiniCups } from "./CiniCups.js";
 import {
@@ -16,18 +16,24 @@ import {
   briefingRules,
   confirmChanges,
   confirmTitle,
+  confirmWhen,
   ConfirmPanel,
   formatRemaining,
   Keycap,
+  liveCaughtUp,
   needsConfirmation,
   NoticeCard,
   personStatus,
   PlayerToken,
+  refusalSnapshot,
   serverNowEstimate,
+  tapSnapshot,
   timingLines,
   useMchezo,
   type BriefingInfo,
   type BriefingPerson,
+  type ConfirmSnapshot,
+  type NeedStatus,
 } from "../../ui/mchezo/index.js";
 import { toMzPlayers } from "./adapters.js";
 import { titleFor } from "../../ui/mchezo/lib/names.js";
@@ -49,6 +55,10 @@ export interface StartNowResult {
   code?: string;
   error?: string;
   needsConfirmation?: string[];
+  /** READINESS_CHANGED: each named player's readiness and connection at the refusal (review 7007413347). */
+  needsStatus?: NeedStatus[];
+  /** READINESS_CHANGED: the projection revision broadcast with the refusal. */
+  rev?: number;
 }
 
 interface CommonProps {
@@ -151,6 +161,8 @@ export function BriefingScreen(props: CommonProps & {
    * closed (a rematch or Next game started from there), or the lobby.
    */
   afterCancel?: { to: "results"; title: string } | { to: "lobby" };
+  /** The applied projection's revision (Stage 5.1 `rev`), so the confirmation can tell older rows from newer ones. */
+  rev?: number;
 }) {
   const { game, registry, players, meId, isHost } = props;
   const { casual } = useMchezo();
@@ -166,8 +178,12 @@ export function BriefingScreen(props: CommonProps & {
   // Fair starts (M9): the confirmation is a snapshot of who needed confirming, rows and all, taken when the host tapped
   // Start now (or when the server asked again). Its title and rows describe that snapshot; live changes are listed
   // separately (confirmChanges), never mixed into its count. The server still checks the confirmed list itself.
-  const [confirm, setConfirm] = useState<{ ids: string[]; note?: string; snapshot: BriefingPerson[] } | null>(null);
-  const snapshotOf = (ids: string[]): BriefingPerson[] => ids.map((id) => ({ ...(people.find((p) => p.id === id) ?? { id, name: "A player", ready: false, presence: "away" as const, you: false }) }));
+  // Review 7007413347: when the server asks again, the rows come from the refusal's own status facts (or, from a
+  // server that sends none, the latest applied projection, read through `latest`), never from the rows captured
+  // when the host tapped, which a projection applied while the request was in flight may already contradict.
+  const [confirm, setConfirm] = useState<(ConfirmSnapshot & { note?: string }) | null>(null);
+  const latest = useRef(people);
+  useEffect(() => { latest.current = people; });
   const [cancelAsk, setCancelAsk] = useState(false);
 
   async function toggleReady() {
@@ -184,8 +200,10 @@ export function BriefingScreen(props: CommonProps & {
       const r = await props.onStartNow(confirmed);
       if (r.ok) { setConfirm(null); return; }
       if (r.code === "READINESS_CHANGED" && r.needsConfirmation) {
-        // Someone's readiness or connection changed: ask again with the server's list.
-        setConfirm({ ids: r.needsConfirmation, note: confirmed.length > 0 || confirm ? "Something changed since you looked. Check the list again." : undefined, snapshot: snapshotOf(r.needsConfirmation) });
+        // Someone's readiness or connection changed: ask again with the server's list, unchanged, and its facts.
+        const again = confirmed.length > 0 || confirm !== null;
+        const snap = refusalSnapshot(r.needsConfirmation, r.needsStatus, latest.current, { rev: r.rev, again });
+        setConfirm({ ...snap, ...(again ? { note: "Something changed since you looked. Check the list again." } : {}) });
         return;
       }
       setConfirm(null);
@@ -196,13 +214,21 @@ export function BriefingScreen(props: CommonProps & {
   }
 
   function askStartNow() {
-    const need = needsConfirmation(people, meId).map((p) => p.id);
-    if (need.length === 0) void startNow([]);
-    else setConfirm({ ids: need, snapshot: snapshotOf(need) });
+    const snap = tapSnapshot(people, meId, props.rev);
+    if (snap.ids.length === 0) void startNow([]);
+    else setConfirm(snap);
   }
 
-  const confirmPeople = confirm ? confirm.snapshot : [];
-  const changedSince = confirm ? confirmChanges(confirm.snapshot, people, needsConfirmation(people, meId).map((p) => p.id)) : [];
+  const confirmPeople = confirm ? confirm.rows : [];
+  // "Since then" lists only changes after the snapshot's moment: until the live rows are at least that new, they may
+  // be older than the refusal, and their differences would be no change at all.
+  const caughtUp = confirm ? liveCaughtUp(confirm, people, props.rev) : false;
+  // Sticky: once caught up, a snapshot stays caught up (a later live difference is a real change). Runs for each new
+  // snapshot too, so one that is caught up on its first frame is marked at once.
+  useEffect(() => {
+    if (caughtUp) setConfirm((c) => (c && !c.caughtUp ? { ...c, caughtUp: true } : c));
+  }, [caughtUp, confirm]);
+  const changedSince = confirm && caughtUp ? confirmChanges(confirm.rows, people, needsConfirmation(people, meId).map((p) => p.id)) : [];
 
   return (
     <main className="mz-screen mz-brief" aria-label={`${title}: rules`} data-testid="briefing" data-game-id={game.id}>
@@ -256,7 +282,7 @@ export function BriefingScreen(props: CommonProps & {
           onCancel={() => setConfirm(null)}
         >
           {confirm.note && <span className="mz-brief__note" data-testid="briefing-confirm-changed">{confirm.note} </span>}
-          <span className="mz-brief__when" data-testid="briefing-confirm-when">When you tapped Start now:</span>
+          <span className="mz-brief__when" data-testid="briefing-confirm-when" data-source={confirm.source}>{confirmWhen(confirm)}</span>
           <span className="mz-brief__confirm-list" data-testid="briefing-confirm-list">
             {confirmPeople.map((p) => <span key={p.id} className="mz-brief__confirm-row" data-testid={`briefing-confirm-${p.id}`}>{p.name}: {personStatus(p).toLowerCase()}</span>)}
           </span>

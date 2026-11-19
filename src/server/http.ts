@@ -1440,7 +1440,10 @@ export class LocalServer {
             if (err instanceof BriefingRefused) {
               this.persist(room); // due deadlines processed first may have changed state
               this.broadcast(room.id);
-              this.send(res, 409, { error: err.message, code: err.code, needsConfirmation: err.needsConfirmation, startNowAt: err.startNowAt });
+              // Fair starts (review 7007413347): `needsStatus` is each named player's readiness and connection at the
+              // refusal, and `rev` the projection revision just broadcast with it, so the host's phone can tell an
+              // older projection from a newer one.
+              this.send(res, 409, { error: err.message, code: err.code, needsConfirmation: err.needsConfirmation, startNowAt: err.startNowAt, ...(err.code === "READINESS_CHANGED" ? { needsStatus: err.needsStatus, rev: this.revOf(room.id) } : {}) });
               return;
             }
             throw err;

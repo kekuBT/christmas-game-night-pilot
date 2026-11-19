@@ -2475,6 +2475,14 @@ Every fix here is client-side. The server's start, timing, scoring and ledger ar
     - **The labels:** "When you tapped Start now:" over the snapshot's rows, and a title that says the same (`confirmTitle`: "not ready", "not connected", or both).
     - **Live changes** go on a separate "Since then: …" status line (`confirmChanges`): who is ready now, who isn't any more, who came back or dropped.
   - **Alternative:** a fully live dialog. Confirming a list that changed under the host's finger would either start play without the server's "ask again", or refuse a list that was on screen. Both contradict the D3 contract.
+  - **The refreshed snapshot** (review 7007413347, which found it on `8f2ead3`):
+    - **The race:** when the server asked again, the replacement snapshot paired the server's new ids with the rows captured before the request. The host confirmed Baraka; Amina withdrew while the request was in flight; the host's phone applied her withdrawal; then the refusal named Amina and Baraka. The replacement said "2 people aren't ready or aren't connected" over "Amina: ready", with "Since then: Amina isn't ready any more".
+    - **What:** a `READINESS_CHANGED` refusal now carries `needsStatus` (each named player's readiness and connection at the refusal) and `rev` (the projection revision broadcast with it). Both are additive; the server's ids, the confirm rule and the start are unchanged.
+    - **The rows:** the replacement keeps the server's ids as sent and takes each row's status from those facts (`refusalSnapshot`). Names come from the latest applied projection of this briefing. A server without the facts gets the latest applied projection's rows, never the rows captured at the tap; a title for a row that then gives no reason says only that the game asked again.
+    - **The label:** "When you confirmed, the game checked again:" (or "When you tapped Start now, the game checked:" when the first tap was refused).
+    - **"Since then":** quiet until the live rows are at least as new as the refusal (`liveCaughtUp`: by `rev`, or, without one, once they have agreed with the snapshot), so an older projection can't contradict the rows.
+    - **The regression:** check-fair-starts M2 holds the host's confirmation on the network while Amina withdraws, then reads every frame of the replacement for 1.5 s.
+    - **Alternative:** rebuild the replacement from the latest projection only. A projection older than the refusal can still say "Amina: ready" while the server names her, which is the same disagreement in a narrower window.
 - **Not changed, and why** (H6): "pressed and disabled, the row still not ready, then play at 5/6".
   - **What happens:** the last Ready starts play in the same server step, so no projection ever shows 6/6. The button is busy from the tap until the start frame arrives, 0.07–0.17 s later in the driver's runs.
   - **The verdict:** that is the documented all-ready contract, not a stale row.

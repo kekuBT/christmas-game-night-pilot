@@ -9,7 +9,7 @@ import { SettingsBar, useExperienceSettings } from "./components/SettingsBar.js"
 import { deriveShowPhase } from "./components/showPhase.js";
 import { wsReconnectDelayMs } from "./components/wsBackoff.js";
 // Mchezo "The Circle" integrated views (Phase 2: landing, lobby, Trivia, TV).
-import { buildCatalog, featuredOfTheDay, filtersFromQuery, filtersToQuery, GameClock, ResultsHero, resultsStory, GameIntro, InviteSheet, linkReach, MchezoProvider, NoticeCard, noteServerTime, OutcomeSummary, parseRoute, routeUrl, SegmentedChoice, Sheet, type Route, type RoomSub } from "./ui/mchezo/index.js";
+import { buildCatalog, featuredOfTheDay, filtersFromQuery, filtersToQuery, GameClock, ResultsHero, resultsStory, GameIntro, InviteSheet, linkReach, MchezoProvider, NoticeCard, noteServerTime, OutcomeSummary, parseNeedStatus, parseRoute, routeUrl, SegmentedChoice, Sheet, type Route, type RoomSub } from "./ui/mchezo/index.js";
 import { GameDetailsSheet, HomeScreen, HostScreen, JoinScreen, TvEntryScreen } from "./components/mchezo/Home.js";
 import { SoloHome, SoloRound, soloShelf } from "./components/mchezo/Solo.js";
 import { ChooseGameSheet, MakeCupSheet, RoomLobby, RoomMenuSheet, UndoCupSheet, FinishCupSheet, EndNightSheet } from "./components/mchezo/Lobby.js";
@@ -1002,9 +1002,12 @@ export function App() {
     if (t) headers["x-session-token"] = t;
     try {
       const resp = await fetch(`/rooms/${roomId}/games/${gameInstanceId}/start-now`, { method: "POST", headers, body: JSON.stringify({ confirmed }) });
-      const body = (await resp.json().catch(() => ({}))) as { error?: string; code?: string; needsConfirmation?: string[] };
+      const body = (await resp.json().catch(() => ({}))) as { error?: string; code?: string; needsConfirmation?: string[]; needsStatus?: unknown; rev?: unknown };
       await refresh();
-      return resp.ok ? { ok: true } : { ok: false, code: body.code, error: body.error, needsConfirmation: body.needsConfirmation };
+      if (resp.ok) return { ok: true };
+      // Fair starts (review 7007413347): the refusal's own status facts and revision, passed through checked.
+      const needsStatus = parseNeedStatus(body.needsStatus);
+      return { ok: false, code: body.code, error: body.error, needsConfirmation: body.needsConfirmation, ...(needsStatus ? { needsStatus } : {}), ...(typeof body.rev === "number" && Number.isFinite(body.rev) ? { rev: body.rev } : {}) };
     } catch (e) {
       return { ok: false, error: e instanceof Error ? e.message : "Couldn’t reach the game. Try again." };
     }
@@ -2066,6 +2069,7 @@ export function App() {
           onStartNow={(confirmed) => briefingStartNow(briefingGame.id, confirmed)}
           onCancel={() => briefingCancel(briefingGame.id)}
           afterCancel={afterCancel}
+          rev={proj?.rev}
         />
       </MchezoProvider>
     );

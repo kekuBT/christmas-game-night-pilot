@@ -32,6 +32,9 @@
 //   M  M9: the host's dialog is open while two players get ready and one withdraws; heading, dialog title, dialog
 //      rows and person rows compared on the same frame (fixed: the dialog is a labelled snapshot, its title counts
 //      its own rows, and live changes are listed separately); the stale confirm is asked again; one start
+//   M2 review 7007413347: the host's confirm is held in flight while Amina withdraws and the host's phone applies
+//      that projection; the refusal then names Amina and Baraka. Every frame of the replacement dialog must agree
+//      (fixed: the replacement is built from the refusal's own status facts, not the rows captured at the tap)
 //   X  the final Ready and the host's confirmed Start now in flight together, both orders: one transition, and both
 //      answers agree with it
 //   L  a late Ready: the host's confirm lands first, the player's Ready after it (fixed: it no longer puts "The
@@ -289,6 +292,21 @@ try {
     return out;
   }
   const oneStart = (ledger) => ledger.filter((e) => e.type === "game-started").length === 1;
+  // One read of the host's briefing screen, all from the same rendered frame (M and M2).
+  const confirmFrame = (page) => page.evaluate(() => {
+    const q = (s) => document.querySelector(`[data-testid="${s}"]`);
+    const dialog = q("briefing-confirm");
+    return {
+      wall: Date.now(),
+      heading: q("briefing-ready-count")?.textContent ?? "",
+      title: dialog?.querySelector(".mz-confirm__title")?.textContent ?? "",
+      dialogRows: [...(dialog?.querySelectorAll(".mz-brief__confirm-row") ?? [])].map((e) => e.textContent),
+      changed: q("briefing-confirm-changed")?.textContent ?? "",
+      since: q("briefing-confirm-since")?.textContent ?? "",
+      when: q("briefing-confirm-when")?.textContent ?? "",
+      notReadyRows: [...document.querySelectorAll('[data-testid^="briefing-person-"][data-ready="false"]')].map((e) => e.getAttribute("data-testid").slice("briefing-person-".length)),
+    };
+  });
 
   // ======== Case A: all-ready through the real buttons, for each game ========
   for (const gameId of ["closest-wins", "team-huddle", "relay"]) {
@@ -532,30 +550,18 @@ try {
     await advance(g0.briefing.startNowAt - (await serverState(roomId)).t);
     await keku.page.getByTestId("briefing-start-now").click({ timeout: 10000 });
     await keku.page.getByTestId("briefing-confirm").waitFor({ timeout: 10000 });
-    // One read of the host's screen, all from the same rendered frame.
-    const frame = () => keku.page.evaluate(() => {
-      const q = (s) => document.querySelector(`[data-testid="${s}"]`);
-      const dialog = q("briefing-confirm");
-      return {
-        heading: q("briefing-ready-count")?.textContent ?? "",
-        title: dialog?.querySelector(".mz-confirm__title")?.textContent ?? "",
-        dialogRows: [...(dialog?.querySelectorAll(".mz-brief__confirm-row") ?? [])].map((e) => e.textContent),
-        since: q("briefing-confirm-since")?.textContent ?? "",
-        when: q("briefing-confirm-when")?.textContent ?? "",
-        notReadyRows: [...document.querySelectorAll('[data-testid^="briefing-person-"][data-ready="false"]')].length,
-      };
-    });
+    const frame = () => confirmFrame(keku.page);
     const before = await frame();
     // While the dialog is open: Baraka and Wanjiru get ready (the reported "dialog 3 unready, list 1" case).
     await clickReady(baraka); await clickReady(wanjiru);
-    await until(async () => (await frame()).notReadyRows === 1, 10000);
+    await until(async () => (await frame()).notReadyRows.length === 1, 10000);
     const after = await frame();
     const countOf = (title) => { const m = /^(\d+) people/.exec(title); return m ? Number(m[1]) : /isn’t/.test(title) ? 1 : -1; };
     const rowsSay = (rows, word) => rows.filter((r) => new RegExp(word, "i").test(r)).length;
     report.cases.push({ case: label, before, after });
-    check(`${label} when the dialog opens, its title, its rows and the person rows agree (3 not ready)`, countOf(before.title) === 3 && before.dialogRows.length === 3 && before.notReadyRows === 3 && /3 of 6/i.test(before.heading), JSON.stringify(before));
+    check(`${label} when the dialog opens, its title, its rows and the person rows agree (3 not ready)`, countOf(before.title) === 3 && before.dialogRows.length === 3 && before.notReadyRows.length === 3 && /3 of 6/i.test(before.heading), JSON.stringify(before));
     check(`${label} after two get ready with the dialog open, the dialog's title still counts its own rows, which say what they said, and it says what changed`,
-      countOf(after.title) === after.dialogRows.length && rowsSay(after.dialogRows, "not ready yet") === after.dialogRows.length && /Baraka is ready now/.test(after.since) && /Wanjiru is ready now/.test(after.since) && /5 of 6/i.test(after.heading) && after.notReadyRows === 1,
+      countOf(after.title) === after.dialogRows.length && rowsSay(after.dialogRows, "not ready yet") === after.dialogRows.length && /Baraka is ready now/.test(after.since) && /Wanjiru is ready now/.test(after.since) && /5 of 6/i.test(after.heading) && after.notReadyRows.length === 1,
       JSON.stringify(after));
     // A withdrawal while open: the dialog says so; confirming asks again (the server refuses a stale list), naming
     // exactly who now needs it; the second confirm starts play once.
@@ -576,6 +582,71 @@ try {
     check(`${label} the second confirm starts play once (start-now, confirmed Amina and Juma)`, !!b && started.length === 1 && started[0].detail?.trigger === "start-now" && JSON.stringify([...started[0].detail.confirmed].sort()) === JSON.stringify([amina.seat.playerId, juma.seat.playerId].sort()), JSON.stringify(started.map((e) => e.detail)));
     report.cases.at(-1).withdrawn = withdrawn; report.cases.at(-1).asked = asked;
     await keku.page.screenshot({ path: join(DATA_DIR, `${label}-host.png`) }).catch(() => {});
+    await finishGame(gid);
+  }
+
+  // ======== Case M2 (review 7007413347): the server asks again after the host's phone applied a newer projection ========
+  // The host confirms Baraka; the request is held on the host's network; Amina withdraws and the host's phone applies
+  // that projection; then the request lands, and READINESS_CHANGED names Amina and Baraka. The replacement dialog's
+  // heading, title, rows and "Since then" line must agree with each other and with the person rows, on every frame
+  // until the host confirms again; the second confirm records exactly one start.
+  {
+    const label = "M2-closest-wins";
+    const gid = await startGame("closest-wins");
+    const [keku, amina, baraka] = PLAYERS;
+    for (const p of PLAYERS.filter((x) => x !== baraka)) await clickReady(p);
+    const g0 = (await serverState(roomId)).games.find((x) => x.id === gid);
+    await advance(g0.briefing.startNowAt - (await serverState(roomId)).t);
+    const frame = () => confirmFrame(keku.page);
+    await until(async () => /5 of 6/i.test((await frame()).heading), 10000);
+    await keku.page.getByTestId("briefing-start-now").click({ timeout: 10000 });
+    await keku.page.getByTestId("briefing-confirm").waitFor({ timeout: 10000 });
+    const opened = await frame();
+    // Hold the host's confirmation (naming Baraka) on the host's network.
+    let release;
+    const held = new Promise((r) => { release = r; });
+    let heldBody = null;
+    await keku.page.route("**/start-now", async (route) => { heldBody ??= route.request().postDataJSON(); await held; await route.continue(); });
+    await keku.page.getByTestId("briefing-confirm-confirm").click();
+    await until(async () => heldBody !== null, 10000);
+    // Amina withdraws while it is in flight; the host's phone applies the withdrawal projection first.
+    await amina.page.getByTestId("briefing-ready").click();
+    await until(async () => (await frame()).notReadyRows.includes(amina.seat.playerId), 10000);
+    const inFlight = await frame();
+    const releasedAt = Date.now();
+    release();
+    // The refusal is drawn when the "Something changed" note appears; from then on, read every frame for 1.5 s.
+    await until(async () => (await frame()).changed.length > 0, 10000);
+    const samples = [];
+    for (const end = Date.now() + 1500; Date.now() < end;) { samples.push(await frame()); await sleep(30); }
+    await keku.page.unroute("**/start-now");
+    const countOf = (title) => { const m = /^(\d+) people/.exec(title); return m ? Number(m[1]) : /isn’t/.test(title) ? 1 : -1; };
+    const want = [amina.seat.playerId, baraka.seat.playerId].sort();
+    const rowFor = (rows, name) => rows.find((r) => r.startsWith(`${name}:`)) ?? "";
+    const bad = samples.filter((f) => !(
+      f.title === "2 people aren’t ready. Start anyway?" && countOf(f.title) === f.dialogRows.length
+      && f.dialogRows.length === 2 && /not ready yet/i.test(rowFor(f.dialogRows, "Amina")) && /not ready yet/i.test(rowFor(f.dialogRows, "Baraka"))
+      && /4 of 6/i.test(f.heading) && JSON.stringify([...f.notReadyRows].sort()) === JSON.stringify(want)
+      && !/Amina/.test(f.since) && !/Baraka/.test(f.since)
+    ));
+    const last = samples.at(-1);
+    report.cases.push({ case: label, heldConfirmed: heldBody?.confirmed, opened, inFlight, releaseToRefusalMs: samples[0] ? samples[0].wall - releasedAt : null, samples: samples.length, firstSample: samples[0], lastSample: last, contradictory: bad.slice(0, 3) });
+    check(`${label} precondition: the held confirmation named only Baraka, and the host's rows showed Amina's withdrawal before it landed`,
+      JSON.stringify(heldBody?.confirmed) === JSON.stringify([baraka.seat.playerId]) && countOf(opened.title) === 1 && opened.dialogRows.length === 1 && inFlight.notReadyRows.includes(amina.seat.playerId),
+      JSON.stringify({ held: heldBody, opened, inFlight }));
+    check(`${label} the replacement dialog's heading, title, rows and "Since then" agree with each other and the person rows on every frame (${samples.length} read)`,
+      samples.length > 0 && bad.length === 0, JSON.stringify(bad.slice(0, 2)));
+    check(`${label} the replacement is labelled as checked again`, /checked again/i.test(last?.when ?? ""), JSON.stringify(last?.when));
+    await keku.page.screenshot({ path: join(DATA_DIR, `${label}-host.png`) }).catch(() => {});
+    const since = Date.now();
+    await keku.page.getByTestId("briefing-confirm-confirm").click();
+    const b = await until(async () => firstBcast(gid, (x) => x.status === "playing", since), 15000);
+    await sleep(500);
+    const st = await serverState(roomId);
+    const started = st.ledger.filter((e) => e.gameInstanceId === gid && e.type === "game-started");
+    check(`${label} the second confirm records exactly one start (start-now, confirmed Amina and Baraka)`,
+      !!b && started.length === 1 && started[0].detail?.trigger === "start-now" && JSON.stringify([...started[0].detail.confirmed].sort()) === JSON.stringify(want),
+      JSON.stringify(started.map((e) => e.detail)));
     await finishGame(gid);
   }
 
