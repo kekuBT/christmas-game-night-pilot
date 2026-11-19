@@ -2547,3 +2547,20 @@ The acceptance criteria are the handoff's, from the November 19 audit's page 4 f
       - a polite region, which queues every cue but lets speech trail the symbol;
       - a per-player slower-cue option that lengthens that player's memorise window. That changes the timing the score depends on, so it is the owner's decision, made after the observed behaviour is reported.
   - **Alternative:** keep the stage as the live region and mount it empty on the ready screen too. That would put a memorise-only region on the ready screen, and still lose the node at recall (the screen's `<main>` changes). One announcer outside the screens is simpler and survives every screen change.
+
+## Post-beta: Draw & Guess drawing board on phones, H3 (handoff 7020760499; acknowledged 7020806630; docs/evidence/draw-board/)
+The reported symptom: a nearly black **drawer** screen in an iPhone in-app browser while the timer stayed visible. Its cause on that device is not established; no native iPhone was available here.
+
+- **D-H3-01 Draw & Guess's play screens have no entry animation** (H3).
+  - **What the trace found** (`scripts/check-draw-board.mjs`):
+    - **The setup:** Chromium phone emulation, three phones at 320×568, 375×667 and 390×844, each the drawer once; touch strokes; a reload mid-turn; the next drawer; with and without a WebSocket.
+    - **The result:** the drawer's board was always in view and painted. Its centre was the board, with the paper fill and opacity 1 up the ancestor chain, paper-bright in the screenshot. Touch strokes reached the server and every guesser, and the screen never re-entered or dimmed.
+    - **The weak point:** the game clock is rendered *above* the screen, outside it. Every screen (`.mz-screen`) fades in from opacity 0 (`mz-enter`, fill mode `both`).
+    - **The reproduction:** held at its first frame, the drawer's screen stays at opacity 0, which is the whole screen at brightness 19 of 255, while the clock still shows. That is the reported picture. A web view can hold an animation like that when it is suspended or throttled; this one simulates it.
+  - **What:** the drawing, guessing and reveal screens carry `mz-dg-screen`, which turns the entry animation off in every motion setting. So they are visible from their first frame whatever the web view does with animations. Nothing else changes: the board, the word only on the drawer's phone, turns, stroke limits and scoring.
+  - **The regression:**
+    - `check-draw-board` holds the entry animation at its first frame after a reload, on the drawer and on a guesser. It fails on `6897765` (opacity 0, brightness 19, the clock visible) and passes with the fix.
+    - `MchezoDraw.test.tsx` pins the class on the three screens and the stylesheet rule.
+  - **Not claimed:** that this was the iPhone's cause. A native Safari (and in-app browser) check on the exact candidate is still needed (see the evidence README).
+  - **Scope:** Draw & Guess only, as the handoff asks. Every other screen still fades in from opacity 0, and Team Draw's drawing screen has the same dependency. Whether to make all screens visible from their first frame is a separate decision.
+  - **Alternative:** a transform-only entry (no opacity). That would keep the motion, but it would keep a composited, animating layer over a large SVG on the screen that was reported black. With no animation, the screen has nothing to stall.

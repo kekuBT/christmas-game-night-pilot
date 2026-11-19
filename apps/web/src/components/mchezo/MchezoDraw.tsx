@@ -11,6 +11,15 @@
  *
  * Guessing: a text box. A wrong guess just says "not it" (it isn't stored
  * or shown to anyone); a right one says so from the server's state.
+ *
+ * H3 (handoff 7020760499): the play screens (drawing, guessing, the reveal)
+ * carry mz-dg-screen and have no entry animation. Every screen otherwise
+ * fades in from opacity 0; when that animation is held at its first frame
+ * (as a suspended or throttled web view can leave it), the whole screen
+ * stays invisible while the game clock above it, outside the screen, still
+ * shows: the reported "nearly black drawer screen with the timer visible".
+ * These screens are now visible from their first frame whatever the
+ * animation does (scripts/check-draw-board.mjs, D-H3-01).
  */
 import { useCallback, useEffect, useRef, useState, type FormEvent, type PointerEvent as ReactPointerEvent, type ReactNode } from "react";
 import { Keycap, OutcomeSummary, useMchezo } from "../../ui/mchezo/index.js";
@@ -238,7 +247,7 @@ export function DrawPad({ gameId, pieces, turnKey, intent, actions = DRAW_GUESS_
 /** Draw & Guess's drawer: the secret word, the pad, progress, "New word" and "Give up". */
 function DrawerPad({ game, st, intent, title, round, of }: { game: PlayerGame; st: DrawView; intent: MchezoDrawDeps["intent"]; title: string; round: number; of: number }) {
   return (
-    <main className="mz-screen" aria-label={`${title}: your turn to draw, turn ${round} of ${of}`} data-testid="mz-dg-draw">
+    <main className="mz-screen mz-dg-screen" aria-label={`${title}: your turn to draw, turn ${round} of ${of}`} data-testid="mz-dg-draw">
       <GameHeader title={title} objective="Your turn to draw" accent={5} />
       <p className="mz-mr-round">Turn {round} of {of} · only you can see the word</p>
       <p className="mz-dg-secret" data-testid="mz-dg-word">Draw: <b>{st.myWord}</b></p>
@@ -273,7 +282,7 @@ export function MchezoDraw({ game, players, playerId, title, intent, error, land
     const r = st.result;
     const mine = r.points[playerId];
     return (
-      <main className="mz-screen" aria-label={`${title}: turn ${round} of ${of}, the reveal`} data-testid="mz-dg-reveal">
+      <main className="mz-screen mz-dg-screen" aria-label={`${title}: turn ${round} of ${of}, the reveal`} data-testid="mz-dg-reveal">
         <GameHeader title={title} objective="The reveal" accent={5} />
         <p className="mz-mr-round">Turn {round} of {of} · {drawerName === "You" ? "you drew" : `${drawerName} drew`}</p>
         <h2 className="mz-mr-prompt" data-testid="mz-dg-answer">It was: {r.word}</h2>
@@ -300,7 +309,7 @@ export function MchezoDraw({ game, players, playerId, title, intent, error, land
   const failure = <SendNote shown={note?.kind === "failed"} landed={landed} error={error} testId="mz-dg-error" />;
   const myOrder = correct.find((c) => c.playerId === playerId)?.order;
   return (
-    <main className="mz-screen" aria-label={`${title}: turn ${round} of ${of}, ${drawerName} is drawing`} data-testid="mz-dg-guess">
+    <main className="mz-screen mz-dg-screen" aria-label={`${title}: turn ${round} of ${of}, ${drawerName} is drawing`} data-testid="mz-dg-guess">
       <GameHeader title={title} objective={st.myCorrect ? "You got it!" : st.mySkipped ? "Sitting this one out" : "What is it?"} accent={5} />
       <p className="mz-mr-round">Turn {round} of {of} · {drawerName} is drawing</p>
       <DrawBoard pieces={st.pieces ?? []} label={`${drawerName}'s drawing so far`} testId="mz-dg-board" />
