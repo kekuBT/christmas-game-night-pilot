@@ -3,11 +3,18 @@
  * while it is tapped back, the complete sequence is never in rendered text, an announced live region or
  * an accessible name: only the current symbol is, in its own slot of the server's memorise window.
  * Recall controls, post-round feedback and scoring are unchanged (the server is untouched apart from the
- * additive showFrom). scripts/check-pulse-cue.mjs checks the same in a real browser, over time.
+ * additive showFrom). scripts/check-pattern-pulse.mjs checks the same in a real browser, over time.
+ *
+ * The cue announcer (review 7010784066): one assertive live region, PulseAnnouncer, rendered after every
+ * screen's <main> at the same place, empty when it mounts, so the first cue updates a region already in the
+ * page. These static renders pin its place, its attributes and its empty mount on every screen, and
+ * pulseCueSay pins what it says in each slot, gap and after the window. That React keeps the SAME node from
+ * the ready screen through memorising to the recall screen is checked in a real browser by
+ * scripts/check-pattern-pulse.mjs (a DOM transition this suite has no DOM for).
  */
 import { describe, expect, it } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
-import { MchezoPulse, PULSE_SYMBOLS } from "./MchezoPulse.js";
+import { MchezoPulse, PULSE_SYMBOLS, pulseCueSay } from "./MchezoPulse.js";
 import { PULSE_CUE_GAP, pulseCueAt, pulseCueText } from "./pulseCue.js";
 import type { PlayerGame, PublicPlayer } from "../../types.js";
 
@@ -71,21 +78,25 @@ describe("pulseCueAt: one symbol at a time, in equal slots of the server's windo
   });
 });
 
+/** The announcer exactly as it is first rendered on every screen: last, after </main>, assertive, atomic, empty. */
+const ANNOUNCER_EMPTY = '<p class="mz-sr" data-testid="mz-pp-announcer" aria-live="assertive" aria-atomic="true"></p>';
+
 describe("the memorise screen holds one symbol, never the sequence (H1)", () => {
-  it("in each slot: the stage is a live region with exactly the current symbol, and no text or name holds two in order", () => {
+  it("in each slot: the stage shows exactly the current symbol, hidden from assistive technology (the announcer speaks), and no text or name holds two in order", () => {
     for (let i = 0; i < PATTERN.length; i++) {
       // The server's window started i slots (of 1,000 ms) plus 100 ms ago.
       const now = Date.now();
       const html = render({ round: 2, length: 5, showFrom: now - i * 1000 - 100, showUntil: now - i * 1000 - 100 + 5000, inputUntil: now + 30_000, pattern: PATTERN });
       expect(html).toContain('data-testid="mz-pp-memorise"');
-      expect(html).toMatch(/data-testid="mz-pp-stage" aria-live="assertive" aria-atomic="true"/);
+      expect(html).toMatch(/data-testid="mz-pp-stage" aria-hidden="true"/);
       expect(html).toContain(`data-index="${i}" data-symbol="${PATTERN[i]}"`);
       expect(html).toContain(pulseCueText(i, 5, names[i]!));
       expect(html.match(/data-testid="mz-pp-cue"/g)?.length).toBe(1);
       for (const t of texts(html)) expect(holdsSequence(t), t).toBe(false);
       expect(html).not.toContain("The pattern:");
       expect(html).not.toContain("mz-pp-cell");
-      // The countdown is not a live region (it would talk over the symbols).
+      // One speaking live region on the screen: the announcer (the stage and the countdown are not live; the game clock is aria-live="off").
+      expect(html.match(/aria-live="(assertive|polite)"/g)).toEqual(['aria-live="assertive"']);
       expect(html).toMatch(/<p class="mz-foot" data-testid="mz-pp-timer">/);
     }
   });
@@ -100,6 +111,50 @@ describe("the memorise screen holds one symbol, never the sequence (H1)", () => 
     const html = render({ round: 2, length: 5, showUntil: now + 5000, inputUntil: now + 30_000, pattern: PATTERN });
     expect(html.match(/data-testid="mz-pp-cue"/g)?.length).toBe(1);
     expect(html).toContain('data-index="0"');
+  });
+});
+
+describe("the cue announcer: one live region, in place and empty before the pattern opens (review 7010784066)", () => {
+  const from = 50_000, until = from + 5_000; // 5 symbols: 1,000 ms slots, 800 ms said, 200 ms empty
+  const open = { round: 2, length: 5, showFrom: from, showUntil: until, inputUntil: until + 19_000, pattern: PATTERN };
+  it("what it says: nothing before a round opens; each symbol with its place in its own slot; nothing in each gap and once the window ends", () => {
+    expect(pulseCueSay(undefined, from, from)).toBe("");
+    expect(pulseCueSay({ round: 2, length: 5, showUntil: until, inputUntil: until + 19_000 }, from, from)).toBe(""); // no pattern (another seat, or after the window)
+    const said: string[] = [];
+    for (let t = from; t < until + 2_000; t += 10) {
+      const s = pulseCueSay(open, t, from);
+      if (said.at(-1) !== s) said.push(s);
+    }
+    // First cue at the window's start, an empty gap after every cue, the last cue cleared before recall.
+    expect(said).toEqual(["1 of 5: Blue diamond", "", "2 of 5: Yellow square", "", "3 of 5: Pink star", "", "4 of 5: Pink star", "", "5 of 5: Red circle", ""]);
+    expect(pulseCueSay(open, from, from)).toBe("1 of 5: Blue diamond");
+    expect(pulseCueSay(open, until - 1, from)).toBe("");
+    expect(pulseCueSay(open, until, from)).toBe("");
+  });
+  it("a symbol shown twice in a row (the server never sends one: pulsePattern) would still be said twice, with its new place, after an empty gap", () => {
+    // PATTERN[2] and PATTERN[3] are both Pink star.
+    expect(pulseCueSay(open, from + 2_000, from)).toBe("3 of 5: Pink star");
+    expect(pulseCueSay(open, from + 2_900, from)).toBe("");
+    expect(pulseCueSay(open, from + 3_000, from)).toBe("4 of 5: Pink star");
+  });
+  it("from an older server without showFrom it counts from when the phone first saw the round", () => {
+    const old = { ...open, showFrom: undefined };
+    expect(pulseCueSay(old, from + 1_000, from + 1_000)).toBe("1 of 5: Blue diamond");
+  });
+  it("every screen of the game renders it last, after its <main>, with the same attributes, and empty when it mounts", () => {
+    const now = Date.now();
+    const screens: [string, string][] = [
+      ["ready (before the pattern opens)", render(undefined as unknown as Record<string, unknown>, { open: undefined })],
+      ["memorising, mid-slot", render({ round: 2, length: 5, showFrom: now - 100, showUntil: now - 100 + 5000, inputUntil: now + 30_000, pattern: PATTERN })],
+      ["memorising, in a gap", render({ round: 2, length: 5, showFrom: now - 900, showUntil: now - 900 + 5000, inputUntil: now + 30_000, pattern: PATTERN })],
+      ["recall (tapping it back)", render({ round: 2, length: 5, showFrom: now - 6000, showUntil: now - 1000, inputUntil: now + 19_000, pattern: PATTERN })],
+      ["finished", render(undefined as unknown as Record<string, unknown>, { open: undefined, done: true })],
+    ];
+    for (const [who, html] of screens) {
+      expect(html.endsWith(`</main>${ANNOUNCER_EMPTY}`), who).toBe(true);
+      expect(html.match(/data-testid="mz-pp-announcer"/g)?.length, who).toBe(1);
+      expect(html.match(/aria-live="assertive"/g)?.length, who).toBe(1);
+    }
   });
 });
 

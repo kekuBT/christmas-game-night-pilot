@@ -2498,7 +2498,7 @@ The acceptance criteria are the handoff's, from the November 19 audit's page 4 f
   - **What:**
     - **The slots:** the server's memorise window (unchanged: 1.2 s plus 0.7 s per symbol) is split into one equal slot per symbol (`pulseCue.ts`). Each symbol is on screen for the first 80% of its slot, then the stage is empty, so a symbol shown twice reads as two appearances.
     - **The stage:** shows one symbol with its place and full name ("2 of 5: Yellow square").
-    - **The accessible cue:** the stage is also an `aria-live="assertive"`, `aria-atomic` region, so a screen reader hears the same symbol in the same slot.
+    - **The accessible cue:** ~~the stage is also an `aria-live="assertive"`, `aria-atomic` region~~ (superseded by D-AV-05: one announcer that is already in the page, empty, before the pattern opens), so a screen reader hears the same symbol in the same slot.
     - **The countdown** ("Hides in 3s") is no longer a live region, so it can't talk over the symbols.
     - **Reduced motion and Animations Off:** the same timing, with only the pop-in dropped.
     - **The server's only change** is the additive `open.showFrom` (the window's start, server time), so every phone times the slots on the server's clock. An older server without it is timed from when the phone first saw the round.
@@ -2524,3 +2524,26 @@ The acceptance criteria are the handoff's, from the November 19 audit's page 4 f
   - **Why:** with a transient cue there is no longer a row to read, and sampling the cue in every driver would slow them all by a whole window.
   - **What:** `scripts/lib/pulse-pattern.mjs` reads the open round's pattern from the page's own seat's projection (the tab's seat, a remembered seat or the solo seat): a test oracle that reads nothing another player could not. `check-pattern-pulse` still watches the cue itself, sampling the page every 15 ms through the window.
   - **Alternative:** a test-only hook in the app exposing the pattern. Rejected: a production page should not carry one.
+- **D-AV-05 Pattern Pulse's cue is spoken by one announcer that is already in the page, empty, before the pattern opens** (H1, review 7010784066).
+  - **Why:** the review found that the memorise screen's live region arrived together with its first words. The ready screen had none. Live regions are generally announced when a region already in the page changes, so the first spoken cue was not assured, whatever a DOM sample of the three labels showed.
+  - **What:**
+    - **The announcer:** `PulseAnnouncer` is one visually hidden `aria-live="assertive"`, `aria-atomic="true"` paragraph. Every Pulse screen (ready, memorising, recall, finished) renders it right after its own `<main>`, at the same place in the tree, so React keeps ONE DOM node for the whole game.
+    - **Its text:** `pulseCueSay` gives "1 of 5: Blue diamond" in its slot and empty in each gap, before a round opens and once the window ends. Recall therefore finds it empty. A symbol that comes back later in a pattern is said again with its new place. The server never sends one twice in a row (`pulsePattern`), and if it did, the gap and the new place would still make it a new announcement.
+    - **Mounting empty:** a newly mounted announcer stays empty for 150 ms (`PULSE_ANNOUNCER_SETTLE_MS`) before it may speak. In play it mounts with the ready screen, long before the pattern opens. The wait matters only when the page itself loads mid-window, after a reload.
+    - **The visible stage:** it keeps the same one symbol in the same slot, now `aria-hidden="true"` and not live, so nothing is heard twice. The one-symbol constraint, the visual cue, the server window and scoring are unchanged.
+  - **The regression:** `check-pattern-pulse` marks the announcer node on the ready screen, before the pattern opens. A MutationObserver then records each change of its text with what the stage showed at that moment.
+    - **For every round opened through the UI** (13 a game), it checks:
+      - the same node at recall;
+      - that it was empty and assertive/atomic before the pattern opened;
+      - that the first change is the first cue;
+      - each cue once, in order, in step with the visible symbol;
+      - empty at recall.
+    - **On `b936586`** (the build reviewed) these checks fail, because there is no announcer before the pattern opens. The unit tests pin the text per slot and gap, and the announcer's place and empty mount on every screen.
+  - **Cadence, not changed and not measured with assistive technology:**
+    - **The timing:** each symbol is on screen and in the announcer for 0.68–0.88 s, in a 0.85–1.1 s slot.
+    - **The arithmetic:** "2 of 5: Yellow square" is five words. At an illustrative 180–300 words a minute, that is 1.0–1.7 s to speak, longer than a slot. So at many speech rates the next assertive cue arrives before the last has finished. Whether a screen reader then cuts it off or queues it is the screen reader's behaviour, which only the native-device retest can observe.
+    - **Options for a decision after that observation** (none applied; the authoritative window is unchanged):
+      - shorter words, such as the name alone;
+      - a polite region, which queues every cue but lets speech trail the symbol;
+      - a per-player slower-cue option that lengthens that player's memorise window. That changes the timing the score depends on, so it is the owner's decision, made after the observed behaviour is reported.
+  - **Alternative:** keep the stage as the live region and mount it empty on the ready screen too. That would put a memorise-only region on the ready screen, and still lose the node at recall (the screen's `<main>` changes). One announcer outside the screens is simpler and survives every screen change.

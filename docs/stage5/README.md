@@ -95,7 +95,7 @@ All three are Practice-only (§6), run on the common module contract (D-S5-05), 
 - Six self-paced rounds of 3 to 8 shapes.
 - Tap "Show me the pattern" when ready. It shows for a few seconds, then you tap it back. Undo and clear are available.
 - Everyone gets the same lengths and windows but their own server-made sequence. A pattern is in your own projection only while you memorise it; future rounds are never sent.
-- Accessible: every symbol is a shape, a colour and a name, with no audio. Since H1 (D-AV-01) the pattern is shown one symbol at a time, each with its place and name in an assertive live region; Reduced motion and Off keep the same timing without the pop-in.
+- Accessible: every symbol is a shape, a colour and a name, with no audio. Since H1 (D-AV-01) the pattern is shown one symbol at a time, each with its place and name spoken by one assertive announcer that is already in the page, empty, before the pattern opens (D-AV-05); Reduced motion and Off keep the same timing without the pop-in.
 - A window nobody answers is closed by the **server clock** (0 points) with nobody acting.
 - Driver: `check-pattern-pulse` (3 phones, one with reduced motion, and a TV). It covers:
   - privacy;

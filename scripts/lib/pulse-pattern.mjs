@@ -5,7 +5,7 @@
 // OWN seat's projection (`/rooms/:id/projection?audience=player`), which carries the pattern only during the
 // memorise window, exactly as before. Nothing here reads another player's pattern, and nothing is added to the
 // app: the seat is the one the page already holds (this tab's seat, a remembered seat, or the solo seat).
-// scripts/check-pulse-cue.mjs checks what the screen shows over time.
+// scripts/check-pattern-pulse.mjs checks what the screen shows over time.
 import { PROTOCOL_HEADERS } from "./protocol.mjs";
 
 /**
