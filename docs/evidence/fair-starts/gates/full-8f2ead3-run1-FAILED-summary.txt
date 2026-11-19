@@ -1,0 +1,13 @@
+
+FAILED (exit 1) | full | run 20261119-093227-8f2ead3a-11408
+  111 passed, 2 failed, 0 timed out, 0 infrastructure, 0 invalid, 0 cancelled, 0 not run
+  FAIL      check-install (w3) [functional]: FAIL no unexpected error — page.goto: Timeout 30000ms exceeded. | Call log: |   - navigating to "http://localhost:36205/", waiting until "load"
+  FAIL      check-release-package (w2) [functional]: FAIL U the package runs as the service user on it — env: '<scratchpad>/r2/node/node-v22.16.0-linux-x64/bin/node':
+  timing   wall 43m 42s · step time 2h 06m (sum) · 3 workers, 96% busy · 2.89× the same steps run one after another
+           predicted 24–73m (about 37m 16s, low-confidence) → actual 43m 42s (+17%)
+           longest  e2e-chromium 8m 33s, check-f5 7m 39s, check-leaderboard 6m 26s · the longest step is 20% of the wall time
+           machine  CPU mean 36%, peak 99% · memory available ≥ 13003 MB · load peak 5.49 · backpressure 11 wait(s), 83s
+           contention ×1.088 (median step time vs its sequential median)
+           baseline sequential full gate: about 1h 17m (mean of recorded sequential passes)
+           retries  none (the gate never retries a step)
+  report <scratchpad>/fs-gate/20261119-093227-8f2ead3a-11408/report.json

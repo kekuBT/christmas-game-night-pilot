@@ -404,13 +404,18 @@ export class PartyRefused extends Error {
  *   connected right now (S1). The game is never switched to practice.
  * - READINESS_CHANGED: the host must confirm every roster player who isn't
  *   ready or isn't connected (S4); `needsConfirmation` is the current set.
+ *   `needsStatus` says, for each of them, why, at the moment of the refusal
+ *   (fair starts, review 7007413347): the host's dialog shows these facts,
+ *   not a projection that may be older or newer than the refusal.
  */
+export interface NeedStatus { id: string; ready: boolean; presence: Presence }
 export class BriefingRefused extends Error {
   constructor(
     readonly code: "READ_WINDOW" | "OFFICIAL_NEEDS_TWO" | "NOT_ENOUGH_CONNECTED" | "READINESS_CHANGED",
     message: string,
     readonly needsConfirmation: string[] = [],
     readonly startNowAt?: number,
+    readonly needsStatus: NeedStatus[] = [],
   ) {
     super(message);
   }
@@ -1352,7 +1357,8 @@ export class RoomEngine {
     const ok = new Set(opts.confirmed ?? []);
     if (needs.some((id) => !ok.has(id))) {
       const names = needs.map((id) => this.players.get(id)?.displayName ?? id);
-      throw new BriefingRefused("READINESS_CHANGED", `Not everyone is ready: ${names.join(", ")}. Confirm to start their clocks too.`, needs, b.startNowAt);
+      const status = needs.map((id) => ({ id, ready: b.ready[id] !== undefined, presence: this.presenceOf(id, now) }));
+      throw new BriefingRefused("READINESS_CHANGED", `Not everyone is ready: ${names.join(", ")}. Confirm to start their clocks too.`, needs, b.startNowAt, status);
     }
     const outcome = this.beginPlay(game, now, "start-now", actorId, game.players.filter((id) => ok.has(id)));
     if (outcome === "content-changed") return { started: false, cancelled: "content-changed" };

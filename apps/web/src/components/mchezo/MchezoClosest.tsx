@@ -82,10 +82,12 @@ export function MchezoClosest(deps: MchezoClosestDeps) {
 
   // Current question unanswered and not abstained: guess controls plus
   // the shared sit-out button (same intents as the old panel).
+  // Fair starts (handoff 7004097156, H7): this question's 40 s clock started
+  // the moment the last one closed, so its prompt and Submit come first; the
+  // last answer follows them instead of pushing them below a small phone's fold.
   return (
     <PhoneScreen label={title}>
       <p className="mz-kicker">{title}</p>
-      {lastCard}
       <div className="mz-card">
         <p><b>{st.prompt}</b>{st.unit ? ` (${st.unit})` : ""}</p>
         <NumericGuess
@@ -103,6 +105,7 @@ export function MchezoClosest(deps: MchezoClosestDeps) {
       <div style={{ padding: "0 16px 16px" }}>
         <AbstainControl abstained={false} onAbstain={() => intent(game.id, "abstain", {})} />
       </div>
+      {lastCard}
     </PhoneScreen>
   );
 }

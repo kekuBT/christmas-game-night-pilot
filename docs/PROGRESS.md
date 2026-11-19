@@ -1,5 +1,5 @@
 # Muse local progress and resume checkpoint
-Updated: 2026-11-14 ~1:25 a.m. EST (Stage 12.4 built and gated: full checkpoint PASSED on 16e485b, 94/94 — see the Stage 12.4 section at the end; Stages 12.2–12.4 are draft PRs #26–#28, unmerged; real-device checks still NOT RUN)
+Updated: 2026-11-19 ~7:20 a.m. EST (fair starts: review 7007413347, the refreshed M9 confirmation, fixed on 84955a5; full gate PASSED (exit 0) on 84955a5, 113/113 — see the last section; not merged, not deployed)
 
 ## Current milestone
 M0–M5: COMPLETED as backend/engine checkpoints ONLY — see docs/FRONTEND_MILESTONES.md. They are NOT evidence the full product is finished.
@@ -4112,3 +4112,34 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
   - **also updated:** the pins README and the evidence README. The developer logs are unchanged.
 - **Checks:** focused document checks only, for links, identities and stale wording. No unit tests, gate, package, image, browser or compatibility rerun.
 - **Next:** ChatGPT verifies the delta and delivers the readiness result. Deploying needs the owner's explicit execution approval.
+
+## Post-beta: fair game starts and clocks, H6/H7/M9 (handoff 7004097156; details 7004164219; direction 7004637491)
+- **Branch:** `claude/fair-starts-h6-h7-m9`, draft PR #52, stacked on #51 (`da5ac0f`).
+- **The tested commit:** `8f2ead3a6eb9aa6eb839c9b79b7735ae972e429e`. Its first draft was `de569d2`, superseded.
+- **Not for merge or deploy;** the beta keeps serving its current build.
+- **What was built:**
+  - `scripts/check-fair-starts.mjs` and `scripts/lib/fair-start-server.ts`: six Chromium contexts on a server clock the driver owns. Each page records, in its own time, frame arrival and actionable controls, gated on phase.
+  - The cases: A, N, R, T, C, M, X, L, E, S and Z, with a negative control for the measurement and a real input path. Baseline `da5ac0f` and live `7097ac2` builds were compared.
+- **Confirmed on baseline and live, and fixed (client-side only):**
+  - **H7:** Closest Wins draws the new question before the last answer (D-FS-02). An "I'm ready" refused because its own game began is silent (D-FS-03).
+  - **H6/H7:** "Game cancelled" shows on results, tied to its briefing (D-FS-04).
+  - **M9:** the Start now dialog is a labelled snapshot whose title counts its own rows, with live changes on a "Since then" line (D-FS-05).
+- **Not reproduced (cause unknown):**
+  - the seconds-long H7 observations: every phone was actionable within 168 ms here;
+  - H6 "play at 5/6": that is the documented same-step start, and no frame shows 6/6;
+  - no interleaving produced more than one transition.
+- **Server, timing, scoring and ledger:** unchanged. There is no pre-start stage (D-FS-01).
+- **Tests:**
+  - unit tests: `tests/fair-starts-ui.test.ts`, `intentRefusal.test.ts`, `MchezoClosest.test.tsx`;
+  - the driver: baseline 8 FAILED, live the same 8 FAILED, fixed 46/46;
+  - targeted gate `PASSED (exit 0)`, run `20261119-093030-8f2ead3a-10462`;
+  - the full gate on `8f2ead3`: `PASSED (exit 0)`, run `20261119-102025-8f2ead3a-2360`, 113/113. An earlier full run on the same revision FAILED (111/113): its release-package step couldn't run this session's private Node as the service user, and check-install had a page-load timeout under load. Both are recorded in the evidence.
+- **Evidence:** `docs/evidence/fair-starts/`.
+- **Review 7007413347 (changes requested on M9), fixed on `84955a5277dd1bef59e93c0be4c441cfc11b6ccd`:**
+  - **The race:** when the server asked again, the replacement dialog used the rows captured before the request. With the host's confirm in flight while Amina withdrew, it said "2 people aren't ready or aren't connected" over "Amina: ready".
+  - **The fix:** a `READINESS_CHANGED` refusal carries `needsStatus` and `rev` (additive). The replacement keeps the server's ids, builds its rows from those facts, and is labelled "When you confirmed, the game checked again:". "Since then" waits until the live rows are as new as the refusal (D-FS-05).
+  - **Files:** `src/server/room.ts`, `src/server/http.ts`, `apps/web/src/ui/mchezo/lib/briefing.ts`, `apps/web/src/components/mchezo/Briefing.tsx`, `apps/web/src/App.tsx`, `scripts/check-fair-starts.mjs` (case M2), `docs/ux-redesign/D3_TIMING_CONTRACT.md`.
+  - **Tests:** `tests/d3-briefing.test.ts`, `tests/d3-briefing-http.test.ts`, `tests/fair-starts-ui.test.ts`. Driver M2: `8f2ead3` 2 FAILED (both M2), 48 passed; `84955a5` 50/50.
+  - **Gates on `84955a5`:** targeted `PASSED (exit 0)`, run `20261119-112958-84955a52-29908`; full `PASSED (exit 0)`, run `20261119-113202-84955a52-30803`, 113/113.
+- **Open:** native devices; ChatGPT's review of `84955a5`.
+- **Next, per the handoff:** H1/H2 answer visibility and accessibility, then the Draw & Guess iPhone retest.

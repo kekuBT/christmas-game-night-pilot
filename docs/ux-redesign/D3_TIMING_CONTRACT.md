@@ -333,6 +333,7 @@ During a briefing, **every** projection (player, host or cohost, TV, spectator) 
 **Behaviour details:**
 - **When (a) is checked:** in the same step as each Ready intent, and on every lifecycle sweep (1 s), which covers presence changes.
 - **Host Start now:** answered with HTTP 409 and `{ code, needsConfirmation, startNowAt }` when refused. `CONTENT_CHANGED` (409) means the briefing was cancelled because a restart loaded different content.
+  - **`READINESS_CHANGED` also carries** (fair starts, review 7007413347; additive) `needsStatus`, one `{ id, ready, presence }` per named player at the refusal instant, and `rev`, the projection revision broadcast with the refusal. The host's phone builds its refreshed confirmation from these facts.
 - **Cancelled briefings:** every phone shows "The game was cancelled before it started…" in the lobby.
 
 **Tests:**

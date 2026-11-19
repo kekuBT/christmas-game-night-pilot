@@ -57,6 +57,128 @@ export function needsConfirmation(people: BriefingPerson[], actorId: string): Br
   return people.filter((p) => p.id !== actorId && (!p.ready || p.presence !== "connected"));
 }
 
+/**
+ * Fair starts (handoff 7004097156, M9): the Start now confirmation is a snapshot, taken when the host tapped Start
+ * now (or when the server asked again): what the host confirms is what they were shown, and the server refuses a stale
+ * list. The title says what the snapshot's rows say, in the same words: "not ready" only for someone who hasn't tapped
+ * Ready, "not connected" for a Ready player whose phone is away or reconnecting.
+ */
+export function confirmTitle(snapshot: BriefingPerson[]): string {
+  const notReady = snapshot.filter((p) => !p.ready).length;
+  const offline = snapshot.filter((p) => p.ready && p.presence !== "connected").length;
+  const one = snapshot.length === 1 ? snapshot[0]! : null;
+  // Only a refusal from a server that sends no status facts can name someone whose latest row is ready and connected
+  // (refreshedSnapshot): the title then claims no reason the row doesn't show.
+  if (notReady + offline < snapshot.length) return one ? `The game asked again about ${one.name}. Start anyway?` : `The game asked again about ${snapshot.length} people. Start anyway?`;
+  if (offline === 0) return one ? `${one.name} isn’t ready. Start anyway?` : `${snapshot.length} people aren’t ready. Start anyway?`;
+  if (notReady === 0) return one ? `${one.name} isn’t connected. Start anyway?` : `${snapshot.length} people aren’t connected. Start anyway?`;
+  return `${snapshot.length} people aren’t ready or aren’t connected. Start anyway?`;
+}
+
+/** Fair starts (review 7007413347): one named player's readiness and connection at a READINESS_CHANGED refusal. */
+export interface NeedStatus {
+  id: string;
+  ready: boolean;
+  presence: BriefingPresence;
+}
+
+const PRESENCES: readonly string[] = ["connected", "reconnecting", "away"];
+
+/** The well-formed status facts in a refusal body, or undefined when it has none (a server that doesn't send them). */
+export function parseNeedStatus(x: unknown): NeedStatus[] | undefined {
+  if (!Array.isArray(x)) return undefined;
+  const out: NeedStatus[] = [];
+  for (const e of x) {
+    if (!e || typeof e !== "object") continue;
+    const r = e as Record<string, unknown>;
+    if (typeof r["id"] === "string" && typeof r["ready"] === "boolean" && typeof r["presence"] === "string" && PRESENCES.includes(r["presence"])) {
+      out.push({ id: r["id"], ready: r["ready"], presence: r["presence"] as BriefingPresence });
+    }
+  }
+  return out;
+}
+
+/**
+ * The host's Start now confirmation (M9; review 7007413347). `ids` is the list Confirm sends: the client rule's on a
+ * tap, the server's own when it asked again, unchanged. `rows` say why each of them needs confirming, as of one
+ * moment, and the title counts them. `rev` is the projection revision that moment belongs to; a live projection at
+ * or after it describes the time after the snapshot. `caughtUp` is set once the live rows have done so, and from
+ * then on their differences are listed as changes; before that, an older projection can't contradict the rows.
+ */
+export interface ConfirmSnapshot {
+  ids: string[];
+  rows: BriefingPerson[];
+  /** "tap": the host tapped Start now. "checked": the server asked when they tapped. "checked-again": it asked again when they confirmed. */
+  source: "tap" | "checked" | "checked-again";
+  rev?: number;
+  caughtUp: boolean;
+}
+
+const placeholder = (id: string): BriefingPerson => ({ id, name: "A player", ready: false, presence: "away", you: false });
+
+/** The snapshot when the host taps Start now: the live rows they are looking at. */
+export function tapSnapshot(live: BriefingPerson[], actorId: string, liveRev?: number): ConfirmSnapshot {
+  const rows = needsConfirmation(live, actorId).map((p) => ({ ...p }));
+  return { ids: rows.map((p) => p.id), rows, source: "tap", ...(liveRev !== undefined ? { rev: liveRev } : {}), caughtUp: true };
+}
+
+/**
+ * The snapshot when the server asks (again): its list, unchanged, and each person's status from the refusal's own
+ * facts. Names come from the latest applied projection of this briefing. A server that sends no facts gets the latest
+ * applied projection's rows instead (never rows captured before the request was sent).
+ */
+export function refusalSnapshot(ids: string[], facts: NeedStatus[] | undefined, latest: BriefingPerson[], opts: { rev?: number; again: boolean }): ConfirmSnapshot {
+  const rows = ids.map((id) => {
+    const row = { ...(latest.find((p) => p.id === id) ?? placeholder(id)) };
+    const f = facts?.find((x) => x.id === id);
+    return f ? { ...row, ready: f.ready, presence: f.presence } : row;
+  });
+  return { ids: [...ids], rows, source: opts.again ? "checked-again" : "checked", ...(opts.rev !== undefined ? { rev: opts.rev } : {}), caughtUp: false };
+}
+
+/**
+ * Whether the live rows describe the time after the snapshot: by revision when both are known, otherwise once the
+ * live rows have agreed with the snapshot (the projection broadcast with a refusal says what the refusal said).
+ */
+export function liveCaughtUp(snap: ConfirmSnapshot, live: BriefingPerson[], liveRev: number | undefined): boolean {
+  if (snap.caughtUp) return true;
+  if (snap.rev !== undefined && liveRev !== undefined) return liveRev >= snap.rev;
+  return snap.rows.every((s) => {
+    const l = live.find((p) => p.id === s.id);
+    return !!l && l.ready === s.ready && l.presence === s.presence;
+  });
+}
+
+/** The line above the snapshot's rows, saying which moment they describe. */
+export function confirmWhen(snap: ConfirmSnapshot): string {
+  if (snap.source === "checked-again") return "When you confirmed, the game checked again:";
+  if (snap.source === "checked") return "When you tapped Start now, the game checked:";
+  return "When you tapped Start now:";
+}
+
+/**
+ * What has changed since the snapshot, from the live rows (the same projection the heading and the person rows use):
+ * one line per change, in the snapshot's order, then anyone who now needs confirming but wasn't in it. Empty when the
+ * snapshot is still true. The dialog shows these lines instead of silently mixing a snapshot count with live rows.
+ */
+export function confirmChanges(snapshot: BriefingPerson[], live: BriefingPerson[], liveNeedIds: string[]): string[] {
+  const out: string[] = [];
+  const now = (id: string) => live.find((p) => p.id === id);
+  const presenceLine = (p: BriefingPerson) => (p.presence === "connected" ? `${p.name} is connected again` : `${p.name} is ${p.presence} now`);
+  for (const s of snapshot) {
+    const l = now(s.id);
+    if (!l) continue;
+    if (s.ready !== l.ready) out.push(l.ready ? `${l.name} is ready now` : `${l.name} isn’t ready any more`);
+    else if (s.presence !== l.presence) out.push(presenceLine(l));
+  }
+  for (const id of liveNeedIds) {
+    if (snapshot.some((s) => s.id === id)) continue;
+    const l = now(id);
+    if (l) out.push(!l.ready ? `${l.name} isn’t ready any more` : presenceLine(l));
+  }
+  return out;
+}
+
 /** "Ready", "Not ready yet", plus the connection when it isn't live. */
 export function personStatus(p: BriefingPerson): string {
   const r = p.ready ? "Ready" : "Not ready yet";

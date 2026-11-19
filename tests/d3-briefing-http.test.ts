@@ -80,6 +80,7 @@ describe("D3 HTTP: briefing routes", () => {
     let r = await h.post(`/rooms/${h.roomId}/games/${gid}/start-now`, { confirmed: [] }, ps[0]!.token);
     expect(r.status).toBe(409);
     expect(r.body).toMatchObject({ code: "READ_WINDOW", startNowAt: clock.t + 20_000 });
+    expect(r.body["needsStatus"]).toBeUndefined(); // only READINESS_CHANGED carries status facts
     clock.advance(20_000);
     r = await h.post(`/rooms/${h.roomId}/games/${gid}/start-now`, { confirmed: [] }, ps[0]!.token);
     expect(r.status).toBe(409);
@@ -94,6 +95,41 @@ describe("D3 HTTP: briefing routes", () => {
     expect(g.phaseDeadlineAt).toBe(clock.t + policyFor("closest-wins").phaseMs!["question"]!);
     // Readiness is locked now.
     expect(await h.intent(ps[1]!, gid, "briefing-ready", { ready: true })).toMatchObject({ accepted: false, reason: "READY_LOCKED" });
+  });
+
+  it("READINESS_CHANGED carries each named player's status at the refusal, and the revision broadcast with it (review 7007413347)", async () => {
+    const { h, clock, ps } = await room(4);
+    const gid = (await h.startGame(ps[0]!, "closest-wins", { official: true })).body["gameId"] as string;
+    expect(await h.intent(ps[1]!, gid, "briefing-ready", { ready: true })).toMatchObject({ accepted: true });
+    expect(await h.intent(ps[2]!, gid, "briefing-ready", { ready: true })).toMatchObject({ accepted: true });
+    clock.advance(20_000);
+    // The host's dialog named only Chausiku. Amina withdraws before the confirmation arrives.
+    expect(await h.intent(ps[1]!, gid, "briefing-ready", { ready: false })).toMatchObject({ accepted: true });
+    const before = (await h.projection(ps[0]!))["rev"] as number;
+    const r = await h.post(`/rooms/${h.roomId}/games/${gid}/start-now`, { confirmed: [ps[3]!.playerId] }, ps[0]!.token);
+    expect(r.status).toBe(409);
+    expect(r.body["code"]).toBe("READINESS_CHANGED");
+    const need = r.body["needsConfirmation"] as string[];
+    expect([...need].sort()).toEqual([ps[1]!.playerId, ps[3]!.playerId].sort());
+    const status = r.body["needsStatus"] as { id: string; ready: boolean; presence: string }[];
+    expect(status.map((s) => s.id)).toEqual(need);
+    expect(status.find((s) => s.id === ps[1]!.playerId)).toEqual({ id: ps[1]!.playerId, ready: false, presence: "connected" });
+    expect(status.find((s) => s.id === ps[3]!.playerId)).toEqual({ id: ps[3]!.playerId, ready: false, presence: "connected" });
+    // The refusal's revision is the projection broadcast with it: newer than what the host had, and what a fresh
+    // projection now carries (nothing else has changed).
+    const rev = r.body["rev"] as number;
+    expect(rev).toBeGreaterThan(before);
+    await waitFor(() => (ps[0]!.lastPush?.["rev"] as number | undefined) === rev);
+    expect((await h.projection(ps[0]!))["rev"]).toBe(rev);
+    // Confirming the refreshed list starts the game once.
+    const ok = await h.post(`/rooms/${h.roomId}/games/${gid}/start-now`, { confirmed: need }, ps[0]!.token);
+    expect(ok.status).toBe(200);
+    expect(gameOf(h, gid)!.status).toBe("playing");
+    const again = await h.post(`/rooms/${h.roomId}/games/${gid}/start-now`, { confirmed: need }, ps[0]!.token);
+    expect(again.body).toMatchObject({ ok: true, started: true, trigger: "already-started" });
+    const started = h.engine().ledger.filter((e) => e.type === "game-started" && e.gameInstanceId === gid);
+    expect(started).toHaveLength(1);
+    expect(started[0]!.detail).toMatchObject({ trigger: "start-now", confirmed: [ps[1]!.playerId, ps[3]!.playerId] });
   });
 
   it("a player can't Start now or Cancel; the host can Cancel, and the game is gone for everyone", async () => {
