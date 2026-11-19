@@ -187,9 +187,13 @@ try {
     // A stroke reaches the server in batches (~3 a second): compare every board with the server's drawing as it is now.
     let server = null;
     const boards = () => Promise.all(pages.map((p) => p.getByTestId("mz-dg-board").first().getAttribute("data-sig", { timeout: 1000 }).catch(() => null)));
+    // Whole: the drawer has nothing left to send (its board draws no local piece beyond the server's), and every board
+    // shows exactly the server's pieces.
     const synced = await soon(`turn ${n} (${size}): the drawer's board and every guesser's board show the server's whole drawing`, async () => {
-      server = sigOf((await tvGame()).state.pieces);
-      return (await boards()).every((s) => s === server);
+      const pieces = (await tvGame()).state.pieces ?? [];
+      server = sigOf(pieces);
+      const drawerAll = Number(await drawer.getByTestId("mz-dg-board").getAttribute("data-pieces"));
+      return drawerAll === pieces.length && (await boards()).every((s) => s === server);
     }, 10000);
     if (!synced) console.log(`  boards ${JSON.stringify({ server, seats: (await boards()).map((s, i) => `${NAMES[i]}${i === d ? " (drawer)" : ""}: ${s}`) })}`);
     const drawn = await trace(drawer);
@@ -208,7 +212,8 @@ try {
       const back = await trace(drawer);
       const lum3 = await brightness(drawer, back.board);
       report.push({ turn: n, size, step: "after a reload", ...back, lum: lum3 });
-      check(`turn ${n} (${size}): after a reload the drawer is back on its board, bright, with the drawing so far`, back.inView && back.hitInBoard && lum3.board > 150 && back.sig === server, JSON.stringify({ sig: back.sig, server, lum: lum3 }));
+      const now = sigOf((await tvGame()).state.pieces);
+      check(`turn ${n} (${size}): after a reload the drawer is back on its board, bright, with the drawing so far`, back.inView && back.hitInBoard && lum3.board > 150 && back.sig === now, JSON.stringify({ sig: back.sig, server: now, lum: lum3 }));
       await sleep(1500);
       const again = await dimSince(drawer, 0); // the reloaded page's own record, from its start
       report.push({ turn: n, size, step: "after the reload, summary", ...again });
