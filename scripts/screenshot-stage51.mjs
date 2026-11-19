@@ -11,6 +11,7 @@ import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { launchChromium } from "./lib/driver-env.mjs";
+import { readPulsePattern } from "./lib/pulse-pattern.mjs";
 
 const arg = (k, d) => { const i = process.argv.indexOf(k); return i > 0 ? process.argv[i + 1] : d; };
 const LABEL = arg("--label", "after");
@@ -132,7 +133,7 @@ try {
     await practice(room, "pattern-pulse");
     await p.getByTestId("mz-pp-open").click({ timeout: 20000 });
     await p.getByTestId("mz-pp-memorise").waitFor({ timeout: 10000 });
-    const seq = await p.locator('[data-testid="mz-pp-pattern"] li').evaluateAll((els) => els.map((e) => Number(e.dataset.symbol)));
+    const seq = await readPulsePattern(p);
     await p.getByTestId("mz-pp-input").waitFor({ timeout: 20000 });
     for (const s of seq) await p.getByTestId(`mz-pp-key-${s}`).click();
     await shot(p, "s5aud02-pulse-full-entry", "All shapes entered, not yet locked in");

@@ -15,6 +15,7 @@ import { join } from "node:path";
 import { launchChromium } from "./lib/driver-env.mjs";
 import { passBriefing } from "./lib/briefing.mjs";
 import { slabNumber, solveMath } from "./lib/math-solve.mjs";
+import { readPulsePattern } from "./lib/pulse-pattern.mjs";
 
 const arg = (k, d) => { const i = process.argv.indexOf(k); return i > 0 ? process.argv[i + 1] : d; };
 const OUT = arg("--out", join("docs", "stage8", "screenshots-81", "after"));
@@ -68,7 +69,7 @@ try {
     await p.getByTestId("mz-pp-ready").waitFor({ timeout: 20000 });
     await p.getByTestId("mz-pp-open").click();
     await p.getByTestId("mz-pp-memorise").waitFor({ timeout: 10000 });
-    let pattern = await p.locator('[data-testid="mz-pp-pattern"] li').evaluateAll((els) => els.map((e) => Number(e.dataset.symbol)));
+    let pattern = await readPulsePattern(p);
     await p.getByTestId("mz-pp-input").waitFor({ timeout: 15000 });
     for (const s of pattern) await p.getByTestId(`mz-pp-key-${s}`).click();
     await p.getByTestId("mz-pp-submit").click();
@@ -76,7 +77,7 @@ try {
     await shot(p, "02-pulse-between-patterns", "Pattern Pulse between patterns (round 2 next)");
     await p.getByTestId("mz-pp-open").click();
     await p.getByTestId("mz-pp-memorise").waitFor({ timeout: 10000 });
-    pattern = await p.locator('[data-testid="mz-pp-pattern"] li').evaluateAll((els) => els.map((e) => Number(e.dataset.symbol)));
+    pattern = await readPulsePattern(p);
     await p.getByTestId("mz-pp-input").waitFor({ timeout: 15000 });
     await p.getByTestId(`mz-pp-key-${pattern[0]}`).click();
     await shot(p, "03-pulse-tap-back", "Pattern Pulse tapping round 2 back (1 of 4 in)");

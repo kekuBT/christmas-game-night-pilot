@@ -28,7 +28,9 @@ import { moduleRng, type GameModule, type ModuleContext } from "./types.js";
  * the symbols, the windows or the scoring below change
  * (tests/stage62-solo-shelf.test.ts fingerprints them).
  */
-export const PULSE_RULES_VERSION = 1;
+// v2 (H1, handoff 7008903623): the pattern is shown one symbol at a time (a transient cue) instead of as a whole row,
+// a different memory task, so a best from the row presentation no longer compares.
+export const PULSE_RULES_VERSION = 2;
 export const PULSE_LENGTHS = [3, 4, 5, 6, 7, 8] as const;
 export const PULSE_SYMBOLS = 6;
 export const PULSE_POINTS = { perSymbol: 20, perfect: 50 } as const;
@@ -178,6 +180,9 @@ export const pulseModule: GameModule<PulseState> = {
     const open = p.open && !expired ? {
       round: p.open.round,
       length: PULSE_LENGTHS[p.open.round],
+      // H1 (handoff 7008903623): when the memorise window began, so the phone shows each symbol in its own equal
+      // slot of that window, on server time (additive).
+      showFrom: p.open.openedAt,
       showUntil: p.open.showUntil,
       inputUntil: p.open.inputUntil,
       // The pattern only while this player is memorising it.

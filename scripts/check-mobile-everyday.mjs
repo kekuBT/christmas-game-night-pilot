@@ -30,6 +30,7 @@ import { launchChromium, screenshotPath } from "./lib/driver-env.mjs";
 import { passBriefing } from "./lib/briefing.mjs";
 import { slabNumber, solveMath } from "./lib/math-solve.mjs";
 import { installedFonts } from "./lib/fonts.mjs";
+import { readPulsePattern } from "./lib/pulse-pattern.mjs";
 
 const GATE_BASE = process.argv[2] ?? "http://localhost:3461";
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -232,7 +233,7 @@ try {
     const memClock = parseClock(await text(p.getByTestId("mz-game-clock")));
     const t2 = await soonTruth(p);
     check("B …and it too is on the server's clock", memClock !== null && t2 && Math.abs(memClock - Math.round((t2.deadlineAt - t2.serverNow) / 1000)) <= 3, `shown ${memClock}s`);
-    const pattern = await p.locator('[data-testid="mz-pp-pattern"] li').evaluateAll((els) => els.map((e) => Number(e.dataset.symbol)));
+    const pattern = await readPulsePattern(p);
     await p.getByTestId("mz-pp-input").waitFor({ timeout: 15000 });
     check("B tapping back: one game clock line", (await p.getByTestId("mz-game-clock").count()) === 1);
     for (const s of pattern) await p.getByTestId(`mz-pp-key-${s}`).click();

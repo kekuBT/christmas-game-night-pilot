@@ -37,6 +37,7 @@ import { join } from "node:path";
 import { launchChromium } from "./lib/driver-env.mjs";
 import { connectionsGroups } from "./lib/content-oracle.mjs";
 import { slabNumber, solveMath } from "./lib/math-solve.mjs";
+import { readPulsePattern } from "./lib/pulse-pattern.mjs";
 
 const BASE = process.argv[2] ?? "http://localhost:3461";
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -80,7 +81,7 @@ async function playPulse(page, how, { keyboardRound = -1 } = {}) {
     await page.getByTestId("mz-pp-open").waitFor({ timeout: 30000 });
     if (i === keyboardRound) { await page.getByTestId("mz-pp-open").focus(); await page.keyboard.press("Enter"); } else await page.getByTestId("mz-pp-open").click();
     await page.getByTestId("mz-pp-memorise").waitFor({ timeout: 10000 });
-    const pattern = await page.locator('[data-testid="mz-pp-pattern"] li').evaluateAll((els) => els.map((e) => Number(e.dataset.symbol)));
+    const pattern = await readPulsePattern(page);
     await page.getByTestId("mz-pp-input").waitFor({ timeout: 15000 });
     const mode = how(i);
     if (mode === "timeout") { await page.locator('[data-testid="mz-pp-ready"], [data-testid="solo-results"]').first().waitFor({ timeout: 40000 }); continue; }
@@ -312,7 +313,7 @@ try {
   await startFromShelf(lp, "pattern-pulse");
   await lp.getByTestId("mz-pp-open").click();
   await lp.getByTestId("mz-pp-memorise").waitFor({ timeout: 10000 });
-  const lpat = await lp.locator('[data-testid="mz-pp-pattern"] li').evaluateAll((els) => els.map((e) => Number(e.dataset.symbol)));
+  const lpat = await readPulsePattern(lp);
   await lp.getByTestId("mz-pp-input").waitFor({ timeout: 15000 });
   for (const s of lpat) await lp.getByTestId(`mz-pp-key-${s}`).click();
   await lp.getByTestId("mz-pp-submit").click();

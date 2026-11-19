@@ -4,8 +4,11 @@
 //   the pattern is on the memorising phone only, and hides at the server's
 //   deadline; undo and clear; a failed send says so and keeps the entry; a
 //   reload mid-round never shows the pattern again; a window nobody answers
-//   is closed by the server clock (0 points) with nobody acting; reduced
-//   motion gets the still row; sitting the rest out; a late joiner sees no
+//   is closed by the server clock (0 points) with nobody acting; H1 (handoff
+//   7008903623): the pattern is shown one symbol at a time, in order, never two
+//   at once and never as text or a name holding the sequence (sampled in the
+//   page every 15 ms through the window); reduced motion keeps the timing and
+//   drops the pop-in; sitting the rest out; a late joiner sees no
 //   pattern; results on every phone equal the server's scores; the TV shows
 //   counts only, then final standings and the review; no sideways scrolling.
 // Isolated server, no content test mode. Time scale 0.5.
@@ -16,6 +19,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { contrastFailures } from "./lib/contrast.mjs";
 import { launchChromium, screenshotPath } from "./lib/driver-env.mjs";
+import { readPulsePattern } from "./lib/pulse-pattern.mjs";
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 let failures = 0;
@@ -66,14 +70,42 @@ const noSideways = (p) => p.evaluate(() => document.scrollingElement.scrollWidth
 const LENGTHS = [3, 4, 5, 6, 7, 8];
 const pts = (len, run) => run * 20 + (run === len ? 50 : 0);
 
-/** Open the round, read the pattern from the memorise screen, wait for it to hide. */
+/** Open the round, read the pattern (this phone's own projection: a test oracle, H1), wait for it to hide. */
 async function openAndRead(p) {
   await p.getByTestId("mz-pp-open").click();
   await p.getByTestId("mz-pp-memorise").waitFor({ timeout: 10000 });
-  const seq = await p.locator('[data-testid="mz-pp-pattern"] li').evaluateAll((els) => els.map((e) => Number(e.dataset.symbol)));
+  const seq = await readPulsePattern(p);
   await p.getByTestId("mz-pp-input").waitFor({ timeout: 15000 });
   return seq;
 }
+/**
+ * H1: everything the memorise screen showed, sampled in the page every 15 ms until the window ends: each
+ * symbol in turn, the most shown at once, and the most symbol names any text or accessible name held at once.
+ */
+const watchCue = (p) => p.evaluate(() => new Promise((resolve) => {
+  // A symbol counts as named in a text when its full name or its one-word name ("circle") is there.
+  const NAMES = ["Red circle", "Yellow square", "Green triangle", "Blue diamond", "Pink star", "Purple hexagon"];
+  const WORDS = NAMES.map((n) => new RegExp(`\\b${n.split(" ")[1]}\\b`, "i"));
+  const seen = []; const anims = new Set(); const words = []; let maxAtOnce = 0, maxInText = 0, maxInLabel = 0, samples = 0;
+  const names = (t) => NAMES.filter((n, i) => t.includes(n) || WORDS[i].test(t)).length;
+  const stage = document.querySelector('[data-testid="mz-pp-stage"]');
+  const live = stage ? `${stage.getAttribute("aria-live")}/${stage.getAttribute("aria-atomic")}` : "none";
+  const tick = () => {
+    if (!document.querySelector('[data-testid="mz-pp-memorise"]')) { resolve({ seen, maxAtOnce, maxInText, maxInLabel, anims: [...anims], words, live, samples }); return; }
+    samples++;
+    const cues = [...document.querySelectorAll('[data-testid="mz-pp-cue"]')];
+    maxAtOnce = Math.max(maxAtOnce, cues.length);
+    for (const c of cues) {
+      const i = Number(c.dataset.index);
+      if (seen.at(-1)?.index !== i) { seen.push({ index: i, symbol: Number(c.dataset.symbol) }); words.push(c.textContent); }
+      anims.add(getComputedStyle(c).animationName);
+    }
+    maxInText = Math.max(maxInText, names(document.body.innerText));
+    for (const el of document.querySelectorAll("[aria-label]")) maxInLabel = Math.max(maxInLabel, names(el.getAttribute("aria-label") ?? ""));
+    setTimeout(tick, 15);
+  };
+  tick();
+}));
 async function tap(p, seq) { for (const s of seq) await p.getByTestId(`mz-pp-key-${s}`).click(); }
 async function playRound(p, entryOf = (seq) => seq) {
   const seq = await openAndRead(p);
@@ -109,22 +141,25 @@ try {
   await keku.screenshot({ path: screenshotPath("docs/stage5/after/pp-ready-390.png") });
   await soon("TV: Pattern Pulse live, counts only", async () => (await tv.getByTestId("tv-live-pattern-pulse").count()) === 1 && /0 of 3/.test(await tv.getByTestId("tv-live-progress").innerText()), 15000);
 
-  // ---- Keku, round 1: the pattern on his phone only, then hidden by the server's clock.
+  // ---- Keku, round 1: the pattern on his phone only, one symbol at a time (H1), then hidden by the server's clock.
   await keku.getByTestId("mz-pp-open").click();
   await keku.getByTestId("mz-pp-memorise").waitFor({ timeout: 10000 });
-  const k1 = await keku.locator('[data-testid="mz-pp-pattern"] li').evaluateAll((els) => els.map((e) => Number(e.dataset.symbol)));
+  const kWatch = watchCue(keku);
   const kekuServer = (await myGame(0)).state;
-  check("memorise: the phone shows exactly the server's pattern for Keku (3 shapes)", k1.length === 3 && JSON.stringify(kekuServer.open?.pattern) === JSON.stringify(k1), `${k1} vs ${JSON.stringify(kekuServer.open)}`);
-  check("memorise: each shape is named (shape + colour, not colour alone)", /circle|square|triangle|diamond|star|hexagon/.test(await keku.getByTestId("mz-pp-pattern").innerText()));
-  check("memorise (full motion): the highlight sweep is on", (await keku.locator(".mz-pp-pattern--sweep").count()) === 1);
   await keku.screenshot({ path: screenshotPath("docs/stage5/after/pp-memorise-390.png") });
   { const f = await contrastFailures(keku); check("contrast (AA): memorise", f.length === 0, f.join("; ")); }
   const tvPub = JSON.stringify(await tvGame());
   check("privacy: the TV projection never has a pattern", !/"pattern"/.test(tvPub) && !/"open"/.test(tvPub));
   check("privacy: another player's projection never has Keku's pattern", !/"pattern"/.test(JSON.stringify(await myGame(1))));
-  check("privacy: the TV screen shows no sequence", (await tv.locator('[data-testid="mz-pp-pattern"]').count()) === 0);
+  check("privacy: the TV screen shows no sequence", (await tv.locator('[data-testid="mz-pp-stage"], [data-testid="mz-pp-cue"]').count()) === 0);
+  const kw = await kWatch;
+  const k1 = kw.seen.map((x) => x.symbol);
+  check("memorise (H1): the phone showed the server's pattern for Keku one symbol at a time, in order (3 shapes)", k1.length === 3 && JSON.stringify(kw.seen.map((x) => x.index)) === "[0,1,2]" && JSON.stringify(kekuServer.open?.pattern) === JSON.stringify(k1), `${JSON.stringify(kw.seen)} vs ${JSON.stringify(kekuServer.open?.pattern)}`);
+  check("memorise (H1): never two symbols at once, and no text or accessible name held more than one symbol's name", kw.maxAtOnce === 1 && kw.maxInText <= 1 && kw.maxInLabel <= 1, JSON.stringify({ maxAtOnce: kw.maxAtOnce, maxInText: kw.maxInText, maxInLabel: kw.maxInLabel, samples: kw.samples }));
+  check("memorise (H1): each symbol is named with its place (\"1 of 3: …\"), in an assertive, atomic live region", kw.words.length === 3 && kw.words.every((w, i) => new RegExp(`^${i + 1} of 3: (Red circle|Yellow square|Green triangle|Blue diamond|Pink star|Purple hexagon)$`).test(w)) && kw.live === "assertive/true", JSON.stringify({ words: kw.words, live: kw.live }));
+  check("memorise (full motion): each symbol pops in", kw.anims.length > 0 && kw.anims.every((a) => a === "mz-pp-pop"), JSON.stringify(kw.anims));
   await keku.getByTestId("mz-pp-input").waitFor({ timeout: 15000 });
-  check("hidden: once the window passes the pattern is gone from the screen", (await keku.getByTestId("mz-pp-pattern").count()) === 0);
+  check("hidden: once the window passes the pattern is gone from the screen", (await keku.locator('[data-testid="mz-pp-stage"], [data-testid="mz-pp-cue"]').count()) === 0);
   check("hidden: …and from Keku's own projection", (await myGame(0)).state.open?.pattern === undefined);
   // Undo and clear.
   const wrong = (k1[0] + 1) % 6;
@@ -142,17 +177,14 @@ try {
   await soon("round 1 (Keku): all three right, +110, from the server", async () => /All 3 right: \+110/.test(await keku.getByTestId("mz-pp-last").innerText()));
   check("server: Keku's round 1 scored 110", (await myGame(0)).state.results[0].points === 110);
 
-  // ---- Amina (reduced motion), round 1: the still row; two right, then a slip.
+  // ---- Amina (reduced motion), round 1: the same one-at-a-time cue with no animation; two right, then a slip.
   await amina.getByTestId("mz-pp-open").click();
   await amina.getByTestId("mz-pp-memorise").waitFor({ timeout: 10000 });
-  const stillOk = await amina.evaluate(() => {
-    const row = document.querySelector('[data-testid="mz-pp-pattern"]');
-    const cells = [...row.querySelectorAll("li")];
-    return row.classList.contains("mz-pp-pattern--still") && cells.every((c) => getComputedStyle(c).animationName === "none") && cells.every((c) => /\d/.test(c.querySelector(".mz-pp-cell__n").textContent));
-  });
-  check("reduced motion: a still, numbered row (no animation), same window", stillOk);
+  const aWatch = watchCue(amina);
   await amina.screenshot({ path: screenshotPath("docs/stage5/after/pp-memorise-reduced-375.png") });
-  const a1 = await amina.locator('[data-testid="mz-pp-pattern"] li').evaluateAll((els) => els.map((e) => Number(e.dataset.symbol)));
+  const aw = await aWatch;
+  const a1 = aw.seen.map((x) => x.symbol);
+  check("reduced motion (H1): the same one-at-a-time cue, in order, with no animation", a1.length === 3 && JSON.stringify(aw.seen.map((x) => x.index)) === "[0,1,2]" && aw.maxAtOnce === 1 && aw.maxInText <= 1 && aw.maxInLabel <= 1 && aw.anims.every((a) => a === "none"), JSON.stringify(aw));
   await amina.getByTestId("mz-pp-input").waitFor({ timeout: 15000 });
   await tap(amina, [a1[0], a1[1], (a1[2] + 1) % 6]);
   await amina.getByTestId("mz-pp-submit").click();

@@ -256,8 +256,8 @@ describe("Word Connections in a solo room", () => {
 describe("rules versions are tied to the rules", () => {
   // If one of these fails, a rule changed: bump that game's *_RULES_VERSION
   // (so old personal bests stop comparing with new rounds) and update here.
-  it("Pattern Pulse v1", () => {
-    expect(PULSE_RULES_VERSION).toBe(1);
+  it("Pattern Pulse v2 (v2: one symbol at a time, H1)", () => {
+    expect(PULSE_RULES_VERSION).toBe(2);
     expect({ lengths: [...PULSE_LENGTHS], symbols: PULSE_SYMBOLS, points: PULSE_POINTS, grace: PULSE_GRACE_MS, show: PULSE_LENGTHS.map(pulseShowMs), input: PULSE_LENGTHS.map(pulseInputMs) })
       .toEqual({ lengths: [3, 4, 5, 6, 7, 8], symbols: 6, points: { perSymbol: 20, perfect: 50 }, grace: 1500, show: [3300, 4000, 4700, 5400, 6100, 6800], input: [16500, 18000, 19500, 21000, 22500, 24000] });
   });

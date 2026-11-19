@@ -4,6 +4,8 @@
 // drivers (check-majority-rules, check-pattern-pulse, ...) test each game in
 // depth; this only lets the full-day drivers include every registered game.
 
+import { readPulsePattern } from "./pulse-pattern.mjs";
+
 /** New games that can only start as Practice (src/server/lifecycle.ts). */
 export const STAGE5_PRACTICE_ONLY = ["majority-rules", "pattern-pulse", "draw-guess"];
 
@@ -76,7 +78,9 @@ async function actOnce(page, gameId) {
       // Read the pattern while it's on screen (it hides on the server's clock).
       try {
         await page.getByTestId("mz-pp-memorise").waitFor({ timeout: 5000 });
-        pulseSeen.set(page, await page.locator('[data-testid="mz-pp-pattern"] li').evaluateAll((els) => els.map((e) => Number(e.dataset.symbol))));
+        // H1: the screen shows one symbol at a time, so the driver reads its own seat's projection (a test oracle).
+        const seen = await readPulsePattern(page);
+        if (seen) pulseSeen.set(page, seen); else pulseSeen.delete(page);
       } catch { pulseSeen.delete(page); }
       return true;
     }

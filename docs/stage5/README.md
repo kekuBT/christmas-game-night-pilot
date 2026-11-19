@@ -95,7 +95,7 @@ All three are Practice-only (§6), run on the common module contract (D-S5-05), 
 - Six self-paced rounds of 3 to 8 shapes.
 - Tap "Show me the pattern" when ready. It shows for a few seconds, then you tap it back. Undo and clear are available.
 - Everyone gets the same lengths and windows but their own server-made sequence. A pattern is in your own projection only while you memorise it; future rounds are never sent.
-- Accessible: every symbol is a shape, a colour and a name, with no audio. Reduced motion and Off show a still, numbered row for the same time.
+- Accessible: every symbol is a shape, a colour and a name, with no audio. Since H1 (D-AV-01) the pattern is shown one symbol at a time, each with its place and name in an assertive live region; Reduced motion and Off keep the same timing without the pop-in.
 - A window nobody answers is closed by the **server clock** (0 points) with nobody acting.
 - Driver: `check-pattern-pulse` (3 phones, one with reduced motion, and a TV). It covers:
   - privacy;
@@ -260,7 +260,7 @@ Use the LAN setup in `REAL_DEVICE_TESTING.md` (and its failure log) with 3–4 p
    - Put one phone in Airplane mode and tap: "We couldn’t confirm that…". Turn it off and tap again.
    - At the reveal the TV shows totals only. A 2–2 split gives +50 on each phone.
 3. **Pattern Pulse:**
-   - On one phone turn on Reduce Motion (iOS Settings → Accessibility → Motion). The pattern is a still numbered row; on another phone the highlight sweeps.
+   - On one phone turn on Reduce Motion (iOS Settings → Accessibility → Motion). Both phones show the pattern one symbol at a time ("1 of 3: Red circle"); only the phone without Reduce Motion pops each one in. With VoiceOver on, each symbol is read as it appears.
    - Tap the shapes back; try Undo and Clear.
    - Lock the screen during a round and unlock after its time: the round shows "Time ran out" without you acting.
    - Pull to refresh mid-answer: the pattern does not come back.
