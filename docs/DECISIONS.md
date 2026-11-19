@@ -2429,3 +2429,19 @@ Handoff 6813167965 (with the Stage 9.2 clearance). Spec: `docs/stage9/stage93.md
   - **Paths:** relative to the context's root, as in the deploy repository. In this repository, use `git apply --directory=deploy/render`.
   - **The archive bytes are not in the patches.** Swapping `artifact/` is a companion step for ChatGPT, where the bytes are kept. The gate refuses any other archive.
   - **The gate checks run without docker:** each context's own `cgn-artifact-gate.sh`, run as the Dockerfile's gate stage runs it (`sh` is dash, Node v22.16.0, the inputs filtered by `.dockerignore`). The script is the same; docker would only add the image layers already reviewed in the render-package evidence.
+
+## Post-beta: fair game starts and clocks (handoff 7004097156; H6/H7/M9; docs/evidence/fair-starts/)
+- **D-FS-01 The server's start and timing contract is unchanged; no shared pre-start stage.**
+  - **The evidence:** `scripts/check-fair-starts.mjs` (six contexts, a server clock the driver owns) measured every phone actionable within 154 ms of the start broadcast, the 6× CPU-throttled one included. All got one `playStartedAt` and one set of deadlines, on the baseline `da5ac0f` and on live `7097ac2` alike. The all-ready start, the tick start, the late confirm ("already started") and the expiry all behaved as D3 documents, with one transition and one `game-started` each.
+  - **Alternative not taken:** a shared "Get ready" lead (every clock starting a few seconds after play begins), to absorb network latency. Nothing measured calls for it, and it would change the timing contract owners approved. Real phones on cellular networks are the open limit; the queued iPhone retest can measure them.
+- **D-FS-02 Closest Wins: the new question comes first, the last answer after it** (M9).
+  - **Why:** a question's 40 s clock starts the moment the last one closes. Drawing the "Last question" card above the new question pushed Submit below the fold of a 320×568 phone (616–672 px of 568), and of a 375×667 one for a longer question, while the clock ran.
+  - **What:** on the guessing screen only, the card moves below the controls. The waiting screen (guess in) keeps it on top: there is nothing to do there. No server or timing change.
+  - **Alternative:** a reveal phase between questions, as Team Huddle has. It would change the game's timing and backstop, and is a larger product change than this slice.
+- **D-FS-03 A briefing Ready refused because play began is not a failure on the game screen** (H7).
+  - **Why:** a Ready (or "not ready") that reaches the server just after the host's confirmed Start now (or the last Ready) is refused with `READY_LOCKED` and changes nothing. The phone used to put "The game has already started." as an alert on the player's first question, in every game that shows the shared send-failure line.
+  - **What:** `refusalText` (apps/web/src/components/intentRefusal.ts) returns null for that one case; every other refusal keeps its words. The server is unchanged.
+  - **Alternative:** have the server accept a late Ready as a no-op. That changes the D3 intent contract for a display problem.
+- **D-FS-04 "Game cancelled" shows on the results screen too** (H6/H7).
+  - **Why:** a cancelled or expired briefing returns people to the last results they hadn't closed (Stage 7.4, C1). The note only rendered in the lobby, so an expiry was silent there, including for a host whose Start now confirmation was open.
+  - **What:** one note element, shown in the lobby notice and above the results hero (every results screen goes through `resultsHero`).

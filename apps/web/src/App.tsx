@@ -68,6 +68,7 @@ import { previousGameScores } from "./ui/mchezo/lib/standings.js";
 import { humanError, NOT_DELIVERED } from "./ui/mchezo/lib/errors.js";
 import { midrank } from "./components/midrank.js";
 import { describeIntentFailure, sendIntent } from "./components/intentRetry.js";
+import { refusalText } from "./components/intentRefusal.js";
 import { connection, roomNotices, useConnection } from "./connectionStore.js";
 import { seats } from "./session.js";
 import { setRefreshNeeded } from "./components/RefreshBanner.js";
@@ -1038,7 +1039,8 @@ export function App() {
       // JSON) becomes "couldn't confirm": the action may already be recorded.
       // A known app error stays itself (describeIntentFailure).
       if (res.status >= 400) throw new Error(describeIntentFailure(res));
-      if (!r.accepted) failed(r.reason === "PHASE_CLOSED" ? "Time was up for that one — it wasn’t counted." : r.reason === "READY_LOCKED" ? "The game has already started." : `Not accepted: ${r.reason || "unknown"}`); else setMsg("Saved.");
+      // Fair starts (H7): a briefing Ready refused because play already began is no failure (refusalText says null).
+      if (!r.accepted) { const text = refusalText(action, r.reason); if (text !== null) failed(text); } else setMsg("Saved.");
       await refresh();
       return r.accepted === true;
     } catch (e) {
@@ -1579,7 +1581,17 @@ export function App() {
         newKey={() => uuid()} canApprove={!!(me?.isHost || me?.isCohost)} onOpenBook={() => setView("memory")} />
     );
   };
-  const resultsHero = (g: PlayerGame, pub?: PublicGame) => {
+  // D3: tell everyone when a briefing ended without play (host cancel, the stall guard, or content that changed).
+  // Fair starts (handoff 7004097156, H6/H7): one note, in the lobby and on top of whatever results someone is back on
+  // (a cancel returns people to the last results they haven't closed), so an expired briefing is never silent there.
+  const cancelledNote = briefingNote
+    ? <NoticeCard tone="info" title="Game cancelled" testId="briefing-cancelled-note" action={<button type="button" className="mz-chip-btn" onClick={() => setBriefingNote("")}>OK</button>}>{briefingNote}</NoticeCard>
+    : null;
+  const resultsHero = (g: PlayerGame, pub?: PublicGame): ReactNode => {
+    const body = resultsHeroBody(g, pub);
+    return cancelledNote ? <>{cancelledNote}{body}</> : body;
+  };
+  const resultsHeroBody = (g: PlayerGame, pub?: PublicGame) => {
     const title = titleFor(g.gameId, games);
     const official = pub?.official ?? g.official ?? false;
     // Stage 9.3: a cooperative game's hero is its one team result: no winner, place, "you won/missed" or confetti.
@@ -2109,7 +2121,7 @@ export function App() {
               }}
             />
           ) : undefined}
-          notice={breakNotice ? breakNotice : briefingNote ? <NoticeCard tone="info" title="Game cancelled" testId="briefing-cancelled-note" action={<button type="button" className="mz-chip-btn" onClick={() => setBriefingNote("")}>OK</button>}>{briefingNote}</NoticeCard>
+          notice={breakNotice ? breakNotice : cancelledNote ? cancelledNote
             : watchingGame ? <NoticeCard tone="info" title={`${games.find((x) => x.id === watchingGame.gameId)?.title ?? "A game"} is being played`} testId="not-in-game-note">It started before you joined, so you’ll play the next one.</NoticeCard>
             // Stage 12.1 (D-S121-02): everyone hears the room became a Family Cup, until its first official game finishes.
             : proj?.cupSince && !(proj.games ?? []).some((g) => g.official && g.status === "finished") ? <NoticeCard tone="info" title="This room is now a Family Cup" testId="cup-started-notice">Day {proj.championshipDay ?? 1} of 7. Official games count toward the standings; the games played before stay casual.</NoticeCard>
