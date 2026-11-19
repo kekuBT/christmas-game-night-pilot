@@ -1,5 +1,5 @@
 # Muse local progress and resume checkpoint
-Updated: 2026-11-19 ~7:20 a.m. EST (fair starts: review 7007413347, the refreshed M9 confirmation, fixed on 84955a5; full gate PASSED (exit 0) on 84955a5, 113/113 — see the last section; not merged, not deployed)
+Updated: 2026-11-19 ~8:45 a.m. EST (answer visibility H1/H2, handoff 7008903623: draft #53; full gate PASSED (exit 0) on b936586, 113/113 — see the last section; #52's live audit 7010116227 found no blocking findings; not merged, not deployed)
 
 ## Current milestone
 M0–M5: COMPLETED as backend/engine checkpoints ONLY — see docs/FRONTEND_MILESTONES.md. They are NOT evidence the full product is finished.
@@ -4141,5 +4141,42 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
   - **Files:** `src/server/room.ts`, `src/server/http.ts`, `apps/web/src/ui/mchezo/lib/briefing.ts`, `apps/web/src/components/mchezo/Briefing.tsx`, `apps/web/src/App.tsx`, `scripts/check-fair-starts.mjs` (case M2), `docs/ux-redesign/D3_TIMING_CONTRACT.md`.
   - **Tests:** `tests/d3-briefing.test.ts`, `tests/d3-briefing-http.test.ts`, `tests/fair-starts-ui.test.ts`. Driver M2: `8f2ead3` 2 FAILED (both M2), 48 passed; `84955a5` 50/50.
   - **Gates on `84955a5`:** targeted `PASSED (exit 0)`, run `20261119-112958-84955a52-29908`; full `PASSED (exit 0)`, run `20261119-113202-84955a52-30803`, 113/113.
-- **Open:** native devices; ChatGPT's review of `84955a5`.
+- **ChatGPT's live audit of `84955a5`** ([7010116227](https://github.com/kekuBT/christmas-game-night-pilot/pull/51#issuecomment-7010116227)): **no blocking findings**, in Chromium and Firefox at 375×667 and 320×568. Native devices and screen-reader speech are still untested.
 - **Next, per the handoff:** H1/H2 answer visibility and accessibility, then the Draw & Guess iPhone retest.
+
+## Post-beta: answer visibility and accessibility, H1/H2 (handoff 7008903623)
+- **The handoff:** ChatGPT cleared M9 on `84955a5`, then asked for a separate draft from the reviewed #52 stack. Its acceptance criteria are the November 19 audit's page 4 findings. It was acknowledged in 7008956723 at 7:22 a.m. ET, with an estimate of 12:30 p.m. ET. ChatGPT's note 7008990991 asked for:
+  - a rules-version decision before any personal-best comparison;
+  - screen-reader timing to stay explicitly unverified.
+- **Branch:** `claude/h1-h2-answer-visibility`, draft PR #53, stacked on #52.
+- **The base:** `235cab949bfda138fda40e78f7d17374bcf7ae56`.
+- **The tested commit:** `b936586e4989ce6f56dd6b1124bab3ebb25521c2`. Its first commit `db1d427` failed the targeted gate on `check-solo-shelf`: the driver still expected a `pattern-pulse@1` best. `b936586` fixed the driver only.
+- **Not for merge or deploy.**
+- **H1, Pattern Pulse (D-AV-01, D-AV-02):**
+  - **The cue:** the memorise screen shows one symbol at a time, each in an equal slot of the unchanged server window. Each symbol is visible for 80% of its slot, then there is a gap.
+  - **The live region:** the stage is an assertive, atomic live region naming "N of L: Symbol name".
+  - **What it removed:** no text, live region or accessible name holds the sequence. The countdown is no longer live.
+  - **Server:** an additive `open.showFrom`, and `PULSE_RULES_VERSION` 2, so earlier personal bests are not compared.
+  - **Browser drivers:** they read the pattern from the page's own seat projection, through `scripts/lib/pulse-pattern.mjs`.
+  - **`check-pattern-pulse`:** samples the page every 15 ms. On the base, its H1 checks FAIL as expected (the negative control); on `b936586` they PASS (55/55).
+- **H2, Spectrum (D-AV-03):**
+  - **No leak found.** The contracts are pinned:
+    - `tests/h2-spectrum-target.test.ts`: the engine, every audience, all four rounds, with canaries, rotation, sit-out, reveal, plus HTTP;
+    - `MchezoSpectrum.test.tsx`: rendering for each role, including a stale or forged projection;
+    - `check-spectrum`: round 2, for non-givers and the TV.
+  - **The negative control:** a module change leaking the target to guessers makes both tests fail. It was reverted.
+- **Files:**
+  - **H1:** `src/games/modules/pulse.ts`, `apps/web/src/components/mchezo/pulseCue.ts` (new), `MchezoPulse.tsx`, `apps/web/src/ui/mchezo/styles/stage5.css`;
+  - **the tests:** `MchezoPulse.test.tsx` (new), `MchezoSpectrum.test.tsx` (new), `tests/h2-spectrum-target.test.ts` (new), `tests/stage5-pulse.test.ts`, `tests/stage62-solo-shelf.test.ts`;
+  - **the drivers:** `scripts/lib/pulse-pattern.mjs` (new), `check-pattern-pulse`, `check-spectrum`, `check-solo-shelf`, and the drivers that tap a pattern back;
+  - **the docs:** `docs/DECISIONS.md` (D-AV-01..04), `docs/stage5/README.md`.
+- **Gates:**
+  - targeted gate on `db1d427`: **FAILED (exit 1)**, run `20261119-123945-db1d427f-27227`, 7/8. Only `check-solo-shelf` failed, on its stale key;
+  - full gate on `b936586`: **`PASSED (exit 0)`**, run `20261119-124950-b936586e-29240`, 113/113, on a clean tree. Its unit step passed 2123 tests; `check-spectrum` passed 203/203.
+- **Evidence:** `docs/evidence/answer-visibility/`.
+- **Limits:**
+  - **Screen readers:** VoiceOver and TalkBack announcement timing is unverified. The slots are 0.68–0.88 s.
+  - **Browser:** headless Chromium only.
+  - **The projection:** the player's own projection still carries the pattern during memorise.
+  - **H2:** the audit observation was not reproduced.
+- **Next:** ChatGPT's review and live audit of `b936586`. The queue holds the Draw & Guess native iPhone confirmation.
