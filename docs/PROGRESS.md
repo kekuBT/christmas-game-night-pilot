@@ -1,5 +1,5 @@
 # Muse local progress and resume checkpoint
-Updated: 2026-11-19 ~9:45 a.m. EST (answer visibility, review 7010784066: H1 cue announcer fixed on 6750b99; full gate PASSED (exit 0) on 6750b99, 113/113 — see the last section; H2 had no blocking finding; not merged, not deployed)
+Updated: 2026-11-19 ~4:20 p.m. EST (Draw & Guess H3, handoff 7020760499: draft #54; full gate PASSED (exit 0) on 9d2eda5, 114/114 — see the last section; #53's H1/H2 cleared by ChatGPT; native iPhone check still needed; not merged, not deployed)
 
 ## Current milestone
 M0–M5: COMPLETED as backend/engine checkpoints ONLY — see docs/FRONTEND_MILESTONES.md. They are NOT evidence the full product is finished.
@@ -4193,3 +4193,28 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
     - speech timing with VoiceOver/TalkBack is unverified; each cue is up 0.68–0.88 s, likely shorter than speaking it;
     - the options are recorded in D-AV-05 for after the native retest, and the window is not changed.
 - **Next:** ChatGPT's review and live audit of `6750b99`. The queue holds the Draw & Guess native iPhone confirmation.
+
+## Post-beta: Draw & Guess drawing board on phones, H3 (handoff 7020760499)
+- **H1/H2 cleared:** ChatGPT's review [7020760499](https://github.com/kekuBT/christmas-game-night-pilot/pull/51#issuecomment-7020760499) cleared #53's H1/H2, engineering and independent private-browser review, on tested `6750b99` with evidence head `6897765`. Speech timing and native phones remain unverified. No timing or scoring change was requested.
+- **The handoff:** the same comment handed off H3, acknowledged in 7020806630 at 3:07 p.m. ET with an estimate of about 7:00 p.m. ET.
+- **Branch:** `claude/h3-draw-guess-canvas`, draft PR #54, stacked on #53 (`6897765`).
+- **The tested commit:** `9d2eda5a9cf7ef817a2bee854829573394de72db`. Its first commit, `4a25bbc`, had the same app code; the targeted gate failed only on the new driver's own stroke-sync check, fixed driver-only in `9d2eda5`.
+- **Not for merge or deploy.**
+- **The report:** a nearly black drawer screen in an iPhone in-app browser, with the timer visible. Its cause on that device is not established; there was no native iPhone here.
+- **The trace (`scripts/check-draw-board.mjs`, new):**
+  - **The setup:** Chromium phone emulation, 320×568, 375×667 and 390×844, each phone the drawer once.
+  - **It checks:** the board's box, the paint at its centre, ancestor styles, screenshot brightness, touch strokes to the server and every guesser, a reload, the next drawer, with and without a WebSocket.
+  - **The result:** all of it renders and works.
+- **The reproduction:** the clock sits above the screen, and every screen fades in from opacity 0. With the entry held at its first frame, the drawer's screen is at opacity 0 (brightness 19 of 255) under the visible clock: the reported picture.
+- **The fix (D-H3-01):** the drawing, guessing and reveal screens carry `mz-dg-screen`, with no entry animation in any motion setting.
+  - **Files:** `apps/web/src/components/mchezo/MchezoDraw.tsx`, `apps/web/src/ui/mchezo/styles/stage5.css`, `apps/web/src/components/mchezo/MchezoDraw.test.tsx` (new), `scripts/check-draw-board.mjs` (new), `docs/DECISIONS.md`.
+- **Tests:**
+  - **The driver:** `6897765` FAILS only the two stalled-entry checks; the fix passes, three times in a row and without a WebSocket.
+  - **The unit suite:** 2132 tests.
+  - **Gates:**
+    - targeted on `4a25bbc`: **FAILED (exit 1)**, 5/6, the driver's own check;
+    - targeted on `9d2eda5`: `PASSED (exit 0)`, 6/6, run `20261119-202708-9d2eda5a-7629`;
+    - **full on `9d2eda5`: `PASSED (exit 0)`, 114/114**, run `20261119-202837-9d2eda5a-8435`.
+- **Evidence:** `docs/evidence/draw-board/`, with the native checklist still needed.
+- **Open:** the native Safari and in-app browser checks (the listed steps); every other screen still fades in from opacity 0 (out of scope).
+- **Next:** ChatGPT's review of `9d2eda5`, and the owner's native iPhone check.
