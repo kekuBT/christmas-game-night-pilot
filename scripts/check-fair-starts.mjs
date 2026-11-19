@@ -11,22 +11,37 @@
 // The six contexts: Keku (host, 390x844), Amina (390x844), Baraka (375x667), Wanjiru (320x568), Zawadi (390x844, the
 // one who drops and reconnects) and Juma (390x844, a slow phone: CPU throttled 6x).
 //
-// Cases, for Closest Wins, Team Huddle and Relay:
-//   A  all-ready through the real Ready buttons (one transition, one game-started, one shared deadline)
-//   N  the next actionable phase (Closest Wins question 2 after question 1 closed; Team Huddle question 2 after
-//      the reveal; Relay's next runner after a right answer): is it on screen when its clock starts, or pushed off
-//      screen by the previous feedback? (Fixed: Closest Wins drew the last answer above question 2's controls.)
+// "Actionable" means: the control is present, enabled (no disabled attribute, no aria-disabled), and its whole box
+// is inside the viewport, measured in the page's own time (Date.now) by a MutationObserver plus a 20 ms scan, and only
+// once the page has received the frame for that phase. The server's clock is the driver's: it starts at
+// 2026-12-24T17:00:00Z and moves only on "advance"; every broadcast line carries both that clock (t) and the wall
+// time it went out (wall), which is the zero of every lag reported here.
+//
+// Cases, for Closest Wins, Team Huddle and Relay (QA IDs per 7004164219: H6 readiness rows and starts, H7 actionable
+// time, M9 heading/dialog/row counts):
+//   A  all-ready through the real Ready buttons (one transition, one game-started, one shared deadline); the final
+//      tapper's busy button against the start frame (H6)
+//   N  the next actionable phase (Closest Wins question 2, with a long prompt, after question 1 closed; Team Huddle
+//      question 2 after the reveal; Relay's next runner): on screen when its clock starts? (H7, fixed: Closest Wins
+//      drew the last answer above question 2's controls.) Also the real input path at 320x568 and 375x667 (hit
+//      test, tap, typing, Tab and Enter, no scroll) and a NEGATIVE CONTROL: a Submit pushed below the fold must
+//      measure as not actionable.
 //   R  a reconnecting player: the host confirms Start now naming them; then they come back
 //   T  a Ready player who drops blocks all-ready; when they're back, the room's tick starts play
 //   C  a stale host confirm after all-ready (already started), with exactly one transition
+//   M  M9: the host's dialog is open while two players get ready and one withdraws; heading, dialog title, dialog
+//      rows and person rows compared on the same frame (fixed: the dialog is a labelled snapshot, its title counts
+//      its own rows, and live changes are listed separately); the stale confirm is asked again; one start
+//   X  the final Ready and the host's confirmed Start now in flight together, both orders: one transition, and both
+//      answers agree with it
 //   L  a late Ready: the host's confirm lands first, the player's Ready after it (fixed: it no longer puts "The
 //      game has already started." on that player's first question)
-//   E  the host's confirm is open when the briefing expires (fixed: "Game cancelled" shows on the results the
-//      players are back on, not only in the lobby)
+//   E  the host's confirm is open when the briefing expires (fixed: "Game cancelled", a status, shows on the results
+//      the players are back on and stays through later broadcasts)
 //   S  informational: Chromium's emulated 400 ms latency on one phone (it is late by about its latency; the start
-//      and deadlines stay shared)
+//      and deadlines stay shared); then the earlier cancellation note must not leak into this round's results
 //   Z  over the whole run: every briefing started exactly once or was cancelled; every start finished once
-// Handoff 7004097156; the baseline and live runs are in docs/evidence/fair-starts/.
+// Handoff 7004097156; the baseline, live and fixed runs are in docs/evidence/fair-starts/.
 //
 // Usage: node scripts/check-fair-starts.mjs [--report <file.json>]   (FS_KEEP_DATA=1 keeps the data and screenshots)
 import { spawn } from "node:child_process";
@@ -283,8 +298,12 @@ try {
     // The players read at different speeds: one Ready per server second; Juma (the slow phone) is last.
     const order = [1, 2, 3, 4, 0, 5].map((i) => PLAYERS[i]);
     for (const p of order.slice(0, -1)) { await clickReady(p); await until(async () => (await serverState(roomId)).games.find((x) => x.id === gid)?.briefing?.ready[p.seat.playerId] !== undefined); await advance(1000); }
+    // H6 ("Ready pressed and disabled, the row still not ready, then play at 5/6"): the final tapper's button is busy
+    // from the tap until the answer; the server starts play in the same step as that Ready, so no frame ever shows 6/6.
+    const last = order.at(-1);
+    await last.page.evaluate((n) => window.__fs.watch(n, '[data-testid="briefing-ready"]:disabled'), `H6-busy:${label}`);
     const since = Date.now();
-    await clickReady(order.at(-1));
+    await clickReady(last);
     const b = await until(async () => firstBcast(gid, (x) => x.status === "playing", since), 15000);
     await sleep(2500);
     const autos = await automationWaits(gameId, label);
@@ -297,6 +316,15 @@ try {
     const shared = c.rows.every((r) => r.frameDeadlines && r.frameDeadlines.playStartedAt === g.playStartedAt && r.frameDeadlines.phaseDeadlineAt === g.phaseDeadlineAt && r.frameDeadlines.deadlineAt === g.deadlineAt);
     check(`${label} every phone got the same start and deadlines`, shared, JSON.stringify(c.rows.map((r) => r.frameDeadlines)));
     const lagMax = Math.max(...c.rows.map((r) => r.actionableLagMs ?? Infinity));
+    const h6 = await last.page.evaluate(([gid2, n]) => {
+      const w = window.__fs.watches.find((x) => x.name === n);
+      const briefingFrames = window.__fs.frames.filter((f) => f.gs.some((g) => g.id === gid2 && g.status === "briefing")).length;
+      const firstPlaying = window.__fs.frames.find((f) => f.gs.some((g) => g.id === gid2 && g.status === "playing"));
+      return { busyAt: w?.present ?? null, playingFrameAt: firstPlaying?.wall ?? null, briefingFrames };
+    }, [gid, `H6-busy:${label}`]);
+    const sixOfSix = c.ledger.filter((e) => e.type === "ready-changed").length === 6 && started[0]?.at === lastReady?.at;
+    report.h6 ??= {};
+    report.h6[label] = { tapper: last.key, clickWall: since, busyAfterClickMs: h6.busyAt ? h6.busyAt - since : null, playingFrameAfterClickMs: h6.playingFrameAt ? h6.playingFrameAt - since : null, startBroadcastAfterClickMs: b ? b.wall - since : null, sixthReadyAndStartSameInstant: sixOfSix };
     report.cases.push({ case: label, gameId, trigger: started[0]?.detail?.trigger, playStartedAt: g?.playStartedAt, firstPhaseDeadlineAt: g?.phaseDeadlineAt, firstPhaseWindowMs: g?.phaseDeadlineAt ? g.phaseDeadlineAt - g.playStartedAt : null, relay: g?.relay, gameDeadlineAt: g?.deadlineAt, startBroadcastWall: b?.wall, rows: c.rows, automation: autos, ledger: c.ledger.map((e) => ({ type: e.type, at: e.at, trigger: e.detail?.trigger })) });
     check(`${label} every phone showed an actionable screen (in the page's own time)`, Number.isFinite(lagMax), `max ${lagMax} ms`);
 
@@ -304,6 +332,8 @@ try {
     if (gameId === "closest-wins" || gameId === "team-huddle") {
       const labelN = `N-${gameId}`;
       const nextKey = gameId === "closest-wins" ? "q:1" : "1:pick";
+      // Long content: question 2 gets a long prompt before it opens (Closest Wins), so the layout is tested at its worst.
+      if (gameId === "closest-wins") await command({ cmd: "long-prompt", roomId, gameInstanceId: gid, index: 1 });
       await armPre(gameId, labelN, gid, nextKey);
       // Everyone answers question 1 (on the server, the same intents the buttons send).
       const g1 = (await serverState(roomId)).games.find((x) => x.id === gid);
@@ -326,6 +356,46 @@ try {
       for (const p of PLAYERS) await p.page.screenshot({ path: join(DATA_DIR, `${labelN}-${p.key}.png`) }).catch(() => {});
       report.cases.push({ case: labelN, gameId, phaseKey: cN.game.phaseKey, phaseStartedAtServer: bN?.t, phaseDeadlineAt: cN.game.phaseDeadlineAt, phaseWindowMs: cN.game.phaseDeadlineAt - (bN?.t ?? 0), phaseBroadcastWall: bN?.wall, rows: cN.rows });
       check(`${labelN} the next question's control is on screen, unscrolled, on every phone`, cN.rows.every((r) => r.actionableLagMs !== null), JSON.stringify(cN.rows.map((r) => [r.player, r.actionableLagMs, r.controlTop, r.controlBottom, r.viewportH])));
+      if (gameId === "closest-wins") {
+        // Negative control: the same measurement must call a control pushed below the fold NOT actionable. A spacer
+        // above the page pushes Keku's live Submit down; then it goes and the same control counts.
+        const keku = PLAYERS[0];
+        const neg = await keku.page.evaluate(async ([s, g]) => {
+          const st = document.createElement("style"); st.id = "fs-neg"; st.textContent = "body{padding-top:2400px !important}"; document.head.appendChild(st);
+          window.__fs.watch("NEG", s, g);
+          await new Promise((r) => setTimeout(r, 300));
+          const pushed = { ...window.__fs.watches.find((w) => w.name === "NEG") };
+          st.remove();
+          await new Promise((r) => setTimeout(r, 300));
+          const back = { ...window.__fs.watches.find((w) => w.name === "NEG") };
+          return { pushed, back };
+        }, ['[data-testid="mz-num-submit"]', { gid, phaseKey: nextKey }]);
+        report.negativeControl = neg;
+        check(`${labelN} negative control: a Submit pushed below the fold is present and enabled but NOT actionable; back in view it is`, !!neg.pushed.present && !!neg.pushed.enabled && !neg.pushed.actionable && neg.pushed.top > neg.pushed.vh && !!neg.back.actionable, JSON.stringify(neg));
+        // The real input path, with question 2's long prompt, no scrolling: the control's on-screen point hits the
+        // control itself (nothing covers it); a tap focuses the field; typed digits go in; then Submit by a tap at its
+        // point (Wanjiru, 320x568) or by keyboard, Tab then Enter (Baraka, 375x667). The server must hold each guess.
+        const prompt = await PLAYERS[3].page.locator(".mz-card b").first().innerText();
+        check(`${labelN} question 2 carries the long prompt`, prompt.length > 150, `${prompt.length} chars`);
+        for (const [p, value, how] of [[PLAYERS[3], 123, "tap"], [PLAYERS[2], 456, "keyboard"]]) {
+          const pt = async (sel) => p.page.evaluate((s) => { const r = document.querySelector(s).getBoundingClientRect(); const x = r.left + r.width / 2, y = r.top + r.height / 2; const hit = document.elementFromPoint(x, y); return { x, y, top: r.top, bottom: r.bottom, vh: innerHeight, hits: !!hit && !!hit.closest(s), scrollY: window.scrollY }; }, sel);
+          const input = await pt('[data-testid="mz-num-input"]');
+          const submit = await pt('[data-testid="mz-num-submit"]');
+          await p.page.mouse.click(input.x, input.y);
+          const focused = await p.page.evaluate(() => document.activeElement?.getAttribute("data-testid"));
+          await p.page.keyboard.press("Control+A");
+          await p.page.keyboard.type(String(value));
+          if (how === "tap") await p.page.mouse.click(submit.x, submit.y);
+          else { await p.page.keyboard.press("Tab"); const onSubmit = await p.page.evaluate(() => document.activeElement?.getAttribute("data-testid")); report[`kbd-${p.key}`] = onSubmit; await p.page.keyboard.press("Enter"); }
+          const got = await until(async () => { const s = (await apiOk(`/rooms/${roomId}/projection?audience=player`, { token: p.seat.token })).myGames.find((x) => x.id === gid)?.state; return s?.myGuess !== undefined ? s.myGuess : null; }, 8000);
+          const scrolled = await p.page.evaluate(() => window.scrollY);
+          report[`input-${p.key}`] = { input, submit, focused, value, got, scrolled, how };
+          check(`${labelN} ${p.key} (${p.vw}x${p.vh}, long prompt): input and Submit unobscured and on screen, ${how} submits ${value} with no scroll`,
+            input.hits && submit.hits && submit.bottom <= submit.vh && focused === "mz-num-input" && Number(got) === value && scrolled === input.scrollY,
+            JSON.stringify(report[`input-${p.key}`]));
+          await p.page.screenshot({ path: join(DATA_DIR, `${labelN}-long-${p.key}.png`) }).catch(() => {});
+        }
+      }
     }
     if (gameId === "relay") {
       // The baton: a right answer passes it, and the next runner's 20 s turn starts at that instant.
@@ -452,6 +522,86 @@ try {
     await finishGame(gid);
   }
 
+  // ======== Case M (M9): the host's dialog is open while readiness changes; heading, dialog and rows compared ========
+  {
+    const label = "M-closest-wins";
+    const gid = await startGame("closest-wins");
+    const [keku, amina, baraka, wanjiru, zawadi, juma] = PLAYERS;
+    for (const p of [keku, amina, zawadi]) await clickReady(p);
+    const g0 = (await serverState(roomId)).games.find((x) => x.id === gid);
+    await advance(g0.briefing.startNowAt - (await serverState(roomId)).t);
+    await keku.page.getByTestId("briefing-start-now").click({ timeout: 10000 });
+    await keku.page.getByTestId("briefing-confirm").waitFor({ timeout: 10000 });
+    // One read of the host's screen, all from the same rendered frame.
+    const frame = () => keku.page.evaluate(() => {
+      const q = (s) => document.querySelector(`[data-testid="${s}"]`);
+      const dialog = q("briefing-confirm");
+      return {
+        heading: q("briefing-ready-count")?.textContent ?? "",
+        title: dialog?.querySelector(".mz-confirm__title")?.textContent ?? "",
+        dialogRows: [...(dialog?.querySelectorAll(".mz-brief__confirm-row") ?? [])].map((e) => e.textContent),
+        since: q("briefing-confirm-since")?.textContent ?? "",
+        when: q("briefing-confirm-when")?.textContent ?? "",
+        notReadyRows: [...document.querySelectorAll('[data-testid^="briefing-person-"][data-ready="false"]')].length,
+      };
+    });
+    const before = await frame();
+    // While the dialog is open: Baraka and Wanjiru get ready (the reported "dialog 3 unready, list 1" case).
+    await clickReady(baraka); await clickReady(wanjiru);
+    await until(async () => (await frame()).notReadyRows === 1, 10000);
+    const after = await frame();
+    const countOf = (title) => { const m = /^(\d+) people/.exec(title); return m ? Number(m[1]) : /isn’t/.test(title) ? 1 : -1; };
+    const rowsSay = (rows, word) => rows.filter((r) => new RegExp(word, "i").test(r)).length;
+    report.cases.push({ case: label, before, after });
+    check(`${label} when the dialog opens, its title, its rows and the person rows agree (3 not ready)`, countOf(before.title) === 3 && before.dialogRows.length === 3 && before.notReadyRows === 3 && /3 of 6/i.test(before.heading), JSON.stringify(before));
+    check(`${label} after two get ready with the dialog open, the dialog's title still counts its own rows, which say what they said, and it says what changed`,
+      countOf(after.title) === after.dialogRows.length && rowsSay(after.dialogRows, "not ready yet") === after.dialogRows.length && /Baraka is ready now/.test(after.since) && /Wanjiru is ready now/.test(after.since) && /5 of 6/i.test(after.heading) && after.notReadyRows === 1,
+      JSON.stringify(after));
+    // A withdrawal while open: the dialog says so; confirming asks again (the server refuses a stale list), naming
+    // exactly who now needs it; the second confirm starts play once.
+    await amina.page.getByTestId("briefing-ready").click();
+    await until(async () => /Amina isn’t ready any more/.test((await frame()).since), 10000);
+    const withdrawn = await frame();
+    await keku.page.getByTestId("briefing-confirm-confirm").click();
+    await until(async () => (await keku.page.getByTestId("briefing-confirm-changed").count()) === 1, 10000);
+    const asked = await frame();
+    check(`${label} a withdrawal while open is named, and confirming asks again with exactly Amina and Juma`,
+      /Amina isn’t ready any more/.test(withdrawn.since) && countOf(asked.title) === 2 && asked.dialogRows.length === 2 && asked.dialogRows.some((r) => /Amina/.test(r)) && asked.dialogRows.some((r) => /Juma/.test(r)) && !asked.since,
+      JSON.stringify({ withdrawn, asked }));
+    const since = Date.now();
+    await keku.page.getByTestId("briefing-confirm-confirm").click();
+    const b = await until(async () => firstBcast(gid, (x) => x.status === "playing", since), 15000);
+    const st = await serverState(roomId);
+    const started = st.ledger.filter((e) => e.gameInstanceId === gid && e.type === "game-started");
+    check(`${label} the second confirm starts play once (start-now, confirmed Amina and Juma)`, !!b && started.length === 1 && started[0].detail?.trigger === "start-now" && JSON.stringify([...started[0].detail.confirmed].sort()) === JSON.stringify([amina.seat.playerId, juma.seat.playerId].sort()), JSON.stringify(started.map((e) => e.detail)));
+    report.cases.at(-1).withdrawn = withdrawn; report.cases.at(-1).asked = asked;
+    await keku.page.screenshot({ path: join(DATA_DIR, `${label}-host.png`) }).catch(() => {});
+    await finishGame(gid);
+  }
+
+  // ======== Case X: the final Ready and the host's confirmed Start now race, both in flight together ========
+  for (const [i, readyFirst] of [[1, true], [2, false]]) {
+    const label = `X${i}-team-huddle`;
+    const gid = await startGame("team-huddle");
+    const juma = PLAYERS.find((p) => p.slow);
+    for (const p of PLAYERS.filter((x) => !x.slow)) await intentApi(roomId, p.seat, gid, "briefing-ready", { ready: true });
+    const g0 = (await serverState(roomId)).games.find((x) => x.id === gid);
+    await advance(g0.briefing.startNowAt - (await serverState(roomId)).t);
+    const ready = () => intentApi(roomId, juma.seat, gid, "briefing-ready", { ready: true });
+    const confirm = () => api(`/rooms/${roomId}/games/${gid}/start-now`, { token: host.seat.token, body: { confirmed: [juma.seat.playerId] } });
+    const [rRes, cRes] = readyFirst ? await Promise.all([ready(), confirm()]) : await Promise.all([confirm(), ready()]).then(([c, r]) => [r, c]);
+    await sleep(800);
+    const st = await serverState(roomId);
+    const started = st.ledger.filter((e) => e.gameInstanceId === gid && e.type === "game-started");
+    const g = st.games.find((x) => x.id === gid);
+    const consistent = started.length === 1 && g.status === "playing" && cRes.status === 200
+      && ((started[0].detail.trigger === "all-ready" && rRes.body.accepted === true && rRes.body.result?.started === true && cRes.body.trigger === "already-started")
+        || (started[0].detail.trigger === "start-now" && rRes.body.accepted === false && rRes.body.reason === "READY_LOCKED" && cRes.body.trigger === "start-now"));
+    report.cases.push({ case: label, readyResponse: rRes.body, confirmResponse: cRes.body, trigger: started[0]?.detail?.trigger });
+    check(`${label} concurrent final Ready and confirm: one transition, and both answers agree with it`, consistent, JSON.stringify({ ready: rRes.body, confirm: cRes.body, started: started.map((e) => e.detail?.trigger) }));
+    await finishGame(gid);
+  }
+
   // ======== Case L: a late Ready (the host's confirm lands first) ========
   for (const lateGame of ["team-huddle", "closest-wins"]) {
     const label = `L-${lateGame}`;
@@ -506,8 +656,20 @@ try {
     const started = st.ledger.filter((e) => e.gameInstanceId === gid && e.type === "game-started");
     check(`${label} the expired briefing is cancelled once, never started; the stale confirm is refused`, gone && cancelled.length === 1 && started.length === 0 && stale.status >= 400, `${stale.status} ${JSON.stringify(stale.body)} cancelled=${cancelled.length}`);
     check(`${label} the host sees "Game cancelled", not the stale dialog`, dialog === 0 && /cancelled/i.test(note), note.replace(/\n/g, " / "));
-    report.cases.push({ case: label, gameId: "relay", stale: { status: stale.status, body: stale.body }, hostNote: note, cancelled: cancelled.map((e) => ({ at: e.at, detail: e.detail })) });
-    await host.page.getByTestId("briefing-cancelled-note").getByRole("button", { name: "OK" }).click().catch(() => {});
+    // It stays put while the room carries on (later broadcasts: Amina's phone drops and reconnects), on a guest's
+    // results too, and it is a polite status region, not an alert.
+    const amina = PLAYERS[1];
+    const bcastsBefore = bcasts.length;
+    await amina.page.evaluate(() => { for (const s of window.__fs.sockets) try { s.close(); } catch { /* closing */ } });
+    await until(async () => bcasts.length >= bcastsBefore + 2, 15000);
+    await sleep(1500);
+    const stays = (await host.page.getByTestId("briefing-cancelled-note").count()) === 1 && (await amina.page.getByTestId("briefing-cancelled-note").count()) === 1;
+    const role = await host.page.getByTestId("briefing-cancelled-note").getAttribute("role").catch(() => null);
+    const onResults = await host.page.evaluate(() => !!document.querySelector('[data-testid="briefing-cancelled-note"]') && !document.querySelector('[data-testid="briefing"]') && !document.querySelector('[data-testid^="lobby"]'));
+    check(`${label} the note stays through later broadcasts, on the host's and a guest's results, as a status`, stays && role === "status" && bcasts.length >= bcastsBefore + 2, `stays=${stays} role=${role} broadcasts=${bcasts.length - bcastsBefore} onResults=${onResults}`);
+    report.cases.push({ case: label, gameId: "relay", stale: { status: stale.status, body: stale.body }, hostNote: note, staysAfterBroadcasts: stays, role, broadcastsSeen: bcasts.length - bcastsBefore, cancelled: cancelled.map((e) => ({ at: e.at, detail: e.detail })) });
+    await host.page.screenshot({ path: join(DATA_DIR, `${label}-host.png`) }).catch(() => {});
+    // Nobody presses OK: the next round (case S) must clear it by itself.
   }
 
   // ======== Case S: a slow network (informational: Chromium's emulated latency on Juma's phone) ========
@@ -530,6 +692,10 @@ try {
     console.log(`INFO ${label} Juma (400 ms emulated latency): frame +${jr.frameLagMs} ms, actionable +${jr.actionableLagMs} ms; others max +${Math.max(...c.rows.filter((r) => r.player !== "juma").map((r) => r.actionableLagMs ?? -1))} ms`);
     check(`${label} one shared start and deadline whatever the network`, oneStart(c.ledger) && c.rows.every((r) => r.frameDeadlines?.phaseDeadlineAt === c.game.phaseDeadlineAt));
     await finishGame(gid);
+    // The earlier cancellation (case E) belongs to that briefing: this round's results never show it.
+    await PLAYERS[0].page.getByTestId("mz-hd-results").waitFor({ timeout: 15000 }).catch(() => {});
+    const leaked = (await PLAYERS[0].page.getByTestId("briefing-cancelled-note").count()) + (await PLAYERS[1].page.getByTestId("briefing-cancelled-note").count());
+    check(`${label} the earlier "Game cancelled" note does not leak into this round's results`, leaked === 0 && (await PLAYERS[0].page.getByTestId("mz-hd-results").count()) === 1, `notes=${leaked}`);
   }
 
   // ======== Z: no orphaned or duplicated starts, and every played game finished once, over the whole run ========

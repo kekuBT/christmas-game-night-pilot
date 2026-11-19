@@ -82,7 +82,7 @@ export function MchezoClosest(deps: MchezoClosestDeps) {
 
   // Current question unanswered and not abstained: guess controls plus
   // the shared sit-out button (same intents as the old panel).
-  // Fair starts (handoff 7004097156, M9): this question's 40 s clock started
+  // Fair starts (handoff 7004097156, H7): this question's 40 s clock started
   // the moment the last one closed, so its prompt and Submit come first; the
   // last answer follows them instead of pushing them below a small phone's fold.
   return (

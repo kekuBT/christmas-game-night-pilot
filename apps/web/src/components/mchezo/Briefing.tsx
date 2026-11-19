@@ -14,6 +14,8 @@ import {
   briefingClock,
   briefingPeople,
   briefingRules,
+  confirmChanges,
+  confirmTitle,
   ConfirmPanel,
   formatRemaining,
   Keycap,
@@ -161,7 +163,11 @@ export function BriefingScreen(props: CommonProps & {
   const title = registry?.title ?? titleFor(game.gameId);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
-  const [confirm, setConfirm] = useState<{ ids: string[]; note?: string } | null>(null);
+  // Fair starts (M9): the confirmation is a snapshot of who needed confirming, rows and all, taken when the host tapped
+  // Start now (or when the server asked again). Its title and rows describe that snapshot; live changes are listed
+  // separately (confirmChanges), never mixed into its count. The server still checks the confirmed list itself.
+  const [confirm, setConfirm] = useState<{ ids: string[]; note?: string; snapshot: BriefingPerson[] } | null>(null);
+  const snapshotOf = (ids: string[]): BriefingPerson[] => ids.map((id) => ({ ...(people.find((p) => p.id === id) ?? { id, name: "A player", ready: false, presence: "away" as const, you: false }) }));
   const [cancelAsk, setCancelAsk] = useState(false);
 
   async function toggleReady() {
@@ -179,7 +185,7 @@ export function BriefingScreen(props: CommonProps & {
       if (r.ok) { setConfirm(null); return; }
       if (r.code === "READINESS_CHANGED" && r.needsConfirmation) {
         // Someone's readiness or connection changed: ask again with the server's list.
-        setConfirm({ ids: r.needsConfirmation, note: confirmed.length > 0 || confirm ? "Something changed since you looked. Check the list again." : undefined });
+        setConfirm({ ids: r.needsConfirmation, note: confirmed.length > 0 || confirm ? "Something changed since you looked. Check the list again." : undefined, snapshot: snapshotOf(r.needsConfirmation) });
         return;
       }
       setConfirm(null);
@@ -192,10 +198,11 @@ export function BriefingScreen(props: CommonProps & {
   function askStartNow() {
     const need = needsConfirmation(people, meId).map((p) => p.id);
     if (need.length === 0) void startNow([]);
-    else setConfirm({ ids: need });
+    else setConfirm({ ids: need, snapshot: snapshotOf(need) });
   }
 
-  const confirmPeople = confirm ? confirm.ids.map((id) => people.find((p) => p.id === id) ?? { id, name: "A player", ready: false, presence: "away" as const, you: false }) : [];
+  const confirmPeople = confirm ? confirm.snapshot : [];
+  const changedSince = confirm ? confirmChanges(confirm.snapshot, people, needsConfirmation(people, meId).map((p) => p.id)) : [];
 
   return (
     <main className="mz-screen mz-brief" aria-label={`${title}: rules`} data-testid="briefing" data-game-id={game.id}>
@@ -242,16 +249,18 @@ export function BriefingScreen(props: CommonProps & {
       {confirm && (
         <ConfirmPanel
           testId="briefing-confirm"
-          title={confirmPeople.length === 1 ? `${confirmPeople[0]!.name} isn’t ready. Start anyway?` : `${confirmPeople.length} people aren’t ready. Start anyway?`}
+          title={confirmTitle(confirmPeople)}
           confirmLabel="Start everyone’s clock"
           cancelLabel="Keep waiting"
           onConfirm={() => void startNow(confirm.ids)}
           onCancel={() => setConfirm(null)}
         >
           {confirm.note && <span className="mz-brief__note" data-testid="briefing-confirm-changed">{confirm.note} </span>}
+          <span className="mz-brief__when" data-testid="briefing-confirm-when">When you tapped Start now:</span>
           <span className="mz-brief__confirm-list" data-testid="briefing-confirm-list">
             {confirmPeople.map((p) => <span key={p.id} className="mz-brief__confirm-row" data-testid={`briefing-confirm-${p.id}`}>{p.name}: {personStatus(p).toLowerCase()}</span>)}
           </span>
+          {changedSince.length > 0 && <span className="mz-brief__note" role="status" data-testid="briefing-confirm-since">Since then: {changedSince.join("; ")}. </span>}
           <span> Their clocks start too. They keep their seats and can still play.</span>
         </ConfirmPanel>
       )}

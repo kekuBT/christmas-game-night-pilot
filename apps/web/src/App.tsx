@@ -288,7 +288,10 @@ export function App() {
   useDocumentLook(theme);
   // D3: tell everyone when a briefing ended without play (host cancel or the
   // five-minute guard). The server removed it; nothing was scored or used.
-  const [briefingNote, setBriefingNote] = useState("");
+  // Fair starts (H6/H7, 7004637491): the note belongs to that cancelled
+  // briefing. It stays until OK, and goes as soon as another game opens its
+  // briefing or is being played, so it never speaks for a later round.
+  const [briefingNote, setBriefingNote] = useState<{ gameInstanceId: string; text: string } | null>(null);
   const lastBriefingRef = useRef<string | null>(null);
   // A-05 (live audit): a player in a game whose briefing just opened, but who
   // is on another screen (Library, Studio, Championship, Memory Book), is
@@ -298,16 +301,17 @@ export function App() {
   useEffect(() => {
     const now = proj?.games ?? [];
     const open = now.find((g) => g.status === "briefing");
-    if (open) { lastBriefingRef.current = open.id; setBriefingNote(""); return; }
+    if (open) { lastBriefingRef.current = open.id; setBriefingNote(null); return; }
+    if (now.some((g) => g.status === "playing")) setBriefingNote(null);
     const last = lastBriefingRef.current;
     lastBriefingRef.current = null;
     // Stage 8.2 (feedback 6795825877, 4): say plainly when the game was cancelled because what it froze no longer suits the room.
     const why = proj?.briefingCancelled?.gameInstanceId === last ? proj.briefingCancelled : undefined;
-    if (last && !now.some((g) => g.id === last)) setBriefingNote(why?.reason === "content-changed"
+    if (last && !now.some((g) => g.id === last)) setBriefingNote({ gameInstanceId: last, text: why?.reason === "content-changed"
       ? why.contentWhy === "season"
         ? "The game was cancelled before it started: what it was going to deal no longer suits this room’s content. Nothing was scored and nothing was used up. Press Start to deal again."
         : "The game was cancelled before it started: its questions changed after an update. Nothing was scored and nothing was used up. Press Start to deal again."
-      : "The game was cancelled before it started. Nothing was scored and no questions were used up.");
+      : "The game was cancelled before it started. Nothing was scored and no questions were used up." });
   }, [proj]);
   useEffect(() => {
     const open = (proj?.games ?? []).find((g) => g.status === "briefing");
@@ -1039,8 +1043,9 @@ export function App() {
       // JSON) becomes "couldn't confirm": the action may already be recorded.
       // A known app error stays itself (describeIntentFailure).
       if (res.status >= 400) throw new Error(describeIntentFailure(res));
-      // Fair starts (H7): a briefing Ready refused because play already began is no failure (refusalText says null).
-      if (!r.accepted) { const text = refusalText(action, r.reason); if (text !== null) failed(text); } else setMsg("Saved.");
+      // Fair starts (H7): an "I'm ready" refused because its own game already began is no failure (refusalText says
+      // null; nothing else is cleared or reported as saved). Every other refusal shows as before.
+      if (!r.accepted) { const text = refusalText(action, payload, r.reason); if (text !== null) failed(text); } else setMsg("Saved.");
       await refresh();
       return r.accepted === true;
     } catch (e) {
@@ -1584,8 +1589,9 @@ export function App() {
   // D3: tell everyone when a briefing ended without play (host cancel, the stall guard, or content that changed).
   // Fair starts (handoff 7004097156, H6/H7): one note, in the lobby and on top of whatever results someone is back on
   // (a cancel returns people to the last results they haven't closed), so an expired briefing is never silent there.
+  // NoticeCard is a role="status" region: announced politely, never stealing focus from the results.
   const cancelledNote = briefingNote
-    ? <NoticeCard tone="info" title="Game cancelled" testId="briefing-cancelled-note" action={<button type="button" className="mz-chip-btn" onClick={() => setBriefingNote("")}>OK</button>}>{briefingNote}</NoticeCard>
+    ? <NoticeCard key={briefingNote.gameInstanceId} tone="info" title="Game cancelled" testId="briefing-cancelled-note" action={<button type="button" className="mz-chip-btn" onClick={() => setBriefingNote(null)}>OK</button>}>{briefingNote.text}</NoticeCard>
     : null;
   const resultsHero = (g: PlayerGame, pub?: PublicGame): ReactNode => {
     const body = resultsHeroBody(g, pub);

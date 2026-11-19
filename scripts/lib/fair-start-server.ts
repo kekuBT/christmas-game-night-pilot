@@ -67,7 +67,7 @@ const port = await server.listen(Number(process.env.PORT ?? 0), "127.0.0.1");
 emit({ kind: "ready", port, t });
 
 createInterface({ input: process.stdin }).on("line", (line) => {
-  let msg: { cmd?: string; ms?: number; roomId?: string };
+  let msg: { cmd?: string; ms?: number; roomId?: string; gameInstanceId?: string; index?: number };
   try { msg = JSON.parse(line) as typeof msg; } catch { return; }
   try {
     if (msg.cmd === "advance") {
@@ -87,6 +87,18 @@ createInterface({ input: process.stdin }).on("line", (line) => {
         presence: Object.fromEntries([...ids].map((id) => [id, engine.presenceOf(id, t)])),
         ledger: engine.ledger.filter((e) => TIMING_EVENTS.has(e.type)).map((e) => ({ seq: e.seq, type: e.type, at: e.createdAt, gameInstanceId: e.gameInstanceId, playerId: e.playerId, actor: e.actor, detail: e.detail })),
       });
+    } else if (msg.cmd === "long-prompt") {
+      // Long content, deterministically: give one Closest Wins question a long prompt before it opens (a test of the
+      // phone's layout; the answer and scoring are untouched). Only for a question not yet shown.
+      const m = msg as { roomId?: string; gameInstanceId?: string; index?: number };
+      const engine = s.rooms.get(String(m.roomId));
+      const g = engine?.games.get(String(m.gameInstanceId));
+      const st = g?.extra as { questionIndex?: number; questions?: { prompt: string }[] } | undefined;
+      const i = Number(m.index);
+      if (!g || g.gameId !== "closest-wins" || !st?.questions?.[i]) throw new Error("long-prompt needs a Closest Wins game and a question index");
+      if ((st.questionIndex ?? 0) >= i) throw new Error("long-prompt only changes a question that hasn't opened");
+      st.questions[i]!.prompt = "Counting every one of the little lights wrapped three times around the big tree in the town square, then adding the ones strung along the market stalls, roughly how many lights is that altogether?";
+      emit({ kind: "long-prompt", index: i, length: st.questions[i]!.prompt.length });
     } else throw new Error(`unknown command ${msg.cmd}`);
   } catch (e) {
     emit({ kind: "error", message: (e as Error).message });

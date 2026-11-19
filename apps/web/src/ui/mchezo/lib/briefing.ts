@@ -57,6 +57,44 @@ export function needsConfirmation(people: BriefingPerson[], actorId: string): Br
   return people.filter((p) => p.id !== actorId && (!p.ready || p.presence !== "connected"));
 }
 
+/**
+ * Fair starts (handoff 7004097156, M9): the Start now confirmation is a snapshot, taken when the host tapped Start
+ * now (or when the server asked again): what the host confirms is what they were shown, and the server refuses a stale
+ * list. The title says what the snapshot's rows say, in the same words: "not ready" only for someone who hasn't tapped
+ * Ready, "not connected" for a Ready player whose phone is away or reconnecting.
+ */
+export function confirmTitle(snapshot: BriefingPerson[]): string {
+  const notReady = snapshot.filter((p) => !p.ready).length;
+  const offline = snapshot.length - notReady;
+  const one = snapshot.length === 1 ? snapshot[0]! : null;
+  if (offline === 0) return one ? `${one.name} isn’t ready. Start anyway?` : `${snapshot.length} people aren’t ready. Start anyway?`;
+  if (notReady === 0) return one ? `${one.name} isn’t connected. Start anyway?` : `${snapshot.length} people aren’t connected. Start anyway?`;
+  return `${snapshot.length} people aren’t ready or aren’t connected. Start anyway?`;
+}
+
+/**
+ * What has changed since the snapshot, from the live rows (the same projection the heading and the person rows use):
+ * one line per change, in the snapshot's order, then anyone who now needs confirming but wasn't in it. Empty when the
+ * snapshot is still true. The dialog shows these lines instead of silently mixing a snapshot count with live rows.
+ */
+export function confirmChanges(snapshot: BriefingPerson[], live: BriefingPerson[], liveNeedIds: string[]): string[] {
+  const out: string[] = [];
+  const now = (id: string) => live.find((p) => p.id === id);
+  const presenceLine = (p: BriefingPerson) => (p.presence === "connected" ? `${p.name} is connected again` : `${p.name} is ${p.presence} now`);
+  for (const s of snapshot) {
+    const l = now(s.id);
+    if (!l) continue;
+    if (s.ready !== l.ready) out.push(l.ready ? `${l.name} is ready now` : `${l.name} isn’t ready any more`);
+    else if (s.presence !== l.presence) out.push(presenceLine(l));
+  }
+  for (const id of liveNeedIds) {
+    if (snapshot.some((s) => s.id === id)) continue;
+    const l = now(id);
+    if (l) out.push(!l.ready ? `${l.name} isn’t ready any more` : presenceLine(l));
+  }
+  return out;
+}
+
 /** "Ready", "Not ready yet", plus the connection when it isn't live. */
 export function personStatus(p: BriefingPerson): string {
   const r = p.ready ? "Ready" : "Not ready yet";

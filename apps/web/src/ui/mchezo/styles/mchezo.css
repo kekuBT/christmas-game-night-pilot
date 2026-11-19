@@ -535,6 +535,7 @@
 .mz-brief__error { margin: 10px 0 0; color: var(--mz-highlight); font-weight: 700; }
 .mz-brief__note { display: block; color: var(--mz-highlight); font-weight: 700; margin-bottom: 4px; }
 .mz-brief__confirm-row { display: block; color: var(--mz-text); font-weight: 600; }
+.mz-brief__when { display: block; color: var(--mz-text-muted); font-size: 13px; font-weight: 700; margin-bottom: 2px; }
 .mz-brief__tvgrid { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); align-items: start; margin-top: 12px; }
 .mz-brief__tvgrid .mz-card + .mz-card, .mz-brief__tvgrid .mz-brief__rules { margin-top: 0; }
 .mz-brief--tv .mz-brief__objective { font-size: 26px; }

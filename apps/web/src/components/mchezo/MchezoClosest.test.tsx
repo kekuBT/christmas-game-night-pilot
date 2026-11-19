@@ -1,5 +1,5 @@
 /**
- * Fair starts (handoff 7004097156, M9): when a Closest Wins question closes, the next one's 40 s clock starts at once.
+ * Fair starts (handoff 7004097156, H7): when a Closest Wins question closes, the next one's 40 s clock starts at once.
  * The phone must show the new question and its controls first; the previous answer comes after them, so it never
  * pushes Submit below the fold of a small phone while the clock runs (scripts/check-fair-starts.mjs measures the real
  * layout at 320x568; this pins the order).
@@ -20,7 +20,7 @@ function render(state: Record<string, unknown>) {
   return renderToStaticMarkup(<MchezoClosest game={game} players={PLAYERS} playerId="p1" intent={() => {}} post={async () => ({}) as never} roomId="r1" isHostOrCohost={false} title="Closest Wins" />);
 }
 
-describe("MchezoClosest: the next question comes before the last answer (M9)", () => {
+describe("MchezoClosest: the next question comes before the last answer (H7)", () => {
   it("guessing: the prompt and Submit come before the last question's card", () => {
     const html = render({ prompt: "How tall is the Statue of Liberty, in metres?", unit: "m", revealed });
     const prompt = html.indexOf("How tall is the Statue of Liberty");

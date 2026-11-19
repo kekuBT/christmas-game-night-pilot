@@ -2430,18 +2430,51 @@ Handoff 6813167965 (with the Stage 9.2 clearance). Spec: `docs/stage9/stage93.md
   - **The archive bytes are not in the patches.** Swapping `artifact/` is a companion step for ChatGPT, where the bytes are kept. The gate refuses any other archive.
   - **The gate checks run without docker:** each context's own `cgn-artifact-gate.sh`, run as the Dockerfile's gate stage runs it (`sh` is dash, Node v22.16.0, the inputs filtered by `.dockerignore`). The script is the same; docker would only add the image layers already reviewed in the render-package evidence.
 
-## Post-beta: fair game starts and clocks (handoff 7004097156; H6/H7/M9; docs/evidence/fair-starts/)
+## Post-beta: fair game starts and clocks (handoff 7004097156; QA report details 7004164219; direction 7004637491; docs/evidence/fair-starts/)
+The QA report's IDs:
+- **H6:** readiness rows and starts.
+- **H7:** actionable time lost; this includes previous feedback pushing the next question's controls down.
+- **M9:** the ready heading, the confirm dialog and the rows disagreeing.
+
+Every fix here is client-side. The server's start, timing, scoring and ledger are unchanged.
 - **D-FS-01 The server's start and timing contract is unchanged; no shared pre-start stage.**
-  - **The evidence:** `scripts/check-fair-starts.mjs` (six contexts, a server clock the driver owns) measured every phone actionable within 154 ms of the start broadcast, the 6× CPU-throttled one included. All got one `playStartedAt` and one set of deadlines, on the baseline `da5ac0f` and on live `7097ac2` alike. The all-ready start, the tick start, the late confirm ("already started") and the expiry all behaved as D3 documents, with one transition and one `game-started` each.
-  - **Alternative not taken:** a shared "Get ready" lead (every clock starting a few seconds after play begins), to absorb network latency. Nothing measured calls for it, and it would change the timing contract owners approved. Real phones on cellular networks are the open limit; the queued iPhone retest can measure them.
-- **D-FS-02 Closest Wins: the new question comes first, the last answer after it** (M9).
-  - **Why:** a question's 40 s clock starts the moment the last one closes. Drawing the "Last question" card above the new question pushed Submit below the fold of a 320×568 phone (616–672 px of 568), and of a 375×667 one for a longer question, while the clock ran.
-  - **What:** on the guessing screen only, the card moves below the controls. The waiting screen (guess in) keeps it on top: there is nothing to do there. No server or timing change.
-  - **Alternative:** a reveal phase between questions, as Team Huddle has. It would change the game's timing and backstop, and is a larger product change than this slice.
-- **D-FS-03 A briefing Ready refused because play began is not a failure on the game screen** (H7).
-  - **Why:** a Ready (or "not ready") that reaches the server just after the host's confirmed Start now (or the last Ready) is refused with `READY_LOCKED` and changes nothing. The phone used to put "The game has already started." as an alert on the player's first question, in every game that shows the shared send-failure line.
-  - **What:** `refusalText` (apps/web/src/components/intentRefusal.ts) returns null for that one case; every other refusal keeps its words. The server is unchanged.
+  - **The evidence:** `scripts/check-fair-starts.mjs` (six contexts, a server clock the driver owns). On the baseline `da5ac0f` and on live `7097ac2` alike:
+    - every phone was actionable within 154 ms of the start broadcast, the 6× CPU-throttled one included;
+    - all got one `playStartedAt` and one set of deadlines;
+    - the all-ready start, the tick start, the late confirm ("already started"), a truly concurrent final Ready and confirm, and the expiry all behaved as D3 documents, with one transition and one `game-started` each.
+  - **The original H7 reports of seconds of lost time are not reproduced; their cause is unknown.** They came from six cloud desktop browsers driven one after another, without simultaneous timestamps.
+  - **Alternative not taken:** a shared "Get ready" lead to absorb network latency. Nothing measured calls for it, and it would change the approved timing contract. Native phones on real networks remain the open limit.
+- **D-FS-02 Closest Wins: the new question comes first, the last answer after it** (H7).
+  - **Why:** a question's 40 s clock starts the moment the last one closes. Drawing the "Last question" card above the new question pushed Submit below the fold of a 320×568 phone (616–672 px of 568, in every run), and of a 375×667 one for a longer question, while the clock ran.
+  - **What:** on the guessing screen only, the card moves below the controls. The waiting screen (guess in) keeps it on top: there is nothing to do there. No forced scrolling. No server or timing change.
+  - **Checked through the real input path:** with a long question 2 (196 characters), at 320×568 and 375×667:
+    - the input's and Submit's on-screen points hit the controls themselves;
+    - a tap focuses the input and typed digits go in;
+    - a tap on Submit, or Tab then Enter, submits with no scroll.
+
+    **A negative control** proves the measurement calls a pushed-down Submit not actionable.
+  - **Alternative:** a reveal phase between questions, as Team Huddle has. It would change the game's timing and backstop.
+- **D-FS-03 Only an "I'm ready" refused because its own game began is not shown as a failure** (H7; narrowed per 7004637491).
+  - **Why:** a `briefing-ready` with `ready: true` that reaches the server just after that game's start (the host's confirmed Start now, or a concurrent last Ready) is refused with `READY_LOCKED` and records nothing. `READY_LOCKED` means exactly "this intent's game has left its briefing". The phone used to put "The game has already started." as an alert on that player's first question.
+  - **What:** `refusalText(action, payload, reason)` returns null for that one case. Unchanged:
+    - a late "not ready" still says the game has already started;
+    - `READY_LOCKED` on any other action keeps its words, as does every other refusal;
+    - delivery failures and reconnects;
+    - what an accepted send says.
   - **Alternative:** have the server accept a late Ready as a no-op. That changes the D3 intent contract for a display problem.
-- **D-FS-04 "Game cancelled" shows on the results screen too** (H6/H7).
+- **D-FS-04 "Game cancelled" belongs to the cancelled briefing, and shows on the results screen too** (H6/H7).
   - **Why:** a cancelled or expired briefing returns people to the last results they hadn't closed (Stage 7.4, C1). The note only rendered in the lobby, so an expiry was silent there, including for a host whose Start now confirmation was open.
-  - **What:** one note element, shown in the lobby notice and above the results hero (every results screen goes through `resultsHero`).
+  - **What:** one note element, keyed to the cancelled briefing's id, shown in the lobby notice and above the results hero (every results screen goes through `resultsHero`).
+    - **Semantics:** it is a polite `role="status"` region.
+    - **Lifetime:** it stays through later broadcasts until OK. It goes as soon as another game opens its briefing or is being played, so it never speaks for a later round.
+- **D-FS-05 The Start now confirmation is a labelled snapshot whose title matches its rows** (M9).
+  - **Why:**
+    - **The snapshot problem:** the dialog's title counted the ids captured when the host tapped Start now, while each of its rows showed that person's live status. Two people getting ready with the dialog open gave "3 people aren't ready" over rows reading "ready, ready, not ready yet", the same disagreement the QA report lists for Majority Rules and Closest Wins.
+    - **The title wording:** a Ready player who was reconnecting was counted as "not ready".
+  - **What:** the dialog keeps the snapshot it confirms (unchanged server semantics: a stale list is refused and asked again, as check-briefing C requires).
+    - **The labels:** "When you tapped Start now:" over the snapshot's rows, and a title that says the same (`confirmTitle`: "not ready", "not connected", or both).
+    - **Live changes** go on a separate "Since then: …" status line (`confirmChanges`): who is ready now, who isn't any more, who came back or dropped.
+  - **Alternative:** a fully live dialog. Confirming a list that changed under the host's finger would either start play without the server's "ask again", or refuse a list that was on screen. Both contradict the D3 contract.
+- **Not changed, and why** (H6): "pressed and disabled, the row still not ready, then play at 5/6".
+  - **What happens:** the last Ready starts play in the same server step, so no projection ever shows 6/6. The button is busy from the tap until the answer, which the driver measures at about 0.1 s.
+  - **The verdict:** that is the documented all-ready contract, not a stale row.
