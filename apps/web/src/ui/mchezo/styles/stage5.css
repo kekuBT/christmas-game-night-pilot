@@ -129,15 +129,14 @@
 /* ------------------------------------------------ Pattern Pulse (Stage 5) */
 /* Every symbol is a shape + a colour + a name; colour is never needed. */
 .mz-pp-shape { display: block; flex: none; }
-.mz-pp-pattern { list-style: none; margin: 14px 0 10px; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
-.mz-pp-cell { display: grid; justify-items: center; gap: 4px; padding: 10px 4px 8px; border-radius: 16px; background: var(--mz-surface-1); border: 2px solid var(--mz-line); position: relative; }
-.mz-pp-cell__n { position: absolute; left: 8px; top: 6px; font: 800 13px/1 var(--mz-font-body); color: var(--mz-text-muted); }
-.mz-pp-cell__name { font: 700 12px/1 var(--mz-font-body); color: var(--mz-text-muted); }
-/* Full motion: a highlight sweeps along the row in order, then repeats. Everything stays visible throughout. */
-.mz-pp-pattern--sweep .mz-pp-cell { animation: mz-pp-sweep calc(var(--mz-pp-n) * 600ms) linear infinite; animation-delay: calc(var(--mz-pp-i) * 600ms); }
-@keyframes mz-pp-sweep { 0%, 14% { border-color: var(--mz-text); transform: translateY(-3px); } 18%, 100% { border-color: var(--mz-line); transform: none; } }
-[data-mz-motion="reduced"] .mz-pp-cell { animation: none !important; }
-@media (prefers-reduced-motion: reduce) { .mz-pp-cell { animation: none !important; } }
+/* H1 (handoff 7008903623): the pattern is shown one symbol at a time on a stage that keeps its size between symbols. */
+.mz-pp-stage { min-height: 176px; margin: 14px 0 10px; display: grid; place-items: center; border-radius: 22px; background: var(--mz-surface-1); border: 2px solid var(--mz-line); }
+.mz-pp-stage__item { margin: 0; display: grid; justify-items: center; gap: 8px; padding: 12px; animation: mz-pp-pop 160ms ease-out; }
+.mz-pp-stage__text { font: 800 18px/1.2 var(--mz-font-body); color: var(--mz-text); text-align: center; }
+@keyframes mz-pp-pop { from { transform: scale(.86); opacity: .4; } to { transform: none; opacity: 1; } }
+.mz-pp-stage--still .mz-pp-stage__item { animation: none; }
+[data-mz-motion="reduced"] .mz-pp-stage__item { animation: none !important; }
+@media (prefers-reduced-motion: reduce) { .mz-pp-stage__item { animation: none !important; } }
 .mz-pp-slots { list-style: none; margin: 14px 0 12px; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
 .mz-pp-slot { width: 42px; height: 42px; border-radius: 12px; display: grid; place-items: center; border: 2px dashed var(--mz-line); font: 700 14px/1 var(--mz-font-body); color: var(--mz-text-muted); }
 .mz-pp-slot--filled { border-style: solid; border-color: var(--mz-text); background: var(--mz-surface-1); }

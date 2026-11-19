@@ -15,6 +15,7 @@ import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { launchChromium, screenshotPath } from "./lib/driver-env.mjs";
+import { readPulsePattern } from "./lib/pulse-pattern.mjs";
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 let failures = 0;
@@ -56,7 +57,7 @@ try {
     for (const round of [0, 1]) {
       await p.getByTestId("mz-pp-open").click({ timeout: 20000 });
       await p.getByTestId("mz-pp-memorise").waitFor({ timeout: 10000 });
-      const seq = await p.locator('[data-testid="mz-pp-pattern"] li').evaluateAll((els) => els.map((e) => Number(e.dataset.symbol)));
+      const seq = await readPulsePattern(p);
       const open = (await mine()).open;
       await p.getByTestId("mz-pp-input").waitFor({ timeout: 20000 });
       const inputAt = Date.now();

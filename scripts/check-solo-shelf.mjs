@@ -37,6 +37,7 @@ import { join } from "node:path";
 import { launchChromium } from "./lib/driver-env.mjs";
 import { connectionsGroups } from "./lib/content-oracle.mjs";
 import { slabNumber, solveMath } from "./lib/math-solve.mjs";
+import { readPulsePattern } from "./lib/pulse-pattern.mjs";
 
 const BASE = process.argv[2] ?? "http://localhost:3461";
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -80,7 +81,7 @@ async function playPulse(page, how, { keyboardRound = -1 } = {}) {
     await page.getByTestId("mz-pp-open").waitFor({ timeout: 30000 });
     if (i === keyboardRound) { await page.getByTestId("mz-pp-open").focus(); await page.keyboard.press("Enter"); } else await page.getByTestId("mz-pp-open").click();
     await page.getByTestId("mz-pp-memorise").waitFor({ timeout: 10000 });
-    const pattern = await page.locator('[data-testid="mz-pp-pattern"] li').evaluateAll((els) => els.map((e) => Number(e.dataset.symbol)));
+    const pattern = await readPulsePattern(page);
     await page.getByTestId("mz-pp-input").waitFor({ timeout: 15000 });
     const mode = how(i);
     if (mode === "timeout") { await page.locator('[data-testid="mz-pp-ready"], [data-testid="solo-results"]').first().waitFor({ timeout: 40000 }); continue; }
@@ -200,14 +201,15 @@ try {
 
   // ---- H. Personal bests ----
   const pb = await bests(page);
-  check("H one best per game and rules version", pb["pattern-pulse@1"]?.score === 960 && pb["word-connections@1"]?.score === 450 && pb["math-mayhem@1"]?.score === m1.score && Object.keys(pb).length === 3, JSON.stringify(pb));
+  // Pattern Pulse's rules are v2 since H1 (D-AV-02: one symbol at a time).
+  check("H one best per game and rules version", pb["pattern-pulse@2"]?.score === 960 && pb["word-connections@1"]?.score === 450 && pb["math-mayhem@1"]?.score === m1.score && Object.keys(pb).length === 3, JSON.stringify(pb));
   await page.getByTestId("solo-back").click();
   await page.getByTestId("solo-home").waitFor({ timeout: 10000 });
   check("H the shelf shows each game's own best", (await page.getByTestId("solo-best-pattern-pulse").innerText()).includes("960") && (await page.getByTestId("solo-best-word-connections").innerText()).includes("450") && (await page.getByTestId("solo-best-math-mayhem").innerText()).includes(m1.score.toLocaleString("en-US")));
-  await page.evaluate(() => { const all = JSON.parse(localStorage.getItem("mchezo.pb.v1")); all["pattern-pulse@0"] = { score: 99999, at: 1, rulesVersion: 0 }; all["word-connections@1"] = { score: 99999, at: 1, rulesVersion: 2 }; localStorage.setItem("mchezo.pb.v1", JSON.stringify(all)); });
+  await page.evaluate(() => { const all = JSON.parse(localStorage.getItem("mchezo.pb.v1")); all["pattern-pulse@0"] = { score: 99999, at: 1, rulesVersion: 0 }; all["pattern-pulse@1"] = { score: 99999, at: 1, rulesVersion: 1 }; all["word-connections@1"] = { score: 99999, at: 1, rulesVersion: 2 }; localStorage.setItem("mchezo.pb.v1", JSON.stringify(all)); });
   await page.reload({ waitUntil: "domcontentloaded" });
   await page.getByTestId("solo-home").waitFor({ timeout: 10000 });
-  check("H a best under other rules is never shown (Pulse v0; a v2 record in Connections' v1 slot)", (await page.getByTestId("solo-best-pattern-pulse").innerText()).includes("960") && /No personal best/.test(await page.getByTestId("solo-best-word-connections").innerText()));
+  check("H a best under other rules is never shown (Pulse v0 and v1, the whole-row presentation (D-AV-02); a v2 record in Connections' v1 slot)", (await page.getByTestId("solo-best-pattern-pulse").innerText()).includes("960") && /No personal best/.test(await page.getByTestId("solo-best-word-connections").innerText()));
 
   const blocked = await browser.newContext({ viewport: { width: 320, height: 640 } });
   await blocked.addInitScript(() => { Object.defineProperty(window, "localStorage", { get() { throw new DOMException("blocked", "SecurityError"); } }); });
@@ -274,7 +276,7 @@ try {
   const lctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
   const lp = await lctx.newPage();
   await lp.goto(`${BASE}/solo`, { waitUntil: "domcontentloaded" });
-  await lp.evaluate(() => localStorage.setItem("mchezo.pb.v1", JSON.stringify({ "word-connections@1": { score: 50, at: 1, rulesVersion: 1 }, "pattern-pulse@1": { score: 20, at: 1, rulesVersion: 1 } })));
+  await lp.evaluate(() => localStorage.setItem("mchezo.pb.v1", JSON.stringify({ "word-connections@1": { score: 50, at: 1, rulesVersion: 1 }, "pattern-pulse@2": { score: 20, at: 1, rulesVersion: 2 } })));
   await lp.reload({ waitUntil: "domcontentloaded" });
   await lp.getByTestId("solo-home").waitFor({ timeout: 15000 });
   const NOTE = "Best score across boards. Some boards are harder than others.";
@@ -312,7 +314,7 @@ try {
   await startFromShelf(lp, "pattern-pulse");
   await lp.getByTestId("mz-pp-open").click();
   await lp.getByTestId("mz-pp-memorise").waitFor({ timeout: 10000 });
-  const lpat = await lp.locator('[data-testid="mz-pp-pattern"] li').evaluateAll((els) => els.map((e) => Number(e.dataset.symbol)));
+  const lpat = await readPulsePattern(lp);
   await lp.getByTestId("mz-pp-input").waitFor({ timeout: 15000 });
   for (const s of lpat) await lp.getByTestId(`mz-pp-key-${s}`).click();
   await lp.getByTestId("mz-pp-submit").click();
@@ -321,7 +323,7 @@ try {
   const a3 = await forge(ppRound, randomUUID());
   const lq = await results(lp);
   check("L Pulse: a forged abstain after a perfect first round ends it: 110, and it sets no best", a3.body.accepted === true && lq.score === 110 && /sat this round out/.test(lq.pb), JSON.stringify({ a3, lq }));
-  check("L Pulse: the stored best is still 20 (110 would have beaten it); no Connections note here", (await bests(lp))["pattern-pulse@1"]?.score === 20 && (await lp.getByTestId("solo-note").count()) === 0, JSON.stringify(await bests(lp)));
+  check("L Pulse: the stored best is still 20 (110 would have beaten it); no Connections note here", (await bests(lp))["pattern-pulse@2"]?.score === 20 && (await lp.getByTestId("solo-note").count()) === 0, JSON.stringify(await bests(lp)));
   await lctx.close();
 } finally {
   await browser.close();

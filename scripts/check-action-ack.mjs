@@ -25,6 +25,7 @@ import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { launchChromium, screenshotPath } from "./lib/driver-env.mjs";
+import { readPulsePattern } from "./lib/pulse-pattern.mjs";
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 let failures = 0;
@@ -153,7 +154,7 @@ try {
     const p = await seatPage(room, seat);
     await p.getByTestId("mz-pp-open").click({ timeout: 20000 });
     await p.getByTestId("mz-pp-memorise").waitFor({ timeout: 10000 });
-    const seq = await p.locator('[data-testid="mz-pp-pattern"] li').evaluateAll((els) => els.map((e) => Number(e.dataset.symbol)));
+    const seq = await readPulsePattern(p);
     await p.getByTestId("mz-pp-input").waitFor({ timeout: 20000 });
     for (const s of seq) await p.getByTestId(`mz-pp-key-${s}`).click();
     const sent = await loseReplies(p);
@@ -213,7 +214,7 @@ try {
     const p = await seatPage(room, seat);
     await p.getByTestId("mz-pp-open").click({ timeout: 20000 });
     await p.getByTestId("mz-pp-memorise").waitFor({ timeout: 10000 });
-    const seq = await p.locator('[data-testid="mz-pp-pattern"] li').evaluateAll((els) => els.map((e) => Number(e.dataset.symbol)));
+    const seq = await readPulsePattern(p);
     await p.getByTestId("mz-pp-input").waitFor({ timeout: 20000 });
     for (const s of seq) await p.getByTestId(`mz-pp-key-${s}`).click();
     const filled = async () => p.locator('[data-testid="mz-pp-slots"] li[data-symbol]').evaluateAll((els) => els.map((e) => Number(e.dataset.symbol)));

@@ -1,0 +1,11 @@
+
+FAILED (exit 1) | targeted | run 20261119-123945-db1d427f-27227
+  7 passed, 1 failed, 0 timed out, 0 infrastructure, 0 invalid, 0 cancelled, 0 not run
+  FAIL      check-solo-shelf (w3) [functional]: FAIL H one best per game and rules version — {"pattern-pulse@2":{"score":960,"at":1795092027690,"rulesVersion":2},"word-connections@1":{"score":450,"at":1795092064964,"rulesVersion":1},"math-mayhem@1"
+  timing   wall 4m 41s · step time 12m 04s (sum) · 3 workers, 86% busy · 2.58× the same steps run one after another
+           predicted 4–6m (about 4m 52s, measured) → actual 4m 41s (-4%)
+           longest  check-mobile-everyday 3m 07s, check-solo-shelf 2m 50s, check-pulse-timing 2m 40s · the longest step is 67% of the wall time
+           machine  CPU mean 18%, peak 87% · memory available ≥ 13998 MB · load peak 0.95
+           contention ×1.016 (median step time vs its sequential median)
+           retries  none (the gate never retries a step)
+  report <scratchpad>/fs-gate/20261119-123945-db1d427f-27227/report.json

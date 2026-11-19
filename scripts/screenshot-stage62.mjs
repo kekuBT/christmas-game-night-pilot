@@ -13,6 +13,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { launchChromium } from "./lib/driver-env.mjs";
 import { connectionsGroups } from "./lib/content-oracle.mjs";
+import { readPulsePattern } from "./lib/pulse-pattern.mjs";
 
 const arg = (k, d) => { const i = process.argv.indexOf(k); return i > 0 ? process.argv[i + 1] : d; };
 const OUT = arg("--out", join("docs", "stage6", "screenshots-62"));
@@ -61,7 +62,7 @@ try {
       await p.getByTestId("mz-pp-open").waitFor({ timeout: 30000 });
       await p.getByTestId("mz-pp-open").click();
       await p.getByTestId("mz-pp-memorise").waitFor({ timeout: 10000 });
-      const pattern = await p.locator('[data-testid="mz-pp-pattern"] li').evaluateAll((els) => els.map((e) => Number(e.dataset.symbol)));
+      const pattern = await readPulsePattern(p);
       if (i === 1) await shot(p, "03-pulse-memorise", view, "Pattern Pulse: memorising round 2");
       await p.getByTestId("mz-pp-input").waitFor({ timeout: 15000 });
       const entry = i === 2 ? [(pattern[0] + 1) % 6, ...pattern.slice(1)] : pattern;

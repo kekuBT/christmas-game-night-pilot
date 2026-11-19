@@ -346,6 +346,22 @@ try {
   const g2 = v.st.current.giver;
   check("D the clue-giver role moved on", g2 !== g1);
   const G2 = pageOf[g2];
+  // H2 (handoff 7008903623): after the roles rotate, the target is still drawn on the new clue-giver's phone only:
+  // no other phone (the host's, last round's clue-giver's) and not the TV carries it in a marker, its text or an
+  // accessible name.
+  {
+    const target2 = truth(ROOM, gid)?.st.rounds[1].target;
+    const hostId = Object.keys(pageOf).find((id) => pageOf[id] === K);
+    const traces = (p) => p.evaluate((t) => document.querySelectorAll('[data-testid$="-target"], .mz-sp-mark--target').length
+      + [...document.querySelectorAll("[aria-label]")].filter((e) => (e.getAttribute("aria-label") ?? "").includes(`Target ${t}`)).length
+      + (document.body.innerText.includes(`Target ${t}`) ? 1 : 0) + (document.body.innerText.includes(`see the target: ${t}`) ? 1 : 0), target2);
+    await soon(`D (H2) round 2: the new clue-giver (${nameOf[g2]}) sees the target, ${target2}`, async () => (await G2.getByTestId("sp-target").innerText()) === String(target2));
+    for (const id of Object.keys(pageOf).filter((x) => x !== g2)) {
+      const role = id === hostId ? " (the host, guessing)" : id === g1 ? " (last round's clue-giver)" : "";
+      check(`D (H2) round 2: ${nameOf[id]}${role} has no target in the screen, its text or its accessible names`, (await traces(pageOf[id])) === 0);
+    }
+    check("D (H2) round 2: the TV has no target in the screen, its text or its accessible names", (await traces(TV)) === 0);
+  }
   const reloader = Object.keys(pageOf).find((id) => id !== g2);
   await pageOf[reloader].reload({ waitUntil: "domcontentloaded" });
   await soon(`D ${nameOf[reloader]} reloads and is back in round 2`, async () => /Round 2 of 4/.test(await pageOf[reloader].getByTestId("sp-round").innerText()), 20000);

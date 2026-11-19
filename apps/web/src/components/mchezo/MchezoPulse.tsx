@@ -8,10 +8,24 @@
  * server's memorise deadline even if a cached copy is still around.
  *
  * Accessibility: every symbol is a shape AND a colour AND a name, so colour
- * is never needed. No sound. With reduced motion (or Animations Off) the
- * pattern is a still, numbered row for the same time; with full motion the
- * same row is shown with a gentle highlight sweeping along it (nothing is
- * hidden or shown faster, so both settings see exactly the same thing).
+ * is never needed. No sound.
+ *
+ * H1 (handoff 7008903623): the pattern is a transient cue, one symbol at a
+ * time. The server's memorise window is split into one equal slot per symbol
+ * (pulseCue.ts), and the stage shows the current symbol with its position and
+ * name ("2 of 5: Yellow square"). At no point does the screen, its text or an
+ * accessible name hold the whole sequence, while memorising or while tapping
+ * it back. Reduced motion (or Animations Off) keeps the same timing and drops
+ * only the small pop-in.
+ *
+ * The cue announcer (H1, review 7010784066): a screen reader hears the same
+ * symbol in the same slot from ONE assertive live region, PulseAnnouncer. It
+ * is mounted, empty, from the screen before the pattern opens (and on every
+ * other screen of the game) at the same place in the tree, so the first cue
+ * is an update to a region that is already there, not a region arriving with
+ * its text. The same node then goes empty → "1 of 5: …" → empty in each gap →
+ * … → empty when the window ends and the recall screen comes. The visible
+ * stage is hidden from assistive technology so nothing is heard twice.
  *
  * What you tap is kept on this phone until the server confirms it; a send
  * that fails says so and keeps your entry for another try.
@@ -19,6 +33,7 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { GameClock, Keycap, MchezoWaiting, OutcomeSummary, useMchezo } from "../../ui/mchezo/index.js";
 import { NO_ANNOUNCEMENTS, clockAnnouncementText, gameClockView, nextAnnouncement, type AnnouncementHistory, type GameClockView } from "./pulseClock.js";
+import { pulseCueAt, pulseCueText } from "./pulseCue.js";
 import { FeedbackLine, GameHeader, ScoreList } from "../../ui/mchezo/components/GameKit.js";
 import { participationLine, serverNowEstimate } from "../../ui/mchezo/lib/lifecycle.js";
 import { SendNote } from "./SendNote.js";
@@ -29,7 +44,8 @@ interface PulseResultView { round: number; length: number; answer: number[] | nu
 export interface PulseView {
   roundCount?: number; lengths?: number[]; finished?: number; total?: number; roundsPlayed?: number; perfectRounds?: number;
   next?: number;
-  open?: { round: number; length: number; showUntil: number; inputUntil: number; pattern?: number[] };
+  /** showFrom (H1): when the memorise window began (server time); an older server sends none. */
+  open?: { round: number; length: number; showFrom?: number; showUntil: number; inputUntil: number; pattern?: number[] };
   results?: PulseResultView[]; done?: boolean; satOut?: boolean; myTotal?: number;
 }
 
@@ -42,6 +58,38 @@ export const PULSE_SYMBOLS = [
   { name: "Pink star", short: "star", color: "#D9479B" },
   { name: "Purple hexagon", short: "hexagon", color: "#8A55D6" },
 ] as const;
+
+/**
+ * H1: what the cue announcer says at `now`: the current symbol's words in its own slot of the memorise
+ * window, and nothing in a gap, before a round opens or once the window is over (the recall screen).
+ * `firstSeenAt` stands in for showFrom from an older server that sends none.
+ */
+export function pulseCueSay(open: PulseView["open"], now: number, firstSeenAt: number): string {
+  if (!open?.pattern || now >= open.showUntil) return "";
+  const len = open.pattern.length;
+  const cue = pulseCueAt(len, open.showFrom ?? firstSeenAt, open.showUntil, now);
+  const sym = cue.index !== null ? open.pattern[cue.index] : undefined;
+  return cue.index !== null && sym !== undefined ? pulseCueText(cue.index, len, PULSE_SYMBOLS[sym]?.name ?? "") : "";
+}
+
+/** How long a newly mounted announcer stays empty before it may speak (only matters when it mounts mid-window). */
+export const PULSE_ANNOUNCER_SETTLE_MS = 150;
+
+/**
+ * H1 (review 7010784066): the one cue announcer. A live region is announced when a region already in the
+ * page changes, so this one always mounts EMPTY and only says `text` once it has been in the page for
+ * PULSE_ANNOUNCER_SETTLE_MS. In play it mounts with the game's ready screen, long before a pattern opens;
+ * the wait matters only when the page itself loads mid-window (a reload), and then the first words come
+ * at most that much after the symbol. Visually hidden; the visible stage is not announced.
+ */
+export function PulseAnnouncer({ text }: { text: string }) {
+  const [settled, setSettled] = useState(false);
+  useEffect(() => {
+    const t = setTimeout(() => setSettled(true), PULSE_ANNOUNCER_SETTLE_MS);
+    return () => clearTimeout(t);
+  }, []);
+  return <p className="mz-sr" data-testid="mz-pp-announcer" aria-live="assertive" aria-atomic="true">{settled ? text : ""}</p>;
+}
 
 export function PulseShape({ s, size = 44 }: { s: number; size?: number }) {
   const sym = PULSE_SYMBOLS[s];
@@ -61,15 +109,15 @@ export function PulseShape({ s, size = 44 }: { s: number; size?: number }) {
   return <svg width={size} height={size} viewBox="0 0 48 48" aria-hidden="true" focusable="false" className="mz-pp-shape">{shape}</svg>;
 }
 
-/** A re-render every ~200 ms while a server-timed window is running. */
-function useNow(active: boolean): number {
+/** A re-render every ~200 ms while a server-timed window is running (every 50 ms while a pattern is shown, so each symbol's slot starts on time). */
+function useNow(active: boolean, everyMs = 200): number {
   const [now, setNow] = useState(() => serverNowEstimate());
   useEffect(() => {
     if (!active) return;
     setNow(serverNowEstimate());
-    const t = setInterval(() => setNow(serverNowEstimate()), 200);
+    const t = setInterval(() => setNow(serverNowEstimate()), everyMs);
     return () => clearInterval(t);
-  }, [active]);
+  }, [active, everyMs]);
   return active ? now : serverNowEstimate();
 }
 
@@ -134,7 +182,16 @@ export function MchezoPulse({ game, publicGame, players, playerId, title, intent
   const open = st.open;
   const finishedHere = !!st.done || !!st.satOut;
   // Stage 8.1: tick between patterns too, so the game's time left stays current.
-  const now = useNow(!!open || (!finishedHere && game.deadlineAt !== undefined));
+  const now = useNow(!!open || (!finishedHere && game.deadlineAt !== undefined), open?.pattern ? 50 : 200);
+  // H1: from an older server without showFrom, the window counts from when this phone first saw the round open.
+  const firstSeen = useRef<{ key: string; at: number } | null>(null);
+  const seenKey = open ? `${game.id}:r${open.round}` : "";
+  if (open && firstSeen.current?.key !== seenKey) firstSeen.current = { key: seenKey, at: now };
+  // H1 (review 7010784066): every screen below renders the SAME announcer after its own <main>, at the
+  // same place in the tree, so React keeps one DOM node for it from the ready screen through each slot,
+  // gap and the recall screen; only its text changes.
+  const cueSay = pulseCueSay(open, now, firstSeen.current?.at ?? now);
+  const withAnnouncer = (screen: ReactNode) => <>{screen}<PulseAnnouncer text={cueSay} /></>;
   const clock = gameClockView(game.deadlineAt, now);
   // Announce only crossings into a more urgent band, each once per GAME (the
   // history is keyed by the game instance: screens never repeat a warning,
@@ -166,7 +223,7 @@ export function MchezoPulse({ game, publicGame, players, playerId, title, intent
   const total = st.myTotal ?? 0;
 
   if (st.done || st.satOut) {
-    return (
+    return withAnnouncer(
       <main className="mz-screen" aria-label={`${title}: finished`} data-testid="mz-pp-done">
         <GameHeader title={title} objective={st.satOut ? "Sitting the rest out" : "All six rounds done"} accent={4} />
         {/* Stage 8.1: Pulse draws its own game clock (App no longer does); results here come at the deadline at the latest. */}
@@ -186,22 +243,26 @@ export function MchezoPulse({ game, publicGame, players, playerId, title, intent
     const memorising = !!open.pattern && now < open.showUntil;
     if (memorising) {
       const secs = Math.max(0, Math.ceil((open.showUntil - now) / 1000));
-      return (
+      const len = open.pattern!.length;
+      const cue = pulseCueAt(len, open.showFrom ?? firstSeen.current?.at ?? now, open.showUntil, now);
+      const sym = cue.index !== null ? open.pattern![cue.index] : undefined;
+      return withAnnouncer(
         <main className="mz-screen" aria-label={`${title}: round ${round} of ${of}, memorise the pattern`} data-testid="mz-pp-memorise">
           <GameHeader title={title} objective="Memorise it" accent={4} />
           <GameClock game={game} />
-          <p className="mz-mr-round">Round {round} of {of} · {open.length} shapes</p>
-          <ol className={`mz-pp-pattern${reducedMotion ? " mz-pp-pattern--still" : " mz-pp-pattern--sweep"}`} data-testid="mz-pp-pattern"
-            style={{ ["--mz-pp-n" as string]: open.pattern!.length }} aria-label={`The pattern: ${open.pattern!.map((s) => PULSE_SYMBOLS[s]?.name).join(", ")}`}>
-            {open.pattern!.map((s, i) => (
-              <li key={i} className="mz-pp-cell" data-symbol={s} style={{ ["--mz-pp-i" as string]: i }}>
-                <span className="mz-pp-cell__n" aria-hidden="true">{i + 1}</span>
-                <PulseShape s={s} />
-                <span className="mz-pp-cell__name" aria-hidden="true">{PULSE_SYMBOLS[s]?.short}</span>
-              </li>
-            ))}
-          </ol>
-          <FeedbackLine testId="mz-pp-timer">Hides in {secs}s. Then tap it back in order.</FeedbackLine>
+          <p className="mz-mr-round">Round {round} of {of} · {len} shapes, one at a time</p>
+          {/* H1: one symbol at a time, never the whole sequence. Seen here; heard from the one announcer
+              (PulseAnnouncer, the same words in the same slot), so this stage is hidden from assistive technology. */}
+          <div className={`mz-pp-stage${reducedMotion ? " mz-pp-stage--still" : ""}`} data-testid="mz-pp-stage" aria-hidden="true">
+            {cue.index !== null && sym !== undefined && (
+              <p key={cue.index} className="mz-pp-stage__item" data-testid="mz-pp-cue" data-index={cue.index} data-symbol={sym}>
+                <PulseShape s={sym} size={112} />
+                <span className="mz-pp-stage__text">{pulseCueText(cue.index, len, PULSE_SYMBOLS[sym]?.name ?? "")}</span>
+              </p>
+            )}
+          </div>
+          {/* Not a live region: a countdown read out every second would talk over the symbols. */}
+          <p className="mz-foot" data-testid="mz-pp-timer">Hides in {secs}s. Then tap it back in order.</p>
         </main>
       );
     }
@@ -214,7 +275,7 @@ export function MchezoPulse({ game, publicGame, players, playerId, title, intent
     const timeUp = now >= until;
     const sending = pending === "answer";
     const full = entry.length === len;
-    return (
+    return withAnnouncer(
       <main className="mz-screen mz-pp-play" aria-label={`${title}: round ${round} of ${of}, tap the pattern back`} data-testid="mz-pp-input">
         {/* Stage 8.1: two columns on a short landscape screen (what to tap | the keys and Lock it in); one column otherwise. */}
         <div className="mz-pp-play__info">
@@ -258,7 +319,7 @@ export function MchezoPulse({ game, publicGame, players, playerId, title, intent
 
   const next = st.next ?? 0;
   const len = st.lengths?.[next] ?? next + 3;
-  return (
+  return withAnnouncer(
     <main className="mz-screen mz-pp-play" aria-label={`${title}: round ${next + 1} of ${of}, ready when you are`} data-testid="mz-pp-ready">
       {/* Stage 8.1: two columns on a short landscape screen (the next round | the game clock and Show me); one column otherwise. */}
       <div className="mz-pp-play__info">

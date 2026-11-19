@@ -49,6 +49,11 @@ describe("Pattern Pulse module", () => {
     expect((during["open"] as Json)["pattern"]).toEqual(pulsePattern(11, "a", 0));
     const after = pulseModule.playerView(s, "a", { now: showUntil, scale: 1 }) as Json;
     expect((after["open"] as Json)["pattern"]).toBeUndefined();
+    // H1 (handoff 7008903623): the window's start (the first open, never moved by asking again), for the phone's
+    // one-symbol-at-a-time cue. Additive: the windows and the pattern's lifetime are unchanged.
+    expect((during["open"] as Json)["showFrom"]).toBe(1000);
+    expect((after["open"] as Json)["showFrom"]).toBe(1000);
+    expect((pulseModule.playerView(s, "b", { now: showUntil - 1, scale: 1 }) as Json)["open"]).toBeUndefined();
     expect(pulseModule.intent(s, "a", "pulse-answer", { round: 0, sequence: [0, 1] }, ctx(showUntil + 10))).toEqual({ ok: false, reason: "INVALID_PAYLOAD" });
     expect(pulseModule.intent(s, "a", "pulse-answer", { round: 0, sequence: [0, 1, 9] }, ctx(showUntil + 10))).toEqual({ ok: false, reason: "INVALID_PAYLOAD" });
     const r = pulseModule.intent(s, "a", "pulse-answer", { round: 0, sequence: pulsePattern(11, "a", 0) }, ctx(showUntil + 10));
