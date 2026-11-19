@@ -2439,7 +2439,7 @@ The QA report's IDs:
 Every fix here is client-side. The server's start, timing, scoring and ledger are unchanged.
 - **D-FS-01 The server's start and timing contract is unchanged; no shared pre-start stage.**
   - **The evidence:** `scripts/check-fair-starts.mjs` (six contexts, a server clock the driver owns). On the baseline `da5ac0f` and on live `7097ac2` alike:
-    - every phone was actionable within 154 ms of the start broadcast, the 6× CPU-throttled one included;
+    - every phone was actionable within 168 ms of the start broadcast, the 6× CPU-throttled one included (the final runs; the evidence README has each figure);
     - all got one `playStartedAt` and one set of deadlines;
     - the all-ready start, the tick start, the late confirm ("already started"), a truly concurrent final Ready and confirm, and the expiry all behaved as D3 documents, with one transition and one `game-started` each.
   - **The original H7 reports of seconds of lost time are not reproduced; their cause is unknown.** They came from six cloud desktop browsers driven one after another, without simultaneous timestamps.
@@ -2476,5 +2476,5 @@ Every fix here is client-side. The server's start, timing, scoring and ledger ar
     - **Live changes** go on a separate "Since then: …" status line (`confirmChanges`): who is ready now, who isn't any more, who came back or dropped.
   - **Alternative:** a fully live dialog. Confirming a list that changed under the host's finger would either start play without the server's "ask again", or refuse a list that was on screen. Both contradict the D3 contract.
 - **Not changed, and why** (H6): "pressed and disabled, the row still not ready, then play at 5/6".
-  - **What happens:** the last Ready starts play in the same server step, so no projection ever shows 6/6. The button is busy from the tap until the answer, which the driver measures at about 0.1 s.
+  - **What happens:** the last Ready starts play in the same server step, so no projection ever shows 6/6. The button is busy from the tap until the start frame arrives, 0.07–0.17 s later in the driver's runs.
   - **The verdict:** that is the documented all-ready contract, not a stale row.

@@ -1,0 +1,35 @@
+PASS A-closest-wins one transition, one game-started (trigger all-ready) — ["all-ready"]
+PASS A-closest-wins play starts at the final Ready's server instant — playStartedAt=1798131605000 lastReady=1798131605000
+PASS A-closest-wins every phone got the same start and deadlines — [{"playStartedAt":1798131605000,"phaseDeadlineAt":1798131645000,"deadlineAt":1798132085000},{"playStartedAt":1798131605000,"phaseDeadlineAt":1798131645000,"deadlineAt":1798132085000},{"playStartedAt":1798131605000,"phaseDeadlineAt":1798131645000,"deadlineAt":1798132085000},{"playStartedAt":1798131605000,"phaseDeadlineAt":1798131645000,"deadlineAt":1798132085000},{"playStartedAt":1798131605000,"phaseDeadlineAt":1798131645000,"deadlineAt":1798132085000},{"playStartedAt":1798131605000,"phaseDeadlineAt":1798131645000,"deadlineAt":1798132085000}]
+PASS A-closest-wins every phone showed an actionable screen (in the page's own time) — max 154 ms
+FAIL N-closest-wins the next question's control is on screen, unscrolled, on every phone — [["keku",12,620,680,844],["amina",18,620,680,844],["baraka",null,616,672,667],["wanjiru",null,616,672,568],["zawadi",31,620,680,844],["juma",20,386,446,844]]
+PASS A-team-huddle one transition, one game-started (trigger all-ready) — ["all-ready"]
+PASS A-team-huddle play starts at the final Ready's server instant — playStartedAt=1798131910000 lastReady=1798131910000
+PASS A-team-huddle every phone got the same start and deadlines — [{"playStartedAt":1798131910000,"phaseDeadlineAt":1798131935000,"deadlineAt":1798132390000},{"playStartedAt":1798131910000,"phaseDeadlineAt":1798131935000,"deadlineAt":1798132390000},{"playStartedAt":1798131910000,"phaseDeadlineAt":1798131935000,"deadlineAt":1798132390000},{"playStartedAt":1798131910000,"phaseDeadlineAt":1798131935000,"deadlineAt":1798132390000},{"playStartedAt":1798131910000,"phaseDeadlineAt":1798131935000,"deadlineAt":1798132390000},{"playStartedAt":1798131910000,"phaseDeadlineAt":1798131935000,"deadlineAt":1798132390000}]
+PASS A-team-huddle every phone showed an actionable screen (in the page's own time) — max 25 ms
+PASS N-team-huddle every team agreed: the reveal came early — 0:reveal
+PASS N-team-huddle the next question's control is on screen, unscrolled, on every phone — [["keku",5,259,323,844],["amina",7,259,323,844],["baraka",14,258,322,667],["wanjiru",10,286,350,568],["zawadi",12,259,323,844],["juma",23,259,323,844]]
+PASS A-relay one transition, one game-started (trigger all-ready) — ["all-ready"]
+PASS A-relay play starts at the final Ready's server instant — playStartedAt=1798132161001 lastReady=1798132161001
+PASS A-relay every phone got the same start and deadlines — [{"playStartedAt":1798132161001,"deadlineAt":1798132401001,"turnEndsAt":1798132181001,"myTurn":true},{"playStartedAt":1798132161001,"deadlineAt":1798132401001,"turnEndsAt":1798132181001,"myTurn":false},{"playStartedAt":1798132161001,"deadlineAt":1798132401001,"turnEndsAt":1798132181001,"myTurn":true},{"playStartedAt":1798132161001,"deadlineAt":1798132401001,"turnEndsAt":1798132181001,"myTurn":false},{"playStartedAt":1798132161001,"deadlineAt":1798132401001,"turnEndsAt":1798132181001,"myTurn":true},{"playStartedAt":1798132161001,"deadlineAt":1798132401001,"turnEndsAt":1798132181001,"myTurn":false}]
+PASS A-relay every phone showed an actionable screen (in the page's own time) — max 58 ms
+PASS N-relay the next runner's turn starts at the right answer, and their options are on screen — lag 18 ms, control 210-274/844
+PASS R-relay a reconnecting player blocks all-ready
+PASS R-relay the confirmation names exactly the reconnecting player — Zawadi: not ready yet · reconnecting | READY · 5 OF 6
+PASS R-relay one transition (start-now, confirmed [Zawadi]) — {"trigger":"start-now","readyAtStart":{"player-1":true,"player-2":true,"player-3":true,"player-4":true,"player-5":false,"player-6":true},"presenceAtStart":{"player-1":"connected","player-2":"connected","player-3":"connected","player-4":"connected","player-5":"reconnecting","player-6":"connected"},"confirmed":["player-5"]}
+PASS T-team-huddle every roster player is Ready but one is reconnecting: still the briefing
+PASS T-team-huddle the host's rows say 6 of 6 ready and Zawadi reconnecting — READY · 6 OF 6 | Z / Zawadi / Ready · reconnecting
+PASS T-team-huddle the tick started play once (all-ready), when Zawadi was back — [{"trigger":"all-ready","readyAtStart":{"player-1":true,"player-2":true,"player-3":true,"player-4":true,"player-5":true,"player-6":true},"presenceAtStart":{"player-1":"connected","player-2":"connected","player-3":"connected","player-4":"connected","player-5":"connected","player-6":"connected"},"confirmed":[]}]
+PASS T-team-huddle every phone, Zawadi's too, got the same start and deadline — [["keku",1798132807001,6],["amina",1798132807001,12],["baraka",1798132807001,10],["wanjiru",1798132807001,27],["zawadi",1798132807001,32],["juma",1798132807001,48]]
+PASS C-closest-wins all-ready won; the stale confirm is "already started"; one transition — 200 {"ok":true,"started":true,"trigger":"already-started"}
+PASS C-closest-wins the host's dialog went with the briefing, and no error shows — confirm listed: Juma: not ready yet; alerts: []
+PASS L-team-huddle one transition (start-now), the late Ready changed nothing on the server — 200 {"ok":true,"started":true,"trigger":"start-now"} readyEvents=0
+PASS L-team-huddle the late Ready leaves no error on Juma's first question — []
+PASS L-closest-wins one transition (start-now), the late Ready changed nothing on the server — 200 {"ok":true,"started":true,"trigger":"start-now"} readyEvents=0
+FAIL L-closest-wins the late Ready leaves no error on Juma's first question — ["The game has already started."]
+PASS E-relay the expired briefing is cancelled once, never started; the stale confirm is refused — 400 {"error":"That game isn't waiting to start"} cancelled=1
+FAIL E-relay the host sees "Game cancelled", not the stale dialog
+INFO S-team-huddle Juma (400 ms emulated latency): frame +561 ms, actionable +644 ms; others max +46 ms
+PASS S-team-huddle one shared start and deadline whatever the network
+data and screenshots kept in <run data dir>
+3 FAIR-START CHECK(S) FAILED

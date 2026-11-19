@@ -1,0 +1,94 @@
+$ node scripts/check-release-package.mjs http://localhost:38099
+# timeout 600s | worker w2 | server http://localhost:38099 (data <scratchpad>/fs-gate/20261119-093227-8f2ead3a-11408/server-data/w2)
+
+[+10.7s] [33m
+[+10.7s] (!) Some chunks are larger than 500 kB after minification. Consider:
+[+10.7s] - Using dynamic import() to code-split the application
+[+10.7s] - Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+[+10.7s] - Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.[39m
+[+10.7s] release 8f2ead3a6eb9aa6eb839c9b79b7735ae972e429e packed into /tmp/mz-release-pkg-NtV35F in 10.6 s
+[+10.7s] PASS P release.json names the checked-out revision — 8f2ead3a6eb9aa6eb839c9b79b7735ae972e429e
+[+10.7s] PASS P the package holds only what runs — ["apps","content","dist","package-lock.json","package.json","release.json"]
+[+10.7s] PASS P no tests, scripts, docs, data, env files or source maps of tests in it
+[+10.7s] PASS P the server entry, the built app and the content are there
+[+10.7s] PASS P no approval records and no editorial pilot batches are shipped
+[+10.8s] PASS P no secret-shaped strings in any shipped file
+[+11.5s] 
+[+11.5s] added 2 packages in 704ms
+[+11.5s] PASS I the runtime install is ws and zod only — ["ws","zod"]
+[+11.8s] PASS S the package starts on plain node in production — port 41725
+[+11.8s] PASS S its output never shows the access code
+[+11.8s] PASS S a first start creates the missing data directory, private (0700) — 700
+[+11.9s] PASS S listening on 127.0.0.1 only: this machine's network address is refused — 192.0.2.2: ECONNREFUSED
+[+11.9s] PASS S /health names the revision and nothing else — {"ok":true,"revision":"8f2ead3a6eb9aa6eb839c9b79b7735ae972e429e"}
+[+11.9s] PASS S the app is behind the gate
+[+11.9s] PASS S the right code opens it (a Secure, HttpOnly cookie, since the public origin is https)
+[+11.9s] PASS S with the cookie: the built app and its files are served — /assets/index-CqWS-n1r.js
+[+11.9s] PASS S a room is created and joined through the gate — 201/201
+[+11.9s] PASS S live updates are gated too: a WebSocket without the cookie is refused, with it it opens
+[+12.1s] PASS L a second server on the same data is refused, with the reason — Another server (pid 22810) is using this data directory (/tmp/mz-release-data-iAAZVW/var-lib-cgn). Stop it first: one process writes a data directory at a time.
+[+12.4s] PASS L four servers started at the same moment on a new folder: one serves, three are refused with the reason — serving, exit 2, exit 2, exit 2
+[+13.9s] PASS L SIGTERM stops it cleanly and frees the lock — exit 0
+[+14.3s] PASS L after a restart the room is back, and the beta cookie still works — 200
+[+14.3s] PASS L a kill -9 leaves a stale lock behind
+[+14.5s] PASS L the next start takes the stale lock over, and the room survives the crash — [data] took over a stale lock left by a process that is no longer running (pid 22876, server) (/tmp/mz-release-data-iAAZVW/var-lib-cgn/server.lock)
+[+14.6s] PASS D a backup is refused while the server runs (stop it between sessions) — A server (pid 22887) is using /tmp/mz-release-data-iAAZVW/var-lib-cgn. Stop it first (between sessions), or pass --allow-running: each file is still copied whole, but a room and its Memory Book may then be a moment apart.
+[+14.6s] PASS D archiving is refused while the server runs — A server (pid 22887) is using /tmp/mz-release-data-iAAZVW/var-lib-cgn: stop it before archiving, or it will write the rooms back.
+[+14.7s] PASS D check is refused while the server runs — A server (pid 22887) is using /tmp/mz-release-data-iAAZVW/var-lib-cgn: check it with the server stopped.
+[+14.8s] PASS D with the server stopped: backup OK, verified — backup OK: 1 room(s), 0 Memory Book(s), 2 file(s), verified
+[+14.9s] PASS D restore into a new folder: OK — restore OK: 1 room(s), 0 Memory Book(s) restored and verified. Next, as the user the server runs as: datatool check --data /tmp/mz-release-rs-Eh5FYC/data
+[+15.1s] PASS D a server on the restored folder serves the same room — 200
+[+15.2s] PASS D retention is a dry run by default and finds nothing recent to archive — 0 room(s) older than 30 days; dry run, nothing moved (add --apply)
+[+15.3s] U local users for this run: mzsvc22720 (the service, uid 996) and mzother22720 (someone else, uid 995); removed at the end
+[+15.3s] PASS U first install: the data folder belongs to the service user, 0700
+[+15.3s] FAIL U the package runs as the service user on it — env: '<scratchpad>/r2/node/node-v22.16.0-linux-x64/bin/node': Permission denied
+[+15.3s] 
+[+15.3s] FAIL the check ran to the end — TypeError: Failed to parse URL from http://127.0.0.1:undefined/rooms |     at node:internal/deps/undici/undici:13510:13 |     at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+[+15.3s] --- S1 output ---
+[+15.3s] Christmas Game Night server on http://localhost:41725 (web app at / after npm run build:web)
+[+15.3s] Listening on 127.0.0.1; public origin https://beta.example.test.
+[+15.3s] received SIGTERM, closing server
+[+15.3s] 
+[+15.3s] --- S2 output ---
+[+15.3s] Another server (pid 22810) is using this data directory (/tmp/mz-release-data-iAAZVW/var-lib-cgn). Stop it first: one process writes a data directory at a time.
+[+15.3s] 
+[+15.3s] --- RACE1 output ---
+[+15.3s] Christmas Game Night server on http://localhost:33977 (web app at / after npm run build:web)
+[+15.3s] Listening on 127.0.0.1; public origin https://beta.example.test.
+[+15.3s] received SIGTERM, closing server
+[+15.3s] 
+[+15.3s] --- RACE2 output ---
+[+15.3s] Another server (pid 22832) is using this data directory (/tmp/mz-release-race-33cPTD/data). Stop it first: one process writes a data directory at a time.
+[+15.3s] 
+[+15.3s] --- RACE3 output ---
+[+15.3s] Another server (pid 22832) is using this data directory (/tmp/mz-release-race-33cPTD/data). Stop it first: one process writes a data directory at a time.
+[+15.3s] 
+[+15.3s] --- RACE4 output ---
+[+15.3s] Another server (pid 22832) is using this data directory (/tmp/mz-release-race-33cPTD/data). Stop it first: one process writes a data directory at a time.
+[+15.3s] 
+[+15.3s] --- S3 output ---
+[+15.3s] [restore] 1 room(s) restored, 0 not loaded (data: /tmp/mz-release-data-iAAZVW/var-lib-cgn)
+[+15.3s] Christmas Game Night server on http://localhost:39419 (web app at / after npm run build:web)
+[+15.3s] Listening on 127.0.0.1; public origin https://beta.example.test.
+[+15.3s] 
+[+15.3s] --- S4 output ---
+[+15.3s] [data] took over a stale lock left by a process that is no longer running (pid 22876, server) (/tmp/mz-release-data-iAAZVW/var-lib-cgn/server.lock)
+[+15.3s] [restore] 1 room(s) restored, 0 not loaded (data: /tmp/mz-release-data-iAAZVW/var-lib-cgn)
+[+15.3s] Christmas Game Night server on http://localhost:37927 (web app at / after npm run build:web)
+[+15.3s] Listening on 127.0.0.1; public origin https://beta.example.test.
+[+15.3s] received SIGTERM, closing server
+[+15.3s] 
+[+15.3s] --- S5 output ---
+[+15.3s] [restore] 1 room(s) restored, 0 not loaded (data: /tmp/mz-release-rs-Eh5FYC/data)
+[+15.3s] Christmas Game Night server on http://localhost:37875 (web app at / after npm run build:web)
+[+15.3s] Listening on 127.0.0.1; public origin https://beta.example.test.
+[+15.3s] received SIGTERM, closing server
+[+15.3s] 
+[+15.3s] --- U-svc-1 output ---
+[+15.3s] env: '<scratchpad>/r2/node/node-v22.16.0-linux-x64/bin/node': Permission denied
+[+15.3s] 
+[+15.4s] cleanup: local users removed: 2 of 2
+[+15.4s] cleanup: 10 process(es) stopped, 7 temporary dir(s) removed; still running: none; left on disk: none
+[+15.4s] RELEASE PACKAGE FAILED: 2 failed
+
+# FAIL (exit 1) in 15.5s | cpu 20.6s, peak memory 685 MB

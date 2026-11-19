@@ -1,0 +1,1979 @@
+{
+  "server": {
+    "T0": 1798131600000,
+    "roomCode": "(redacted)"
+  },
+  "cases": [
+    {
+      "case": "A-closest-wins",
+      "gameId": "closest-wins",
+      "trigger": "all-ready",
+      "playStartedAt": 1798131605000,
+      "firstPhaseDeadlineAt": 1798131645000,
+      "firstPhaseWindowMs": 40000,
+      "gameDeadlineAt": 1798132085000,
+      "startBroadcastWall": 1795078935150,
+      "rows": [
+        {
+          "player": "keku",
+          "viewport": "390x844",
+          "slow": false,
+          "dropped": false,
+          "frameDeadlines": {
+            "playStartedAt": 1798131605000,
+            "phaseDeadlineAt": 1798131645000,
+            "deadlineAt": 1798132085000
+          },
+          "frameLagMs": 4,
+          "presentLagMs": 18,
+          "enabledLagMs": 18,
+          "actionableLagMs": 18,
+          "controlTop": 386,
+          "controlBottom": 446,
+          "viewportH": 844
+        },
+        {
+          "player": "amina",
+          "viewport": "390x844",
+          "slow": false,
+          "dropped": false,
+          "frameDeadlines": {
+            "playStartedAt": 1798131605000,
+            "phaseDeadlineAt": 1798131645000,
+            "deadlineAt": 1798132085000
+          },
+          "frameLagMs": 4,
+          "presentLagMs": 43,
+          "enabledLagMs": 43,
+          "actionableLagMs": 43,
+          "controlTop": 386,
+          "controlBottom": 446,
+          "viewportH": 844
+        },
+        {
+          "player": "baraka",
+          "viewport": "375x667",
+          "slow": false,
+          "dropped": false,
+          "frameDeadlines": {
+            "playStartedAt": 1798131605000,
+            "phaseDeadlineAt": 1798131645000,
+            "deadlineAt": 1798132085000
+          },
+          "frameLagMs": 3,
+          "presentLagMs": 17,
+          "enabledLagMs": 17,
+          "actionableLagMs": 17,
+          "controlTop": 405,
+          "controlBottom": 461,
+          "viewportH": 667
+        },
+        {
+          "player": "wanjiru",
+          "viewport": "320x568",
+          "slow": false,
+          "dropped": false,
+          "frameDeadlines": {
+            "playStartedAt": 1798131605000,
+            "phaseDeadlineAt": 1798131645000,
+            "deadlineAt": 1798132085000
+          },
+          "frameLagMs": 5,
+          "presentLagMs": 44,
+          "enabledLagMs": 44,
+          "actionableLagMs": 44,
+          "controlTop": 405,
+          "controlBottom": 461,
+          "viewportH": 568
+        },
+        {
+          "player": "zawadi",
+          "viewport": "390x844",
+          "slow": false,
+          "dropped": false,
+          "frameDeadlines": {
+            "playStartedAt": 1798131605000,
+            "phaseDeadlineAt": 1798131645000,
+            "deadlineAt": 1798132085000
+          },
+          "frameLagMs": 6,
+          "presentLagMs": 35,
+          "enabledLagMs": 35,
+          "actionableLagMs": 35,
+          "controlTop": 386,
+          "controlBottom": 446,
+          "viewportH": 844
+        },
+        {
+          "player": "juma",
+          "viewport": "390x844",
+          "slow": true,
+          "dropped": false,
+          "frameDeadlines": {
+            "playStartedAt": 1798131605000,
+            "phaseDeadlineAt": 1798131645000,
+            "deadlineAt": 1798132085000
+          },
+          "frameLagMs": 35,
+          "presentLagMs": 154,
+          "enabledLagMs": 154,
+          "actionableLagMs": 154,
+          "controlTop": 386,
+          "controlBottom": 446,
+          "viewportH": 844
+        }
+      ],
+      "automation": [
+        {
+          "player": "keku",
+          "automationLagMs": 49
+        },
+        {
+          "player": "amina",
+          "automationLagMs": 81
+        },
+        {
+          "player": "baraka",
+          "automationLagMs": 126
+        },
+        {
+          "player": "wanjiru",
+          "automationLagMs": 156
+        },
+        {
+          "player": "zawadi",
+          "automationLagMs": 195
+        },
+        {
+          "player": "juma",
+          "automationLagMs": 251
+        }
+      ],
+      "ledger": [
+        {
+          "type": "game-briefing-started",
+          "at": 1798131600000
+        },
+        {
+          "type": "ready-changed",
+          "at": 1798131600000
+        },
+        {
+          "type": "ready-changed",
+          "at": 1798131601000
+        },
+        {
+          "type": "ready-changed",
+          "at": 1798131602000
+        },
+        {
+          "type": "ready-changed",
+          "at": 1798131603000
+        },
+        {
+          "type": "ready-changed",
+          "at": 1798131604000
+        },
+        {
+          "type": "ready-changed",
+          "at": 1798131605000
+        },
+        {
+          "type": "content-selected",
+          "at": 1798131605000
+        },
+        {
+          "type": "game-started",
+          "at": 1798131605000,
+          "trigger": "all-ready"
+        }
+      ]
+    },
+    {
+      "case": "N-closest-wins",
+      "gameId": "closest-wins",
+      "phaseKey": "q:1",
+      "phaseStartedAtServer": 1798131605000,
+      "phaseDeadlineAt": 1798131645000,
+      "phaseWindowMs": 40000,
+      "phaseBroadcastWall": 1795078938038,
+      "rows": [
+        {
+          "player": "keku",
+          "viewport": "390x844",
+          "slow": false,
+          "dropped": false,
+          "frameDeadlines": {
+            "playStartedAt": 1798131605000,
+            "phaseDeadlineAt": 1798131645000,
+            "deadlineAt": 1798132085000
+          },
+          "frameLagMs": 9,
+          "presentLagMs": 12,
+          "enabledLagMs": 12,
+          "actionableLagMs": 12,
+          "controlTop": 620,
+          "controlBottom": 680,
+          "viewportH": 844
+        },
+        {
+          "player": "amina",
+          "viewport": "390x844",
+          "slow": false,
+          "dropped": false,
+          "frameDeadlines": {
+            "playStartedAt": 1798131605000,
+            "phaseDeadlineAt": 1798131645000,
+            "deadlineAt": 1798132085000
+          },
+          "frameLagMs": 9,
+          "presentLagMs": 18,
+          "enabledLagMs": 18,
+          "actionableLagMs": 18,
+          "controlTop": 620,
+          "controlBottom": 680,
+          "viewportH": 844
+        },
+        {
+          "player": "baraka",
+          "viewport": "375x667",
+          "slow": false,
+          "dropped": false,
+          "frameDeadlines": {
+            "playStartedAt": 1798131605000,
+            "phaseDeadlineAt": 1798131645000,
+            "deadlineAt": 1798132085000
+          },
+          "frameLagMs": 11,
+          "presentLagMs": 13,
+          "enabledLagMs": 13,
+          "actionableLagMs": null,
+          "controlTop": 616,
+          "controlBottom": 672,
+          "viewportH": 667
+        },
+        {
+          "player": "wanjiru",
+          "viewport": "320x568",
+          "slow": false,
+          "dropped": false,
+          "frameDeadlines": {
+            "playStartedAt": 1798131605000,
+            "phaseDeadlineAt": 1798131645000,
+            "deadlineAt": 1798132085000
+          },
+          "frameLagMs": 24,
+          "presentLagMs": 32,
+          "enabledLagMs": 32,
+          "actionableLagMs": null,
+          "controlTop": 616,
+          "controlBottom": 672,
+          "viewportH": 568
+        },
+        {
+          "player": "zawadi",
+          "viewport": "390x844",
+          "slow": false,
+          "dropped": false,
+          "frameDeadlines": {
+            "playStartedAt": 1798131605000,
+            "phaseDeadlineAt": 1798131645000,
+            "deadlineAt": 1798132085000
+          },
+          "frameLagMs": 24,
+          "presentLagMs": 31,
+          "enabledLagMs": 31,
+          "actionableLagMs": 31,
+          "controlTop": 620,
+          "controlBottom": 680,
+          "viewportH": 844
+        },
+        {
+          "player": "juma",
+          "viewport": "390x844",
+          "slow": true,
+          "dropped": false,
+          "frameDeadlines": {
+            "playStartedAt": 1798131605000,
+            "phaseDeadlineAt": 1798131645000,
+            "deadlineAt": 1798132085000
+          },
+          "frameLagMs": 20,
+          "presentLagMs": 20,
+          "enabledLagMs": 20,
+          "actionableLagMs": 20,
+          "controlTop": 386,
+          "controlBottom": 446,
+          "viewportH": 844
+        }
+      ]
+    },
+    {
+      "case": "A-team-huddle",
+      "gameId": "team-huddle",
+      "trigger": "all-ready",
+      "playStartedAt": 1798131910000,
+      "firstPhaseDeadlineAt": 1798131935000,
+      "firstPhaseWindowMs": 25000,
+      "gameDeadlineAt": 1798132390000,
+      "startBroadcastWall": 1795078942009,
+      "rows": [
+        {
+          "player": "keku",
+          "viewport": "390x844",
+          "slow": false,
+          "dropped": false,
+          "frameDeadlines": {
+            "playStartedAt": 1798131910000,
+            "phaseDeadlineAt": 1798131935000,
+            "deadlineAt": 1798132390000
+          },
+          "frameLagMs": 2,
+          "presentLagMs": 12,
+          "enabledLagMs": 12,
+          "actionableLagMs": 12,
+          "controlTop": 229,
+          "controlBottom": 293,
+          "viewportH": 844
+        },
+        {
+          "player": "amina",
+          "viewport": "390x844",
+          "slow": false,
+          "dropped": false,
+          "frameDeadlines": {
+            "playStartedAt": 1798131910000,
+            "phaseDeadlineAt": 1798131935000,
+            "deadlineAt": 1798132390000
+          },
+          "frameLagMs": 6,
+          "presentLagMs": 13,
+          "enabledLagMs": 13,
+          "actionableLagMs": 13,
+          "controlTop": 229,
+          "controlBottom": 293,
+          "viewportH": 844
+        },
+        {
+          "player": "baraka",
+          "viewport": "375x667",
+          "slow": false,
+          "dropped": false,
+          "frameDeadlines": {
+            "playStartedAt": 1798131910000,
+            "phaseDeadlineAt": 1798131935000,
+            "deadlineAt": 1798132390000
+          },
+          "frameLagMs": 6,
+          "presentLagMs": 17,
+          "enabledLagMs": 17,
+          "actionableLagMs": 17,
+          "controlTop": 228,
+          "controlBottom": 292,
+          "viewportH": 667
+        },
+        {
+          "player": "wanjiru",
+          "viewport": "320x568",
+          "slow": false,
+          "dropped": false,
+          "frameDeadlines": {
+            "playStartedAt": 1798131910000,
+            "phaseDeadlineAt": 1798131935000,
+            "deadlineAt": 1798132390000
+          },
+          "frameLagMs": 7,
+          "presentLagMs": 18,
+          "enabledLagMs": 18,
+          "actionableLagMs": 18,
+          "controlTop": 226,
+          "controlBottom": 290,
+          "viewportH": 568
+        },
+        {
+          "player": "zawadi",
+          "viewport": "390x844",
+          "slow": false,
+          "dropped": false,
+          "frameDeadlines": {
+            "playStartedAt": 1798131910000,
+            "phaseDeadlineAt": 1798131935000,
+            "deadlineAt": 1798132390000
+          },
+          "frameLagMs": 6,
+          "presentLagMs": 13,
+          "enabledLagMs": 13,
+          "actionableLagMs": 13,
+          "controlTop": 229,
+          "controlBottom": 293,
+          "viewportH": 844
+        },
+        {
+          "player": "juma",
+          "viewport": "390x844",
+          "slow": true,
+          "dropped": false,
+          "frameDeadlines": {
+            "playStartedAt": 1798131910000,
+            "phaseDeadlineAt": 1798131935000,
+            "deadlineAt": 1798132390000
+          },
+          "frameLagMs": 16,
+          "presentLagMs": 25,
+          "enabledLagMs": 25,
+          "actionableLagMs": 25,
+          "controlTop": 229,
+          "controlBottom": 293,
+          "viewportH": 844
+        }
+      ],
+      "automation": [
+        {
+          "player": "keku",
+          "automationLagMs": 38
+        },
+        {
+          "player": "amina",
+          "automationLagMs": 88
+        },
+        {
+          "player": "baraka",
+          "automationLagMs": 122
+        },
+        {
+          "player": "wanjiru",
+          "automationLagMs": 150
+        },
+        {
+          "player": "zawadi",
+          "automationLagMs": 178
+        },
+        {
+          "player": "juma",
+          "automationLagMs": 224
+        }
+      ],
+      "ledger": [
+        {
+          "type": "game-briefing-started",
+          "at": 1798131905000
+        },
+        {
+          "type": "ready-changed",
+          "at": 1798131905000
+        },
+        {
+          "type": "ready-changed",
+          "at": 1798131906000
+        },
+        {
+          "type": "ready-changed",
+          "at": 1798131907000
+        },
+        {
+          "type": "ready-changed",
+          "at": 1798131908000
+        },
+        {
+          "type": "ready-changed",
+          "at": 1798131909000
+        },
+        {
+          "type": "ready-changed",
+          "at": 1798131910000
+        },
+        {
+          "type": "content-selected",
+          "at": 1798131910000
+        },
+        {
+          "type": "game-started",
+          "at": 1798131910000,
+          "trigger": "all-ready"
+        }
+      ]
+    },
+    {
+      "case": "N-team-huddle",
+      "gameId": "team-huddle",
+      "phaseKey": "1:pick",
+      "phaseStartedAtServer": 1798131916001,
+      "phaseDeadlineAt": 1798131941000,
+      "phaseWindowMs": 24999,
+      "phaseBroadcastWall": 1795078945425,
+      "rows": [
+        {
+          "player": "keku",
+          "viewport": "390x844",
+          "slow": false,
+          "dropped": false,
+          "frameDeadlines": {
+            "playStartedAt": 1798131910000,
+            "phaseDeadlineAt": 1798131941000,
+            "deadlineAt": 1798132390000
+          },
+          "frameLagMs": 3,
+          "presentLagMs": 5,
+          "enabledLagMs": 5,
+          "actionableLagMs": 5,
+          "controlTop": 259,
+          "controlBottom": 323,
+          "viewportH": 844
+        },
+        {
+          "player": "amina",
+          "viewport": "390x844",
+          "slow": false,
+          "dropped": false,
+          "frameDeadlines": {
+            "playStartedAt": 1798131910000,
+            "phaseDeadlineAt": 1798131941000,
+            "deadlineAt": 1798132390000
+          },
+          "frameLagMs": 5,
+          "presentLagMs": 7,
+          "enabledLagMs": 7,
+          "actionableLagMs": 7,
+          "controlTop": 259,
+          "controlBottom": 323,
+          "viewportH": 844
+        },
+        {
+          "player": "baraka",
+          "viewport": "375x667",
+          "slow": false,
+          "dropped": false,
+          "frameDeadlines": {
+            "playStartedAt": 1798131910000,
+            "phaseDeadlineAt": 1798131941000,
+            "deadlineAt": 1798132390000
+          },
+          "frameLagMs": 4,
+          "presentLagMs": 14,
+          "enabledLagMs": 14,
+          "actionableLagMs": 14,
+          "controlTop": 258,
+          "controlBottom": 322,
+          "viewportH": 667
+        },
+        {
+          "player": "wanjiru",
+          "viewport": "320x568",
+          "slow": false,
+          "dropped": false,
+          "frameDeadlines": {
+            "playStartedAt": 1798131910000,
+            "phaseDeadlineAt": 1798131941000,
+            "deadlineAt": 1798132390000
+          },
+          "frameLagMs": 4,
+          "presentLagMs": 10,
+          "enabledLagMs": 10,
+          "actionableLagMs": 10,
+          "controlTop": 286,
+          "controlBottom": 350,
+          "viewportH": 568
+        },
+        {
+          "player": "zawadi",
+          "viewport": "390x844",
+          "slow": false,
+          "dropped": false,
+          "frameDeadlines": {
+            "playStartedAt": 1798131910000,
+            "phaseDeadlineAt": 1798131941000,
+            "deadlineAt": 1798132390000
+          },
+          "frameLagMs": 6,
+          "presentLagMs": 12,
+          "enabledLagMs": 12,
+          "actionableLagMs": 12,
+          "controlTop": 259,
+          "controlBottom": 323,
+          "viewportH": 844
+        },
+        {
+          "player": "juma",
+          "viewport": "390x844",
+          "slow": true,
+          "dropped": false,
+          "frameDeadlines": {
+            "playStartedAt": 1798131910000,
+            "phaseDeadlineAt": 1798131941000,
+            "deadlineAt": 1798132390000
+          },
+          "frameLagMs": 13,
+          "presentLagMs": 23,
+          "enabledLagMs": 23,
+          "actionableLagMs": 23,
+          "controlTop": 259,
+          "controlBottom": 323,
+          "viewportH": 844
+        }
+      ]
+    },
+    {
+      "case": "A-relay",
+      "gameId": "relay",
+      "trigger": "all-ready",
+      "playStartedAt": 1798132161001,
+      "firstPhaseWindowMs": null,
+      "relay": {
+        "startedAt": 1798132161001,
+        "lanes": [
+          {
+            "teamId": "team-coral",
+            "legs": 0,
+            "runnerId": "player-1",
+            "turnStartedAt": 1798132161001
+          },
+          {
+            "teamId": "team-sun",
+            "legs": 0,
+            "runnerId": "player-3",
+            "turnStartedAt": 1798132161001
+          },
+          {
+            "teamId": "team-mint",
+            "legs": 0,
+            "runnerId": "player-5",
+            "turnStartedAt": 1798132161001
+          }
+        ]
+      },
+      "gameDeadlineAt": 1798132401001,
+      "startBroadcastWall": 1795078949255,
+      "rows": [
+        {
+          "player": "keku",
+          "viewport": "390x844",
+          "slow": false,
+          "dropped": false,
+          "frameDeadlines": {
+            "playStartedAt": 1798132161001,
+            "deadlineAt": 1798132401001,
+            "turnEndsAt": 1798132181001,
+            "myTurn": true
+          },
+          "frameLagMs": 4,
+          "presentLagMs": 20,
+          "enabledLagMs": 20,
+          "actionableLagMs": 20,
+          "controlTop": 210,
+          "controlBottom": 274,
+          "viewportH": 844
+        },
+        {
+          "player": "amina",
+          "viewport": "390x844",
+          "slow": false,
+          "dropped": false,
+          "frameDeadlines": {
+            "playStartedAt": 1798132161001,
+            "deadlineAt": 1798132401001,
+            "turnEndsAt": 1798132181001,
+            "myTurn": false
+          },
+          "frameLagMs": 7,
+          "presentLagMs": 16,
+          "enabledLagMs": 16,
+          "actionableLagMs": 16,
+          "controlTop": 149,
+          "controlBottom": 190,
+          "viewportH": 844
+        },
+        {
+          "player": "baraka",
+          "viewport": "375x667",
+          "slow": false,
+          "dropped": false,
+          "frameDeadlines": {
+            "playStartedAt": 1798132161001,
+            "deadlineAt": 1798132401001,
+            "turnEndsAt": 1798132181001,
+            "myTurn": true
+          },
+          "frameLagMs": 11,
+          "presentLagMs": 22,
+          "enabledLagMs": 22,
+          "actionableLagMs": 22,
+          "controlTop": 207,
+          "controlBottom": 271,
+          "viewportH": 667
+        },
+        {
+          "player": "wanjiru",
+          "viewport": "320x568",
+          "slow": false,
+          "dropped": false,
+          "frameDeadlines": {
+            "playStartedAt": 1798132161001,
+            "deadlineAt": 1798132401001,
+            "turnEndsAt": 1798132181001,
+            "myTurn": false
+          },
+          "frameLagMs": 12,
+          "presentLagMs": 25,
+          "enabledLagMs": 25,
+          "actionableLagMs": 25,
+          "controlTop": 146,
+          "controlBottom": 185,
+          "viewportH": 568
+        },
+        {
+          "player": "zawadi",
+          "viewport": "390x844",
+          "slow": false,
+          "dropped": false,
+          "frameDeadlines": {
+            "playStartedAt": 1798132161001,
+            "deadlineAt": 1798132401001,
+            "turnEndsAt": 1798132181001,
+            "myTurn": true
+          },
+          "frameLagMs": 13,
+          "presentLagMs": 20,
+          "enabledLagMs": 20,
+          "actionableLagMs": 20,
+          "controlTop": 210,
+          "controlBottom": 274,
+          "viewportH": 844
+        },
+        {
+          "player": "juma",
+          "viewport": "390x844",
+          "slow": true,
+          "dropped": false,
+          "frameDeadlines": {
+            "playStartedAt": 1798132161001,
+            "deadlineAt": 1798132401001,
+            "turnEndsAt": 1798132181001,
+            "myTurn": false
+          },
+          "frameLagMs": 32,
+          "presentLagMs": 58,
+          "enabledLagMs": 58,
+          "actionableLagMs": 58,
+          "controlTop": 149,
+          "controlBottom": 190,
+          "viewportH": 844
+        }
+      ],
+      "automation": [
+        {
+          "player": "keku",
+          "automationLagMs": 41
+        },
+        {
+          "player": "amina",
+          "automationLagMs": 79
+        },
+        {
+          "player": "baraka",
+          "automationLagMs": 123
+        },
+        {
+          "player": "wanjiru",
+          "automationLagMs": 147
+        },
+        {
+          "player": "zawadi",
+          "automationLagMs": 185
+        },
+        {
+          "player": "juma",
+          "automationLagMs": 252
+        }
+      ],
+      "ledger": [
+        {
+          "type": "game-briefing-started",
+          "at": 1798132156001
+        },
+        {
+          "type": "ready-changed",
+          "at": 1798132156001
+        },
+        {
+          "type": "ready-changed",
+          "at": 1798132157001
+        },
+        {
+          "type": "ready-changed",
+          "at": 1798132158001
+        },
+        {
+          "type": "ready-changed",
+          "at": 1798132159001
+        },
+        {
+          "type": "ready-changed",
+          "at": 1798132160001
+        },
+        {
+          "type": "ready-changed",
+          "at": 1798132161001
+        },
+        {
+          "type": "game-started",
+          "at": 1798132161001,
+          "trigger": "all-ready"
+        }
+      ]
+    },
+    {
+      "case": "N-relay",
+      "gameId": "relay",
+      "answer": {
+        "accepted": true,
+        "result": {
+          "right": true
+        }
+      },
+      "turnStartedAt": 1798132161001,
+      "nextRunner": "amina",
+      "viewport": "390x844",
+      "actionableLagMs": 18,
+      "controlTop": 210,
+      "controlBottom": 274,
+      "viewportH": 844
+    },
+    {
+      "case": "R-relay",
+      "gameId": "relay",
+      "trigger": "start-now",
+      "confirmText": "Zawadi: not ready yet · reconnecting",
+      "readyCount": "READY · 5 OF 6",
+      "playStartedAt": 1798132481001,
+      "relay": {
+        "startedAt": 1798132481001,
+        "lanes": [
+          {
+            "teamId": "team-coral",
+            "legs": 0,
+            "runnerId": "player-1",
+            "turnStartedAt": 1798132481001
+          },
+          {
+            "teamId": "team-sun",
+            "legs": 0,
+            "runnerId": "player-3",
+            "turnStartedAt": 1798132481001
+          },
+          {
+            "teamId": "team-mint",
+            "legs": 0,
+            "runnerId": "player-5",
+            "turnStartedAt": 1798132481001
+          }
+        ]
+      },
+      "startBroadcastWall": 1795078956974,
+      "backOnlineAfterStartMs": 2224,
+      "rows": [
+        {
+          "player": "keku",
+          "viewport": "390x844",
+          "slow": false,
+          "dropped": false,
+          "frameDeadlines": {
+            "playStartedAt": 1798132481001,
+            "deadlineAt": 1798132721001,
+            "turnEndsAt": 1798132501001,
+            "myTurn": true
+          },
+          "frameLagMs": 7,
+          "presentLagMs": 11,
+          "enabledLagMs": 11,
+          "actionableLagMs": 11,
+          "controlTop": 210,
+          "controlBottom": 274,
+          "viewportH": 844
+        },
+        {
+          "player": "amina",
+          "viewport": "390x844",
+          "slow": false,
+          "dropped": false,
+          "frameDeadlines": {
+            "playStartedAt": 1798132481001,
+            "deadlineAt": 1798132721001,
+            "turnEndsAt": 1798132501001,
+            "myTurn": false
+          },
+          "frameLagMs": 3,
+          "presentLagMs": 10,
+          "enabledLagMs": 10,
+          "actionableLagMs": 10,
+          "controlTop": 149,
+          "controlBottom": 190,
+          "viewportH": 844
+        },
+        {
+          "player": "baraka",
+          "viewport": "375x667",
+          "slow": false,
+          "dropped": false,
+          "frameDeadlines": {
+            "playStartedAt": 1798132481001,
+            "deadlineAt": 1798132721001,
+            "turnEndsAt": 1798132501001,
+            "myTurn": true
+          },
+          "frameLagMs": 7,
+          "presentLagMs": 21,
+          "enabledLagMs": 21,
+          "actionableLagMs": 21,
+          "controlTop": 207,
+          "controlBottom": 271,
+          "viewportH": 667
+        },
+        {
+          "player": "wanjiru",
+          "viewport": "320x568",
+          "slow": false,
+          "dropped": false,
+          "frameDeadlines": {
+            "playStartedAt": 1798132481001,
+            "deadlineAt": 1798132721001,
+            "turnEndsAt": 1798132501001,
+            "myTurn": false
+          },
+          "frameLagMs": 12,
+          "presentLagMs": 22,
+          "enabledLagMs": 22,
+          "actionableLagMs": 22,
+          "controlTop": 146,
+          "controlBottom": 185,
+          "viewportH": 568
+        },
+        {
+          "player": "zawadi",
+          "viewport": "390x844",
+          "slow": false,
+          "dropped": false,
+          "frameDeadlines": {
+            "playStartedAt": 1798132481001,
+            "deadlineAt": 1798132721001,
+            "turnEndsAt": 1798132501001,
+            "myTurn": true
+          },
+          "frameLagMs": 2253,
+          "presentLagMs": 2253,
+          "enabledLagMs": 2253,
+          "actionableLagMs": 2253,
+          "controlTop": 210,
+          "controlBottom": 274,
+          "viewportH": 844
+        },
+        {
+          "player": "juma",
+          "viewport": "390x844",
+          "slow": true,
+          "dropped": false,
+          "frameDeadlines": {
+            "playStartedAt": 1798132481001,
+            "deadlineAt": 1798132721001,
+            "turnEndsAt": 1798132501001,
+            "myTurn": false
+          },
+          "frameLagMs": 20,
+          "presentLagMs": 38,
+          "enabledLagMs": 38,
+          "actionableLagMs": 38,
+          "controlTop": 149,
+          "controlBottom": 190,
+          "viewportH": 844
+        }
+      ],
+      "rowsBeforeReturn": [
+        {
+          "player": "keku",
+          "viewport": "390x844",
+          "slow": false,
+          "dropped": false,
+          "frameDeadlines": {
+            "playStartedAt": 1798132481001,
+            "deadlineAt": 1798132721001,
+            "turnEndsAt": 1798132501001,
+            "myTurn": true
+          },
+          "frameLagMs": 7,
+          "presentLagMs": 11,
+          "enabledLagMs": 11,
+          "actionableLagMs": 11,
+          "controlTop": 210,
+          "controlBottom": 274,
+          "viewportH": 844
+        },
+        {
+          "player": "amina",
+          "viewport": "390x844",
+          "slow": false,
+          "dropped": false,
+          "frameDeadlines": {
+            "playStartedAt": 1798132481001,
+            "deadlineAt": 1798132721001,
+            "turnEndsAt": 1798132501001,
+            "myTurn": false
+          },
+          "frameLagMs": 3,
+          "presentLagMs": 10,
+          "enabledLagMs": 10,
+          "actionableLagMs": 10,
+          "controlTop": 149,
+          "controlBottom": 190,
+          "viewportH": 844
+        },
+        {
+          "player": "baraka",
+          "viewport": "375x667",
+          "slow": false,
+          "dropped": false,
+          "frameDeadlines": {
+            "playStartedAt": 1798132481001,
+            "deadlineAt": 1798132721001,
+            "turnEndsAt": 1798132501001,
+            "myTurn": true
+          },
+          "frameLagMs": 7,
+          "presentLagMs": 21,
+          "enabledLagMs": 21,
+          "actionableLagMs": 21,
+          "controlTop": 207,
+          "controlBottom": 271,
+          "viewportH": 667
+        },
+        {
+          "player": "wanjiru",
+          "viewport": "320x568",
+          "slow": false,
+          "dropped": false,
+          "frameDeadlines": {
+            "playStartedAt": 1798132481001,
+            "deadlineAt": 1798132721001,
+            "turnEndsAt": 1798132501001,
+            "myTurn": false
+          },
+          "frameLagMs": 12,
+          "presentLagMs": 22,
+          "enabledLagMs": 22,
+          "actionableLagMs": 22,
+          "controlTop": 146,
+          "controlBottom": 185,
+          "viewportH": 568
+        },
+        {
+          "player": "zawadi",
+          "viewport": "390x844",
+          "slow": false,
+          "dropped": true,
+          "frameDeadlines": null,
+          "frameLagMs": null,
+          "presentLagMs": null,
+          "enabledLagMs": null,
+          "actionableLagMs": null,
+          "controlTop": null,
+          "controlBottom": null,
+          "viewportH": null
+        },
+        {
+          "player": "juma",
+          "viewport": "390x844",
+          "slow": true,
+          "dropped": false,
+          "frameDeadlines": {
+            "playStartedAt": 1798132481001,
+            "deadlineAt": 1798132721001,
+            "turnEndsAt": 1798132501001,
+            "myTurn": false
+          },
+          "frameLagMs": 20,
+          "presentLagMs": 38,
+          "enabledLagMs": 38,
+          "actionableLagMs": 38,
+          "controlTop": 149,
+          "controlBottom": 190,
+          "viewportH": 844
+        }
+      ],
+      "ledger": [
+        {
+          "type": "game-briefing-started",
+          "at": 1798132461001,
+          "detail": {
+            "gameId": "relay",
+            "official": false,
+            "roster": [
+              "player-1",
+              "player-2",
+              "player-3",
+              "player-4",
+              "player-5",
+              "player-6"
+            ],
+            "season": "everyday"
+          }
+        },
+        {
+          "type": "ready-changed",
+          "at": 1798132461001,
+          "detail": {
+            "ready": true
+          }
+        },
+        {
+          "type": "ready-changed",
+          "at": 1798132461001,
+          "detail": {
+            "ready": true
+          }
+        },
+        {
+          "type": "ready-changed",
+          "at": 1798132461001,
+          "detail": {
+            "ready": true
+          }
+        },
+        {
+          "type": "ready-changed",
+          "at": 1798132461001,
+          "detail": {
+            "ready": true
+          }
+        },
+        {
+          "type": "ready-changed",
+          "at": 1798132461001,
+          "detail": {
+            "ready": true
+          }
+        },
+        {
+          "type": "game-started",
+          "at": 1798132481001,
+          "detail": {
+            "trigger": "start-now",
+            "readyAtStart": {
+              "player-1": true,
+              "player-2": true,
+              "player-3": true,
+              "player-4": true,
+              "player-5": false,
+              "player-6": true
+            },
+            "presenceAtStart": {
+              "player-1": "connected",
+              "player-2": "connected",
+              "player-3": "connected",
+              "player-4": "connected",
+              "player-5": "reconnecting",
+              "player-6": "connected"
+            },
+            "confirmed": [
+              "player-5"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "case": "T-team-huddle",
+      "gameId": "team-huddle",
+      "trigger": "all-ready",
+      "playStartedAt": 1798132782001,
+      "firstPhaseDeadlineAt": 1798132807001,
+      "startBroadcastWall": 1795078960963,
+      "rows": [
+        {
+          "player": "keku",
+          "viewport": "390x844",
+          "slow": false,
+          "dropped": false,
+          "frameDeadlines": {
+            "playStartedAt": 1798132782001,
+            "phaseDeadlineAt": 1798132807001,
+            "deadlineAt": 1798133262001
+          },
+          "frameLagMs": 3,
+          "presentLagMs": 6,
+          "enabledLagMs": 6,
+          "actionableLagMs": 6,
+          "controlTop": 229,
+          "controlBottom": 293,
+          "viewportH": 844
+        },
+        {
+          "player": "amina",
+          "viewport": "390x844",
+          "slow": false,
+          "dropped": false,
+          "frameDeadlines": {
+            "playStartedAt": 1798132782001,
+            "phaseDeadlineAt": 1798132807001,
+            "deadlineAt": 1798133262001
+          },
+          "frameLagMs": 7,
+          "presentLagMs": 12,
+          "enabledLagMs": 12,
+          "actionableLagMs": 12,
+          "controlTop": 229,
+          "controlBottom": 293,
+          "viewportH": 844
+        },
+        {
+          "player": "baraka",
+          "viewport": "375x667",
+          "slow": false,
+          "dropped": false,
+          "frameDeadlines": {
+            "playStartedAt": 1798132782001,
+            "phaseDeadlineAt": 1798132807001,
+            "deadlineAt": 1798133262001
+          },
+          "frameLagMs": 7,
+          "presentLagMs": 10,
+          "enabledLagMs": 10,
+          "actionableLagMs": 10,
+          "controlTop": 228,
+          "controlBottom": 292,
+          "viewportH": 667
+        },
+        {
+          "player": "wanjiru",
+          "viewport": "320x568",
+          "slow": false,
+          "dropped": false,
+          "frameDeadlines": {
+            "playStartedAt": 1798132782001,
+            "phaseDeadlineAt": 1798132807001,
+            "deadlineAt": 1798133262001
+          },
+          "frameLagMs": 15,
+          "presentLagMs": 27,
+          "enabledLagMs": 27,
+          "actionableLagMs": 27,
+          "controlTop": 226,
+          "controlBottom": 290,
+          "viewportH": 568
+        },
+        {
+          "player": "zawadi",
+          "viewport": "390x844",
+          "slow": false,
+          "dropped": false,
+          "frameDeadlines": {
+            "playStartedAt": 1798132782001,
+            "phaseDeadlineAt": 1798132807001,
+            "deadlineAt": 1798133262001
+          },
+          "frameLagMs": 23,
+          "presentLagMs": 32,
+          "enabledLagMs": 32,
+          "actionableLagMs": 32,
+          "controlTop": 229,
+          "controlBottom": 293,
+          "viewportH": 844
+        },
+        {
+          "player": "juma",
+          "viewport": "390x844",
+          "slow": true,
+          "dropped": false,
+          "frameDeadlines": {
+            "playStartedAt": 1798132782001,
+            "phaseDeadlineAt": 1798132807001,
+            "deadlineAt": 1798133262001
+          },
+          "frameLagMs": 26,
+          "presentLagMs": 48,
+          "enabledLagMs": 48,
+          "actionableLagMs": 48,
+          "controlTop": 229,
+          "controlBottom": 293,
+          "viewportH": 844
+        }
+      ]
+    },
+    {
+      "case": "C-closest-wins",
+      "gameId": "closest-wins",
+      "confirmText": "Juma: not ready yet",
+      "stale": {
+        "ok": true,
+        "started": true,
+        "trigger": "already-started"
+      },
+      "rows": [
+        {
+          "player": "keku",
+          "viewport": "390x844",
+          "slow": false,
+          "dropped": false,
+          "frameDeadlines": {
+            "playStartedAt": 1798133103001,
+            "phaseDeadlineAt": 1798133143001,
+            "deadlineAt": 1798133583001
+          },
+          "frameLagMs": 5,
+          "presentLagMs": 14,
+          "enabledLagMs": 14,
+          "actionableLagMs": 14,
+          "controlTop": 386,
+          "controlBottom": 446,
+          "viewportH": 844
+        },
+        {
+          "player": "amina",
+          "viewport": "390x844",
+          "slow": false,
+          "dropped": false,
+          "frameDeadlines": {
+            "playStartedAt": 1798133103001,
+            "phaseDeadlineAt": 1798133143001,
+            "deadlineAt": 1798133583001
+          },
+          "frameLagMs": 6,
+          "presentLagMs": 12,
+          "enabledLagMs": 12,
+          "actionableLagMs": 12,
+          "controlTop": 386,
+          "controlBottom": 446,
+          "viewportH": 844
+        },
+        {
+          "player": "baraka",
+          "viewport": "375x667",
+          "slow": false,
+          "dropped": false,
+          "frameDeadlines": {
+            "playStartedAt": 1798133103001,
+            "phaseDeadlineAt": 1798133143001,
+            "deadlineAt": 1798133583001
+          },
+          "frameLagMs": 10,
+          "presentLagMs": 17,
+          "enabledLagMs": 17,
+          "actionableLagMs": 17,
+          "controlTop": 382,
+          "controlBottom": 438,
+          "viewportH": 667
+        },
+        {
+          "player": "wanjiru",
+          "viewport": "320x568",
+          "slow": false,
+          "dropped": false,
+          "frameDeadlines": {
+            "playStartedAt": 1798133103001,
+            "phaseDeadlineAt": 1798133143001,
+            "deadlineAt": 1798133583001
+          },
+          "frameLagMs": 20,
+          "presentLagMs": 24,
+          "enabledLagMs": 24,
+          "actionableLagMs": 24,
+          "controlTop": 405,
+          "controlBottom": 461,
+          "viewportH": 568
+        },
+        {
+          "player": "zawadi",
+          "viewport": "390x844",
+          "slow": false,
+          "dropped": false,
+          "frameDeadlines": {
+            "playStartedAt": 1798133103001,
+            "phaseDeadlineAt": 1798133143001,
+            "deadlineAt": 1798133583001
+          },
+          "frameLagMs": 34,
+          "presentLagMs": 37,
+          "enabledLagMs": 37,
+          "actionableLagMs": 37,
+          "controlTop": 386,
+          "controlBottom": 446,
+          "viewportH": 844
+        },
+        {
+          "player": "juma",
+          "viewport": "390x844",
+          "slow": true,
+          "dropped": false,
+          "frameDeadlines": {
+            "playStartedAt": 1798133103001,
+            "phaseDeadlineAt": 1798133143001,
+            "deadlineAt": 1798133583001
+          },
+          "frameLagMs": 38,
+          "presentLagMs": 73,
+          "enabledLagMs": 73,
+          "actionableLagMs": 73,
+          "controlTop": 386,
+          "controlBottom": 446,
+          "viewportH": 844
+        }
+      ],
+      "hostAlerts": []
+    },
+    {
+      "case": "L-team-huddle",
+      "gameId": "team-huddle",
+      "startNow": {
+        "ok": true,
+        "started": true,
+        "trigger": "start-now"
+      },
+      "jumaAlerts": [],
+      "rows": [
+        {
+          "player": "keku",
+          "viewport": "390x844",
+          "slow": false,
+          "dropped": false,
+          "frameDeadlines": {
+            "playStartedAt": 1798133483001,
+            "phaseDeadlineAt": 1798133508001,
+            "deadlineAt": 1798133963001
+          },
+          "frameLagMs": 4,
+          "presentLagMs": 8,
+          "enabledLagMs": 8,
+          "actionableLagMs": 8,
+          "controlTop": 229,
+          "controlBottom": 293,
+          "viewportH": 844
+        },
+        {
+          "player": "amina",
+          "viewport": "390x844",
+          "slow": false,
+          "dropped": false,
+          "frameDeadlines": {
+            "playStartedAt": 1798133483001,
+            "phaseDeadlineAt": 1798133508001,
+            "deadlineAt": 1798133963001
+          },
+          "frameLagMs": 5,
+          "presentLagMs": 12,
+          "enabledLagMs": 12,
+          "actionableLagMs": 12,
+          "controlTop": 229,
+          "controlBottom": 293,
+          "viewportH": 844
+        },
+        {
+          "player": "baraka",
+          "viewport": "375x667",
+          "slow": false,
+          "dropped": false,
+          "frameDeadlines": {
+            "playStartedAt": 1798133483001,
+            "phaseDeadlineAt": 1798133508001,
+            "deadlineAt": 1798133963001
+          },
+          "frameLagMs": 10,
+          "presentLagMs": 28,
+          "enabledLagMs": 28,
+          "actionableLagMs": 28,
+          "controlTop": 228,
+          "controlBottom": 292,
+          "viewportH": 667
+        },
+        {
+          "player": "wanjiru",
+          "viewport": "320x568",
+          "slow": false,
+          "dropped": false,
+          "frameDeadlines": {
+            "playStartedAt": 1798133483001,
+            "phaseDeadlineAt": 1798133508001,
+            "deadlineAt": 1798133963001
+          },
+          "frameLagMs": 13,
+          "presentLagMs": 18,
+          "enabledLagMs": 18,
+          "actionableLagMs": 18,
+          "controlTop": 226,
+          "controlBottom": 290,
+          "viewportH": 568
+        },
+        {
+          "player": "zawadi",
+          "viewport": "390x844",
+          "slow": false,
+          "dropped": false,
+          "frameDeadlines": {
+            "playStartedAt": 1798133483001,
+            "phaseDeadlineAt": 1798133508001,
+            "deadlineAt": 1798133963001
+          },
+          "frameLagMs": 14,
+          "presentLagMs": 29,
+          "enabledLagMs": 29,
+          "actionableLagMs": 29,
+          "controlTop": 229,
+          "controlBottom": 293,
+          "viewportH": 844
+        },
+        {
+          "player": "juma",
+          "viewport": "390x844",
+          "slow": true,
+          "dropped": false,
+          "frameDeadlines": {
+            "playStartedAt": 1798133483001,
+            "phaseDeadlineAt": 1798133508001,
+            "deadlineAt": 1798133963001
+          },
+          "frameLagMs": 19,
+          "presentLagMs": 52,
+          "enabledLagMs": 52,
+          "actionableLagMs": 52,
+          "controlTop": 229,
+          "controlBottom": 293,
+          "viewportH": 844
+        }
+      ]
+    },
+    {
+      "case": "L-closest-wins",
+      "gameId": "closest-wins",
+      "startNow": {
+        "ok": true,
+        "started": true,
+        "trigger": "start-now"
+      },
+      "jumaAlerts": [
+        "The game has already started."
+      ],
+      "rows": [
+        {
+          "player": "keku",
+          "viewport": "390x844",
+          "slow": false,
+          "dropped": false,
+          "frameDeadlines": {
+            "playStartedAt": 1798133803001,
+            "phaseDeadlineAt": 1798133843001,
+            "deadlineAt": 1798134283001
+          },
+          "frameLagMs": 3,
+          "presentLagMs": 15,
+          "enabledLagMs": 15,
+          "actionableLagMs": 15,
+          "controlTop": 386,
+          "controlBottom": 446,
+          "viewportH": 844
+        },
+        {
+          "player": "amina",
+          "viewport": "390x844",
+          "slow": false,
+          "dropped": false,
+          "frameDeadlines": {
+            "playStartedAt": 1798133803001,
+            "phaseDeadlineAt": 1798133843001,
+            "deadlineAt": 1798134283001
+          },
+          "frameLagMs": 6,
+          "presentLagMs": 12,
+          "enabledLagMs": 12,
+          "actionableLagMs": 12,
+          "controlTop": 386,
+          "controlBottom": 446,
+          "viewportH": 844
+        },
+        {
+          "player": "baraka",
+          "viewport": "375x667",
+          "slow": false,
+          "dropped": false,
+          "frameDeadlines": {
+            "playStartedAt": 1798133803001,
+            "phaseDeadlineAt": 1798133843001,
+            "deadlineAt": 1798134283001
+          },
+          "frameLagMs": 9,
+          "presentLagMs": 23,
+          "enabledLagMs": 23,
+          "actionableLagMs": 23,
+          "controlTop": 382,
+          "controlBottom": 438,
+          "viewportH": 667
+        },
+        {
+          "player": "wanjiru",
+          "viewport": "320x568",
+          "slow": false,
+          "dropped": false,
+          "frameDeadlines": {
+            "playStartedAt": 1798133803001,
+            "phaseDeadlineAt": 1798133843001,
+            "deadlineAt": 1798134283001
+          },
+          "frameLagMs": 6,
+          "presentLagMs": 26,
+          "enabledLagMs": 26,
+          "actionableLagMs": 26,
+          "controlTop": 382,
+          "controlBottom": 438,
+          "viewportH": 568
+        },
+        {
+          "player": "zawadi",
+          "viewport": "390x844",
+          "slow": false,
+          "dropped": false,
+          "frameDeadlines": {
+            "playStartedAt": 1798133803001,
+            "phaseDeadlineAt": 1798133843001,
+            "deadlineAt": 1798134283001
+          },
+          "frameLagMs": 15,
+          "presentLagMs": 21,
+          "enabledLagMs": 21,
+          "actionableLagMs": 21,
+          "controlTop": 386,
+          "controlBottom": 446,
+          "viewportH": 844
+        },
+        {
+          "player": "juma",
+          "viewport": "390x844",
+          "slow": true,
+          "dropped": false,
+          "frameDeadlines": {
+            "playStartedAt": 1798133803001,
+            "phaseDeadlineAt": 1798133843001,
+            "deadlineAt": 1798134283001
+          },
+          "frameLagMs": 26,
+          "presentLagMs": 56,
+          "enabledLagMs": 56,
+          "actionableLagMs": 56,
+          "controlTop": 386,
+          "controlBottom": 446,
+          "viewportH": 844
+        }
+      ]
+    },
+    {
+      "case": "E-relay",
+      "gameId": "relay",
+      "stale": {
+        "status": 400,
+        "body": {
+          "error": "That game isn't waiting to start"
+        }
+      },
+      "hostNote": "",
+      "cancelled": [
+        {
+          "at": 1798134463001,
+          "detail": {
+            "reason": "expired",
+            "gameId": "relay",
+            "official": false,
+            "roster": [
+              "player-1",
+              "player-2",
+              "player-3",
+              "player-4",
+              "player-5",
+              "player-6"
+            ],
+            "ready": [
+              "player-1",
+              "player-2",
+              "player-3",
+              "player-4",
+              "player-5"
+            ],
+            "frozenItemCount": 0
+          }
+        }
+      ]
+    },
+    {
+      "case": "S-team-huddle",
+      "gameId": "team-huddle",
+      "emulatedLatencyMs": 400,
+      "playStartedAt": 1798134463001,
+      "firstPhaseDeadlineAt": 1798134488001,
+      "rows": [
+        {
+          "player": "keku",
+          "viewport": "390x844",
+          "slow": false,
+          "dropped": false,
+          "frameDeadlines": {
+            "playStartedAt": 1798134463001,
+            "phaseDeadlineAt": 1798134488001,
+            "deadlineAt": 1798134943001
+          },
+          "frameLagMs": 16,
+          "presentLagMs": 34,
+          "enabledLagMs": 34,
+          "actionableLagMs": 34,
+          "controlTop": 199,
+          "controlBottom": 263,
+          "viewportH": 844
+        },
+        {
+          "player": "amina",
+          "viewport": "390x844",
+          "slow": false,
+          "dropped": false,
+          "frameDeadlines": {
+            "playStartedAt": 1798134463001,
+            "phaseDeadlineAt": 1798134488001,
+            "deadlineAt": 1798134943001
+          },
+          "frameLagMs": 21,
+          "presentLagMs": 27,
+          "enabledLagMs": 27,
+          "actionableLagMs": 27,
+          "controlTop": 199,
+          "controlBottom": 263,
+          "viewportH": 844
+        },
+        {
+          "player": "baraka",
+          "viewport": "375x667",
+          "slow": false,
+          "dropped": false,
+          "frameDeadlines": {
+            "playStartedAt": 1798134463001,
+            "phaseDeadlineAt": 1798134488001,
+            "deadlineAt": 1798134943001
+          },
+          "frameLagMs": 15,
+          "presentLagMs": 41,
+          "enabledLagMs": 41,
+          "actionableLagMs": 41,
+          "controlTop": 198,
+          "controlBottom": 262,
+          "viewportH": 667
+        },
+        {
+          "player": "wanjiru",
+          "viewport": "320x568",
+          "slow": false,
+          "dropped": false,
+          "frameDeadlines": {
+            "playStartedAt": 1798134463001,
+            "phaseDeadlineAt": 1798134488001,
+            "deadlineAt": 1798134943001
+          },
+          "frameLagMs": 29,
+          "presentLagMs": 46,
+          "enabledLagMs": 46,
+          "actionableLagMs": 46,
+          "controlTop": 226,
+          "controlBottom": 290,
+          "viewportH": 568
+        },
+        {
+          "player": "zawadi",
+          "viewport": "390x844",
+          "slow": false,
+          "dropped": false,
+          "frameDeadlines": {
+            "playStartedAt": 1798134463001,
+            "phaseDeadlineAt": 1798134488001,
+            "deadlineAt": 1798134943001
+          },
+          "frameLagMs": 24,
+          "presentLagMs": 41,
+          "enabledLagMs": 41,
+          "actionableLagMs": 41,
+          "controlTop": 199,
+          "controlBottom": 263,
+          "viewportH": 844
+        },
+        {
+          "player": "juma",
+          "viewport": "390x844",
+          "slow": true,
+          "dropped": false,
+          "frameDeadlines": {
+            "playStartedAt": 1798134463001,
+            "phaseDeadlineAt": 1798134488001,
+            "deadlineAt": 1798134943001
+          },
+          "frameLagMs": 561,
+          "presentLagMs": 644,
+          "enabledLagMs": 644,
+          "actionableLagMs": 644,
+          "controlTop": 199,
+          "controlBottom": 263,
+          "viewportH": 844
+        }
+      ]
+    }
+  ],
+  "results": [
+    {
+      "name": "A-closest-wins one transition, one game-started (trigger all-ready)",
+      "ok": true,
+      "detail": "[\"all-ready\"]"
+    },
+    {
+      "name": "A-closest-wins play starts at the final Ready's server instant",
+      "ok": true,
+      "detail": "playStartedAt=1798131605000 lastReady=1798131605000"
+    },
+    {
+      "name": "A-closest-wins every phone got the same start and deadlines",
+      "ok": true,
+      "detail": "[{\"playStartedAt\":1798131605000,\"phaseDeadlineAt\":1798131645000,\"deadlineAt\":1798132085000},{\"playStartedAt\":1798131605000,\"phaseDeadlineAt\":1798131645000,\"deadlineAt\":1798132085000},{\"playStartedAt\":1798131605000,\"phaseDeadlineAt\":1798131645000,\"deadlineAt\":1798132085000},{\"playStartedAt\":1798131605000,\"phaseDeadlineAt\":1798131645000,\"deadlineAt\":1798132085000},{\"playStartedAt\":1798131605000,\"phaseDeadlineAt\":1798131645000,\"deadlineAt\":1798132085000},{\"playStartedAt\":1798131605000,\"phaseDeadlineAt\":1798131645000,\"deadlineAt\":1798132085000}]"
+    },
+    {
+      "name": "A-closest-wins every phone showed an actionable screen (in the page's own time)",
+      "ok": true,
+      "detail": "max 154 ms"
+    },
+    {
+      "name": "N-closest-wins the next question's control is on screen, unscrolled, on every phone",
+      "ok": false,
+      "detail": "[[\"keku\",12,620,680,844],[\"amina\",18,620,680,844],[\"baraka\",null,616,672,667],[\"wanjiru\",null,616,672,568],[\"zawadi\",31,620,680,844],[\"juma\",20,386,446,844]]"
+    },
+    {
+      "name": "A-team-huddle one transition, one game-started (trigger all-ready)",
+      "ok": true,
+      "detail": "[\"all-ready\"]"
+    },
+    {
+      "name": "A-team-huddle play starts at the final Ready's server instant",
+      "ok": true,
+      "detail": "playStartedAt=1798131910000 lastReady=1798131910000"
+    },
+    {
+      "name": "A-team-huddle every phone got the same start and deadlines",
+      "ok": true,
+      "detail": "[{\"playStartedAt\":1798131910000,\"phaseDeadlineAt\":1798131935000,\"deadlineAt\":1798132390000},{\"playStartedAt\":1798131910000,\"phaseDeadlineAt\":1798131935000,\"deadlineAt\":1798132390000},{\"playStartedAt\":1798131910000,\"phaseDeadlineAt\":1798131935000,\"deadlineAt\":1798132390000},{\"playStartedAt\":1798131910000,\"phaseDeadlineAt\":1798131935000,\"deadlineAt\":1798132390000},{\"playStartedAt\":1798131910000,\"phaseDeadlineAt\":1798131935000,\"deadlineAt\":1798132390000},{\"playStartedAt\":1798131910000,\"phaseDeadlineAt\":1798131935000,\"deadlineAt\":1798132390000}]"
+    },
+    {
+      "name": "A-team-huddle every phone showed an actionable screen (in the page's own time)",
+      "ok": true,
+      "detail": "max 25 ms"
+    },
+    {
+      "name": "N-team-huddle every team agreed: the reveal came early",
+      "ok": true,
+      "detail": "0:reveal"
+    },
+    {
+      "name": "N-team-huddle the next question's control is on screen, unscrolled, on every phone",
+      "ok": true,
+      "detail": "[[\"keku\",5,259,323,844],[\"amina\",7,259,323,844],[\"baraka\",14,258,322,667],[\"wanjiru\",10,286,350,568],[\"zawadi\",12,259,323,844],[\"juma\",23,259,323,844]]"
+    },
+    {
+      "name": "A-relay one transition, one game-started (trigger all-ready)",
+      "ok": true,
+      "detail": "[\"all-ready\"]"
+    },
+    {
+      "name": "A-relay play starts at the final Ready's server instant",
+      "ok": true,
+      "detail": "playStartedAt=1798132161001 lastReady=1798132161001"
+    },
+    {
+      "name": "A-relay every phone got the same start and deadlines",
+      "ok": true,
+      "detail": "[{\"playStartedAt\":1798132161001,\"deadlineAt\":1798132401001,\"turnEndsAt\":1798132181001,\"myTurn\":true},{\"playStartedAt\":1798132161001,\"deadlineAt\":1798132401001,\"turnEndsAt\":1798132181001,\"myTurn\":false},{\"playStartedAt\":1798132161001,\"deadlineAt\":1798132401001,\"turnEndsAt\":1798132181001,\"myTurn\":true},{\"playStartedAt\":1798132161001,\"deadlineAt\":1798132401001,\"turnEndsAt\":1798132181001,\"myTurn\":false},{\"playStartedAt\":1798132161001,\"deadlineAt\":1798132401001,\"turnEndsAt\":1798132181001,\"myTurn\":true},{\"playStartedAt\":1798132161001,\"deadlineAt\":1798132401001,\"turnEndsAt\":1798132181001,\"myTurn\":false}]"
+    },
+    {
+      "name": "A-relay every phone showed an actionable screen (in the page's own time)",
+      "ok": true,
+      "detail": "max 58 ms"
+    },
+    {
+      "name": "N-relay the next runner's turn starts at the right answer, and their options are on screen",
+      "ok": true,
+      "detail": "lag 18 ms, control 210-274/844"
+    },
+    {
+      "name": "R-relay a reconnecting player blocks all-ready",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "R-relay the confirmation names exactly the reconnecting player",
+      "ok": true,
+      "detail": "Zawadi: not ready yet · reconnecting | READY · 5 OF 6"
+    },
+    {
+      "name": "R-relay one transition (start-now, confirmed [Zawadi])",
+      "ok": true,
+      "detail": "{\"trigger\":\"start-now\",\"readyAtStart\":{\"player-1\":true,\"player-2\":true,\"player-3\":true,\"player-4\":true,\"player-5\":false,\"player-6\":true},\"presenceAtStart\":{\"player-1\":\"connected\",\"player-2\":\"connected\",\"player-3\":\"connected\",\"player-4\":\"connected\",\"player-5\":\"reconnecting\",\"player-6\":\"connected\"},\"confirmed\":[\"player-5\"]}"
+    },
+    {
+      "name": "T-team-huddle every roster player is Ready but one is reconnecting: still the briefing",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "T-team-huddle the host's rows say 6 of 6 ready and Zawadi reconnecting",
+      "ok": true,
+      "detail": "READY · 6 OF 6 | Z / Zawadi / Ready · reconnecting"
+    },
+    {
+      "name": "T-team-huddle the tick started play once (all-ready), when Zawadi was back",
+      "ok": true,
+      "detail": "[{\"trigger\":\"all-ready\",\"readyAtStart\":{\"player-1\":true,\"player-2\":true,\"player-3\":true,\"player-4\":true,\"player-5\":true,\"player-6\":true},\"presenceAtStart\":{\"player-1\":\"connected\",\"player-2\":\"connected\",\"player-3\":\"connected\",\"player-4\":\"connected\",\"player-5\":\"connected\",\"player-6\":\"connected\"},\"confirmed\":[]}]"
+    },
+    {
+      "name": "T-team-huddle every phone, Zawadi's too, got the same start and deadline",
+      "ok": true,
+      "detail": "[[\"keku\",1798132807001,6],[\"amina\",1798132807001,12],[\"baraka\",1798132807001,10],[\"wanjiru\",1798132807001,27],[\"zawadi\",1798132807001,32],[\"juma\",1798132807001,48]]"
+    },
+    {
+      "name": "C-closest-wins all-ready won; the stale confirm is \"already started\"; one transition",
+      "ok": true,
+      "detail": "200 {\"ok\":true,\"started\":true,\"trigger\":\"already-started\"}"
+    },
+    {
+      "name": "C-closest-wins the host's dialog went with the briefing, and no error shows",
+      "ok": true,
+      "detail": "confirm listed: Juma: not ready yet; alerts: []"
+    },
+    {
+      "name": "L-team-huddle one transition (start-now), the late Ready changed nothing on the server",
+      "ok": true,
+      "detail": "200 {\"ok\":true,\"started\":true,\"trigger\":\"start-now\"} readyEvents=0"
+    },
+    {
+      "name": "L-team-huddle the late Ready leaves no error on Juma's first question",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "name": "L-closest-wins one transition (start-now), the late Ready changed nothing on the server",
+      "ok": true,
+      "detail": "200 {\"ok\":true,\"started\":true,\"trigger\":\"start-now\"} readyEvents=0"
+    },
+    {
+      "name": "L-closest-wins the late Ready leaves no error on Juma's first question",
+      "ok": false,
+      "detail": "[\"The game has already started.\"]"
+    },
+    {
+      "name": "E-relay the expired briefing is cancelled once, never started; the stale confirm is refused",
+      "ok": true,
+      "detail": "400 {\"error\":\"That game isn't waiting to start\"} cancelled=1"
+    },
+    {
+      "name": "E-relay the host sees \"Game cancelled\", not the stale dialog",
+      "ok": false,
+      "detail": ""
+    },
+    {
+      "name": "S-team-huddle one shared start and deadline whatever the network",
+      "ok": true,
+      "detail": ""
+    }
+  ]
+}
