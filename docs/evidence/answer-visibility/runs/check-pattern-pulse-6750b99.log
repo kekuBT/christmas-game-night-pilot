@@ -1,0 +1,70 @@
+$ node scripts/check-pattern-pulse.mjs http://localhost:41697
+# timeout 600s | worker w3 | server http://localhost:41697 (data <scratchpad>/fs-gate/20261119-135611-6750b998-25340/server-data/w3)
+
+[+4.3s] PASS lobby: Pattern Pulse is Practice only, and says why
+[+4.3s] PASS server: an official start is refused — 400 Pattern Pulse is new: practice-only until its Cup scoring is approved.
+[+4.4s] PASS briefing: every phone explains the game
+[+5.1s] PASS every phone: round 1 of 6, 3 shapes, ready when you are
+[+5.2s] PASS TV: Pattern Pulse live, counts only
+[+5.2s] PASS announcer (H1): on the ready screen, before the pattern opens, the one assertive, atomic announcer is already in the page, empty — {"found":true,"count":1,"live":"assertive","atomic":"true","text":"","ready":true}
+[+5.6s] PASS contrast (AA): memorise
+[+5.6s] PASS privacy: the TV projection never has a pattern
+[+5.6s] PASS privacy: another player's projection never has Keku's pattern
+[+5.6s] PASS privacy: the TV screen shows no sequence
+[+7.2s] PASS memorise (H1): the phone showed the server's pattern for Keku one symbol at a time, in order (3 shapes) — [{"index":0,"symbol":4},{"index":1,"symbol":2},{"index":2,"symbol":3}] vs [4,2,3]
+[+7.2s] PASS memorise (H1): never two symbols at once, and no text or accessible name held more than one symbol's name — {"maxAtOnce":1,"maxInText":1,"maxInLabel":0,"samples":108}
+[+7.2s] PASS memorise (full motion): each symbol pops in — ["mz-pp-pop"]
+[+7.2s] PASS announcer (H1): the visible stage is seen, not heard (hidden from assistive technology, not live) — hidden=true live=null
+[+7.2s] PASS announcer (H1): the SAME node from the ready screen through memorising to recall, and still the only one — {"same":true,"mountedEmpty":true}
+[+7.2s] PASS announcer (H1): the first cue is an update of that empty node; each symbol said once, in order, with its place, in step with the visible symbol — ["1 of 3: Pink star","","2 of 3: Green triangle","","3 of 3: Blue diamond",""]
+[+7.2s] PASS announcer (H1): empty in the gaps, and empty at recall after the last cue — {"firstCue":"1 of 3: Pink star","lastCue":"3 of 3: Blue diamond","gaps":3,"clearedAtRecall":true}
+[+7.2s] PASS hidden: once the window passes the pattern is gone from the screen
+[+7.2s] PASS hidden: …and from Keku's own projection
+[+7.3s] PASS undo removes the last shape
+[+7.5s] PASS clear empties the entry
+[+7.6s] PASS a full entry: 'Lock it in', and every shape key is done
+[+7.6s] PASS contrast (AA): tap it back
+[+7.7s] PASS round 1 (Keku): all three right, +110, from the server
+[+7.7s] PASS server: Keku's round 1 scored 110
+[+9.4s] PASS reduced motion (H1): the same one-at-a-time cue, in order, with no animation — {"seen":[{"index":0,"symbol":3},{"index":1,"symbol":4},{"index":2,"symbol":2}],"maxAtOnce":1,"maxInText":1,"maxInLabel":0,"anims":["none"],"stageA11y":"hidden=true live=null","samples":107}
+[+9.4s] PASS announcer (H1), reduced motion: the same one node, mounted empty before the pattern opened; each cue in order and in step; empty at recall — {"said":["1 of 3: Blue diamond","","2 of 3: Pink star","","3 of 3: Green triangle",""],"same":true,"stage":"hidden=true live=null"}
+[+9.6s] PASS round 1 (Amina): 2 of 3 before the first slip, +40
+[+13.4s] PASS a failed send says it couldn't be confirmed, and keeps the entry
+[+13.4s] PASS a failed send: the server has no answer from Bartholomew
+[+13.5s] PASS the retry counts: All 3 right, +110
+[+15.3s] PASS a late joiner: no Pattern Pulse play screen
+[+15.3s] PASS a late joiner's projection has no pattern
+[+15.5s] PASS sitting out: 'Sitting the rest out', with his total
+[+15.5s] PASS sitting out: further opens are refused by the server
+[+18.1s] PASS reload mid-round: back on the answer screen, round 2, no pattern
+[+18.7s] PASS round 2 (Keku): all 4 right after the reload, +130
+[+31.7s] PASS a window nobody answers: the server closes it as missed, with nobody acting
+[+31.7s] PASS …after the answer window (≈ 9 s at this scale), not before — 10596ms
+[+31.7s] PASS round 3: 5 shapes for Keku
+[+38.1s] PASS round 4: 6 shapes for Keku
+[+44.5s] PASS round 5: 7 shapes for Keku
+[+51.8s] PASS round 6: 8 shapes for Keku
+[+60.2s] PASS announcer (H1), every other round opened (11, lengths 3,4,4,5,5,6,6,7,7,8,8): one node from the ready screen to recall, mounted empty, each cue in order and in step, empty at recall — []
+[+60.2s] MCHEZO_ANNOUNCER {"rounds":13,"recurringSymbols":17,"gapsSeen":["3/3","4/4","4/4","5/5","5/5","6/6","6/6","7/7","7/7","8/8","8/8","3/3","3/3"],"first":["1 of 3: Blue diamond","1 of 4: Purple hexagon","1 of 4: Yellow square","1 of 5: Red circle","1 of 5: Purple hexagon","1 of 6: Purple hexagon","1 of 6: Pink star","1 of 7: Yellow square","1 of 7: Blue diamond","1 of 8: Red circle","1 of 8: Blue diamond","1 of 3: Pink star","1 of 3: Blue diamond"],"last":["3 of 3: Blue diamond","4 of 4: Yellow square","4 of 4: Green triangle","5 of 5: Purple hexagon","5 of 5: Yellow square","6 of 6: Yellow square","6 of 6: Red circle","7 of 7: Green triangle","7 of 7: Blue diamond","8 of 8: Green triangle","8 of 8: Yellow square","3 of 3: Blue diamond","3 of 3: Green triangle"],"recurringRounds":[["1 of 3: Blue diamond","","2 of 3: Pink star","","3 of 3: Blue diamond",""],["1 of 4: Purple hexagon","","2 of 4: Red circle","","3 of 4: Purple hexagon","","4 of 4: Yellow square",""],["1 of 5: Purple hexagon","","2 of 5: Red circle","","3 of 5: Purple hexagon","","4 of 5: Green triangle","","5 of 5: Yellow square",""],["1 of 6: Purple hexagon","","2 of 6: Blue diamond","","3 of 6: Yellow square","","4 of 6: Purple hexagon","","5 of 6: Red circle","","6 of 6: Yellow square",""],["1 of 6: Pink star","","2 of 6: Blue diamond","","3 of 6: Green triangle","","4 of 6: Pink star","","5 of 6: Green triangle","","6 of 6: Red circle",""],["1 of 7: Yellow square","","2 of 7: Purple hexagon","","3 of 7: Red circle","","4 of 7: Blue diamond","","5 of 7: Purple hexagon","","6 of 7: Yellow square","","7 of 7: Green triangle",""],["1 of 7: Blue diamond","","2 of 7: Purple hexagon","","3 of 7: Pink star","","4 of 7: Blue diamond","","5 of 7: Green triangle","","6 of 7: Red circle","","7 of 7: Blue diamond",""],["1 of 8: Red circle","","2 of 8: Green triangle","","3 of 8: Yellow square","","4 of 8: Blue diamond","","5 of 8: Pink star","","6 of 8: Red circle","","7 of 8: Blue diamond","","8 of 8: Green triangle",""],["1 of 8: Blue diamond","","2 of 8: Yellow square","","3 of 8: Purple hexagon","","4 of 8: Green triangle","","5 of 8: Blue diamond","","6 of 8: Pink star","","7 of 8: Blue diamond","","8 of 8: Yellow square",""]]}
+[+60.2s] PASS announcer (H1): a symbol that comes back later in a pattern is said again each time, with its own place — 17 recurrence(s) in 9 of 13 round(s)
+[+60.2s] PASS results on every phone
+[+60.2s] PASS results: the server's scores are the plan's (960, 550, 110) — {"player-1":960,"player-2":550,"player-3":110}
+[+60.2s] PASS results: ended because everyone finished (or sat out); practice, not counted — {"reason":"completed","endedAt":1795098522735,"countsOfficially":false,"participation":{"player-1":{"done":6,"of":6,"actions":6,"finished":true},"player-2":{"done":5,"of":6,"actions":5,"finished":true},"player-3":{"done":1,"of":6,"actions":1,"finished":false}}}
+[+60.2s] PASS results 390px: how scoring works, no sideways scrolling
+[+60.2s] PASS results 375px: how scoring works, no sideways scrolling
+[+60.2s] PASS results 320px: how scoring works, no sideways scrolling
+[+60.2s] PASS results: Keku's six rounds recapped (his own patterns, now it's over)
+[+60.2s] PASS results: Amina's slipped last round says so
+[+60.4s] PASS contrast (AA): results
+[+60.4s] PASS results: Keku's moment is his own recorded rounds
+[+60.4s] PASS results: Amina's moment is her own longest perfect sequence (7)
+[+60.4s] PASS celebration with full motion: the short burst, no ribbon
+[+60.5s] PASS celebration with reduced motion: a still ribbon, no confetti
+[+60.6s] PASS celebration: only the winner's phone celebrates
+[+60.6s] PASS TV: final standings, then the review
+[+60.8s] PASS TV review: the room's totals only
+[+60.8s] PASS privacy after the game: no pattern in the public projection
+[+60.9s] PATTERN PULSE ALL PASSED
+[+60.9s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":5,"pages":5,"peakOpenPages":5}
+
+# PASS (exit 0) in 60.9s | cpu 6.7s, peak memory 399 MB

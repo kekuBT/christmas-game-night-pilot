@@ -1,5 +1,5 @@
 # Muse local progress and resume checkpoint
-Updated: 2026-11-19 ~8:45 a.m. EST (answer visibility H1/H2, handoff 7008903623: draft #53; full gate PASSED (exit 0) on b936586, 113/113 — see the last section; #52's live audit 7010116227 found no blocking findings; not merged, not deployed)
+Updated: 2026-11-19 ~9:45 a.m. EST (answer visibility, review 7010784066: H1 cue announcer fixed on 6750b99; full gate PASSED (exit 0) on 6750b99, 113/113 — see the last section; H2 had no blocking finding; not merged, not deployed)
 
 ## Current milestone
 M0–M5: COMPLETED as backend/engine checkpoints ONLY — see docs/FRONTEND_MILESTONES.md. They are NOT evidence the full product is finished.
@@ -4179,4 +4179,17 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
   - **Browser:** headless Chromium only.
   - **The projection:** the player's own projection still carries the pattern during memorise.
   - **H2:** the audit observation was not reproduced.
-- **Next:** ChatGPT's review and live audit of `b936586`. The queue holds the Draw & Guess native iPhone confirmation.
+- **Review 7010784066 (H1 changes requested; H2 no blocking finding), fixed on `6750b99810819f1630fa356d0d49b2d631fb5b56` (D-AV-05):**
+  - **The finding:** the memorise screen's live region arrived with its first words. The ready screen had no announcer, so the first spoken cue was not assured.
+  - **The fix:** one visually hidden assertive, atomic `PulseAnnouncer` is rendered after every Pulse screen's `<main>` at the same place. It is one DOM node from the ready screen through each slot, gap and recall, and its text is `pulseCueSay`. It mounts empty and may speak after 150 ms. The visible stage is now `aria-hidden` and not live. The window and scoring are unchanged.
+  - **Files:** `MchezoPulse.tsx`, `MchezoPulse.test.tsx` (14 tests), `scripts/check-pattern-pulse.mjs`, `docs/DECISIONS.md` (D-AV-05), `docs/stage5/README.md`. The stale `check-pulse-cue.mjs` comments are fixed.
+  - **The browser regression:** a MutationObserver on the node marked on the ready screen, over 13 rounds per game.
+    - `b936586`: 8 FAILs (the negative control).
+    - `6750b99`: 62/62.
+  - **Gates on `6750b99`:**
+    - targeted `PASSED (exit 0)`, run `20261119-135219-6750b998-24214`, 7/7;
+    - full `PASSED (exit 0)`, run `20261119-135611-6750b998-25340`, 113/113, with 2127 unit tests.
+  - **Open:**
+    - speech timing with VoiceOver/TalkBack is unverified; each cue is up 0.68–0.88 s, likely shorter than speaking it;
+    - the options are recorded in D-AV-05 for after the native retest, and the window is not changed.
+- **Next:** ChatGPT's review and live audit of `6750b99`. The queue holds the Draw & Guess native iPhone confirmation.
