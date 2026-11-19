@@ -3,6 +3,7 @@
 **What this is:** Claude's developer-run checks in headless Chromium, on this session's machine. It is not independent evidence, and not a real-device test.
 - **The QA IDs** follow the report details in 7004164219: H6 readiness rows and starts; H7 actionable time, including previous feedback pushing the next controls down; M9 the ready heading, the confirm dialog and the rows disagreeing.
 - **The direction** followed is 7004637491. **The decisions** are D-FS-01..05 in `docs/DECISIONS.md`.
+- **Review 7007413347** (changes requested on M9, the refreshed confirmation) is answered on `84955a5`: see the last section before Limits.
 
 ## The builds measured (each web build from an exact source revision)
 | Build | Source revision | What it is |
@@ -10,6 +11,7 @@
 | Baseline | `da5ac0f740aab43c86fdaadd436f8c1b34802176` | #51's head; its runtime is byte-identical to the audited `72e9d8b` |
 | Live comparison | `7097ac2` | the live beta's client. Its server code is byte-identical to the baseline's; it differs only in `App.tsx`, `intentRetry.ts` and `errors.ts` (uncertain delivery) |
 | Fixed | `8f2ead3a6eb9aa6eb839c9b79b7735ae972e429e` | draft PR #52 |
+| Review fix | `84955a5277dd1bef59e93c0be4c441cfc11b6ccd` | draft PR #52, after review 7007413347 (M2 only; see its section) |
 
 **How each build was run:**
 - **The server:** each run used the driver's fixture server from the fixed tree. The server code is identical across the three builds; only the web build changes.
@@ -139,7 +141,49 @@
    - **On the fix,** the title and rows describe the snapshot, under "When you tapped Start now:". The live line reads "Since then: Baraka is ready now; Wanjiru is ready now."
    - **A withdrawal while open** is named ("Amina isn't ready any more"). Confirming then asks again with exactly Amina and Juma, and the second confirm starts play once.
 
-**No server, timing, scoring or ledger change.**
+**No server, timing, scoring or ledger change on `8f2ead3`.** `84955a5` adds two fields to one refusal's body (below); timing, scoring and the ledger are still unchanged.
+
+## Review 7007413347: the refreshed confirmation (case M2)
+**The race, as reviewed on `8f2ead3`:** when the server asked again, the replacement dialog paired the server's new ids with the rows captured before the request.
+
+**Case M2 in `scripts/check-fair-starts.mjs`:**
+1. Everyone but Baraka is Ready. The host opens Start now, which names Baraka only.
+2. The host confirms, and that request is held on the host's network (a Playwright route).
+3. Amina withdraws through her own Ready button, and the driver waits until the host's person rows show her as not ready.
+4. The request is released. The server refuses with `READINESS_CHANGED`, naming Amina and Baraka.
+5. Every frame of the host's screen is read for 1.5 s, all from the same rendered frame: the heading, the dialog's title, its rows, its "Since then" line, its label and the person rows.
+6. The host confirms again, and the ledger must show exactly one `game-started`, `trigger: start-now`, with Amina and Baraka confirmed.
+
+| Run | Tree and web build | Result |
+|---|---|---|
+| `m9-refresh/before-8f2ead3.*` | `8f2ead3` (server and web), with the new driver | **2 FAILED** (both M2), 48 passed |
+| `m9-refresh/fixed-84955a5.*` | `84955a5` | **50 passed, 0 failed** |
+
+**What the host saw after the refusal,** on the first frame read:
+
+| Build | Title | Rows | "Since then" | Label |
+|---|---|---|---|---|
+| `8f2ead3` | "2 people aren't ready or aren't connected. Start anyway?" | "Amina: ready", "Baraka: not ready yet" | "Amina isn't ready any more." | "When you tapped Start now:" |
+| `84955a5` | "2 people aren't ready. Start anyway?" | "Amina: not ready yet", "Baraka: not ready yet" | (none) | "When you confirmed, the game checked again:" |
+
+- **On both builds,** the heading said `4 of 6`, and the person rows showed Amina and Baraka as not ready.
+- **On `8f2ead3`,** the check failed: the first and the last of the 46 frames read both showed the disagreement above. The report keeps the first three disagreeing frames.
+- **On `84955a5`,** none of the 47 frames read disagreed.- **The second confirm started play once on both builds:** the server's confirm rule is unchanged.
+- **Screenshots:** `m9-refresh/before-M2-host-390x844.png` and `m9-refresh/after-M2-host-390x844.png`.
+
+**The change** (D-FS-05, "The refreshed snapshot"):
+- **The server (additive):** a `READINESS_CHANGED` refusal also carries `needsStatus`, each named player's `{ id, ready, presence }` at the refusal, and `rev`, the projection revision broadcast with it. The ids, the confirm rule, timing, scoring and the ledger are unchanged.
+- **The client:** the replacement keeps the server's ids as sent and builds its rows from those facts. "Since then" stays quiet until the live rows are at least as new as the refusal.
+- **Not covered by a browser case:** the opposite order, where the refusal reaches the phone before the withdrawal projection. M2 holds the request, so the projection always arrives first. That order is covered by the unit tests (`liveCaughtUp` by revision).
+- **Tests:**
+  - `tests/d3-briefing.test.ts`: the facts for a ready-but-reconnecting player and two not-ready players.
+  - `tests/d3-briefing-http.test.ts`: the 409 body, its `rev` against the projection, and one start after the refreshed confirm.
+  - `tests/fair-starts-ui.test.ts`: the pure helpers, including the fallback for a server that sends no facts.
+
+**The gates on `84955a5`** (records in `m9-refresh/`):
+- **Targeted** (briefing, fair-starts, team-huddle, answer-reveal, relay, closest): `PASSED (exit 0)`, run `20261119-112958-84955a52-29908`, 8/8.
+- **Full, `node scripts/gate.mjs full`:** `PASSED (exit 0)`, run `20261119-113202-84955a52-30803`, 113/113 (Node v22.23.4, a clean tree).
+- **Unit tests, lint and typecheck** on the same tree: 2,106 tests in 166 files passed; `eslint .` and both `tsc` projects were clean.
 
 ## Limits
 - **Headless Chromium on one Linux machine:** throttling and latency are emulated. Real phones on Wi-Fi and cellular networks are untested; the queued iPhone retest can measure them.

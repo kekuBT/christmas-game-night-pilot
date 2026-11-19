@@ -1,5 +1,5 @@
 # Muse local progress and resume checkpoint
-Updated: 2026-11-19 ~6:10 a.m. EST (fair starts H6/H7/M9: draft PR #52, full gate PASSED on 8f2ead3, 113/113 — see the last section; not merged, not deployed)
+Updated: 2026-11-19 ~7:20 a.m. EST (fair starts: review 7007413347, the refreshed M9 confirmation, fixed on 84955a5; full gate PASSED (exit 0) on 84955a5, 113/113 — see the last section; not merged, not deployed)
 
 ## Current milestone
 M0–M5: COMPLETED as backend/engine checkpoints ONLY — see docs/FRONTEND_MILESTONES.md. They are NOT evidence the full product is finished.
@@ -4135,5 +4135,11 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
   - targeted gate `PASSED (exit 0)`, run `20261119-093030-8f2ead3a-10462`;
   - the full gate on `8f2ead3`: `PASSED (exit 0)`, run `20261119-102025-8f2ead3a-2360`, 113/113. An earlier full run on the same revision FAILED (111/113): its release-package step couldn't run this session's private Node as the service user, and check-install had a page-load timeout under load. Both are recorded in the evidence.
 - **Evidence:** `docs/evidence/fair-starts/`.
-- **Open:** native devices; ChatGPT's independent review.
+- **Review 7007413347 (changes requested on M9), fixed on `84955a5277dd1bef59e93c0be4c441cfc11b6ccd`:**
+  - **The race:** when the server asked again, the replacement dialog used the rows captured before the request. With the host's confirm in flight while Amina withdrew, it said "2 people aren't ready or aren't connected" over "Amina: ready".
+  - **The fix:** a `READINESS_CHANGED` refusal carries `needsStatus` and `rev` (additive). The replacement keeps the server's ids, builds its rows from those facts, and is labelled "When you confirmed, the game checked again:". "Since then" waits until the live rows are as new as the refusal (D-FS-05).
+  - **Files:** `src/server/room.ts`, `src/server/http.ts`, `apps/web/src/ui/mchezo/lib/briefing.ts`, `apps/web/src/components/mchezo/Briefing.tsx`, `apps/web/src/App.tsx`, `scripts/check-fair-starts.mjs` (case M2), `docs/ux-redesign/D3_TIMING_CONTRACT.md`.
+  - **Tests:** `tests/d3-briefing.test.ts`, `tests/d3-briefing-http.test.ts`, `tests/fair-starts-ui.test.ts`. Driver M2: `8f2ead3` 2 FAILED (both M2), 48 passed; `84955a5` 50/50.
+  - **Gates on `84955a5`:** targeted `PASSED (exit 0)`, run `20261119-112958-84955a52-29908`; full `PASSED (exit 0)`, run `20261119-113202-84955a52-30803`, 113/113.
+- **Open:** native devices; ChatGPT's review of `84955a5`.
 - **Next, per the handoff:** H1/H2 answer visibility and accessibility, then the Draw & Guess iPhone retest.
