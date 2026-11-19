@@ -1,0 +1,9 @@
+
+PASSED (exit 0) | targeted | run 20261119-202708-9d2eda5a-7629
+  6 passed, 0 failed, 0 timed out, 0 infrastructure, 0 invalid, 0 cancelled, 0 not run
+  timing   wall 1m 24s · step time 3m 34s (sum) · 3 workers, 85% busy · 2.55× the same steps run one after another
+           predicted 1–4m (about 1m 56s, low-confidence) → actual 1m 24s (-28%)
+           longest  check-draw-guess 1m 10s, check-team-draw 1m 02s, check-draw-sync 54s · the longest step is 83% of the wall time
+           machine  CPU mean 30%, peak 94% · memory available ≥ 13547 MB · load peak 1.22
+           retries  none (the gate never retries a step)
+  report <scratchpad>/fs-gate/20261119-202708-9d2eda5a-7629/report.json

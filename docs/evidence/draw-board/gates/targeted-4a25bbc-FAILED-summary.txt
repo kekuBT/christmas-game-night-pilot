@@ -1,0 +1,10 @@
+
+FAILED (exit 1) | targeted | run 20261119-202306-4a25bbcd-6172
+  5 passed, 1 failed, 0 timed out, 0 infrastructure, 0 invalid, 0 cancelled, 0 not run
+  FAIL      check-draw-board (w2) [functional]: FAIL turn 1 (390×844): after a reload the drawer is back on its board, bright, with the drawing so far — {"sig":"2:14","server":"1:8","lum":{"whole":115,"board":244}}
+  timing   wall 1m 27s · step time 3m 38s (sum) · 3 workers, 84% busy · 2.51× the same steps run one after another
+           predicted 1–4m (about 1m 56s, low-confidence) → actual 1m 27s (-25%)
+           longest  check-draw-guess 1m 10s, check-team-draw 1m 02s, check-draw-sync 56s · the longest step is 80% of the wall time
+           machine  CPU mean 32%, peak 95% · memory available ≥ 13540 MB · load peak 3.63
+           retries  none (the gate never retries a step)
+  report <scratchpad>/fs-gate/20261119-202306-4a25bbcd-6172/report.json
