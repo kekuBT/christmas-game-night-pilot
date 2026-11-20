@@ -1,5 +1,5 @@
 # Muse local progress and resume checkpoint
-Updated: 2026-11-20 ~8:30 a.m. EST (handoff 7037561069: #56 engineering-reviewed and cleared to build on, its private browser audit at cbdb124 deferred by the owner; Trivia/Math auto-advance D-AA-01 on draft #57 (tested 9f7ed98, full gate PASSED 117/117); not merged, not deployed)
+Updated: 2026-11-20 ~9:55 a.m. EST (draft #57: review 7040842858 found Stay reset on reload (P2); repaired in cfef39f, full gate PASSED 117/117; awaiting review; not merged, not deployed)
 
 ## Current milestone
 M0–M5: COMPLETED as backend/engine checkpoints ONLY — see docs/FRONTEND_MILESTONES.md. They are NOT evidence the full product is finished.
@@ -4333,3 +4333,19 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
   - Geography auto-advance (backlog).
   - The #56 private audit (deferred) and H3 native iPhone.
 - **Next:** wait for review. Results restructuring and the broader visual redesign are separate slices.
+- **Review [7040842858](https://github.com/kekuBT/christmas-game-night-pilot/pull/51#issuecomment-7040842858) on `9f7ed98`: changes requested (P2).** "Stay on this screen" silently reset after a reload or remount. Acknowledged in [7040856655](https://github.com/kekuBT/christmas-game-night-pilot/pull/51#issuecomment-7040856655) at 8:34 a.m. ET, with an estimate of about 11:45 a.m. ET. The checkpoint stays uncleared until this repair is reviewed.
+  - **The repair (D-AA-01 addendum):** `stayPreference.ts` (`useStayPreference`).
+    - It keeps one sessionStorage record per tab, keyed by room or solo session, seat and game instance. It holds ids and times only, keeps at most 8 games for at most 12 h, and falls back to memory.
+    - A different seat or room never inherits it.
+    - It is cleared on seat sign-out and when a solo round is left.
+    - **Files:** `apps/web/src/components/mchezo/stayPreference.ts` and `.test.ts` (new); `MchezoTrivia.tsx`, `MchezoMath.tsx`, `Solo.tsx`, `App.tsx`; `scripts/check-quiz-advance.mjs` (section P); `docs/DECISIONS.md`.
+  - **The tested commit:** `cfef39f8f3fa361ebf0ea19e472c9ce2a2e0a873`.
+  - **Tests:**
+    - **Section P:** `9f7ed98` FAILS 9; development build 27/27; the whole driver 88/88.
+    - **Unit:** 2167 tests (2157 + 10). Lint and typecheck are clean.
+  - **Gates on `cfef39f`:**
+    - targeted, 9 drivers: `PASSED (exit 0)`, 11/11, run `20261120-135457-cfef39f8-1548`;
+    - **full: `PASSED (exit 0)`, 117/117**, run `20261120-140403-cfef39f8-3608`.
+  - **Evidence:** `docs/evidence/quiz-advance/stay-lifetime/`.
+  - **Known driver inefficiency, not fixed in this checkpoint:** section P's detail line waits 30 s on a missing countdown element (Playwright `textContent()`). The checks are unaffected, and the step took 404.8 s of its 600 s limit.
+  - **Next:** review of `cfef39f`.
