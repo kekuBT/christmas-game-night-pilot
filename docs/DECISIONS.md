@@ -2608,4 +2608,5 @@ The reported symptom: a nearly black **drawer** screen in an iPhone in-app brows
   3. Who Said That? older pack: answers are guessable from the speakers' roles (content).
   4. Rooms deal the older packs for Who Said That? and Geography when the newer items are not approved for Official play (content approval, not copy).
   5. Practice-only reasons name approval status (e.g. "practice-only until its Cup scoring is approved"). This is honest status and acceptable as is; listed for the owner's wording pass.
+  6. Accuracy, not a team note: the details sheet's chip "Can count in the Cup (2+ players)" (`Home.tsx`) gives the Cup's two-player minimum. It shows that number on games that need more, such as Who Said That? (4–10 players). Suggested: name the game's own minimum.
   - **Result of the sweep:** no other game's tutorial, details description or briefing line trips the guard, and no other pack item does (pack titles such as "Sprint 4" are never shown to players).

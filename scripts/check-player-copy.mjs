@@ -67,6 +67,9 @@ const intent = (room, seat, gid, action, payload) => api(`/rooms/${room.roomId}/
 const PHONE = { viewport: { width: 320, height: 568 }, isMobile: true, hasTouch: true, deviceScaleFactor: 2 };
 const browser = await launchChromium();
 const body = (p) => p.locator("body").innerText();
+/** Screens and sheets fade in; a screenshot waits until every finite animation has finished (looping ones are ignored). */
+const settled = (p) => p.waitForFunction(() => document.getAnimations().every((a) => a.playState === "finished" || a.effect?.getComputedTiming().iterations === Infinity), null, { timeout: 5000 }).catch(() => {});
+const shot = async (p, path, fullPage = false) => { await settled(p); await p.screenshot({ path: screenshotPath(path), fullPage }); };
 
 try {
   // ---------- The Library's details sheets (no room). ----------
@@ -80,7 +83,7 @@ try {
     const t = await sheet.innerText();
     check(`Library (${g.title}, 320 px): the details sheet describes the game for players`, t.includes(g.description), t.split("\n").slice(0, 4).join(" | "));
     check(`Library (${g.title}, 320 px): no internal note in the details sheet`, noteIn(t) === null, String(noteIn(t)));
-    await p.screenshot({ path: screenshotPath(`docs/evidence/player-copy/library-details-${gameId}-320.png`) });
+    await shot(p, `docs/evidence/player-copy/library-details-${gameId}-320.png`);
     await ctx.close();
   }
 
@@ -130,7 +133,7 @@ try {
     const obj = await objective.innerText();
     check(`briefing (${g.title}, 320 px): How to play gives the player guidance`, obj === g.objective, obj);
     check(`briefing (${g.title}, 320 px): no internal note on the screen`, noteIn(await body(p)) === null, String(noteIn(await body(p))));
-    await p.screenshot({ path: screenshotPath(`docs/evidence/player-copy/briefing-${gameId}-320.png`), fullPage: true });
+    await shot(p, `docs/evidence/player-copy/briefing-${gameId}-320.png`, true);
     // Play: everyone ready, then everyone answers every question through the server (gameplay untouched).
     const gid = (await api(`/rooms/${room.roomId}/projection?audience=player`, { token: seats[0].token })).games.at(-1).id;
     for (const s of seats) await intent(room, s, gid, "briefing-ready", { ready: true }).catch(() => {});
@@ -151,7 +154,7 @@ try {
     console.log(`INFO results (${g.title}): listed pack explanations shown (content, backlog; not edited in H8): ${known.length ? known.map((n) => JSON.stringify(n)).join(", ") : "none"}`);
     const scores = (await api(`/rooms/${room.roomId}/projection?audience=tv`)).games.find((x) => x.id === gid)?.rawScores ?? {};
     check(`results (${g.title}): the scores are the server's, 100 per right answer`, Object.values(scores).every((v) => v % 100 === 0) && Object.keys(scores).length === seats.length, JSON.stringify(scores));
-    await p.screenshot({ path: screenshotPath(`docs/evidence/player-copy/results-${gameId}-320.png`), fullPage: true });
+    await shot(p, `docs/evidence/player-copy/results-${gameId}-320.png`, true);
     await back.click();
     await soon(`back (${g.title}): the ordinary way back to the lobby`, async () => (await p.getByTestId("choose-game").count()) === 1, 15000);
     check(`lobby after ${g.title} (320 px): no internal note on the screen`, noteIn(await body(p)) === null, String(noteIn(await body(p))));
