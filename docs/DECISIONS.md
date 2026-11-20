@@ -2564,3 +2564,58 @@ The reported symptom: a nearly black **drawer** screen in an iPhone in-app brows
   - **Not claimed:** that this was the iPhone's cause. A native Safari (and in-app browser) check on the exact candidate is still needed (see the evidence README).
   - **Scope:** Draw & Guess only, as the handoff asks. Every other screen still fades in from opacity 0, and Team Draw's drawing screen has the same dependency. Whether to make all screens visible from their first frame is a separate decision.
   - **Alternative:** a transform-only entry (no opacity). That would keep the motion, but it would keep a composited, animating layer over a large SVG on the screen that was reported black. With no animation, the screen has nothing to stall.
+
+## Post-beta: player-facing copy in Who Said That? and Geography Challenge, H8 (handoff 7027768922; acknowledged 7027797177; the November 19 QA audit, pages 7 and 29; docs/evidence/player-copy/)
+- **D-H8-01 The two games tell players what they do, with no build or status note** (H8).
+  - **Where the copy reaches players:**
+    - The registry `tutorial` (`src/games/registry.ts`) is the briefing's "How to play" line (`briefingRules`; neither game has its own rules entry) and the older intro screen.
+    - The manifest `description` (`src/games/manifest.ts`) is the game's card and details sheet: Home, the Library (`/library` and, in a room, Room menu → All games) and the host's picker.
+  - **What players saw on the base (`7c013bf`):**
+    - Who Said That?: "Match the quote to the speaker. Generic pack only in local builds." (briefing) and "Match quotes to their speakers. Generic pack only in local builds." (details).
+    - Geography Challenge: "Flags, capitals, outlines, maps, and distance — six modes, provisional." (briefing) and "…Six modes, provisional." (details).
+  - **What they see now:**
+    - Who Said That?: "Match each quote to the character who said it. Everyone answers on their own phone, and the answers are shown when the game ends." (briefing) and "Match each quote to the made-up character who said it. Played in a room, each player on their own phone." (details).
+    - Geography Challenge: "Geography questions, mixed in every game: flags, capitals, regions, distances and more. Pick one of four answers on your phone." (briefing) and "Four-choice geography questions, mixed in every game: flags, capitals, regions, distances and more." (details).
+  - **Why this wording:**
+    - Who Said That? is played in a room only (4–10 players); it is not on the solo shelf, and the shelf already says "the other games are played in a room". The quotes are from made-up characters. Answers are revealed on the results screen.
+    - Geography Challenge has no mode to pick: each game mixes question types from the pack (flags, capitals, regions, landmarks, higher-or-lower, distance; outlines in the older pack). "Six modes" described the module, not anything a player chooses.
+  - **The audit's other two strings:** "play solo (not in a room)" and "It is easy to get all answers right in tests." are not in the source, its history, or the built bundle of `7c013bf`, and no results screen shows them. The likely meaning of the second one is that the older Who Said That? pack's answers are guessable from the speakers' jobs ("Baking is just chemistry with cinnamon" → Mira the Baker). That is content, listed below.
+  - **Unchanged:** players, durations, play styles, statuses, solo availability, scoring and every question. The only pack change is D-H8-02's two explanations. The manifest `details` field (not shown to players) now says the same as the code.
+  - **The regression:**
+    - `tests/h8-player-copy.test.ts` (14 tests, with D-H8-02's) runs one guard for team notes over every game's tutorial, details description and briefing lines. It pins the two games' new text and unchanged registry facts, and its negative control is the audit's strings.
+    - `scripts/check-player-copy.mjs` (a browser driver) runs on a 320 px phone through the normal entry points:
+      - the Library's details sheet;
+      - the solo shelf;
+      - in a room: Room menu → All games → details, then the picker, Start, the briefing, play, results with the answers, and Back to lobby.
+    - On `7c013bf` the driver fails 13 checks: 10 on this copy and 3 on D-H8-02's results text. It passes on the fix.
+  - **Alternative:** hiding the briefing line for these two games. Rejected: players lose their only "How to play" text.
+- **D-H8-02 Two Geography answer explanations lose their team note (a wording edit inside H8, authorised in handoff 7028695889)** (H8).
+  - **What players saw:** two revealed explanations on the Geography results screen ended with a note for the team:
+    - `geo-legacy-5` / `geo-outline-1`: "Italy is famously boot-shaped. Text hint fallback, not SVG geometry."
+    - `geo-legacy-6` / `geo-region-1`: "Egypt is in North Africa. Accessible region fallback, not map tap."
+  - **History:** at first (tested commit `777b6f5`) H8 left them alone and only listed them, because they are pack content and the handoff said "preserve content". ChatGPT's scope answer [7028695889](https://github.com/kekuBT/christmas-game-night-pilot/pull/51#issuecomment-7028695889) then clarified that removing these two implementation notes is within H8, with no owner relay needed for this narrow edit.
+  - **What:** each explanation keeps its first sentence only ("Italy is famously boot-shaped." and "Egypt is in North Africa."). The edit is in both sources: `content/packs/geography-legacy.json`, whose version is now 1.0.1, and `src/games/geography.ts`.
+  - **Unchanged:** IDs, prompts, options, answers, difficulty, category, mechanics, mode, scoring, eligibility and the review block (status `legacy`, notes as before).
+  - **Approvals:** none was made or touched; there is no approvals file. This is a wording edit, not an editorial or factual approval of the pack, and not clearance for official championship use.
+  - **The technical rationale stays in developer docs:** the outline and region questions are text and region fallbacks, not licensed geometry or map tiles. It is in the comment above `GEOGRAPHY_PACK`, the manifest's `details` (not shown to players) and `docs/SECURITY_AUDIT.md`.
+  - **Hash and snapshot effect (existing behaviour, no incompatibility):**
+    - The pack version and both items' content hashes changed.
+    - A Geography briefing frozen on the old text before a server restart onto this pack fails its content check at play start (`pendingItems`). It is cancelled as `content-changed`: no game, no usage, no score, and the host can start again.
+    - A game already in play keeps the questions it was dealt. Content history is by item ID, so the no-repeat rules are unaffected.
+    - `npm run content:check` reports CONTENT OK, with the same single Geography warning as the base.
+  - **The regression:**
+    - `tests/h8-player-copy.test.ts` asserts that neither game's questions, options, answers or explanations contain a team note, in both packs, with no exception list. It pins both cleaned items field by field, the 1.0.1 version, the clean load, the `legacy` status and Official eligibility, and the hash change. It also plays a whole Official Geography game on both paths and reads the revealed explanations from a player's projection: a Cup created now deals from the content pack, and a Cup restored from before Sprint 4 deals from the built-in pack.
+    - `scripts/check-player-copy.mjs` checks the unfiltered results text, and that each of the two explanations is shown as exactly its first sentence.
+  - **Alternative:** keep them and list them (H8 as first tested). Superseded by the scope answer.
+- **H8 sweep: other player-facing notes, for the backlog (not patched; the patch is limited to the two reported games):**
+  1. Finish the Family Cup sheet (`apps/web/src/components/mchezo/Lobby.tsx`): "Try-out rules: these are provisional and haven’t been confirmed for an official championship yet." The TV's champion screen (`TvShow.tsx`) also says "Try-out rules: …". These are deliberate status lines about the Cup's rules; they need the owner's wording.
+  2. "Design estimate" notes about game lengths, which read like team notes:
+     - the game details sheet (`Home.tsx`): "“About N min” is our design estimate of a session, not a measurement.";
+     - the Library footer (`MchezoLibrary.tsx`): "Lengths are design estimates…";
+     - the host's picker (`Lobby.tsx`): "Times are design estimates, not measured."
+     Suggested: "About N min is a typical game." Each one also says the game ends by itself at its time limit, which should stay.
+  3. Who Said That? older pack: answers are guessable from the speakers' roles (content).
+  4. Rooms deal the older packs for Who Said That? and Geography when the newer items are not approved for Official play (content approval, not copy).
+  5. Practice-only reasons name approval status (e.g. "practice-only until its Cup scoring is approved"). This is honest status and acceptable as is; listed for the owner's wording pass.
+  6. Accuracy, not a team note: the details sheet's chip "Can count in the Cup (2+ players)" (`Home.tsx`) gives the Cup's two-player minimum. It shows that number on games that need more, such as Who Said That? (4–10 players). Suggested: name the game's own minimum.
+  - **Result of the sweep:** no other game's tutorial, details description or briefing line trips the guard, and no other pack item does (pack titles such as "Sprint 4" are never shown to players).

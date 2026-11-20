@@ -4224,3 +4224,45 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
   - **What is needed:** an authorized tester with a real iPhone runs report 7022381812's checklist on the exact candidate, recording Safari and the named in-app browser separately.
   - **Not requested:** a code repair or a repeat gate. A native failure goes to Claude for a reproduction-driven repair.
 - **Next:** the native check (no ETA until a device is available); then ChatGPT assesses it and issues the next milestone.
+- **H3 status (handoff [7027768922](https://github.com/kekuBT/christmas-game-night-pilot/pull/51#issuecomment-7027768922)):** **open, native verification deferred by owner.**
+  - **Already recorded:** the scoped engineering and private-browser pass in review 7023016430.
+  - **Still attached:** the native checklist (report 7022381812) stays with H3. It no longer blocks other development.
+
+## Post-beta: player-facing copy in Who Said That? and Geography Challenge, H8 (handoff 7027768922)
+- **The handoff:** [7027768922](https://github.com/kekuBT/christmas-game-night-pilot/pull/51#issuecomment-7027768922), acknowledged in 7027797177 at 8:46 p.m. ET with an estimate of about 11:45 p.m. ET.
+  - **The task:** H8 from the November 19 QA audit, pages 7 and 29.
+- **Branch:** `claude/h8-player-copy`, draft PR #55. It is stacked on #54 at exact base `7c013bfbfbdc526ec9000c7ac9f05d612e75fd90`.
+- **The tested commit (final):** `436f272d13ee021f246d4669a8fb88e327704f74`.
+  - **`d2b9fba`:** the copy fix. It has no gate verdict: its targeted run was stopped by hand, because the screenshots were caught mid-fade.
+  - **`777b6f5`:** the driver waits for the fade; one backlog line. Gates on it, recorded for that commit only:
+    - targeted `PASSED (exit 0)`, 17/17, run `20261120-020658-777b6f5f-7891`;
+    - full `PASSED (exit 0)`, 115/115, run `20261120-021257-777b6f5f-10794`.
+  - **`436f272`:** the D-H8-02 edit, authorised in scope answer [7028695889](https://github.com/kekuBT/christmas-game-night-pilot/pull/51#issuecomment-7028695889), acknowledged in 7028702911 at 9:46 p.m. ET with a revised estimate of about 12:00 a.m. ET.
+- **Not for merge or deploy.**
+- **What players saw:**
+  - Who Said That?: "Generic pack only in local builds", in the briefing's How to play line and the details sheet.
+  - Geography Challenge: "six modes, provisional", in the same two places.
+  - The audit's "play solo (not in a room)" and "It is easy to get all answers right in tests." are not in the source, its history or the built bundle of `7c013bf`.
+- **The fix (D-H8-01):** each game's registry `tutorial` and manifest `description` now say what a player does.
+  - Who Said That?: match each quote to a made-up character; played in a room, on each player's own phone; answers at the end.
+  - Geography Challenge: four-choice questions, with types mixed in every game.
+  - **Unchanged:** gameplay, players, durations, solo availability, scoring, packs and questions.
+  - **Files:** `src/games/registry.ts`, `src/games/manifest.ts`, `content/packs/geography-legacy.json`, `src/games/geography.ts`, `tests/h8-player-copy.test.ts` (new), `scripts/check-player-copy.mjs` (new), `docs/DECISIONS.md`.
+- **D-H8-02:** two Geography answer explanations ended with a team note.
+  - **The edit:** each keeps its first sentence: "Italy is famously boot-shaped." and "Egypt is in North Africa.". It is in `content/packs/geography-legacy.json` (now 1.0.1) and `src/games/geography.ts`.
+  - **Unchanged:** everything else about the two items, and no approval was made or touched. It is a wording edit, not an editorial approval.
+  - **The hash effect:** a briefing frozen on the old text before a restart is cancelled as `content-changed` (existing behaviour).
+- **The sweep:** six backlog items in DECISIONS (H8 sweep). No other game's tutorial, description, briefing line or pack item has a team note.
+- **Tests:**
+  - **Unit:** 2146 tests (2132 + 14). With the D-H8-02 edit stashed, 7 of the 14 fail. Lint, typecheck and `content:check` are clean.
+  - **`check-player-copy`:** 320×568 touch phone, through the normal entry points.
+    - **The route:** the Library details sheet; the solo shelf; in a room, Room menu → All games → details, then the picker, Start, the briefing, play (4 seats × 8 answers through the server), results with the answers (unfiltered text), and Back to lobby.
+    - **The result:** `7c013bf` FAILS 13 checks, all on the reported copy and the two explanations; the fix passes 32/32.
+  - **Gates on `436f272`:**
+    - targeted `PASSED (exit 0)`, 17/17, run `20261120-030228-436f272d-10627`;
+    - **full `PASSED (exit 0)`, 115/115**, run `20261120-030829-436f272d-13337`.
+- **Evidence:** `docs/evidence/player-copy/`.
+- **Open:**
+  - ChatGPT's independent engineering review and private-browser audit;
+  - the sweep backlog (DECISIONS, H8 sweep), for independent review.
+- **Next:** ChatGPT's review of `436f272`.

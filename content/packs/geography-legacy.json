@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "packId": "geography-legacy",
   "gameId": "geography",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "title": "Geography — original set",
   "language": "en",
   "items": [
@@ -145,7 +145,7 @@
         "Portugal"
       ],
       "answer": "Italy",
-      "explanation": "Italy is famously boot-shaped. Text hint fallback, not SVG geometry.",
+      "explanation": "Italy is famously boot-shaped.",
       "mechanic": "recognition"
     },
     {
@@ -173,7 +173,7 @@
         "Northern Europe"
       ],
       "answer": "North Africa",
-      "explanation": "Egypt is in North Africa. Accessible region fallback, not map tap.",
+      "explanation": "Egypt is in North Africa.",
       "mechanic": "recall"
     },
     {

@@ -160,7 +160,7 @@ export const GAME_MANIFESTS: GameManifest[] = [
   {
     id: "who-said-that",
     title: "Who Said That?",
-    description: "Match quotes to their speakers. Generic pack only in local builds.",
+    description: "Match each quote to the made-up character who said it. Played in a room, each player on their own phone.",
     categories: ["knowledge", "social"],
     minPlayers: 4,
     maxPlayers: 10,
@@ -175,7 +175,7 @@ export const GAME_MANIFESTS: GameManifest[] = [
     scoring: { type: "per-player-points", teamDerived: false },
     features: { practice: true, official: true, abstention: "whole-game" },
     tournament: { usesPerPlayerScores: true, supportsTeams: false },
-    details: "Quote-to-speaker matching from a fixed pack. The registry notes the pack is generic in local builds.",
+    details: "Quote-to-speaker matching from a fixed pack of made-up characters (no real people's quotes).",
   },
   {
     id: "guess-the-year",
@@ -260,7 +260,7 @@ export const GAME_MANIFESTS: GameManifest[] = [
   {
     id: "geography",
     title: "Geography Challenge",
-    description: "Flags, capitals, outlines, maps, and distance. Six modes, provisional.",
+    description: "Four-choice geography questions, mixed in every game: flags, capitals, regions, distances and more.",
     categories: ["knowledge", "geography"],
     minPlayers: 2,
     maxPlayers: 10,
@@ -275,7 +275,7 @@ export const GAME_MANIFESTS: GameManifest[] = [
     scoring: { type: "per-player-points", teamDerived: false },
     features: { practice: true, official: true, abstention: "whole-game" },
     tournament: { usesPerPlayerScores: true, supportsTeams: false },
-    details: "Six question modes from a fixed pack; the registry marks the modes provisional. Outlines and maps are text/region fallbacks, not licensed geometry or tiles.",
+    details: "Question types from a fixed pack, mixed in each game: flags, capitals, regions, landmarks, higher-or-lower and distance (outlines in the older pack). Outlines and maps are text/region fallbacks, not licensed geometry or tiles.",
   },
   {
     id: "math-mayhem",

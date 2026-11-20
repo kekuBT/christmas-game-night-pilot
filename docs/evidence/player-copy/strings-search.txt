@@ -1,0 +1,12 @@
+# Search for the audit's two strings that were not found, on the base revision 7c013bfbfbdc526ec9000c7ac9f05d612e75fd90.
+# tree    = files tracked at 7c013bf containing it (git grep -F, node_modules excluded)
+# history = commits reachable from 7c013bf that add or remove it (git log 7c013bf -S)
+# bundle  = files of the web build of 7c013bf (app code identical to 9d2eda5) containing it (grep -rlF)
+# (The H8 commits themselves quote these strings in the regression test and DECISIONS, so a search over all branches finds them there.)
+"easy to get all" | tree:0 | history:0 | bundle:0
+"right in tests" | tree:0 | history:0 | bundle:0
+"not in a room" | tree:0 | history:0 | bundle:0
+"play solo (not" | tree:0 | history:0 | bundle:0
+"Generic pack only in local builds" (control: reported and present) | tree:3 | bundle:1
+"six modes, provisional" (control: reported and present) | tree:1 | bundle:1
+"Six modes, provisional" (control: reported and present) | tree:2 | bundle:1

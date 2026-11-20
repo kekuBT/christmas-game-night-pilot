@@ -1,0 +1,39 @@
+$ node scripts/check-player-copy.mjs http://localhost:44453
+# timeout 600s | worker w1 | server http://localhost:44453 (data $SCRATCH/h8-gate/20261120-030228-436f272d-10627/server-data/w1)
+
+[+1.8s] PASS Library (Who Said That?, 320 px): the details sheet describes the game for players — KNOWLEDGE · SOCIAL | Who Said That? |  | Match each quote to the made-up character who said it. Played in a room, each player on their own phone.
+[+1.8s] PASS Library (Who Said That?, 320 px): no internal note in the details sheet — null
+[+3.0s] PASS Library (Geography Challenge, 320 px): the details sheet describes the game for players — KNOWLEDGE · GEOGRAPHY | Geography Challenge |  | Four-choice geography questions, mixed in every game: flags, capitals, regions, distances and more.
+[+3.0s] PASS Library (Geography Challenge, 320 px): no internal note in the details sheet — null
+[+3.6s] PASS solo shelf (320 px): neither game is offered to play alone — solo-game-math-mayhem, solo-game-pattern-pulse, solo-game-word-connections
+[+3.7s] PASS solo shelf (320 px): it says the other games are played in a room — More solo games are on the way. For now the other games are played in a room: Host a game to play them together.
+[+3.7s] PASS solo shelf (320 px): no internal note on the screen — null
+[+5.9s] PASS room library (Who Said That?, 320 px): the details sheet describes the game for players, with no internal note — null
+[+7.7s] PASS briefing (Who Said That?, 320 px): How to play gives the player guidance — Match each quote to the character who said it. Everyone answers on their own phone, and the answers are shown when the game ends.
+[+7.7s] PASS briefing (Who Said That?, 320 px): no internal note on the screen — null
+[+8.2s] PASS play (Who Said That?): the questions are on the host's phone
+[+8.2s] PASS play (Who Said That?, 320 px): no internal note on the screen — null
+[+8.4s] PASS play (Who Said That?): every seat answered every question through the server — 32 answers
+[+8.4s] PASS results (Who Said That?): the results screen, with the answers revealed
+[+8.4s] PASS results (Who Said That?, 320 px): no internal note on the screen (the whole text, unfiltered) — null
+[+8.4s] PASS results (Who Said That?): the scores are the server's, 100 per right answer — {"player-1":200,"player-2":200,"player-3":200,"player-4":200}
+[+9.4s] PASS back (Who Said That?): the ordinary way back to the lobby
+[+9.4s] PASS lobby after Who Said That? (320 px): no internal note on the screen — null
+[+11.6s] PASS room library (Geography Challenge, 320 px): the details sheet describes the game for players, with no internal note — null
+[+13.4s] PASS briefing (Geography Challenge, 320 px): How to play gives the player guidance — Geography questions, mixed in every game: flags, capitals, regions, distances and more. Pick one of four answers on your phone.
+[+13.4s] PASS briefing (Geography Challenge, 320 px): no internal note on the screen — null
+[+14.0s] PASS play (Geography Challenge): the questions are on the host's phone
+[+14.0s] PASS play (Geography Challenge, 320 px): no internal note on the screen — null
+[+14.3s] PASS play (Geography Challenge): every seat answered every question through the server — 32 answers
+[+14.3s] PASS results (Geography Challenge): the results screen, with the answers revealed
+[+14.3s] PASS results (Geography Challenge, 320 px): no internal note on the screen (the whole text, unfiltered) — null
+[+14.3s] PASS results (Geography Challenge): the outline and region questions were dealt, so their explanations are on screen — 2 of 2
+[+14.3s] PASS results (Geography Challenge): "Italy is famously boot-shaped." is the whole explanation, with no team note after it — "Italy is famously boot-shaped."
+[+14.3s] PASS results (Geography Challenge): "Egypt is in North Africa." is the whole explanation, with no team note after it — "Egypt is in North Africa."
+[+14.3s] PASS results (Geography Challenge): the scores are the server's, 100 per right answer — {"player-1":500,"player-2":500,"player-3":500,"player-4":500}
+[+15.5s] PASS back (Geography Challenge): the ordinary way back to the lobby
+[+15.5s] PASS lobby after Geography Challenge (320 px): no internal note on the screen — null
+[+15.5s] PLAYER COPY ALL PASSED
+[+15.5s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":5,"pages":5,"peakOpenPages":1}
+
+# PASS (exit 0) in 15.6s | cpu 4.1s, peak memory 366 MB

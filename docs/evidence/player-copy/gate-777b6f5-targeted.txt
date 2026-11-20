@@ -1,0 +1,10 @@
+
+PASSED (exit 0) | targeted | run 20261120-020658-777b6f5f-7891
+  17 passed, 0 failed, 0 timed out, 0 infrastructure, 0 invalid, 0 cancelled, 0 not run
+  timing   wall 5m 59s · step time 17m 41s (sum) · 3 workers, 98% busy · 2.96× the same steps run one after another
+           predicted 3–8m (about 4m 17s, low-confidence) → actual 5m 59s (+40%)
+           longest  check-audit-fixes 3m 53s, check-locked-answer 3m 03s, check-solo-shelf 2m 46s · the longest step is 65% of the wall time
+           machine  CPU mean 31%, peak 87% · memory available ≥ 13611 MB · load peak 3.97
+           contention ×1.059 (median step time vs its sequential median)
+           retries  none (the gate never retries a step)
+  report $SCRATCH/h8-gate/20261120-020658-777b6f5f-7891/report.json

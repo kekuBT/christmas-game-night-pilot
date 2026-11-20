@@ -1,0 +1,11 @@
+
+PASSED (exit 0) | full | run 20261120-030829-436f272d-13337
+  115 passed, 0 failed, 0 timed out, 0 infrastructure, 0 invalid, 0 cancelled, 0 not run
+  timing   wall 42m 39s · step time 2h 04m (sum) · 3 workers, 97% busy · 2.91× the same steps run one after another
+           predicted 35–51m (about 40m 35s, low-confidence) → actual 42m 39s (+5%)
+           longest  e2e-chromium 8m 15s, check-f5 7m 34s, check-leaderboard 6m 29s · the longest step is 19% of the wall time
+           machine  CPU mean 32%, peak 98% · memory available ≥ 12959 MB · load peak 5.65 · backpressure 14 wait(s), 63s
+           contention ×1.076 (median step time vs its sequential median)
+           baseline sequential full gate: about 1h 17m (mean of recorded sequential passes)
+           retries  none (the gate never retries a step)
+  report $SCRATCH/h8-gate/20261120-030829-436f272d-13337/report.json
