@@ -2690,6 +2690,20 @@ The reported symptom: a nearly black **drawer** screen in an iPhone in-app brows
     - **Found by the gates (driver fixes only):**
       - The fixed 12-pass answer loops in `check-mchezo`, `check-reveal`, `check-spectator`, `check-tv-entry`, `check-tv-lifecycle`, `check-tv-spectator` and two screenshot scripts now wait up to 700 ms for an enabled answer. Inside the carry-over guard a pass was wasted (targeted run `20261120-112523-fd9ff395-7559`).
       - `check-answer-race` now counts answer intents by action. With auto-advance, Math's `math-open` for question 2 can fall inside its 3.7 s window on a loaded machine. It is not an answer (full run `20261120-114819-5fb22906-14972`, and a probe recording `submit-math-answer, math-open`).
+  - **The Stay choice lasts for the game (review 7040842858, a P2 finding on `9f7ed98`):**
+    - **The defect:** `stayedIn` lived in component state, so a reload, recovery or remount (the TV stage and back) dropped it, and the countdown came back although the screen had promised it would not.
+    - **The fix:** a shared helper, `apps/web/src/components/mchezo/stayPreference.ts` (`useStayPreference`), used by both Trivia and Math.
+      - **What it stores:** one small record in this tab's sessionStorage (`mz_quiz_stay`): `{ v: 1, scope: "room:<id>" | "solo:<id>", seat: "<playerId>", games: { "<gameId>": savedAt } }`. No answers, names, tokens or recovery codes.
+      - **Why the room is in the key:** game and player ids are only unique within a room, so the room is part of the scope.
+      - **Isolation:** a read for another scope or seat finds nothing and removes the stale record; a write for a new seat replaces it.
+      - **Bounds:** at most 8 games, each kept for at most 12 hours.
+      - **Cleanup:** it is cleared when this device signs out of a seat and when a solo round is left.
+      - **Without storage:** if sessionStorage is unavailable, the record lives in memory for the page, so remounts keep the choice and a reload cannot (without storage the seat itself is not kept either).
+      - **New games:** a new game or Play again is a new game instance, so it counts down. A solo reload lands on the instructions and Start begins a new round (D-SR-01), so solo does not resume a stayed round.
+    - **The regression:** `check-quiz-advance` section P (P1–P7).
+      - It FAILS 9 checks on `9f7ed98`: Trivia reload, the TV stage round trip, Math reload (where question 4 is also opened), and the no-storage round trip.
+      - It passes 27/27 on the fix.
+      - `stayPreference.test.ts` covers the record, isolation, retention, malformed records and throwing storage (10 tests).
   - **Alternatives:**
     - **A room-wide step after every question.** Rejected: the games are paced per player, and the handoff asks to keep each player's opportunity to answer.
     - **Moving on with no visible countdown.** Rejected: it surprises players, and WCAG 2.2.1 needs a way to stop it.

@@ -38,6 +38,16 @@
 //   M1 the host's next question is opened only after the countdown, and timed from that open
 //   M2 both players finish (countdown and Next); the server ends the game when everyone has answered and both
 //      phones reach the results
+// P. The Stay choice lasts for the rest of THAT game (review 7040842858; it used to reset on a reload or remount):
+//   P1 room Trivia: Stay, move on, reload; the next answer shows the stayed status, no countdown, and it is still
+//      locked past the reading time
+//   P2 the TV stage and back (the phone's game screen remounts): the choice holds
+//   P3 a new game in the same room counts down again
+//   P4 the same tab moves to a seat in another room whose ids collide (player-1, game-1): nothing is inherited, and
+//      the stored record never names another room's seat or holds answers, names or tokens
+//   P5 room Math: Stay, move on, reload; the choice holds, and the next question is not opened (its clock not started)
+//   P6 solo Math: its contract is that a reload lands on the instructions and Start begins a new round; it counts down
+//   P7 sessionStorage unavailable: the guest joins by code; Stay holds through the TV stage and back (memory fallback)
 // Usage: node scripts/check-quiz-advance.mjs   (starts its own servers; MCHEZO_WEB_DIST passes through)
 import { spawn } from "node:child_process";
 import { mkdirSync, mkdtempSync, rmSync } from "node:fs";
@@ -58,8 +68,8 @@ async function soon(label, fn, timeout = 15000) {
 }
 /** The reading time the product uses (D-AA-01). A step that comes earlier than READ_MIN, or not by READ_MAX, fails. */
 const READ_MIN = 3500, READ_MAX = 6500;
-/** QA_ONLY=S, R or M runs one section (for local iteration); the gate runs all three. */
-const ONLY = process.env.QA_ONLY ?? "SRM";
+/** QA_ONLY=S, R, M or P runs one section (for local iteration); the gate runs all four. */
+const ONLY = process.env.QA_ONLY ?? "SRMP";
 
 async function startServer(scale) {
   const dataDir = mkdtempSync(join(tmpdir(), "quiz-advance-"));
@@ -471,6 +481,176 @@ try {
       check("M room Math section ran to the end", false, String(e?.stack ?? e).split("\n").slice(0, 3).join(" | "));
     }
     await H.ctx.close(); await G.ctx.close();
+  }
+
+  // ======================= P. The Stay choice lasts for the game (review 7040842858) =======================
+  if (ONLY.includes("P")) {
+    /** After an answer with Stay chosen: the stayed status, no countdown, and still locked past the reading time. */
+    const stayedHolds = async (page, tag, { math = false } = {}) => {
+      const lock = await answer(page, { math });
+      const paused = await page.getByTestId("mz-advance-paused").count();
+      const counting = await page.getByTestId("mz-advance").count();
+      check(`${tag}: the stayed status shows and no countdown runs`, !!lock && LOCKED.test(lock.l) && paused === 1 && counting === 0, JSON.stringify({ lock: lock?.l, paused, counting, count: await page.getByTestId("mz-advance-count").textContent().catch(() => null) }));
+      await sleep(READ_MAX + 500);
+      const last = (await screenLog(page)).at(-1)?.l;
+      check(`${tag}: ${READ_MAX + 500} ms later it is still on the locked view (no automatic advance)`, LOCKED.test(last ?? ""), String(last));
+      return lock;
+    };
+    const chooseStay = async (page, tag) => {
+      await page.getByTestId("mz-advance-stay").click({ timeout: 3000 });
+      await page.getByTestId("mz-advance-paused").waitFor({ timeout: 3000 });
+      check(`${tag}: Stay on this screen is chosen`, true);
+    };
+    const answerAllViaApi = async (room, seat, gid) => {
+      const p = await api(room.base, `/rooms/${room.roomId}/projection?audience=player`, { token: seat.token });
+      const g = (p.myGames ?? []).find((x) => x.id === gid);
+      for (const q of g?.state?.questions ?? []) await intent(room, seat, gid, "trivia-answer", { questionId: q.id, chosenIndex: 0 }).catch(() => {});
+    };
+
+    // P1–P4: room Trivia, the host on a 320×568 phone (the guest answers through the API).
+    {
+      const room = await makeRoom(s1.base, ["Keku", "Amina"]);
+      const [hs, gs] = room.seats;
+      const H = await seatPage(browser, room, hs, 320, 568);
+      const h = H.page;
+      try {
+        const gid = await startGame(room, "trivia");
+        for (const s of room.seats) await intent(room, s, gid, "briefing-ready", { ready: true });
+        await h.locator(".mz-slab:not([disabled])").first().waitFor({ timeout: 20000 });
+        // P1: Stay, move on, reload, answer again: the choice holds.
+        await answer(h);
+        await chooseStay(h, "P1 room Trivia Q1");
+        await tapNext(h);
+        await stayedHolds(h, "P1 room Trivia Q2, before any reload");
+        await tapNext(h);
+        await h.reload({ waitUntil: "domcontentloaded" });
+        await h.locator('main[aria-label^="Question 3 of"]').waitFor({ timeout: 20000 });
+        check("P1 after the reload the host resumes at question 3", true);
+        await stayedHolds(h, "P1 room Trivia Q3, after the reload");
+        await h.screenshot({ path: join(SHOTS, "stay-after-reload-trivia-320x568.png") });
+        // P2: the TV stage and back (the game screen remounts): the choice holds.
+        await tapNext(h);
+        await h.getByRole("button", { name: "TV stage" }).first().click({ timeout: 10000 });
+        const back = h.getByRole("button", { name: "Back to phone view" });
+        await back.waitFor({ timeout: 10000 });
+        check("P2 the TV stage is showing (the phone's game screen is unmounted)", (await h.locator(".mz-slab").count()) === 0 && (await h.getByTestId("mz-locked").count()) === 0);
+        await back.focus(); await h.keyboard.press("Enter"); // keyboard: the phone-sized TV layout can overlap pointer targets
+        await h.locator('main[aria-label^="Question 4 of"]').waitFor({ timeout: 20000 });
+        await stayedHolds(h, "P2 room Trivia Q4, after the TV stage and back");
+        // P3: the game ends; a new game counts down again.
+        await tapNext(h);
+        for (let q = 5; q <= 10; q++) { const l = await answer(h, { index: q % 4 }); if (l && LOCKED.test(l.l)) await tapNext(h); }
+        await answerAllViaApi(room, gs, gid);
+        await soon("P3 the first game finishes (everyone answered)", () => atResults(h), 20000);
+        const gid2 = await startGame(room, "trivia");
+        for (const s of room.seats) await intent(room, s, gid2, "briefing-ready", { ready: true });
+        await h.locator('main[aria-label^="Question 1 of"]').waitFor({ timeout: 20000 });
+        await answer(h);
+        check("P3 a new game in the same room counts down again (the choice was for the last game only)", (await h.getByTestId("mz-advance").count()) === 1 && (await h.getByTestId("mz-advance-paused").count()) === 0);
+        // P4: the same tab moves to a seat in another room whose ids collide (player-1, game-1): nothing is inherited.
+        const roomB = await makeRoom(s1.base, ["Keku", "Amina"]);
+        await h.evaluate((s) => { sessionStorage.setItem("cgn_roomId", s.roomId); sessionStorage.setItem("cgn_playerId", s.playerId); sessionStorage.setItem("cgn_token", s.token); }, { ...roomB.seats[0], roomId: roomB.roomId });
+        const stored = await h.evaluate(() => sessionStorage.getItem("mz_quiz_stay"));
+        await h.goto(`${s1.base}/room`, { waitUntil: "domcontentloaded" });
+        const gidB = await startGame(roomB, "trivia");
+        check("P4 the other room's ids collide with the first room's (player-1 and game-1)", roomB.seats[0].playerId === hs.playerId && gidB === gid, `${roomB.seats[0].playerId} ${gidB} vs ${hs.playerId} ${gid}`);
+        for (const s of roomB.seats) await intent(roomB, s, gidB, "briefing-ready", { ready: true });
+        await h.locator('main[aria-label^="Question 1 of"]').waitFor({ timeout: 20000 });
+        await answer(h);
+        check("P4 the seat in the other room counts down (no choice inherited across rooms)", (await h.getByTestId("mz-advance").count()) === 1 && (await h.getByTestId("mz-advance-paused").count()) === 0, String(stored));
+        const after = await h.evaluate(() => sessionStorage.getItem("mz_quiz_stay"));
+        check("P4 the stored record never names another room's seat (and holds no answers, names or tokens)", after === null || (JSON.parse(after).scope === `room:${roomB.roomId}` && !/token|Keku|Amina|answer/i.test(after)), String(after));
+      } catch (e) {
+        check("P room Trivia part ran to the end", false, String(e?.stack ?? e).split("\n").slice(0, 3).join(" | "));
+      }
+      await H.ctx.close();
+    }
+
+    // P5: room Math, the host on a 320×568 phone: Stay, move on, reload, answer again.
+    {
+      const room = await makeRoom(s1.base, ["Keku", "Amina"]);
+      const [hs] = room.seats;
+      const H = await seatPage(browser, room, hs, 320, 568);
+      const h = H.page;
+      try {
+        const gid = await startGame(room, "math-mayhem");
+        for (const s of room.seats) await intent(room, s, gid, "briefing-ready", { ready: true });
+        await h.locator("h1.mz-question").waitFor({ timeout: 20000 });
+        await answer(h, { math: true });
+        await chooseStay(h, "P5 room Math Q1");
+        await tapNext(h);
+        await stayedHolds(h, "P5 room Math Q2, before any reload", { math: true });
+        await tapNext(h);
+        await h.reload({ waitUntil: "domcontentloaded" });
+        await h.locator('main[aria-label^="Question 3 of"]').waitFor({ timeout: 20000 });
+        await stayedHolds(h, "P5 room Math Q3, after the reload", { math: true });
+        const srv = await mine(room.base, room.roomId, hs.token, gid);
+        check("P5 Math's question 4 is not opened while the player stays (its clock has not started)", srv.opened[3] === false, JSON.stringify(srv.opened));
+        await h.screenshot({ path: join(SHOTS, "stay-after-reload-math-320x568.png") });
+      } catch (e) {
+        check("P room Math part ran to the end", false, String(e?.stack ?? e).split("\n").slice(0, 3).join(" | "));
+      }
+      await H.ctx.close();
+    }
+
+    // P6: solo Math. Its session contract: a reload lands on the instructions and Start begins a NEW round (D-SR-01),
+    // so a stayed choice is not carried into it; the new round counts down.
+    {
+      const { ctx, page } = await phone(browser, 320, 568);
+      try {
+        await page.goto(`${s1.base}/solo/math-mayhem`, { waitUntil: "domcontentloaded" });
+        await page.getByTestId("solo-round-start").click({ timeout: 15000 });
+        await page.locator("h1.mz-question").waitFor({ timeout: 20000 });
+        await answer(page, { math: true });
+        await chooseStay(page, "P6 solo Math Q1");
+        await page.reload({ waitUntil: "domcontentloaded" });
+        await page.getByTestId("solo-ready").waitFor({ timeout: 15000 });
+        check("P6 after a reload solo lands on the instructions (its existing contract: the round is not resumed)", (await page.getByTestId("solo-round").count()) === 0);
+        await page.getByTestId("solo-round-start").click({ timeout: 15000 });
+        await page.locator("h1.mz-question").waitFor({ timeout: 20000 });
+        await answer(page, { math: true });
+        check("P6 the new solo round counts down (a new game instance)", (await page.getByTestId("mz-advance").count()) === 1 && (await page.getByTestId("mz-advance-paused").count()) === 0);
+      } catch (e) {
+        check("P solo part ran to the end", false, String(e?.stack ?? e).split("\n").slice(0, 3).join(" | "));
+      }
+      await ctx.close();
+    }
+
+    // P7: sessionStorage unavailable (blocked site data): the guest joins by code; Stay holds through the TV stage
+    // and back (memory fallback). A reload cannot keep it there: without storage the seat itself is not kept either.
+    {
+      const room = await makeRoom(s1.base, ["Keku"]);
+      const { ctx, page: g } = await phone(browser, 320, 568);
+      await ctx.addInitScript(() => {
+        Object.defineProperty(window, "sessionStorage", { configurable: true, get() { throw new DOMException("The operation is insecure.", "SecurityError"); } });
+      });
+      try {
+        await g.goto(`${s1.base}/join`, { waitUntil: "domcontentloaded" });
+        const blocked = await g.evaluate(() => { try { void window.sessionStorage; return false; } catch { return true; } });
+        check("P7 precondition: sessionStorage throws on this page", blocked);
+        await g.getByPlaceholder("e.g. Auntie June").fill("Amina");
+        await g.locator(".mz-code__input").fill(room.code);
+        await g.getByRole("button", { name: "Join the game" }).click();
+        await g.getByRole("heading", { name: "You’re in, Amina." }).waitFor({ timeout: 15000 });
+        const gid = await startGame(room, "trivia");
+        await intent(room, room.seats[0], gid, "briefing-ready", { ready: true });
+        await g.getByTestId("briefing-ready").click({ timeout: 20000 });
+        await g.locator(".mz-slab:not([disabled])").first().waitFor({ timeout: 20000 });
+        await answer(g);
+        await chooseStay(g, "P7 no storage Q1");
+        await tapNext(g);
+        await answer(g);
+        await g.getByRole("button", { name: "TV stage" }).first().click({ timeout: 10000 });
+        const back = g.getByRole("button", { name: "Back to phone view" });
+        await back.waitFor({ timeout: 10000 });
+        await back.focus(); await g.keyboard.press("Enter");
+        await g.locator('main[aria-label^="Question 3 of"]').waitFor({ timeout: 20000 });
+        await stayedHolds(g, "P7 no storage Q3, after the TV stage and back (memory fallback)");
+      } catch (e) {
+        check("P storage-unavailable part ran to the end", false, String(e?.stack ?? e).split("\n").slice(0, 3).join(" | "));
+      }
+      await ctx.close();
+    }
   }
 } catch (e) {
   check("driver ran to the end", false, String(e?.stack ?? e).slice(0, 600));

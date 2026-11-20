@@ -28,6 +28,7 @@ import { ContentSeasonChoice, ContentSeasonLabel } from "./ContentChoice.js";
 import type { SessionSeason } from "../../../../../src/shared/season.js";
 import { setShownSeason } from "../../ui/mchezo/look.js";
 import { CalmNotices } from "./InstallUi.js";
+import { clearStay } from "./stayPreference.js";
 
 /**
  * Stage 8.2 (§3.7): what the solo content changes, honestly: only Word
@@ -143,7 +144,7 @@ export function SoloRound({ game, onBackToSolo, onHome, store: injected }: {
   useEffect(() => {
     if (sessionRef.current!.isDisposed) sessionRef.current = newSession();
     const s = sessionRef.current!;
-    return () => { void s.leave(); s.dispose(); };
+    return () => { void s.leave(); s.dispose(); clearStay(); }; // D-AA-01: the round is over; so is its Stay choice
   }, []);
 
   // File the finished round's score once, against this game's rules version,
@@ -183,7 +184,7 @@ export function SoloRound({ game, onBackToSolo, onHome, store: injected }: {
         {state.stale && <p className="mz-foot mz-solo-round__note mz-solo-round__stale" role="status" data-testid="solo-stale">Can’t reach the game server right now. Reconnecting… Answers it already has are kept.</p>}
         {confirmLeave && (
           <NoticeCard tone="warn" title="Leave this round?" testId="solo-leave-confirm"
-            action={<span className="mz-solo__actions"><button type="button" className="mz-key mz-key--brand mz-key--md" data-testid="solo-leave-yes" onClick={() => { setConfirmLeave(false); void live().leave(); onBackToSolo(); }}>Leave round</button><button type="button" className="mz-key mz-key--surface mz-key--md" data-testid="solo-leave-no" autoFocus onClick={() => setConfirmLeave(false)}>Keep playing</button></span>}>
+            action={<span className="mz-solo__actions"><button type="button" className="mz-key mz-key--brand mz-key--md" data-testid="solo-leave-yes" onClick={() => { setConfirmLeave(false); void live().leave(); clearStay(); onBackToSolo(); }}>Leave round</button><button type="button" className="mz-key mz-key--surface mz-key--md" data-testid="solo-leave-no" autoFocus onClick={() => setConfirmLeave(false)}>Keep playing</button></span>}>
             It won’t be scored, and your personal best stays as it is.
           </NoticeCard>
         )}

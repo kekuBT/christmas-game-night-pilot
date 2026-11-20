@@ -17,6 +17,7 @@ import { PartyStartAsk, QuickPartyCard, QuickPartySheet, type PartyApplyResult, 
 import { anchorHomeBelow, stampEntry, useRoute } from "./nav.js";
 import type { ReactionId } from "./ui/mchezo/index.js";
 import { MchezoTriviaIntro, MchezoTriviaPlay, MchezoTriviaResults } from "./components/mchezo/MchezoTrivia.js";
+import { clearStay } from "./components/mchezo/stayPreference.js";
 import { MchezoClosest } from "./components/mchezo/MchezoClosest.js";
 import { ConnectionsTv, MchezoConnections, MchezoConnectionsResults } from "./components/mchezo/MchezoConnections.js";
 import { TvShow } from "./components/mchezo/TvShow.js";
@@ -592,6 +593,7 @@ export function App() {
   /** This device stops using the seat (sign out / session replaced). The seat stays in the game. */
   function leaveSeatOnThisDevice(note?: string) {
     seats.signOut();
+    clearStay(); // D-AA-01: this tab's "Stay on this screen" choices belonged to that seat
     connection.reset();
     setRoomId(null); setPlayerId(null); setToken(null); setProj(null);
     navigate(HOME, { replace: true });

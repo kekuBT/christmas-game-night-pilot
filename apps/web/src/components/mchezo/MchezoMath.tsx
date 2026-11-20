@@ -49,6 +49,7 @@ import { useEffect, useState } from "react";
 import { usePageVisible } from "../../ui/mchezo/lib/visibility.js";
 import { MchezoWaiting } from "../../ui/mchezo/index.js";
 import { LockedAnswer, QUIZ_AUTO_ADVANCE_MS, useAdvanceGuard } from "./LockedAnswer.js";
+import { stayScope, useStayPreference } from "./stayPreference.js";
 import { QuestionScreen } from "../../ui/mchezo/index.js";
 import type { PlayerGame, PublicGame, PublicPlayer } from "../../types.js";
 
@@ -80,10 +81,10 @@ export function MchezoMath(deps: MchezoMathDeps) {
   const questions = game.questions ?? [];
   const myAnswers: Record<string, number | null> = game.myAnswers ?? {};
   const [lastAnswered, setLastAnswered] = useState<string | null>(null);
-  // D-AA-01: a locked answer moves on by itself unless the player chose to stay, for the rest of THIS game (keyed
-  // by its id, so a new round or Play again, which can reuse this component, counts down again).
-  const [stayedIn, setStayedIn] = useState<string | null>(null);
-  const stayed = stayedIn === game.id;
+  // D-AA-01: a locked answer moves on by itself unless the player chose to stay, for the rest of THIS game. The
+  // choice is kept per room or solo session, seat and game instance, through remounts and reloads (review
+  // 7040842858); a new round or Play again is a new game, so it counts down again.
+  const [stayed, stay] = useStayPreference({ scope: stayScope(deps.roomId, deps.solo), seat: playerId, game: game.id });
   // D-AA-01: a tap that carries over from moving on must not answer the next question.
   const guard = useAdvanceGuard();
   // Sprint 2: the answered question is recorded at TAP time, and the grid
@@ -146,7 +147,7 @@ export function MchezoMath(deps: MchezoMathDeps) {
         key={lockedQ.id}
         autoAdvanceMs={QUIZ_AUTO_ADVANCE_MS}
         stayed={stayed}
-        onStay={() => setStayedIn(game.id)}
+        onStay={stay}
         players={players}
         playerId={playerId}
         publicGame={publicGame}
