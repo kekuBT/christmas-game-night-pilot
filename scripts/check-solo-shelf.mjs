@@ -71,7 +71,8 @@ async function results(page) {
 async function startFromShelf(page, gameId, base = BASE) {
   if (new URL(page.url()).pathname !== "/solo") await page.goto(`${base}/solo`, { waitUntil: "domcontentloaded" });
   await page.getByTestId("solo-home").waitFor({ timeout: 15000 });
-  await page.getByTestId(`solo-start-${gameId}`).click();
+  await page.getByTestId(`solo-start-${gameId}`).click(); // D-SR-01: the shelf opens the instructions
+  await page.getByTestId("solo-round-start").click(); // and their one Start begins the round
   await page.getByTestId("solo-round").waitFor({ timeout: 20000 });
 }
 
@@ -131,7 +132,7 @@ try {
   await page.getByTestId("solo-home").waitFor({ timeout: 15000 });
   const shelf = await page.locator('[data-testid^="solo-game-"]').evaluateAll((els) => els.map((e) => e.getAttribute("data-testid").replace("solo-game-", "")));
   check("A the shelf lists exactly Math Mayhem, Pattern Pulse and Word Connections", JSON.stringify(shelf) === JSON.stringify(["math-mayhem", "pattern-pulse", "word-connections"]), shelf.join(", "));
-  for (const g of shelf) check(`A ${g}: no personal best yet, and a Start`, /No personal best on this device yet/.test(await page.getByTestId(`solo-best-${g}`).innerText()) && await page.getByTestId(`solo-start-${g}`).isEnabled());
+  for (const g of shelf) check(`A ${g}: no personal best yet, and How to play`, /No personal best on this device yet/.test(await page.getByTestId(`solo-best-${g}`).innerText()) && await page.getByTestId(`solo-start-${g}`).isEnabled());
 
   // ---- B. Pattern Pulse, perfect ----
   await startFromShelf(page, "pattern-pulse");
@@ -217,7 +218,8 @@ try {
   await bp.goto(`${BASE}/solo`, { waitUntil: "domcontentloaded" });
   await bp.getByTestId("solo-home").waitFor({ timeout: 15000 });
   check("H blocked storage: every game says bests can't be kept", (await bp.locator('[data-testid^="solo-best-"]').allInnerTexts()).every((t) => /can’t be kept/.test(t)));
-  await bp.getByTestId("solo-start-word-connections").click();
+  await bp.getByTestId("solo-start-word-connections").click(); // D-SR-01: the shelf opens the instructions
+  await bp.getByTestId("solo-round-start").click(); // and their one Start begins the round
   const cb = await playConnections(bp, ["wrong", "wrong", "wrong", "wrong"]);
   check("H blocked storage: Connections plays to its result and says the best couldn't be saved", cb.score === 0 && /couldn’t be saved/.test(cb.pb), JSON.stringify(cb));
   await blocked.close();

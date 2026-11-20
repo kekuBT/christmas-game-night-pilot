@@ -179,7 +179,8 @@ try {
     check("W setup: controlled", await controlled(host));
     // Solo: a Word Connections round, one guess.
     await host.goto(`${GATE_BASE}/solo`, { waitUntil: "load" });
-    await host.getByTestId("solo-start-word-connections").click();
+    await host.getByTestId("solo-start-word-connections").click(); // D-SR-01: the shelf opens the instructions
+    await host.getByTestId("solo-round-start").click(); // and their one Start begins the round
     await host.getByTestId("mz-cx").waitFor({ timeout: 20000 });
     const tiles = host.getByTestId("mz-cx-tile");
     for (let i = 0; i < 4; i++) await tiles.nth(i).click();
@@ -254,7 +255,8 @@ try {
     await p.goto(`${GATE_BASE}/solo`, { waitUntil: "load" });
     await p.getByTestId("solo-home").waitFor({ timeout: 10000 });
     check("O offline: the solo shelf says so too", (await soon(() => visible(p, "offline-notice"), 8000)) !== null);
-    await p.getByTestId("solo-start-math-mayhem").click();
+    await p.getByTestId("solo-start-math-mayhem").click(); // D-SR-01: the shelf opens the instructions
+    await p.getByTestId("solo-round-start").click(); // and their one Start begins the round
     await sleep(2500);
     const roundShown = await visible(p, "solo-round");
     const err = (await p.getByTestId("solo-error").count()) ? await p.getByTestId("solo-error").innerText() : "";
@@ -283,7 +285,7 @@ try {
     const p = await ctx.newPage();
     await p.goto(`${GATE_BASE}/`, { waitUntil: "load" });
     check("O3 a stand-in page answering /health (a sign-in page, 200 HTML) is not the server: Home says it can't be reached", (await soon(() => visible(p, "offline-notice"), 8000)) !== null);
-    check("O3 the notice never gates play: Play solo still starts a round", await (async () => { await p.getByTestId("home-solo").click(); await p.getByTestId("solo-start-word-connections").click(); return (await soon(() => visible(p, "mz-cx"), 20000)) !== null; })());
+    check("O3 the notice never gates play: Play solo still starts a round", await (async () => { await p.getByTestId("home-solo").click(); await p.getByTestId("solo-start-word-connections").click(); await p.getByTestId("solo-round-start").click(); return (await soon(() => visible(p, "mz-cx"), 20000)) !== null; })());
     const before = probes;
     await sleep(6000);
     check("O3 no polling: no further /health checks while the screen sits there", probes === before, `${before} → ${probes}`);
@@ -368,7 +370,8 @@ try {
     await ctx.addInitScript(bip(), "none");
     const p = await ctx.newPage();
     await p.goto(`${GATE_BASE}/solo`, { waitUntil: "load" });
-    await p.getByTestId("solo-start-word-connections").click();
+    await p.getByTestId("solo-start-word-connections").click(); // D-SR-01: the shelf opens the instructions
+    await p.getByTestId("solo-round-start").click(); // and their one Start begins the round
     await p.getByTestId("mz-cx").waitFor({ timeout: 20000 });
     await p.evaluate(() => window.__mzFireBip());
     await sleep(500);
@@ -465,7 +468,8 @@ try {
     const ok = await controlled(p);
     check("S storage unavailable: Home opens, the worker still registers and controls, no page errors", ok && errors.length === 0, errors.slice(0, 2).join(" | "));
     await p.goto(`${GATE_BASE}/solo`, { waitUntil: "load" });
-    await p.getByTestId("solo-start-word-connections").click();
+    await p.getByTestId("solo-start-word-connections").click(); // D-SR-01: the shelf opens the instructions
+    await p.getByTestId("solo-round-start").click(); // and their one Start begins the round
     check("S storage unavailable: a solo round still starts", (await soon(() => visible(p, "mz-cx"), 20000)) !== null);
     await ctx.close();
   }
@@ -515,7 +519,8 @@ try {
     const round = await ctx.newPage(); // tab A
     await round.goto(`${B}/solo`, { waitUntil: "load" });
     await round.getByTestId("solo-content-christmas").click();
-    await round.getByTestId("solo-start-word-connections").click();
+    await round.getByTestId("solo-start-word-connections").click(); // D-SR-01: the shelf opens the instructions
+    await round.getByTestId("solo-round-start").click(); // and their one Start begins the round
     await round.getByTestId("mz-cx").waitFor({ timeout: 20000 });
     await round.evaluate(() => { window.__mzMarker = "still-the-same-page"; });
     const local = () => roomTab.evaluate(() => Object.fromEntries(Object.keys(localStorage).filter((k) => k.startsWith("mz_") || k.startsWith("cgn_") || k.startsWith("mchezo")).sort().map((k) => [k, localStorage.getItem(k)])));
@@ -585,7 +590,8 @@ try {
     check("U nothing claims the worker updated: after Reload the old worker still controls, the next one still waits", (await workerBuild(round, "active")) === V1 && (await workerBuild(round, "waiting")) === V2);
     await round.getByTestId("home-solo").click().catch(async () => { await round.goto(`${B}/solo`, { waitUntil: "load" }); });
     await round.locator('main[data-testid="solo-home"]').waitFor({ timeout: 10000 });
-    await round.getByTestId("solo-start-word-connections").click();
+    await round.getByTestId("solo-start-word-connections").click(); // D-SR-01: the shelf opens the instructions
+    await round.getByTestId("solo-round-start").click(); // and their one Start begins the round
     check("U solo replay on the next build's page: a round starts with the same solo seat", (await soon(() => visible(round, "mz-cx"), 20000)) !== null);
     const localAfter = await local();
     check("U preferences and the solo seat survived (localStorage unchanged)", JSON.stringify(localAfter) === JSON.stringify(localBefore) && localAfter["mz_look"] === "christmas", JSON.stringify(Object.keys(localAfter)));
@@ -613,7 +619,8 @@ try {
     const regState = (p) => p.evaluate(async () => { const r = await navigator.serviceWorker.getRegistration(); return { active: r?.active ? r.active.state : null, waiting: !!r?.waiting, installing: !!r?.installing, caches: await caches.keys() }; });
     const playsOnline = async (p, base) => {
       await p.goto(`${base}/solo`, { waitUntil: "load" });
-      await p.getByTestId("solo-start-word-connections").click();
+      await p.getByTestId("solo-start-word-connections").click(); // D-SR-01: the shelf opens the instructions
+      await p.getByTestId("solo-round-start").click(); // and their one Start begins the round
       return (await soon(() => visible(p, "mz-cx"), 20000)) !== null;
     };
     // F1: the next build is missing a file it lists (a partial deploy): its worker doesn't install, no half-made cache is left, the current worker carries on.

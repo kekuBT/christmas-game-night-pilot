@@ -174,7 +174,8 @@ try {
     await p.goto(`${B}/`, { waitUntil: "load" });
     await controlled(p);
     await p.goto(`${B}/solo`, { waitUntil: "load" });
-    await p.getByTestId("solo-start-word-connections").click();
+    await p.getByTestId("solo-start-word-connections").click(); // D-SR-01: the shelf opens the instructions
+    await p.getByTestId("solo-round-start").click(); // and their one Start begins the round
     await p.getByTestId("mz-cx").waitFor({ timeout: 20000 });
     await p.goto(`${B}/host`, { waitUntil: "load" });
     await p.getByPlaceholder("e.g. Auntie June").fill("Ada");

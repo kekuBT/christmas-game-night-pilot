@@ -225,7 +225,8 @@ try {
   await home.evaluate(async () => { const c = await caches.open("not-mchezo"); await c.put("/not-mchezo.txt", new Response("keep me")); });
   const round = await ctx.newPage();
   await round.goto(`${base}/solo`, { waitUntil: "load" });
-  await round.getByTestId("solo-start-word-connections").click();
+  await round.getByTestId("solo-start-word-connections").click(); // D-SR-01: the shelf opens the instructions
+  await round.getByTestId("solo-round-start").click(); // and their one Start begins the round
   await round.getByTestId("mz-cx").waitFor({ timeout: 20000 });
   await round.evaluate(() => { window.__mzMarker = "the-same-page"; });
   const a0 = await digests(home, live(A.version));

@@ -65,7 +65,8 @@ try {
     await shot(p, "01-solo-shelf", "Play solo: the shelf, first screen");
 
     // Pattern Pulse: round 1 played, then the between-pattern screen; round 2 tapping back.
-    await p.getByTestId("solo-start-pattern-pulse").click();
+    await p.getByTestId("solo-start-pattern-pulse").click(); // D-SR-01: the shelf opens the instructions
+    await p.getByTestId("solo-round-start").click(); // and their one Start begins the round
     await p.getByTestId("mz-pp-ready").waitFor({ timeout: 20000 });
     await p.getByTestId("mz-pp-open").click();
     await p.getByTestId("mz-pp-memorise").waitFor({ timeout: 10000 });
@@ -86,7 +87,8 @@ try {
     await p.getByTestId("solo-home").waitFor({ timeout: 10000 });
 
     // Math Mayhem: a question, then the results.
-    await p.getByTestId("solo-start-math-mayhem").click();
+    await p.getByTestId("solo-start-math-mayhem").click(); // D-SR-01: the shelf opens the instructions
+    await p.getByTestId("solo-round-start").click(); // and their one Start begins the round
     await p.locator("h1.mz-question").waitFor({ timeout: 20000 });
     await shot(p, "04-math-question", "Math Mayhem, solo: the first question");
     await playMath(p);

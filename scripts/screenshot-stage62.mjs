@@ -55,7 +55,8 @@ try {
     await p.getByTestId("solo-game-math-mayhem").scrollIntoViewIfNeeded();
 
     // Pattern Pulse: ready, memorise, tap back, then the rest of the game (round 3 slips) to results.
-    await p.getByTestId("solo-start-pattern-pulse").click();
+    await p.getByTestId("solo-start-pattern-pulse").click(); // D-SR-01: the shelf opens the instructions
+    await p.getByTestId("solo-round-start").click(); // and their one Start begins the round
     await p.getByTestId("mz-pp-ready").waitFor({ timeout: 20000 });
     await shot(p, "02-pulse-ready", view, "Pattern Pulse, solo: ready for round 1 (no Sit the rest out)");
     for (let i = 0; i < 6; i++) {
@@ -79,7 +80,8 @@ try {
     // Word Connections: one group found and two tiles selected, then two more groups and four mistakes.
     await p.getByTestId("solo-back").click();
     await p.getByTestId("solo-home").waitFor({ timeout: 10000 });
-    await p.getByTestId("solo-start-word-connections").click();
+    await p.getByTestId("solo-start-word-connections").click(); // D-SR-01: the shelf opens the instructions
+    await p.getByTestId("solo-round-start").click(); // and their one Start begins the round
     await p.getByTestId("mz-cx").waitFor({ timeout: 20000 });
     const groups = connectionsGroups((await p.getByTestId("mz-cx-tile").allInnerTexts()).map((w) => w.trim()));
     const guess = async (four) => {

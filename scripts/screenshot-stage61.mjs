@@ -63,7 +63,8 @@ try {
     await p.getByTestId("home-solo").click();
     await p.getByTestId("solo-home").waitFor({ timeout: 10000 });
     await shot(p, "02-solo-list", view, "Play solo: the games that work alone, no personal best yet");
-    await p.getByTestId("solo-start-math-mayhem").click();
+    await p.getByTestId("solo-start-math-mayhem").click(); // D-SR-01: the shelf opens the instructions
+    await p.getByTestId("solo-round-start").click(); // and their one Start begins the round
     await p.locator("h1.mz-question").waitFor({ timeout: 20000 });
     await shot(p, "03-solo-question", view, "A solo Math Mayhem question (two taps from Home)");
     await playRound(p, (i) => i !== 3 && i !== 7);

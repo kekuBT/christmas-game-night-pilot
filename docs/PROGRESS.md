@@ -4266,3 +4266,19 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
   - ChatGPT's independent engineering review and private-browser audit;
   - the sweep backlog (DECISIONS, H8 sweep), for independent review.
 - **Next:** ChatGPT's review of `436f272`.
+- **ChatGPT's review [7029967180](https://github.com/kekuBT/christmas-game-night-pilot/pull/51#issuecomment-7029967180): H8 cleared for development.**
+  - **What it covered:** tested `436f272`, with head `3cc1c2f` re-fetched (documentation and evidence only above it). It found **no blocking finding**.
+  - **Its independent checks:** on a hash-verified reconstruction, 127/127 focused tests, the production build and CONTENT OK; a briefing frozen on the old Geography pack was cancelled as `content-changed` and reopened on 1.0.1; and a loopback Chromium run at 320×568 passed 32/32.
+  - **What it did not do:** a second clean-checkout gate or a native device check.
+  - **Still open:** the sweep items stay in the backlog, and H3's native check stays owner-deferred.
+
+## Post-beta: solo players read the rules before they start (handoff 7029967180)
+- **The handoff:** the same comment, acknowledged in 7029976924 at 11:01 p.m. ET with an estimate of about 2:30 a.m. ET.
+- **Branch:** `claude/solo-rules-first`, stacked on #55 at exact base `3cc1c2f92f0d96a6dbb8f33a5de974d8c89fc5ac`.
+- **The fix (D-SR-01):**
+  - The shelf's action is **How to play** and opens the game's instructions. Their one Start makes the round, and nothing starts on arrival, a direct URL, a reload or Back.
+  - **Files:** `apps/web/src/App.tsx`, `apps/web/src/components/mchezo/Solo.tsx`, `Solo.test.tsx` (new), `scripts/check-solo-rules.mjs` (new), the updated solo drivers and stage screenshot scripts, `docs/DECISIONS.md`.
+- **Tests so far:**
+  - `check-solo-rules`: `3cc1c2f` FAILS 30; the fix passes 88/88, on development builds.
+  - **Unit:** 2151 tests (2146 + 5).
+

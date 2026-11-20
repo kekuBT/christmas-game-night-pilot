@@ -166,7 +166,8 @@ try {
     await p.reload({ waitUntil: "domcontentloaded" });
     await p.getByTestId("solo-home").waitFor({ timeout: 15000 });
     check("A after a reload: still Christmas, and the Christmas look", (await pressed(p, "solo-content-christmas")) && (await isLook(p, "christmas")));
-    await p.getByTestId("solo-start-word-connections").click();
+    await p.getByTestId("solo-start-word-connections").click(); // D-SR-01: the shelf opens the instructions
+    await p.getByTestId("solo-round-start").click(); // and their one Start begins the round
     const b1 = await shownBoard(p);
     check("A Christmas, first round: a Christmas board (unused Christmas first)", !!b1 && CHRISTMAS_BOARDS.includes(b1.id), b1?.id ?? "unknown board");
     check("A the round says it deals Christmas content", /Christmas content/.test(await p.getByTestId("solo-round-content").innerText()));
@@ -363,7 +364,8 @@ try {
     // Tab A's Start is held in flight while tab B changes the device's remembered choice.
     let release; const held = new Promise((r) => { release = r; });
     await a.route("**/rooms/*/games", async (route) => { if (route.request().method() === "POST") await held; return route.continue(); });
-    await a.getByTestId("solo-start-word-connections").click();
+    await a.getByTestId("solo-start-word-connections").click(); // D-SR-01: the shelf opens the instructions
+    await a.getByTestId("solo-round-start").click(); // and their one Start begins the round
     const b = await ctx.newPage();
     await b.goto(`${GATE_BASE}/solo`, { waitUntil: "domcontentloaded" });
     await b.getByTestId("solo-home").waitFor({ timeout: 15000 });
@@ -391,7 +393,8 @@ try {
     check("E tab A's Play again repeats the finished round's content (Christmas), not the device's changed choice", again.length >= 1 && again.every((v) => v === "christmas") && !!ab2 && CHRISTMAS_BOARDS.includes(ab2.id), `${JSON.stringify(again)} ${ab2?.id}`);
     // Tab B's own Start uses tab B's choice.
     const n1 = bodies.length;
-    await b.getByTestId("solo-start-word-connections").click();
+    await b.getByTestId("solo-start-word-connections").click(); // D-SR-01: the shelf opens the instructions
+    await b.getByTestId("solo-round-start").click(); // and their one Start begins the round
     const bb = await shownBoard(b);
     check("E tab B's own Start uses its choice (Everyday): a year-round board", bodies.slice(n1).filter((x) => x.page === b).map((x) => x.body.season).join(",") === "everyday" && !!bb && !CHRISTMAS_BOARDS.includes(bb.id), bb?.id);
     await soon("E tab B's round is in the Everyday look", () => isLook(b, "everyday"));
@@ -444,7 +447,8 @@ try {
       await sleep(400);
       check(`F ${mode}: the shelf's Christmas stays chosen, with the Christmas look (Match the game)`, (await p.getByTestId("solo-content").getAttribute("data-season")) === "christmas" && (await pressed(p, "solo-content-christmas")) && (await isLook(p, "christmas")), `${await p.getByTestId("solo-content").getAttribute("data-season")} ${JSON.stringify(await look(p))}`);
       check(`F ${mode}: the shelf says the choice lasts until reload`, await p.getByTestId("solo-content-unsaved").isVisible());
-      await p.getByTestId("solo-start-word-connections").click();
+      await p.getByTestId("solo-start-word-connections").click(); // D-SR-01: the shelf opens the instructions
+      await p.getByTestId("solo-round-start").click(); // and their one Start begins the round
       const board = await shownBoard(p);
       check(`F ${mode}: shelf → Word Connections: the Start reached the server as Christmas and dealt a Christmas board`, starts.length >= 1 && starts.every((b) => b.season === "christmas") && !!board && CHRISTMAS_BOARDS.includes(board.id), `${JSON.stringify(starts.map((b) => b.season))} ${board?.id}`);
       check(`F ${mode}: the round keeps the Christmas look and label`, (await isLook(p, "christmas")) && /Christmas content/.test(await p.getByTestId("solo-round-content").innerText()));
