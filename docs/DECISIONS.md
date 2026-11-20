@@ -2704,6 +2704,17 @@ The reported symptom: a nearly black **drawer** screen in an iPhone in-app brows
       - It FAILS 9 checks on `9f7ed98`: Trivia reload, the TV stage round trip, Math reload (where question 4 is also opened), and the no-storage round trip.
       - It passes 27/27 on the fix.
       - `stayPreference.test.ts` covers the record, isolation, retention, malformed records and throwing storage (10 tests).
+    - **Memory is authoritative after a failed write (review 7042658020, a P2 finding on `cfef39f`):**
+      - **The defect:** once an earlier game's record was stored, a later failing write (a full quota) put the new choice in memory, but reads still preferred the older stored record. So the next game's Stay did nothing.
+      - **The fix:** `createStayStorage`. After the first failed write, the page's store latches into memory mode, and every read comes from memory, which holds the newest value.
+        - The stale persistent copy is removed where possible, so a reload cannot bring back an older choice instead.
+        - Later writes are still tried on storage, so when it is writable again the newest value is persisted.
+        - Removing (clear, a seat or room switch) acts on both copies.
+      - **The regression:**
+        - Section P8 (a prior game's Stay stored, then writes fail) FAILS 6 checks on `cfef39f`: choosing Stay took no effect, the countdown ran on and moved the phone on, and the old record stayed.
+        - It passes 10/10 on the fix.
+        - 6 more unit tests cover the reviewer's cases: a later failure with an old record still readable, a remount, clear and seat/room switches, storage writable again, a failing remove, and storage unavailable from the start.
+      - **The same driver edit** reads the countdown text without Playwright's 30 s wait when it is absent, so section P runs in about 100 s instead of about 390 s.
   - **Alternatives:**
     - **A room-wide step after every question.** Rejected: the games are paced per player, and the handoff asks to keep each player's opportunity to answer.
     - **Moving on with no visible countdown.** Rejected: it surprises players, and WCAG 2.2.1 needs a way to stop it.

@@ -48,6 +48,8 @@
 //   P5 room Math: Stay, move on, reload; the choice holds, and the next question is not opened (its clock not started)
 //   P6 solo Math: its contract is that a reload lands on the instructions and Start begins a new round; it counts down
 //   P7 sessionStorage unavailable: the guest joins by code; Stay holds through the TV stage and back (memory fallback)
+//   P8 (review 7042658020) writes start failing AFTER a prior game's Stay was stored: Stay in the next game shows at
+//      once, holds past the reading time and through the TV stage and back (memory is authoritative after a failure)
 // Usage: node scripts/check-quiz-advance.mjs   (starts its own servers; MCHEZO_WEB_DIST passes through)
 import { spawn } from "node:child_process";
 import { mkdirSync, mkdtempSync, rmSync } from "node:fs";
@@ -490,7 +492,7 @@ try {
       const lock = await answer(page, { math });
       const paused = await page.getByTestId("mz-advance-paused").count();
       const counting = await page.getByTestId("mz-advance").count();
-      check(`${tag}: the stayed status shows and no countdown runs`, !!lock && LOCKED.test(lock.l) && paused === 1 && counting === 0, JSON.stringify({ lock: lock?.l, paused, counting, count: await page.getByTestId("mz-advance-count").textContent().catch(() => null) }));
+      check(`${tag}: the stayed status shows and no countdown runs`, !!lock && LOCKED.test(lock.l) && paused === 1 && counting === 0, JSON.stringify({ lock: lock?.l, paused, counting, count: await page.evaluate(() => document.querySelector('[data-testid="mz-advance-count"]')?.textContent ?? null) })); // no wait when absent
       await sleep(READ_MAX + 500);
       const last = (await screenLog(page)).at(-1)?.l;
       check(`${tag}: ${READ_MAX + 500} ms later it is still on the locked view (no automatic advance)`, LOCKED.test(last ?? ""), String(last));
@@ -648,6 +650,64 @@ try {
         await stayedHolds(g, "P7 no storage Q3, after the TV stage and back (memory fallback)");
       } catch (e) {
         check("P storage-unavailable part ran to the end", false, String(e?.stack ?? e).split("\n").slice(0, 3).join(" | "));
+      }
+      await ctx.close();
+    }
+
+    // P8: sessionStorage works, a game's Stay is stored, then writes start failing (a full quota): the NEXT game's Stay
+    // must still hold. The page's own Storage.setItem throws for the Stay record while window.__failStay is set.
+    {
+      const room = await makeRoom(s1.base, ["Keku", "Amina"]);
+      const [hs, gs] = room.seats;
+      const { ctx, page: h } = await phone(browser, 320, 568);
+      await ctx.addInitScript(() => {
+        window.__stayWriteFailures = 0;
+        const orig = Storage.prototype.setItem;
+        Storage.prototype.setItem = function (k, v) {
+          if (window.__failStay && k === "mz_quiz_stay") { window.__stayWriteFailures++; throw new DOMException("The quota has been exceeded.", "QuotaExceededError"); }
+          return orig.call(this, k, v);
+        };
+      });
+      try {
+        await h.goto(`${s1.base}/join`, { waitUntil: "domcontentloaded" });
+        await h.evaluate((s) => { sessionStorage.setItem("cgn_roomId", s.roomId); sessionStorage.setItem("cgn_playerId", s.playerId); sessionStorage.setItem("cgn_token", s.token); }, { ...hs, roomId: room.roomId });
+        await h.goto(`${s1.base}/room`, { waitUntil: "domcontentloaded" });
+        const gid1 = await startGame(room, "trivia");
+        for (const s of room.seats) await intent(room, s, gid1, "briefing-ready", { ready: true });
+        await h.locator(".mz-slab:not([disabled])").first().waitFor({ timeout: 20000 });
+        await answer(h);
+        await chooseStay(h, "P8 first game Q1 (storage writable)");
+        const stored1 = await h.evaluate(() => sessionStorage.getItem("mz_quiz_stay"));
+        check("P8 precondition: the first game's Stay is in sessionStorage", !!stored1 && stored1.includes(gid1), String(stored1));
+        await tapNext(h);
+        for (let q = 2; q <= 10; q++) { const l = await answer(h, { index: q % 4 }); if (l && LOCKED.test(l.l)) await tapNext(h); }
+        await answerAllViaApi(room, gs, gid1);
+        await soon("P8 the first game finishes", () => atResults(h), 20000);
+        const gid2 = await startGame(room, "trivia");
+        for (const s of room.seats) await intent(room, s, gid2, "briefing-ready", { ready: true });
+        await h.locator('main[aria-label^="Question 1 of"]').waitFor({ timeout: 20000 });
+        await h.evaluate(() => { window.__failStay = true; });
+        await answer(h);
+        await h.getByTestId("mz-advance-stay").click({ timeout: 3000 });
+        await sleep(400);
+        const fails = await h.evaluate(() => window.__stayWriteFailures);
+        check("P8 precondition: the Stay write for the second game failed (storage now throws)", fails >= 1, `${fails} failed write(s)`);
+        check("P8 second game Q1: choosing Stay takes effect at once (stayed status, no countdown)", (await h.getByTestId("mz-advance-paused").count()) === 1 && (await h.getByTestId("mz-advance").count()) === 0,
+          JSON.stringify({ paused: await h.getByTestId("mz-advance-paused").count(), counting: await h.getByTestId("mz-advance").count() }));
+        await tapNext(h);
+        await stayedHolds(h, "P8 second game Q2, writes failing");
+        await tapNext(h);
+        await h.getByRole("button", { name: "TV stage" }).first().click({ timeout: 10000 });
+        const back = h.getByRole("button", { name: "Back to phone view" });
+        await back.waitFor({ timeout: 10000 });
+        await back.focus(); await h.keyboard.press("Enter");
+        await h.locator('main[aria-label^="Question 3 of"]').waitFor({ timeout: 20000 });
+        await stayedHolds(h, "P8 second game Q3, after the TV stage and back, writes failing");
+        const stored2 = await h.evaluate(() => sessionStorage.getItem("mz_quiz_stay"));
+        check("P8 the stale persistent record is gone (a reload cannot bring back the older choice instead)", stored2 === null, String(stored2));
+        await h.screenshot({ path: join(SHOTS, "stay-after-write-failure-trivia-320x568.png") });
+      } catch (e) {
+        check("P write-failure part ran to the end", false, String(e?.stack ?? e).split("\n").slice(0, 3).join(" | "));
       }
       await ctx.close();
     }

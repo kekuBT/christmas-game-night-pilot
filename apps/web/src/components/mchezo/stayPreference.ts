@@ -11,8 +11,9 @@
 //     stale record (a session change); a write for a new seat replaces it.
 //   - Bounded: at most MAX_GAMES games, each kept for at most TTL_MS.
 //   - A new game or Play again is a new game instance, so it counts down as normal.
-//   - If sessionStorage is unavailable (private browsing, blocked site data, a throwing quota), the record lives in
-//     memory for the life of the page: remounts keep the choice; a reload cannot.
+//   - If sessionStorage is unavailable (private browsing, blocked site data), or a write to it fails later (a quota
+//     error), the record lives in memory for the life of the page and memory is authoritative: remounts keep the
+//     newest choice; a reload cannot (see createStayStorage).
 import { useCallback, useMemo, useState } from "react";
 
 export interface StayStorage {
@@ -84,33 +85,60 @@ export function clearStay(storage: StayStorage = stayStorage()): void {
   try { storage.removeItem(STAY_KEY); } catch { /* nothing to remove */ }
 }
 
-// ---- The page's storage: this tab's sessionStorage, or memory when it is unavailable. ----
-const memory = new Map<string, string>();
-const memoryStorage: StayStorage = { getItem: (k) => memory.get(k) ?? null, setItem: (k, v) => void memory.set(k, v), removeItem: (k) => void memory.delete(k) };
-let probed: StayStorage | null = null;
-
-/** sessionStorage when it works (probed once per page; a later failing write also lands in memory), else memory. */
-export function stayStorage(): StayStorage {
-  if (probed) return probed;
-  let s: Storage | null;
-  try {
-    s = typeof window !== "undefined" ? window.sessionStorage : null;
-    if (s) { s.setItem("__mz_stay_probe__", "1"); s.removeItem("__mz_stay_probe__"); }
-  } catch {
-    s = null;
-  }
-  const real = s;
-  probed = real
-    ? {
-      getItem: (k) => { try { return real.getItem(k) ?? memory.get(k) ?? null; } catch { return memory.get(k) ?? null; } },
-      setItem: (k, v) => { try { real.setItem(k, v); memory.delete(k); } catch { memory.set(k, v); } },
-      removeItem: (k) => { try { real.removeItem(k); } catch { /* unavailable */ } memory.delete(k); },
-    }
-    : memoryStorage;
-  return probed;
+// ---- The page's storage: this tab's sessionStorage, or memory when it is unavailable or a write fails. ----
+/**
+ * A store over `real` (this tab's sessionStorage, or null when it is unavailable) that never lets an older persistent
+ * value hide a newer choice made in this page (review 7042658020):
+ *   - while every write succeeds, it reads and writes `real`;
+ *   - after the FIRST failed write (a quota error, blocked site data), it latches into memory mode for the life of the
+ *     page: the newest value lives in memory and every read comes from memory. The stale persistent copy is removed
+ *     where removal still works, so a reload cannot bring back an older choice;
+ *   - in memory mode each later write is still tried on `real` too; when storage is writable again the newest value is
+ *     persisted, and when it is not, the stale copy is removed again;
+ *   - removing (clear, a seat or room switch) acts on both copies, so nothing comes back.
+ */
+export function createStayStorage(real: StayStorage | null): StayStorage {
+  const memory = new Map<string, string>();
+  let memoryMode = real === null;
+  const dropReal = (k: string) => { try { real?.removeItem(k); } catch { /* unavailable */ } };
+  return {
+    getItem(k) {
+      if (memoryMode || !real) return memory.get(k) ?? null;
+      try { return real.getItem(k); } catch { memoryMode = true; return memory.get(k) ?? null; }
+    },
+    setItem(k, v) {
+      if (memoryMode || !real) {
+        memory.set(k, v);
+        if (real) { try { real.setItem(k, v); } catch { dropReal(k); } }
+        return;
+      }
+      try { real.setItem(k, v); } catch { memoryMode = true; memory.set(k, v); dropReal(k); }
+    },
+    removeItem(k) {
+      memory.delete(k);
+      dropReal(k);
+    },
+  };
 }
-/** Tests only: forget the probe and the memory copy. */
-export function resetStayStorageForTests(): void { probed = null; memory.clear(); }
+
+let page: StayStorage | null = null;
+
+/** This page's store: sessionStorage when it can be read and written (probed once), memory otherwise. */
+export function stayStorage(): StayStorage {
+  if (page) return page;
+  let real: StayStorage | null;
+  try {
+    const s = typeof window !== "undefined" ? window.sessionStorage : null;
+    if (s) { s.setItem("__mz_stay_probe__", "1"); s.removeItem("__mz_stay_probe__"); }
+    real = s;
+  } catch {
+    real = null;
+  }
+  page = createStayStorage(real);
+  return page;
+}
+/** Tests only: forget this page's store. */
+export function resetStayStorageForTests(): void { page = null; }
 
 /**
  * The Stay choice for this seat and game: [stayed, stay]. Read from storage on every identity change, so a remount,
