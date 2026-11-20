@@ -4270,9 +4270,12 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
   - **What it covered:** tested `436f272`, head `3cc1c2f`.
   - **Its independent checks:** 127/127 focused tests, the production build, CONTENT OK, the frozen-briefing check, and a loopback Chromium run at 320×568 of 32/32.
 - **Its status is qualified by [7029976608](https://github.com/kekuBT/christmas-game-night-pilot/pull/51#issuecomment-7029976608) and [7029986532](https://github.com/kekuBT/christmas-game-night-pilot/pull/51#issuecomment-7029986532).** H8 is **engineering-reviewed, with the mandatory private Codespace interactive audit pending**.
-  - **Why it is pending:** the cloud browser is at GitHub sign-in, and the owner has to restore it.
-  - **Not requested:** an H8 code repair.
-  - **Still open:** the sweep items stay in the backlog, and H3's native check stays owner-deferred.
+  - **Why it was pending:** the cloud browser was at GitHub sign-in, and the owner had to restore it.
+- **H8 cleared: ChatGPT's private Codespace audit [7031163169](https://github.com/kekuBT/christmas-game-night-pilot/pull/51#issuecomment-7031163169) passed** on the exact `436f272`.
+  - **The preview:** a detached exact-revision worktree in the existing Codespace, served on a private port. `/health` returned the full tested SHA.
+  - **The hands-on run:** both corrected game details opened from the Library. It hosted and joined a synthetic room by code, and played Geography Challenge and Who Said That? through ordinary controls, with 4 seats × 8 answers each. It checked the new briefing guidance, the results, a guest's return to the lobby, and Geography replay opening a fresh briefing before the clock started.
+  - **Independent checks at 320×568:** the details sheets and the solo shelf. The 14/14 tests were rerun on the exact revision, covering both content paths of the two explanations.
+  - **No blocking findings.** H3's native iPhone check stays owner-deferred, and the sweep items stay in the backlog.
 
 ## Post-beta: solo players read the rules before they start (handoff 7029967180)
 - **The handoff:** the same comment, acknowledged in 7029976924 at 11:01 p.m. ET with an estimate of about 2:30 a.m. ET.
@@ -4280,13 +4283,16 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
 - **The fix (D-SR-01):**
   - The shelf's action is **How to play** and opens the game's instructions. Their one Start makes the round, and nothing starts on arrival, a direct URL, a reload or Back.
   - **Files:** `apps/web/src/App.tsx`, `apps/web/src/components/mchezo/Solo.tsx`, `Solo.test.tsx` (new), `scripts/check-solo-rules.mjs` (new), the updated solo drivers and stage screenshot scripts, `docs/DECISIONS.md`.
-- **HELD (7029976608; 7030250257 on #56):** the hold reached this session (at 04:16 UTC, delayed delivery) after the slice had begun.
-  - **What happened next:** work stopped. The validation already running was finished on its exact revision, and its report was published. No full gate and no completed handoff; the slice is not accepted.
-  - **The status comment:** 7030250085 on #51.
+- **Held, then released.**
+  - **The hold:** 7029976608, and 7030250257 on #56. It reached this session at 04:16 UTC, through delayed delivery, after the slice had begun. Work stopped; the validation already running was finished on its exact revision and reported (7030250085, 7030365275).
+  - **The release:** 7031163169 lifted the hold, acknowledged in 7031175275 at 12:18 a.m. ET with an estimate of about 1:20 a.m. ET. The full gate then ran on the same code revision.
+- **The tested commit:** `cbdb12424908a326ac4f3d533fa92ec5b665eec4`. Everything above it is docs only.
 - **Tests (on `cbdb124`):**
   - `check-solo-rules`: `3cc1c2f` FAILS 30; development build 88/88.
   - **Unit:** 2151 tests (2146 + 5). Lint and typecheck are clean.
-  - **Targeted gate:** `PASSED (exit 0)`, 13/13, run `20261120-041617-cbdb1242-6009`.
+  - **Gates:**
+    - targeted `PASSED (exit 0)`, 13/13, run `20261120-041617-cbdb1242-6009`;
+    - **full `PASSED (exit 0)`, 116/116**, run `20261120-051827-cbdb1242-266`.
 - **Evidence:** `docs/evidence/solo-rules/`.
-- **Next:** wait for ChatGPT's private audit of H8 and its release of this slice. Then run the full gate on the exact candidate and post the completed handoff.
+- **Next:** ChatGPT's review of `cbdb124`. Auto-advance and the broader redesign stay outside #56.
 

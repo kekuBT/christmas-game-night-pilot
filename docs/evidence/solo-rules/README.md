@@ -1,15 +1,14 @@
-# Solo rules first: evidence (HELD slice)
+# Solo rules first: evidence
 
 - **Handoff:** [7029967180](https://github.com/kekuBT/christmas-game-night-pilot/pull/51#issuecomment-7029967180) and D-SR-01 in `docs/DECISIONS.md`.
 - **Draft PR:** #56, stacked on #55 at exact base `3cc1c2f92f0d96a6dbb8f33a5de974d8c89fc5ac`.
 - **Code commit:** `cbdb12424908a326ac4f3d533fa92ec5b665eec4`. This folder was added afterwards, in a docs-only commit.
 
-## Status: held, not a completed slice
+## Status: completed after the hold
 
-- **The hold:** ChatGPT's qualification [7029976608](https://github.com/kekuBT/christmas-game-night-pilot/pull/51#issuecomment-7029976608) held this slice until H8's private Codespace audit is done. The access result is [7029986532](https://github.com/kekuBT/christmas-game-night-pilot/pull/51#issuecomment-7029986532), and the coordination comment is [7030250257](https://github.com/kekuBT/christmas-game-night-pilot/pull/56#issuecomment-7030250257).
-- **When the hold arrived:** after the slice had started, through delayed notification delivery.
-- **What was done under the hold:** the validation already running was finished on its exact revision, and this evidence is kept, as 7030250257 asks.
-- **Not run:** a full gate, and the completed handoff. The slice is not accepted.
+- **The hold:** ChatGPT's qualification [7029976608](https://github.com/kekuBT/christmas-game-night-pilot/pull/51#issuecomment-7029976608) held this slice until H8's private Codespace audit was done. The audit passed and the hold was lifted in [7031163169](https://github.com/kekuBT/christmas-game-night-pilot/pull/51#issuecomment-7031163169).
+- **The code was not changed during the hold.** The targeted gate run before the hold and the full gate run after it are both on `cbdb124`.
+- **No independent acceptance yet:** the slice is waiting for ChatGPT's review.
 
 ## What the check covers: `scripts/check-solo-rules.mjs`
 
@@ -36,7 +35,9 @@
 |---|---|---|---|
 | Targeted: `check-solo-rules` and every driver touching `/solo` (`solo`, `solo-shelf`, `mobile-everyday`, `install`, `install-builds`, `casual`, `themes-seasonal`, `warm-ivory`, `content-variety`, `player-copy`) | **`PASSED (exit 0)`**, 13/13 | `20261120-041617-cbdb1242-6009` | `gate-cbdb124-targeted.txt` |
 
-- **No full gate was run on this slice** (held).
+| **Full**: typecheck, lint, unit tests, build and every driver | **`PASSED (exit 0)`**, 116/116 | `20261120-051827-cbdb1242-266` | `gate-cbdb124-full.txt` |
+
+- **Both runs are on `cbdb124`;** each verdict belongs to its own run. The full run's `check-solo-rules` log is `after-gate-cbdb124-full-check-solo-rules.log`.
 
 ## Screenshots (320 px, right after the shelf tap)
 
@@ -48,5 +49,5 @@
 
 ## Limits
 
-- **Browsers:** Chromium phone emulation only, with local synthetic data; no native device and no private Codespace audit.
+- **Browsers:** Chromium phone emulation only, with local synthetic data; no native device. This slice has had no private Codespace audit.
 - **Redaction:** the scratch directory is shown as `$SCRATCH`, the repository as `$REPO`, and temporary data directories as `/tmp/mz-XXXX`; colour codes are removed.
