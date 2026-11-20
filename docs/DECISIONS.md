@@ -2754,3 +2754,30 @@ The reported symptom: a nearly black **drawer** screen in an iPhone in-app brows
     - Keep the director inside the picture on phones too: at 320 px it would be drawn at a sixth of its size, so its buttons would be far too small to tap.
     - A fixed bottom bar over the picture: it would overlap the picture.
     - Hiding the director on phones, or turning pointer events off on the picture: the handoff rules both out.
+
+## Post-beta: the TV briefing on a phone (handoff 7046501193; acknowledged 7046515024; docs/evidence/briefing-tv-fit/)
+- **D-BF-01 The TV briefing's cards fit the width they are given** (a layout repair within the existing design; it is no redesign).
+  - **What the trace found** (base `5d5eead`, Chromium phone emulation at 320×568, in both looks, for an invited player on the TV view and for a spectator):
+    - The briefing grid (`.mz-brief__tvgrid`) asked for `repeat(auto-fit, minmax(320px, 1fr))`. That is a 320 px minimum track inside about 290 px of content on a 320 px phone.
+    - So each card (How to play, Ready and, when shown, Played as teams) was 320 px wide and ran from x=15 to x=335, past the content edge at 305 and the screen's edge at 320.
+    - Its right side was clipped. Nothing scrolled, so the page reported no sideways overflow.
+    - The top bar and the "You're playing in this game" notice were not in the grid and fit.
+    - The TV people list's own tracks (`minmax(220px, 1fr)`) had the same weakness at narrower sizes.
+  - **What:** both track minimums are capped at the grid's own width, `minmax(min(320px, 100%), 1fr)` and `minmax(min(220px, 100%), 1fr)`.
+    - On a phone each card takes the full width.
+    - On a desktop nothing changes: the cards sit side by side, each at least 320 px. At 1280×800 the widths are identical to the base (three cards of 376 px).
+  - **Unchanged:** content, the way back (Back to phone view, Back to my phone to get ready, Stop watching), the spectator's read-only view, and the server's briefing and start.
+  - **The regression:** `scripts/check-briefing-tv-fit.mjs` (new, its own server, 186 checks).
+    - **K:** Know Your Rivals with the night's teams. It has long rules and six players with long names (one a single 32-character word), plus the longest team name allowed (20 characters, one word).
+    - **S:** Spectrum, the game with the longest rules.
+    - **Views:** an invited player and a spectator, in both looks, at 320×568 and 1280×800 (Spectrum's desktop case is the spectator only).
+    - **Checks:**
+      - every card lies inside the briefing's content box and the screen, and nothing inside a card spills past its edges;
+      - long names are shown in full;
+      - the desktop keeps its side-by-side cards;
+      - the spectator's only control is Stop watching;
+      - an ordinary tap or click on the way back leaves the briefing TV;
+      - everyone ready still starts play.
+    - **The result:** on `5d5eead` it FAILS 20 checks (every grid card at 320 px, in both games, views and looks). On the fix it passes 186/186.
+  - **Not changed (out of scope):** the teams card keeps the TV's large team text (24 px), so a long one-word name wraps mid-word on a phone. It fits; a phone-specific type scale belongs to the broader redesign.
+  - **Alternative:** a media query that switches the grid to one column below a breakpoint. The capped minimum does the same at any width with no breakpoint to keep in step, and it leaves wider layouts untouched.

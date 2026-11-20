@@ -1,0 +1,132 @@
+
+PASSED (exit 0) | full | run 20261120-200340-6d884195-204
+  119 passed, 0 failed, 0 timed out, 0 infrastructure, 0 invalid, 0 cancelled, 0 not run
+  timing   wall 46m 38s · step time 2h 13m (sum) · 3 workers, 96% busy · 2.87× the same steps run one after another
+           predicted 24–80m (about 38m 48s, low-confidence) → actual 46m 38s (+20%)
+           longest  e2e-chromium 8m 15s, check-f5 7m 43s, check-leaderboard 5m 08s · the longest step is 18% of the wall time
+           machine  CPU mean 34%, peak 99% · memory available ≥ 13376 MB · load peak 5.76 · backpressure 15 wait(s), 139s
+           contention ×1.16 (median step time vs its sequential median)
+           baseline sequential full gate: about 1h 17m (mean of recorded sequential passes)
+           retries  none (the gate never retries a step)
+  report <scratch>/gate-bf-full3/20261120-200340-6d884195-204/report.json
+
+Steps (from the run's console):
+[ 1/119] PASS        23.9s  typecheck-server  w1
+[ 2/119] PASS         9.8s  typecheck-web  w1
+[ 3/119] PASS         9.5s  build-web  w3
+[ 4/119] PASS        21.4s  lint  w1
+[ 5/119] PASS        70.2s  unit-tests  w2
+[ 6/119] PASS         1.9s  browser-preflight  w1
+[ 7/119] PASS       307.7s  check-leaderboard  w3
+[ 8/119] PASS       462.9s  check-f5  w2
+[ 9/119] PASS       494.5s  e2e-chromium  w1
+[10/119] PASS       271.5s  check-game-night  w3
+[11/119] PASS         160s  check-pulse-timing  w1
+[12/119] PASS       240.8s  check-audit-fixes  w2
+[13/119] PASS       129.5s  check-lifecycle  w1
+[14/119] PASS       222.6s  check-tv-lifecycle  w3
+[15/119] PASS       128.5s  check-mchezo  w2
+[16/119] PASS        93.6s  check-briefing  w1
+[17/119] PASS        85.8s  check-tv-reveal  w3
+[18/119] PASS         2.4s  check-beta-gate  w3
+[19/119] PASS        18.2s  check-beta-gate-https  w3
+[20/119] PASS        68.3s  check-draw-guess  w1
+[21/119] PASS       108.7s  check-caption  w2
+[22/119] PASS        21.9s  check-briefing-tv-fit  w1
+[23/119] PASS         6.3s  check-content-look  w1
+[24/119] PASS          69s  check-book-live  w3
+[25/119] PASS        57.8s  check-casual  w2
+[26/119] PASS        34.3s  check-cup-party  w3
+[27/119] PASS        65.9s  check-content-variety  w1
+[28/119] PASS        22.7s  check-draw-board  w3
+[29/119] PASS        54.3s  check-family-questions  w3
+[30/119] PASS        80.5s  check-fair-starts  w1
+[31/119] PASS        41.7s  check-host-handover  w3
+[32/119] PASS       151.1s  check-cup-team-games  w2
+[33/119] PASS        48.5s  check-install-builds  w3
+[34/119] PASS         142s  check-install  w1
+[35/119] PASS       123.1s  check-jebena-rush  w2
+[36/119] PASS        77.7s  check-know-your-rivals  w3
+[37/119] PASS         9.3s  check-night-card  w3
+[38/119] PASS        40.1s  check-one-path  w3
+[39/119] PASS        15.3s  check-player-copy  w3
+[40/119] PASS        22.8s  check-poll-body-stall  w3
+[41/119] PASS        49.4s  check-quick-party  w3
+[42/119] PASS       182.6s  check-locked-answer  w1
+[43/119] PASS        25.4s  check-relay  w1
+[44/119] PASS       188.1s  check-mobile-everyday  w2
+[45/119] PASS        20.1s  check-release-package  w1
+[46/119] PASS       159.7s  check-session-flow  w2
+[47/119] PASS         168s  check-solo  w1
+[48/119] PASS       253.2s  check-quiz-advance  w3
+[49/119] PASS         112s  check-solo-rules  w2
+[50/119] PASS       121.1s  check-spectrum  w3
+[51/119] PASS       175.3s  check-solo-shelf  w1
+[52/119] PASS       109.1s  check-split-clues  w2
+[53/119] PASS        20.5s  check-start-helper  w1
+[54/119] PASS        97.6s  check-split-clues-content  w3
+[55/119] PASS        57.8s  check-team-huddle  w1
+[56/119] PASS        60.7s  check-team-draw  w2
+[57/119] PASS          11s  check-teams  w3
+[58/119] PASS        90.4s  check-territory  w1
+[59/119] PASS        20.3s  check-tv-moments  w1
+[60/119] PASS       112.1s  check-themes-seasonal  w2
+[61/119] PASS        30.6s  check-uncertain-delivery  w2
+[62/119] PASS       145.1s  check-tug-of-war  w3
+[63/119] PASS        68.5s  check-tv-return  w1
+[64/119] PASS        59.9s  check-pattern-pulse  w3
+[65/119] PASS        68.6s  check-warm-ivory  w2
+[66/119] PASS        59.1s  check-math  w1
+[67/119] PASS        54.9s  check-stage2  w3
+[68/119] PASS        58.7s  check-majority-rules  w2
+[69/119] PASS        62.8s  check-spectator  w1
+[70/119] PASS        57.7s  check-connections  w3
+[71/119] PASS        55.8s  check-draw-sync  w2
+[72/119] PASS          53s  check-math-network  w3
+[73/119] PASS        50.8s  check-results  w2
+[74/119] PASS       118.5s  check-f4  w1
+[75/119] PASS        52.3s  check-reveal  w3
+[76/119] PASS          49s  check-input-isolation  w2
+[77/119] PASS        41.7s  check-tv-outage  w2
+[78/119] PASS        52.8s  check-tv-spectator  w3
+[79/119] PASS        40.3s  check-caption-4p  w2
+[80/119] PASS          38s  check-geography  w3
+[81/119] PASS       113.3s  check-multiplayer  w1
+[82/119] PASS        33.2s  check-answer-reveal  w2
+[83/119] PASS        26.5s  check-action-ack  w3
+[84/119] PASS        28.5s  check-math-timing  w1
+[85/119] PASS        28.4s  check-ten-players  w3
+[86/119] PASS        52.5s  check-contrast  w2
+[87/119] PASS        26.7s  check-library-nav  w1
+[88/119] PASS        28.4s  check-mobile  w2
+[89/119] PASS        51.2s  check-m6  w3
+[90/119] PASS        26.1s  check-tv-entry  w1
+[91/119] PASS        21.8s  check-send-failures  w2
+[92/119] PASS        19.5s  check-abstain  w1
+[93/119] PASS        25.5s  check-answer-race  w3
+[94/119] PASS        23.8s  check-lobby-mode  w2
+[95/119] PASS        19.8s  check-year  w1
+[96/119] PASS          20s  check-readiness  w3
+[97/119] PASS          18s  check-lobby-fixes  w2
+[98/119] PASS        16.4s  check-stage4-details  w1
+[99/119] PASS        15.4s  check-viewports  w3
+[100/119] PASS        15.3s  check-cup-memory  w2
+[101/119] PASS        12.6s  check-tv-show  w1
+[102/119] PASS        12.9s  check-recovery  w3
+[103/119] PASS         9.5s  check-progress  w1
+[104/119] PASS        10.6s  check-answer-helper  w2
+[105/119] PASS        10.3s  check-game-night-flow  w3
+[106/119] PASS        10.1s  check-official-practice  w1
+[107/119] PASS        10.8s  check-sessions  w2
+[108/119] PASS         7.2s  check-closest  w1
+[109/119] PASS         6.9s  check-ws-reconnect  w1
+[110/119] PASS           5s  check-history-links  w1
+[111/119] PASS         5.7s  check-tv-dashboard  w3
+[112/119] PASS         6.6s  check-library  w2
+[113/119] PASS         6.6s  check-reduced-motion  w1
+[114/119] PASS         5.5s  check-errors  w1
+[115/119] PASS           6s  check-shuffle  w1
+[116/119] PASS         5.1s  check-studio  w2
+[117/119] PASS         5.2s  check-double-start  w3
+[118/119] PASS         2.7s  check-a11y-surfaces  w1
+[119/119] PASS           2s  check-restart  w2

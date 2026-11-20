@@ -4397,3 +4397,33 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
   - H3's native iPhone confirmation.
 - **Seen, not changed:** the briefing TV's rules card is 15 px wider than a 320 px screen and is clipped.
 - **Next:** ChatGPT's review of #58.
+- **#58 cleared:** ChatGPT's review [7046501193](https://github.com/kekuBT/christmas-game-night-pilot/pull/51#issuecomment-7046501193) passed #58's TV return in independent QA, on tested `6ac91f6` with docs-only head `5d5eead`.
+  - **Its run:** 217 logged assertions passed, 0 failed, and 49/49 focused tests passed. No independent full gate was run.
+  - **Still open:** native iPhone/Android and real screen-reader checks. The private Codespace audits remain owner-deferred.
+
+## Post-beta: the TV briefing on a phone (handoff 7046501193)
+- **The handoff:** the same comment set this slice. It was acknowledged in 7046515024 at 12:44 p.m. ET, estimating about 3:30 p.m. ET.
+- **Branch:** `claude/tv-briefing-fit`, draft PR #59, stacked on #58 (exact base `5d5eead`). Not for merge or deploy.
+- **The tested commit:** `6d884195e5e09dfc85fad3aee8589ac8b000c7b4`.
+- **The defect, reproduced on `5d5eead`:**
+  - At 320 px the TV briefing grid's 320 px minimum track ran each card (rules, ready, teams) to x=335, clipped at the screen's edge.
+  - It affected the invited player and the spectator, in both looks.
+- **The fix (D-BF-01):** the track minimums are capped at the grid's width (`min(320px, 100%)`, `min(220px, 100%)`). The desktop layout is identical.
+  - **Files:** `apps/web/src/ui/mchezo/styles/mchezo.css`, `scripts/check-briefing-tv-fit.mjs` (new), `docs/DECISIONS.md`.
+- **Tests:**
+  - **`check-briefing-tv-fit` (186 checks):**
+    - Coverage: Know Your Rivals with teams (long rules, long names, the longest team name) and Spectrum (the longest rules); player and spectator; both looks; 320×568 and 1280×800.
+    - Results: **20 FAIL** on `5d5eead`; 186/186 on the fix.
+  - **Gates:** 
+    - targeted on `6d88419`: **`PASSED (exit 0)`**, 13/13, run `20261120-174946-6d884195-26796`;
+    - full run 1: **`FAILED (exit 1)`**, 118/119, run `20261120-175449-6d884195-29338`. Only `check-install-builds` E1 failed: an existing driver races update checks it does not start (see the evidence README);
+    - full run 2: **no verdict**, run `20261120-185358-6d884195-24239` (the worker process restarted at 6/119);
+    - **full run 3: `PASSED (exit 0)`, 119/119**, run `20261120-200340-6d884195-204`.
+- **Evidence:** `docs/evidence/briefing-tv-fit/`.
+- **Open:**
+  - `check-install-builds` section E races update checks it does not start; a separate driver fix is proposed.
+  - Real-device checks.
+  - The teams card's TV-sized text on phones (fits, wraps mid-word).
+  - The broader redesign (owner-selected options).
+  - Draw & Guess native confirmation.
+- **Next:** ChatGPT's review of #59.

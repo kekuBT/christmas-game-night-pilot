@@ -1,0 +1,133 @@
+
+FAILED (exit 1) | full | run 20261120-175449-6d884195-29338
+  118 passed, 1 failed, 0 timed out, 0 infrastructure, 0 invalid, 0 cancelled, 0 not run
+  FAIL      check-install-builds (w3) [functional]: FAIL E1 no candidate is left, nothing else is touched — ["mchezo-shell-654a7428e2c621a4","mchezo-stage-e53a77ceedc1f749-mwpav1zd-jwpjkx0p","not-mchezo"]
+  timing   wall 45m 56s · step time 2h 12m (sum) · 3 workers, 96% busy · 2.89× the same steps run one after another
+           predicted 24–80m (about 38m 48s, low-confidence) → actual 45m 56s (+18%)
+           longest  e2e-chromium 8m 02s, check-f5 7m 38s, check-leaderboard 5m 11s · the longest step is 18% of the wall time
+           machine  CPU mean 34%, peak 100% · memory available ≥ 13047 MB · load peak 6.32 · backpressure 13 wait(s), 96s
+           contention ×1.172 (median step time vs its sequential median)
+           baseline sequential full gate: about 1h 17m (mean of recorded sequential passes)
+           retries  none (the gate never retries a step)
+  report <scratch>/gate-bf-full/20261120-175449-6d884195-29338/report.json
+
+Steps (from the run's console):
+[ 1/119] PASS        16.1s  typecheck-server  w1
+[ 2/119] PASS        16.5s  typecheck-web  w2
+[ 3/119] PASS        23.7s  lint  w3
+[ 4/119] PASS         7.5s  build-web  w2
+[ 5/119] PASS        68.5s  unit-tests  w1
+[ 6/119] PASS         0.7s  browser-preflight  w1
+[ 7/119] PASS       310.5s  check-leaderboard  w3
+[ 8/119] PASS       458.3s  check-f5  w2
+[ 9/119] PASS       482.4s  e2e-chromium  w1
+[10/119] PASS       265.9s  check-game-night  w3
+[11/119] PASS       157.9s  check-pulse-timing  w1
+[12/119] PASS       242.9s  check-audit-fixes  w2
+[13/119] PASS         129s  check-lifecycle  w1
+[14/119] PASS       222.5s  check-tv-lifecycle  w3
+[15/119] PASS       129.8s  check-mchezo  w2
+[16/119] PASS        94.5s  check-briefing  w1
+[17/119] PASS        72.9s  check-tv-reveal  w3
+[18/119] PASS         2.3s  check-beta-gate  w3
+[19/119] PASS        16.2s  check-beta-gate-https  w3
+[20/119] PASS        67.4s  check-draw-guess  w1
+[21/119] PASS        21.1s  check-briefing-tv-fit  w1
+[22/119] PASS         109s  check-caption  w2
+[23/119] PASS         7.2s  check-content-look  w2
+[24/119] PASS        69.2s  check-book-live  w3
+[25/119] PASS        56.4s  check-casual  w1
+[26/119] PASS        32.9s  check-cup-party  w3
+[27/119] PASS        66.1s  check-content-variety  w2
+[28/119] PASS        21.6s  check-draw-board  w3
+[29/119] PASS          53s  check-family-questions  w3
+[30/119] PASS        77.3s  check-fair-starts  w2
+[31/119] PASS        38.6s  check-host-handover  w3
+[32/119] PASS       148.7s  check-cup-team-games  w1
+[33/119] FAIL        39.5s  check-install-builds  w3  FAIL E1 no candidate is left, nothing else is touched — ["mchezo-shell-654a7428e2c621a4","mchezo-stage-e53a77ceedc1f749-mwpav1zd-jwpjkx0p","not-mchezo"]
+[34/119] PASS        78.1s  check-know-your-rivals  w3
+[35/119] PASS       141.5s  check-install  w2
+[36/119] PASS       135.4s  check-jebena-rush  w1
+[37/119] PASS         9.9s  check-night-card  w1
+[38/119] PASS        41.1s  check-one-path  w1
+[39/119] PASS        15.1s  check-player-copy  w1
+[40/119] PASS        22.8s  check-poll-body-stall  w1
+[41/119] PASS        47.9s  check-quick-party  w1
+[42/119] PASS       185.3s  check-locked-answer  w3
+[43/119] PASS       190.9s  check-mobile-everyday  w2
+[44/119] PASS        16.2s  check-release-package  w2
+[45/119] PASS        25.1s  check-relay  w3
+[46/119] PASS         158s  check-session-flow  w2
+[47/119] PASS       167.3s  check-solo  w3
+[48/119] PASS       250.2s  check-quiz-advance  w1
+[49/119] PASS         112s  check-solo-rules  w2
+[50/119] PASS       113.3s  check-spectrum  w1
+[51/119] PASS       176.4s  check-solo-shelf  w3
+[52/119] PASS        20.4s  check-start-helper  w3
+[53/119] PASS       109.4s  check-split-clues  w2
+[54/119] PASS          59s  check-team-draw  w3
+[55/119] PASS        95.6s  check-split-clues-content  w1
+[56/119] PASS        56.7s  check-team-huddle  w2
+[57/119] PASS        12.4s  check-teams  w3
+[58/119] PASS        90.2s  check-territory  w1
+[59/119] PASS        20.8s  check-tv-moments  w1
+[60/119] PASS       110.1s  check-themes-seasonal  w2
+[61/119] PASS        30.3s  check-uncertain-delivery  w2
+[62/119] PASS       143.6s  check-tug-of-war  w3
+[63/119] PASS        67.8s  check-tv-return  w1
+[64/119] PASS        59.8s  check-pattern-pulse  w3
+[65/119] PASS        69.1s  check-warm-ivory  w2
+[66/119] PASS        60.8s  check-math  w1
+[67/119] PASS        57.5s  check-stage2  w3
+[68/119] PASS        59.6s  check-majority-rules  w2
+[69/119] PASS        63.7s  check-spectator  w1
+[70/119] PASS        57.2s  check-connections  w3
+[71/119] PASS        54.2s  check-draw-sync  w2
+[72/119] PASS          53s  check-math-network  w3
+[73/119] PASS        51.5s  check-results  w2
+[74/119] PASS       118.2s  check-f4  w1
+[75/119] PASS        48.8s  check-input-isolation  w2
+[76/119] PASS        52.9s  check-reveal  w3
+[77/119] PASS        41.2s  check-tv-outage  w3
+[78/119] PASS        52.7s  check-tv-spectator  w2
+[79/119] PASS        39.6s  check-caption-4p  w3
+[80/119] PASS        36.5s  check-geography  w2
+[81/119] PASS       114.7s  check-multiplayer  w1
+[82/119] PASS        31.3s  check-answer-reveal  w3
+[83/119] PASS        27.6s  check-action-ack  w2
+[84/119] PASS        29.3s  check-math-timing  w1
+[85/119] PASS        30.6s  check-ten-players  w2
+[86/119] PASS        28.4s  check-library-nav  w1
+[87/119] PASS        53.6s  check-contrast  w3
+[88/119] PASS        25.7s  check-tv-entry  w3
+[89/119] PASS        28.8s  check-mobile  w2
+[90/119] PASS        51.3s  check-m6  w1
+[91/119] PASS        21.5s  check-send-failures  w3
+[92/119] PASS        26.5s  check-answer-race  w2
+[93/119] PASS        19.6s  check-abstain  w1
+[94/119] PASS        24.1s  check-lobby-mode  w3
+[95/119] PASS        20.1s  check-year  w2
+[96/119] PASS        20.1s  check-readiness  w1
+[97/119] PASS        17.8s  check-lobby-fixes  w3
+[98/119] PASS        15.8s  check-viewports  w1
+[99/119] PASS        17.7s  check-stage4-details  w2
+[100/119] PASS        15.8s  check-cup-memory  w3
+[101/119] PASS        12.8s  check-recovery  w2
+[102/119] PASS        13.3s  check-tv-show  w1
+[103/119] PASS        10.4s  check-answer-helper  w3
+[104/119] PASS         9.7s  check-progress  w2
+[105/119] PASS        10.5s  check-game-night-flow  w1
+[106/119] PASS         9.1s  check-closest  w1
+[107/119] PASS        11.8s  check-sessions  w2
+[108/119] PASS        12.8s  check-official-practice  w3
+[109/119] PASS         6.1s  check-ws-reconnect  w1
+[110/119] PASS           6s  check-history-links  w1
+[111/119] PASS         6.1s  check-tv-dashboard  w3
+[112/119] PASS         6.9s  check-library  w2
+[113/119] PASS         6.3s  check-reduced-motion  w1
+[114/119] PASS         5.5s  check-errors  w1
+[115/119] PASS         5.6s  check-studio  w3
+[116/119] PASS           6s  check-shuffle  w2
+[117/119] PASS         4.8s  check-double-start  w1
+[118/119] PASS         2.8s  check-a11y-surfaces  w1
+[119/119] PASS         1.9s  check-restart  w2
