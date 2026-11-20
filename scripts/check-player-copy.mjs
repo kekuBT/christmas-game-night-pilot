@@ -26,13 +26,13 @@ async function soon(label, fn, timeout = 15000) {
 const INTERNAL_NOTE = /\b(local builds?|provisional|in tests?|test mode|registry|generic pack|placeholder|stub|debug|owner review|review pending|not licensed|fallbacks?|sprint \d|stage \d)\b/i;
 const noteIn = (t) => (t.match(INTERNAL_NOTE) ?? [null])[0];
 /**
- * Two Geography answer explanations in the content pack (geo-legacy-5 and geo-legacy-6, the same text in
- * src/games/geography.ts) end with a team note. They are content: an item edit goes through the editorial workflow
- * (docs/content-quality-2/WORKFLOW.md) and the handoff says to preserve content, so H8 lists them for the backlog
- * instead of editing them. The results check takes out exactly these two sentences and still fails on any other note.
+ * The two Geography explanations that ended with a team note (D-H8-02; handoff 7028695889 authorised the edit): the
+ * results must show each one as its first sentence only, whenever its question was dealt.
  */
-const KNOWN_CONTENT_NOTES = ["Text hint fallback, not SVG geometry.", "Accessible region fallback, not map tap."];
-const withoutKnown = (t) => KNOWN_CONTENT_NOTES.reduce((s, n) => s.split(n).join(""), t);
+const CLEANED = [
+  { prompt: "Which boot-shaped country is this outline hint describing?", explanation: "Italy is famously boot-shaped.", old: "Text hint fallback, not SVG geometry." },
+  { prompt: "In which region is Egypt located?", explanation: "Egypt is in North Africa.", old: "Accessible region fallback, not map tap." },
+];
 const GAMES = {
   "who-said-that": {
     title: "Who Said That?", action: "whosaid-answer",
@@ -149,9 +149,15 @@ try {
     const back = p.getByTestId("show-back-to-lobby").first();
     await soon(`results (${g.title}): the results screen, with the answers revealed`, async () => (await back.count()) === 1 && /Answers/.test(await body(p)), 20000);
     const res = await body(p);
-    const known = KNOWN_CONTENT_NOTES.filter((n) => res.includes(n));
-    check(`results (${g.title}, 320 px): no internal note on the screen, apart from the listed pack explanations`, noteIn(withoutKnown(res)) === null, String(noteIn(withoutKnown(res))));
-    console.log(`INFO results (${g.title}): listed pack explanations shown (content, backlog; not edited in H8): ${known.length ? known.map((n) => JSON.stringify(n)).join(", ") : "none"}`);
+    check(`results (${g.title}, 320 px): no internal note on the screen (the whole text, unfiltered)`, noteIn(res) === null, String(noteIn(res)));
+    if (gameId === "geography") {
+      const dealt = CLEANED.filter((c) => res.includes(c.prompt));
+      check(`results (${g.title}): the outline and region questions were dealt, so their explanations are on screen`, dealt.length === CLEANED.length, `${dealt.length} of ${CLEANED.length}`);
+      for (const c of dealt) {
+        const lines = res.split("\n").map((l) => l.trim());
+        check(`results (${g.title}): "${c.explanation}" is the whole explanation, with no team note after it`, lines.includes(c.explanation) && !res.includes(c.old), JSON.stringify(lines.find((l) => l.startsWith(c.explanation.slice(0, 10))) ?? "not found"));
+      }
+    }
     const scores = (await api(`/rooms/${room.roomId}/projection?audience=tv`)).games.find((x) => x.id === gid)?.rawScores ?? {};
     check(`results (${g.title}): the scores are the server's, 100 per right answer`, Object.values(scores).every((v) => v % 100 === 0) && Object.keys(scores).length === seats.length, JSON.stringify(scores));
     await shot(p, `docs/evidence/player-copy/results-${gameId}-320.png`, true);
