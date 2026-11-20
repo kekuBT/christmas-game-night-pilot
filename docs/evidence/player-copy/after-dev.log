@@ -1,0 +1,33 @@
+PASS Library (Who Said That?, 320 px): the details sheet describes the game for players — KNOWLEDGE · SOCIAL | Who Said That? |  | Match each quote to the made-up character who said it. Played in a room, each player on their own phone.
+PASS Library (Who Said That?, 320 px): no internal note in the details sheet — null
+PASS Library (Geography Challenge, 320 px): the details sheet describes the game for players — KNOWLEDGE · GEOGRAPHY | Geography Challenge |  | Four-choice geography questions, mixed in every game: flags, capitals, regions, distances and more.
+PASS Library (Geography Challenge, 320 px): no internal note in the details sheet — null
+PASS solo shelf (320 px): neither game is offered to play alone — solo-game-math-mayhem, solo-game-pattern-pulse, solo-game-word-connections
+PASS solo shelf (320 px): it says the other games are played in a room — More solo games are on the way. For now the other games are played in a room: Host a game to play them together.
+PASS solo shelf (320 px): no internal note on the screen — null
+PASS room library (Who Said That?, 320 px): the details sheet describes the game for players, with no internal note — null
+PASS briefing (Who Said That?, 320 px): How to play gives the player guidance — Match each quote to the character who said it. Everyone answers on their own phone, and the answers are shown when the game ends.
+PASS briefing (Who Said That?, 320 px): no internal note on the screen — null
+PASS play (Who Said That?): the questions are on the host's phone
+PASS play (Who Said That?, 320 px): no internal note on the screen — null
+PASS play (Who Said That?): every seat answered every question through the server — 32 answers
+PASS results (Who Said That?): the results screen, with the answers revealed
+PASS results (Who Said That?, 320 px): no internal note on the screen (the whole text, unfiltered) — null
+PASS results (Who Said That?): the scores are the server's, 100 per right answer — {"player-1":200,"player-2":200,"player-3":200,"player-4":200}
+PASS back (Who Said That?): the ordinary way back to the lobby
+PASS lobby after Who Said That? (320 px): no internal note on the screen — null
+PASS room library (Geography Challenge, 320 px): the details sheet describes the game for players, with no internal note — null
+PASS briefing (Geography Challenge, 320 px): How to play gives the player guidance — Geography questions, mixed in every game: flags, capitals, regions, distances and more. Pick one of four answers on your phone.
+PASS briefing (Geography Challenge, 320 px): no internal note on the screen — null
+PASS play (Geography Challenge): the questions are on the host's phone
+PASS play (Geography Challenge, 320 px): no internal note on the screen — null
+PASS play (Geography Challenge): every seat answered every question through the server — 32 answers
+PASS results (Geography Challenge): the results screen, with the answers revealed
+PASS results (Geography Challenge, 320 px): no internal note on the screen (the whole text, unfiltered) — null
+PASS results (Geography Challenge): the outline and region questions were dealt, so their explanations are on screen — 2 of 2
+PASS results (Geography Challenge): "Italy is famously boot-shaped." is the whole explanation, with no team note after it — "Italy is famously boot-shaped."
+PASS results (Geography Challenge): "Egypt is in North Africa." is the whole explanation, with no team note after it — "Egypt is in North Africa."
+PASS results (Geography Challenge): the scores are the server's, 100 per right answer — {"player-1":100,"player-2":100,"player-3":100,"player-4":100}
+PASS back (Geography Challenge): the ordinary way back to the lobby
+PASS lobby after Geography Challenge (320 px): no internal note on the screen — null
+PLAYER COPY ALL PASSED

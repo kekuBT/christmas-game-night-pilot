@@ -1,0 +1,172 @@
+
+ RUN  v2.1.9 $SCRATCH/wtfs
+
+ ❯ tests/h8-player-copy.test.ts (14 tests | 7 failed) 104ms
+   × H8: the two games' questions and revealed answers carry no internal note > the content packs: no note in any question, option, answer or explanation 10ms
+     → expected { …(2) } to deeply equal {}
+   × H8: the two games' questions and revealed answers carry no internal note > the built-in packs (used when no content is selected): no note either 2ms
+     → expected { …(2) } to deeply equal {}
+   × H8: the two games' questions and revealed answers carry no internal note > the two explanations keep their first sentence, in both packs; every other field is unchanged 3ms
+     → expected { id: 'geo-legacy-5', …(13) } to match object { id: 'geo-legacy-5', …(9) }
+(7 matching properties omitted from actual)
+   × H8: the two games' questions and revealed answers carry no internal note > the pack is version 1.0.1, loads with no problem, and both items keep their status and Official eligibility 1ms
+     → expected { gameId: 'geography', …(5) } to match object { gameId: 'geography', …(3) }
+(16 matching properties omitted from actual)
+   × H8: the two games' questions and revealed answers carry no internal note > the content hash follows the wording, so a briefing frozen on the old text is cancelled after a restart (never played) 1ms
+     → expected '837a8c411b5788e3' not to be '837a8c411b5788e3' // Object.is equality
+   × H8: Geography results reveal the cleaned explanations on both content paths > a Cup created now (content pack): both explanations revealed as their first sentence, no note anywhere 46ms
+     → expected 'Italy is famously boot-shaped. Text h…' to be 'Italy is famously boot-shaped.' // Object.is equality
+   × H8: Geography results reveal the cleaned explanations on both content paths > a Cup restored from before Sprint 4 (built-in pack): the same, with the built-in ids 31ms
+     → expected 'Italy is famously boot-shaped. Text h…' to be 'Italy is famously boot-shaped.' // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 7 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/h8-player-copy.test.ts > H8: the two games' questions and revealed answers carry no internal note > the content packs: no note in any question, option, answer or explanation
+AssertionError: expected { …(2) } to deeply equal {}
+
+- Expected
++ Received
+
+- Object {}
++ Object {
++   "geo-legacy-5": "Italy is famously boot-shaped. Text hint fallback, not SVG geometry.",
++   "geo-legacy-6": "Egypt is in North Africa. Accessible region fallback, not map tap.",
++ }
+
+ ❯ tests/h8-player-copy.test.ts:95:28
+     93|     const items = [...lib.items.values()].filter((li) => li.gameId ===…
+     94|     expect(items.length).toBeGreaterThan(16);
+     95|     expect(flagged(items)).toEqual({});
+       |                            ^
+     96|   });
+     97| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/7]⎯
+
+ FAIL  tests/h8-player-copy.test.ts > H8: the two games' questions and revealed answers carry no internal note > the built-in packs (used when no content is selected): no note either
+AssertionError: expected { …(2) } to deeply equal {}
+
+- Expected
++ Received
+
+- Object {}
++ Object {
++   "geo-outline-1": "Italy is famously boot-shaped. Text hint fallback, not SVG geometry.",
++   "geo-region-1": "Egypt is in North Africa. Accessible region fallback, not map tap.",
++ }
+
+ ❯ tests/h8-player-copy.test.ts:100:77
+     98|   it("the built-in packs (used when no content is selected): no note e…
+     99|     expect(flagged(WHO_SAID_PACK as unknown as Record<string, unknown>…
+    100|     expect(flagged(GEOGRAPHY_PACK as unknown as Record<string, unknown…
+       |                                                                             ^
+    101|   });
+    102| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/7]⎯
+
+ FAIL  tests/h8-player-copy.test.ts > H8: the two games' questions and revealed answers carry no internal note > the two explanations keep their first sentence, in both packs; every other field is unchanged
+AssertionError: expected { id: 'geo-legacy-5', …(13) } to match object { id: 'geo-legacy-5', …(9) }
+(7 matching properties omitted from actual)
+
+- Expected
++ Received
+
+  Object {
+    "answer": "Italy",
+    "category": "World",
+    "difficulty": 1,
+    "eligibility": "official",
+-   "explanation": "Italy is famously boot-shaped.",
++   "explanation": "Italy is famously boot-shaped. Text hint fallback, not SVG geometry.",
+    "id": "geo-legacy-5",
+    "mechanic": "recognition",
+    "mode": "outline",
+    "options": Array [
+      "Greece",
+      "Italy",
+      "Spain",
+      "Portugal",
+    ],
+    "prompt": "Which boot-shaped country is this outline hint describing?",
+  }
+
+ ❯ tests/h8-player-copy.test.ts:105:24
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/7]⎯
+
+ FAIL  tests/h8-player-copy.test.ts > H8: the two games' questions and revealed answers carry no internal note > the pack is version 1.0.1, loads with no problem, and both items keep their status and Official eligibility
+AssertionError: expected { gameId: 'geography', …(5) } to match object { gameId: 'geography', …(3) }
+(16 matching properties omitted from actual)
+
+- Expected
++ Received
+
+  Object {
+    "gameId": "geography",
+    "packId": "geography-legacy",
+-   "packVersion": "1.0.1",
++   "packVersion": "1.0.0",
+    "status": "legacy",
+  }
+
+ ❯ tests/h8-player-copy.test.ts:116:18
+    114|   it("the pack is version 1.0.1, loads with no problem, and both items…
+    115|     for (const li of [shipped("geo-legacy-5"), shipped("geo-legacy-6")…
+    116|       expect(li).toMatchObject({ gameId: "geography", packId: "geograp…
+       |                  ^
+    117|       expect(li.approval).toBeUndefined(); // no approval record exist…
+    118|       expect(li.item.review).toEqual({ status: "legacy", notes: "In of…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/7]⎯
+
+ FAIL  tests/h8-player-copy.test.ts > H8: the two games' questions and revealed answers carry no internal note > the content hash follows the wording, so a briefing frozen on the old text is cancelled after a restart (never played)
+AssertionError: expected '837a8c411b5788e3' not to be '837a8c411b5788e3' // Object.is equality
+ ❯ tests/h8-player-copy.test.ts:134:75
+    132|       const li = shipped(id);
+    133|       expect(li.hash).toBe(itemHash("geography", li.item));
+    134|       expect(itemHash("geography", { ...li.item, explanation: old })).…
+       |                                                                           ^
+    135|       expect(INTERNAL_NOTE.test(old)).toBe(true); // the old text is w…
+    136|     }
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/7]⎯
+
+ FAIL  tests/h8-player-copy.test.ts > H8: Geography results reveal the cleaned explanations on both content paths > a Cup created now (content pack): both explanations revealed as their first sentence, no note anywhere
+AssertionError: expected 'Italy is famously boot-shaped. Text h…' to be 'Italy is famously boot-shaped.' // Object.is equality
+
+Expected: "Italy is famously boot-shaped."
+Received: "Italy is famously boot-shaped. Text hint fallback, not SVG geometry."
+
+ ❯ tests/h8-player-copy.test.ts:175:54
+    173|     const { questions, contentUsage } = play(false);
+    174|     expect(questions.map((q) => q.id)).toEqual(expect.arrayContaining(…
+    175|     expect(explanationOf(questions, "geo-legacy-5")).toBe("Italy is fa…
+       |                                                      ^
+    176|     expect(explanationOf(questions, "geo-legacy-6")).toBe("Egypt is in…
+    177|     for (const q of questions) expect(INTERNAL_NOTE.test(q.explanation…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/7]⎯
+
+ FAIL  tests/h8-player-copy.test.ts > H8: Geography results reveal the cleaned explanations on both content paths > a Cup restored from before Sprint 4 (built-in pack): the same, with the built-in ids
+AssertionError: expected 'Italy is famously boot-shaped. Text h…' to be 'Italy is famously boot-shaped.' // Object.is equality
+
+Expected: "Italy is famously boot-shaped."
+Received: "Italy is famously boot-shaped. Text hint fallback, not SVG geometry."
+
+ ❯ tests/h8-player-copy.test.ts:184:55
+    182|     const { questions, contentUsage } = play(true);
+    183|     expect(questions.map((q) => q.id)).toEqual(GEOGRAPHY_PACK.map((q) …
+    184|     expect(explanationOf(questions, "geo-outline-1")).toBe("Italy is f…
+       |                                                       ^
+    185|     expect(explanationOf(questions, "geo-region-1")).toBe("Egypt is in…
+    186|     for (const q of questions) expect(INTERNAL_NOTE.test(q.explanation…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/7]⎯
+
+ Test Files  1 failed (1)
+      Tests  7 failed | 7 passed (14)
+   Start at  03:00:06
+   Duration  1.25s (transform 600ms, setup 0ms, collect 849ms, tests 104ms, environment 0ms, prepare 56ms)
+
