@@ -1,0 +1,11 @@
+
+PASSED (exit 0) | full | run 20261120-151444-b8ba545c-1295
+  117 passed, 0 failed, 0 timed out, 0 infrastructure, 0 invalid, 0 cancelled, 0 not run
+  timing   wall 45m 49s · step time 2h 13m (sum) · 3 workers, 97% busy · 2.92× the same steps run one after another
+           predicted 23–78m (about 38m 07s, low-confidence) → actual 45m 49s (+20%)
+           longest  e2e-chromium 8m 11s, check-f5 7m 43s, check-leaderboard 5m 16s · the longest step is 18% of the wall time
+           machine  CPU mean 36%, peak 99% · memory available ≥ 13167 MB · load peak 5.69 · backpressure 10 wait(s), 78s
+           contention ×1.183 (median step time vs its sequential median)
+           baseline sequential full gate: about 1h 17m (mean of recorded sequential passes)
+           retries  none (the gate never retries a step)
+  report <scratch>/gate-aar2-full/20261120-151444-b8ba545c-1295/report.json

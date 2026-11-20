@@ -1,5 +1,5 @@
 # Muse local progress and resume checkpoint
-Updated: 2026-11-19 ~4:50 p.m. EST (Draw & Guess H3: ChatGPT's review 7023016430 found no blocking defect in #54's scoped fix (tested 9d2eda5) and completed its private browser audit; native iPhone/in-app H3 remains OPEN, awaiting an authorized tester with an iPhone; not merged, not deployed)
+Updated: 2026-11-20 ~11:05 a.m. EST (draft #57: review 7042658020 (P2) found a later storage write failure let an older record hide a new Stay choice; repaired in b8ba545, full gate PASSED 117/117; awaiting review; not merged, not deployed)
 
 ## Current milestone
 M0–M5: COMPLETED as backend/engine checkpoints ONLY — see docs/FRONTEND_MILESTONES.md. They are NOT evidence the full product is finished.
@@ -4295,4 +4295,72 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
     - **full `PASSED (exit 0)`, 116/116**, run `20261120-051827-cbdb1242-266`.
 - **Evidence:** `docs/evidence/solo-rules/`.
 - **Next:** ChatGPT's review of `cbdb124`. Auto-advance and the broader redesign stay outside #56.
+- **Recorded per handoff [7037561069](https://github.com/kekuBT/christmas-game-night-pilot/pull/51#issuecomment-7037561069):** Keku approved continuing development with the private Codespace review deferred. That lifts the development hold from review 7031981214.
+  - **#56 is engineering-reviewed and cleared to build on.** The independent private browser audit stays **open for later** at tested SHA `cbdb12424908a326ac4f3d533fa92ec5b665eec4`.
+  - #56's head `ce626a82ecebb0f725704f7c3cb6168e5df02215` adds only documentation and evidence.
+  - Exact-SHA local QA and synthetic browser checks continue.
+  - Draw & Guess native iPhone confirmation (H3) stays **open** until a device is available.
 
+## Post-beta: Trivia and Math Mayhem move on after the answer locks (handoff 7037561069)
+- **The handoff:** the same comment, acknowledged in [7037632425](https://github.com/kekuBT/christmas-game-night-pilot/pull/51#issuecomment-7037632425) at 5:50 a.m. ET with an estimate of about 11:30 a.m. ET.
+- **Branch:** `claude/quiz-auto-advance`, a separate stacked draft from #56's head `ce626a82ecebb0f725704f7c3cb6168e5df02215`.
+- **The change (D-AA-01):**
+  - A nonfinal locked answer counts down 4 s (a provisional default) and then moves that player on. Next question still works at once, and Stay on this screen keeps the screen for the rest of the game. The final answer still has no continuation.
+  - Screen readers hear one sentence. The ticking number is hidden from assistive tech.
+  - A 450 ms carry-over guard stops a second tap on Next question, or a tap as the countdown runs out, from answering the next question. This slice's regression found that hazard (an answer locked by a double tap); it already existed in the old manual flow.
+  - Each player's pace is kept, and the server alone ends the game (everyone answered, or its deadline). Scoring, reveal permissions and Math's open-then-time clock are unchanged. Geography stays manual (backlog).
+- **Files:**
+  - **Components:** `apps/web/src/components/mchezo/LockedAnswer.tsx`, `MchezoTrivia.tsx`, `MchezoMath.tsx`, `LockedAnswer.test.tsx`.
+  - **Shared UI:** `apps/web/src/ui/mchezo/components/phone/screens.tsx` (`QuestionScreen` `arming`) and `apps/web/src/ui/mchezo/styles/mchezo.css`.
+  - **Drivers:** `scripts/check-quiz-advance.mjs` (new); `scripts/lib/answer.mjs` and the drivers that tap Next question; `check-locked-answer` and `check-math` (Stay before long holds); `check-warm-ivory` W8 keys; the stage screenshot scripts.
+  - **Docs:** `docs/DECISIONS.md`.
+- **Local results before the commit:**
+  - **Unit:** 2157 tests (2151 + 6). Lint and typecheck are clean.
+  - **`check-quiz-advance`:** base `ce626a8` FAILS 22 checks; development build 61/61.
+- **Draft PR:** #57, base `claude/solo-rules-first`.
+- **The tested commit:** `9f7ed984f589576933bae788cf8b0699d7123af7`.
+  - The product change is `fd9ff39`. `5fb2290` and `9f7ed98` change only drivers; everything above `9f7ed98` is docs only.
+- **Gates (each verdict is its own run and revision):**
+  - `fd9ff39` targeted, 20 drivers: `FAILED (exit 1)`, 20/22 (`check-mchezo`, `check-reveal`). Their 12-pass answer loops wasted a pass inside the carry-over guard; fixed in the drivers. Run `20261120-112523-fd9ff395-7559`.
+  - `5fb2290` targeted, 14 drivers: `PASSED (exit 0)`, 16/16. Run `20261120-113924-5fb22906-12746`.
+  - `5fb2290` full: `FAILED (exit 1)`, 116/117 (`check-answer-race` counted the auto-advance's `math-open` as a second answer request). A probe showed it was one answer plus the open, so the driver now counts answer intents. Run `20261120-114819-5fb22906-14972`.
+  - `9f7ed98` targeted (`answer-race`, `quiz-advance`, `math`): `PASSED (exit 0)`, 5/5. Run `20261120-123600-9f7ed984-5134`.
+  - **`9f7ed98` full: `PASSED (exit 0)`, 117/117.** Run `20261120-123848-9f7ed984-5747`.
+- **Evidence:** `docs/evidence/quiz-advance/`.
+- **Open:**
+  - ChatGPT's review of `9f7ed98`.
+  - Owner sign-off on the 4 s reading time and the 450 ms guard.
+  - Geography auto-advance (backlog).
+  - The #56 private audit (deferred) and H3 native iPhone.
+- **Next:** wait for review. Results restructuring and the broader visual redesign are separate slices.
+- **Review [7040842858](https://github.com/kekuBT/christmas-game-night-pilot/pull/51#issuecomment-7040842858) on `9f7ed98`: changes requested (P2).** "Stay on this screen" silently reset after a reload or remount. Acknowledged in [7040856655](https://github.com/kekuBT/christmas-game-night-pilot/pull/51#issuecomment-7040856655) at 8:34 a.m. ET, with an estimate of about 11:45 a.m. ET. The checkpoint stays uncleared until this repair is reviewed.
+  - **The repair (D-AA-01 addendum):** `stayPreference.ts` (`useStayPreference`).
+    - It keeps one sessionStorage record per tab, keyed by room or solo session, seat and game instance. It holds ids and times only, keeps at most 8 games for at most 12 h, and falls back to memory.
+    - A different seat or room never inherits it.
+    - It is cleared on seat sign-out and when a solo round is left.
+    - **Files:** `apps/web/src/components/mchezo/stayPreference.ts` and `.test.ts` (new); `MchezoTrivia.tsx`, `MchezoMath.tsx`, `Solo.tsx`, `App.tsx`; `scripts/check-quiz-advance.mjs` (section P); `docs/DECISIONS.md`.
+  - **The tested commit:** `cfef39f8f3fa361ebf0ea19e472c9ce2a2e0a873`.
+  - **Tests:**
+    - **Section P:** `9f7ed98` FAILS 9; development build 27/27; the whole driver 88/88.
+    - **Unit:** 2167 tests (2157 + 10). Lint and typecheck are clean.
+  - **Gates on `cfef39f`:**
+    - targeted, 9 drivers: `PASSED (exit 0)`, 11/11, run `20261120-135457-cfef39f8-1548`;
+    - **full: `PASSED (exit 0)`, 117/117**, run `20261120-140403-cfef39f8-3608`.
+  - **Evidence:** `docs/evidence/quiz-advance/stay-lifetime/`.
+  - **Known driver inefficiency, not fixed in this checkpoint:** section P's detail line waits 30 s on a missing countdown element (Playwright `textContent()`). The checks are unaffected, and the step took 404.8 s of its 600 s limit.
+  - **Next:** review of `cfef39f`.
+- **Review [7042658020](https://github.com/kekuBT/christmas-game-night-pilot/pull/51#issuecomment-7042658020) on `cfef39f`: changes requested (P2).**
+  - **Confirmed fixed:** the ordinary reload case.
+  - **Still broken:** a later failing storage write let an older stored record hide the new in-memory Stay choice.
+  - Acknowledged in [7042671799](https://github.com/kekuBT/christmas-game-night-pilot/pull/51#issuecomment-7042671799) at 9:55 a.m. ET, with an estimate of about 12:15 p.m. ET.
+  - **The repair:** `createStayStorage` latches into memory mode after the first failed write, so memory is authoritative. The stale persistent copy is removed, later writes are still tried, and removes act on both copies.
+  - **The same driver edit** removed the known 30 s waits; section P now takes about 100 s.
+  - **The tested commit:** `b8ba545c7e3c165c3e69bd9f6ce3c561e4ab5d56`.
+  - **Tests:**
+    - **Section P8:** `cfef39f` FAILS 6; development build 10/10. The whole driver passes 98/98.
+    - **Unit:** 2173 tests (2167 + 6). Lint and typecheck are clean.
+  - **Gates on `b8ba545`:**
+    - targeted, 9 drivers: `PASSED (exit 0)`, 11/11, run `20261120-150740-b8ba545c-31691`;
+    - **full: `PASSED (exit 0)`, 117/117**, run `20261120-151444-b8ba545c-1295`.
+  - **Evidence:** `docs/evidence/quiz-advance/write-failure/`.
+  - **Next:** review of `b8ba545`. No new milestone until then.

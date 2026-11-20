@@ -76,7 +76,7 @@ try {
       const doneBtn = page.getByRole("button", { name: "Waiting for the game to finish" });
       if (await doneBtn.isVisible({ timeout: 500 }).catch(() => false)) { await doneBtn.click(); await page.waitForTimeout(400); return; }
       const next = page.getByRole("button", { name: "Next question" });
-      if (await next.isVisible({ timeout: 500 }).catch(() => false)) { await next.click(); await page.waitForTimeout(400); continue; }
+      if (await next.isVisible({ timeout: 500 }).catch(() => false)) { await next.click({ timeout: 3000 }).catch(() => {}); /* D-AA-01 */ await page.waitForTimeout(400); continue; }
       const slabs = page.locator(".mz-slab:not([disabled])");
       if ((await slabs.count()) > 0) { await slabs.first().click(); await page.waitForTimeout(500); continue; }
       await page.waitForTimeout(500);

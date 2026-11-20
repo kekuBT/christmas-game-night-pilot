@@ -1,0 +1,12 @@
+
+FAILED (exit 1) | targeted | run 20261120-112523-fd9ff395-7559
+  20 passed, 2 failed, 0 timed out, 0 infrastructure, 0 invalid, 0 cancelled, 0 not run
+  FAIL      check-mchezo (w3) [functional]: FAIL check-mchezo journey crashed — TimeoutError: locator.waitFor: Timeout 15000ms exceeded.
+  FAIL      check-reveal (w1) [functional]: FAIL reveal driver crashed — TimeoutError: locator.waitFor: Timeout 30000ms exceeded.
+  timing   wall 12m 52s · step time 36m 38s (sum) · 3 workers, 95% busy · 2.85× the same steps run one after another
+           predicted 6–17m (about 9m 19s, low-confidence) → actual 12m 52s (+38%)
+           longest  check-leaderboard 5m 08s, check-audit-fixes 4m 04s, check-mobile-everyday 3m 11s · the longest step is 40% of the wall time
+           machine  CPU mean 26%, peak 84% · memory available ≥ 13264 MB · load peak 4.3
+           contention ×1.089 (median step time vs its sequential median)
+           retries  none (the gate never retries a step)
+  report <scratch>/gate-aa-targeted/20261120-112523-fd9ff395-7559/report.json

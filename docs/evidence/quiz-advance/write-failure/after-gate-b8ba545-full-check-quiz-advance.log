@@ -1,0 +1,107 @@
+$ node scripts/check-quiz-advance.mjs http://localhost:35435
+# timeout 600s | worker w2 | server http://localhost:35435 (data <scratch>/gate-aar2-full/20261120-151444-b8ba545c-1295/server-data/w2)
+
+[+2.9s] PASS S1 the first answer locks (the server confirmed it) — Answer locked in
+[+3.0s] PASS S1 the locked view shows a countdown to the next question — Next question in 4 s
+[+3.0s] PASS S1 the status line says it once, in words: the next question opens by itself in 4 seconds — Keep going — you don’t need to wait for anyone. 9 questions left. The next question opens by itself in 4 seconds.
+[+3.0s] PASS S1 the ticking number is hidden from assistive tech and sits in no live region — {"lead":"Keep going — you don’t need to wait for anyone. 9 questions left. The next question opens by itself in 4 seconds.","leadRole":"status","count":"Next question in 4 s","countHidden":true,"tickInLive":false,"stayIsButton":true,"correctness":true}
+[+3.0s] PASS S1 Stay on this screen is a button with that name, next to Next question
+[+3.0s] PASS S1 the accessibility tree has the status sentence and both buttons, and no ticking number — - main "Answer locked in": - text: Question 1 of 10 · your answer 9 LOCKED IN - paragraph: Answered in 0.5 s — timed by the game from when it sent this question to your phone (+20 within 5 s, +10 within 10 s, if correct). - region "Keep going": - status: Keep going — you don’t need to wait for anyon
+[+7.1s] PASS S1 mid-countdown the number has ticked down, and the status sentence has not changed — {"first":"Next question in 4 s","mid":"Next question in 3 s","same":true}
+[+7.1s] PASS S1 with no tap, question 2 opens by itself after the reading time (3500–6500 ms after the lock) — 4022 ms → Question 2 of 10
+[+7.1s] PASS S1 the server did not open question 2 during the countdown (its clock starts only after) — [{"at":4146,"opened":true}]
+[+7.1s] PASS S1 question 2 is opened on the server once it shows
+[+14.8s] PASS S2 while the page is hidden the locked view stays (6 s, longer than the countdown) — Answer locked in
+[+14.8s] PASS S2 and question 3 is not opened on the server
+[+18.0s] PASS S2 once shown, the countdown carries on (not from zero, not at once) and question 3 opens — 3218 ms after the page was shown
+[+22.0s] PASS S3 the countdown reaches its last second
+[+23.6s] PASS S3 one step only: question 4 is on screen, none skipped — [1,2,3,4]
+[+23.6s] PASS S3 the extra tap did not answer question 4 — 3
+[+24.2s] PASS S4 Next question moves on at once (the old action still works) — 477 ms
+[+25.1s] PASS S5 Tab reaches Next question
+[+25.1s] PASS S5 the next Tab is Stay on this screen — mz-advance-stay
+[+25.1s] PASS S5 Enter on Stay keeps the screen: a status line says so and the countdown is gone
+[+30.8s] PASS S5 it stays well past the reading time
+[+30.8s] PASS S5 Tab and Enter on Next question move on
+[+30.8s] PASS S5 question 6 is shown
+[+38.2s] PASS S6 a later answer in this game shows no countdown and stays until Next question
+[+43.1s] PASS S7 the last answer reaches the results
+[+43.1s] PASS S7 no countdown after the last answer — ["Question 10 of 10","Math Mayhem solo results"]
+[+43.1s] PASS S7 all ten questions were shown in order, once each — [1,2,3,4,5,6,7,8,9,10]
+[+43.1s] PASS S7 the server recorded ten answers — 10
+[+44.1s] PASS S8 Play again: the new round's locked answer counts down again
+[+46.2s] PASS R1 the host's locked answer counts down — Next question in 4 s
+[+46.2s] PASS R1 the locked view shows no correctness while the game plays
+[+50.1s] PASS R1 with no tap, the host moves on to question 2 after the reading time — 4004 ms
+[+50.1s] PASS R1 the guest, who has not answered, still has question 1 open
+[+55.0s] PASS R2 question 2: moves on by itself — 4003 ms
+[+59.9s] PASS R2 question 3: moves on by itself — 4003 ms
+[+68.6s] PASS R2 the host's last answer: all their answers are in — All your answers are in
+[+75.1s] PASS R2 the final screen has no countdown and no continuation — ["TV stage"]
+[+75.2s] PASS R2 the host saw every question once, in order — [1,2,3,4,5,6,7,8,9,10]
+[+75.3s] PASS R2 the room is not finished while the guest still has questions (the server keeps it playing)
+[+75.3s] PASS R2 the host's pace never moved the guest: still on question 1, nothing recorded
+[+76.3s] PASS R3 the guest reloads while the countdown runs
+[+76.6s] PASS R3 after the reload the guest resumes at question 2 (the next unanswered)
+[+76.7s] PASS R3 the seat and the answer are kept, recorded once — {"answered":1,"a":2}
+[+80.1s] PASS R4 the guest's countdown reaches its last second
+[+81.7s] PASS R4 one step only: question 3 is on screen — [["Rejoining your room",-473],["Question 2 of 10",-430],["Answer locked in",0],["Question 3 of 10",3166]]
+[+81.7s] PASS R4 the extra tap did not answer question 3 — 2
+[+81.7s]      (the game's server deadline is 36 s away, at scale 0.2: test-only)
+[+84.7s] PASS R5 before its deadline, the game is still playing on the server
+[+117.6s] PASS R5 the host's phone reaches the results with no host action
+[+117.6s] PASS R5 the guest's phone reaches the results too
+[+117.6s] PASS R5 the server ended it at its deadline — {"status":"finished","outcome":{"reason":"deadline","endedAt":1795189315913,"countsOfficially":false,"participation":{"player-1":{"done":10,"of":10,"actions":10},"player-2":{"done":2,"of":10,"actions":2}}}}
+[+121.1s] PASS M1 two seconds into the countdown, question 2 is not opened on the server
+[+123.1s] PASS M1 with no tap, the host moves on to question 2 after the reading time — 4014 ms
+[+124.0s] PASS M1 question 2's time runs from its open after the countdown, not from the lock — 841 ms timed
+[+134.3s] PASS M2 the host's last answer: all their answers are in, no countdown
+[+134.3s] PASS M2 the room is still playing while the guest has questions
+[+138.5s] PASS M2 guest question 1: moves on by itself — 4014 ms
+[+143.3s] PASS M2 guest question 2: moves on by itself — 4009 ms
+[+153.2s] PASS M2 once everyone has answered, the host's phone reaches the results
+[+153.2s] PASS M2 and the guest's
+[+153.2s] PASS M2 the server ended it because everyone answered (not the deadline) — {"reason":"completed","endedAt":1795189351661,"countsOfficially":false,"participation":{"player-1":{"done":10,"of":10,"actions":10},"player-2":{"done":10,"of":10,"actions":10}}}
+[+153.2s] PASS M2 the guest saw every question once, in order — [1,2,3,4,5,6,7,8,9,10]
+[+155.1s] PASS P1 room Trivia Q1: Stay on this screen is chosen
+[+156.0s] PASS P1 room Trivia Q2, before any reload: the stayed status shows and no countdown runs — {"lock":"Answer locked in","paused":1,"counting":0,"count":null}
+[+163.0s] PASS P1 room Trivia Q2, before any reload: 7000 ms later it is still on the locked view (no automatic advance) — Answer locked in
+[+163.3s] PASS P1 after the reload the host resumes at question 3
+[+163.8s] PASS P1 room Trivia Q3, after the reload: the stayed status shows and no countdown runs — {"lock":"Answer locked in","paused":1,"counting":0,"count":null}
+[+170.8s] PASS P1 room Trivia Q3, after the reload: 7000 ms later it is still on the locked view (no automatic advance) — Answer locked in
+[+171.8s] PASS P2 the TV stage is showing (the phone's game screen is unmounted)
+[+172.3s] PASS P2 room Trivia Q4, after the TV stage and back: the stayed status shows and no countdown runs — {"lock":"Answer locked in","paused":1,"counting":0,"count":null}
+[+179.3s] PASS P2 room Trivia Q4, after the TV stage and back: 7000 ms later it is still on the locked view (no automatic advance) — Answer locked in
+[+186.8s] PASS P3 the first game finishes (everyone answered)
+[+187.8s] PASS P3 a new game in the same room counts down again (the choice was for the last game only)
+[+187.9s] PASS P4 the other room's ids collide with the first room's (player-1 and game-1) — player-1 game-1 vs player-1 game-1
+[+188.5s] PASS P4 the seat in the other room counts down (no choice inherited across rooms) — {"v":1,"scope":"room:room-mwp5e0y4-106682","seat":"player-1","games":{"game-1":1795189353609}}
+[+188.5s] PASS P4 the stored record never names another room's seat (and holds no answers, names or tokens) — null
+[+190.3s] PASS P5 room Math Q1: Stay on this screen is chosen
+[+191.3s] PASS P5 room Math Q2, before any reload: the stayed status shows and no countdown runs — {"lock":"Answer locked in","paused":1,"counting":0,"count":null}
+[+198.3s] PASS P5 room Math Q2, before any reload: 7000 ms later it is still on the locked view (no automatic advance) — Answer locked in
+[+199.0s] PASS P5 room Math Q3, after the reload: the stayed status shows and no countdown runs — {"lock":"Answer locked in","paused":1,"counting":0,"count":null}
+[+206.0s] PASS P5 room Math Q3, after the reload: 7000 ms later it is still on the locked view (no automatic advance) — Answer locked in
+[+206.0s] PASS P5 Math's question 4 is not opened while the player stays (its clock has not started) — [true,true,true,false,false,false,false,false,false,false]
+[+207.8s] PASS P6 solo Math Q1: Stay on this screen is chosen
+[+207.9s] PASS P6 after a reload solo lands on the instructions (its existing contract: the round is not resumed)
+[+208.9s] PASS P6 the new solo round counts down (a new game instance)
+[+209.1s] PASS P7 precondition: sessionStorage throws on this page
+[+212.0s] PASS P7 no storage Q1: Stay on this screen is chosen
+[+214.3s] PASS P7 no storage Q3, after the TV stage and back (memory fallback): the stayed status shows and no countdown runs — {"lock":"Answer locked in","paused":1,"counting":0,"count":null}
+[+221.3s] PASS P7 no storage Q3, after the TV stage and back (memory fallback): 7000 ms later it is still on the locked view (no automatic advance) — Answer locked in
+[+223.0s] PASS P8 first game Q1 (storage writable): Stay on this screen is chosen
+[+223.0s] PASS P8 precondition: the first game's Stay is in sessionStorage — {"v":1,"scope":"room:room-mwp5fhhh-970532","seat":"player-1","games":{"game-1":1795189421527}}
+[+234.3s] PASS P8 the first game finishes
+[+236.1s] PASS P8 precondition: the Stay write for the second game failed (storage now throws) — 1 failed write(s)
+[+236.1s] PASS P8 second game Q1: choosing Stay takes effect at once (stayed status, no countdown) — {"paused":1,"counting":0}
+[+237.0s] PASS P8 second game Q2, writes failing: the stayed status shows and no countdown runs — {"lock":"Answer locked in","paused":1,"counting":0,"count":null}
+[+244.0s] PASS P8 second game Q2, writes failing: 7000 ms later it is still on the locked view (no automatic advance) — Answer locked in
+[+245.9s] PASS P8 second game Q3, after the TV stage and back, writes failing: the stayed status shows and no countdown runs — {"lock":"Answer locked in","paused":1,"counting":0,"count":null}
+[+252.9s] PASS P8 second game Q3, after the TV stage and back, writes failing: 7000 ms later it is still on the locked view (no automatic advance) — Answer locked in
+[+252.9s] PASS P8 the stale persistent record is gone (a reload cannot bring back the older choice instead) — null
+[+253.5s] 
+[+253.5s] ALL QUIZ ADVANCE CHECKS PASSED
+[+253.5s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":10,"pages":10,"peakOpenPages":2}
+
+# PASS (exit 0) in 253.6s | cpu 15.7s, peak memory 441 MB

@@ -1,0 +1,39 @@
+PASS P1 room Trivia Q1: Stay on this screen is chosen
+PASS P1 room Trivia Q2, before any reload: the stayed status shows and no countdown runs — {"lock":"Answer locked in","paused":1,"counting":0,"count":null}
+PASS P1 room Trivia Q2, before any reload: 7000 ms later it is still on the locked view (no automatic advance) — Answer locked in
+PASS P1 after the reload the host resumes at question 3
+PASS P1 room Trivia Q3, after the reload: the stayed status shows and no countdown runs — {"lock":"Answer locked in","paused":1,"counting":0,"count":null}
+PASS P1 room Trivia Q3, after the reload: 7000 ms later it is still on the locked view (no automatic advance) — Answer locked in
+PASS P2 the TV stage is showing (the phone's game screen is unmounted)
+PASS P2 room Trivia Q4, after the TV stage and back: the stayed status shows and no countdown runs — {"lock":"Answer locked in","paused":1,"counting":0,"count":null}
+PASS P2 room Trivia Q4, after the TV stage and back: 7000 ms later it is still on the locked view (no automatic advance) — Answer locked in
+PASS P3 the first game finishes (everyone answered)
+PASS P3 a new game in the same room counts down again (the choice was for the last game only)
+PASS P4 the other room's ids collide with the first room's (player-1 and game-1) — player-1 game-1 vs player-1 game-1
+PASS P4 the seat in the other room counts down (no choice inherited across rooms) — {"v":1,"scope":"room:room-mwp3ulqi-222342","seat":"player-1","games":{"game-1":1795186767281}}
+PASS P4 the stored record never names another room's seat (and holds no answers, names or tokens) — null
+PASS P5 room Math Q1: Stay on this screen is chosen
+PASS P5 room Math Q2, before any reload: the stayed status shows and no countdown runs — {"lock":"Answer locked in","paused":1,"counting":0,"count":null}
+PASS P5 room Math Q2, before any reload: 7000 ms later it is still on the locked view (no automatic advance) — Answer locked in
+PASS P5 room Math Q3, after the reload: the stayed status shows and no countdown runs — {"lock":"Answer locked in","paused":1,"counting":0,"count":null}
+PASS P5 room Math Q3, after the reload: 7000 ms later it is still on the locked view (no automatic advance) — Answer locked in
+PASS P5 Math's question 4 is not opened while the player stays (its clock has not started) — [true,true,true,false,false,false,false,false,false,false]
+PASS P6 solo Math Q1: Stay on this screen is chosen
+PASS P6 after a reload solo lands on the instructions (its existing contract: the round is not resumed)
+PASS P6 the new solo round counts down (a new game instance)
+PASS P7 precondition: sessionStorage throws on this page
+PASS P7 no storage Q1: Stay on this screen is chosen
+PASS P7 no storage Q3, after the TV stage and back (memory fallback): the stayed status shows and no countdown runs — {"lock":"Answer locked in","paused":1,"counting":0,"count":null}
+PASS P7 no storage Q3, after the TV stage and back (memory fallback): 7000 ms later it is still on the locked view (no automatic advance) — Answer locked in
+PASS P8 first game Q1 (storage writable): Stay on this screen is chosen
+PASS P8 precondition: the first game's Stay is in sessionStorage — {"v":1,"scope":"room:room-mwp3w0w9-676439","seat":"player-1","games":{"game-1":1795186833995}}
+PASS P8 the first game finishes
+PASS P8 precondition: the Stay write for the second game failed (storage now throws) — 1 failed write(s)
+FAIL P8 second game Q1: choosing Stay takes effect at once (stayed status, no countdown) — {"paused":0,"counting":1}
+FAIL P8 second game Q2, writes failing: the stayed status shows and no countdown runs — {"lock":"Answer locked in","paused":0,"counting":1,"count":"Next question in 4 s"}
+FAIL P8 second game Q2, writes failing: 7000 ms later it is still on the locked view (no automatic advance) — Question 3 of 10
+FAIL P8 second game Q3, after the TV stage and back, writes failing: the stayed status shows and no countdown runs — {"lock":"Answer locked in","paused":0,"counting":1,"count":"Next question in 4 s"}
+FAIL P8 second game Q3, after the TV stage and back, writes failing: 7000 ms later it is still on the locked view (no automatic advance) — Question 4 of 10
+FAIL P8 the stale persistent record is gone (a reload cannot bring back the older choice instead) — {"v":1,"scope":"room:room-mwp3w0w9-676439","seat":"player-1","games":{"game-1":1795186833995}}
+
+6 check(s) FAILED

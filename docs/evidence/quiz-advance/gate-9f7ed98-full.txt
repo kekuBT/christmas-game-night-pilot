@@ -1,0 +1,11 @@
+
+PASSED (exit 0) | full | run 20261120-123848-9f7ed984-5747
+  117 passed, 0 failed, 0 timed out, 0 infrastructure, 0 invalid, 0 cancelled, 0 not run
+  timing   wall 45m 15s · step time 2h 11m (sum) · 3 workers, 97% busy · 2.90× the same steps run one after another
+           predicted 23–78m (about 38m 07s, low-confidence) → actual 45m 15s (+19%)
+           longest  e2e-chromium 8m 00s, check-f5 7m 43s, check-leaderboard 5m 14s · the longest step is 18% of the wall time
+           machine  CPU mean 37%, peak 98% · memory available ≥ 13233 MB · load peak 6.04 · backpressure 12 wait(s), 87s
+           contention ×1.194 (median step time vs its sequential median)
+           baseline sequential full gate: about 1h 17m (mean of recorded sequential passes)
+           retries  none (the gate never retries a step)
+  report <scratch>/gate-aa-full2/20261120-123848-9f7ed984-5747/report.json

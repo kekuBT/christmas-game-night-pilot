@@ -175,7 +175,7 @@ try {
     extra: async ({ room, pA }) => {
       const seat = room.seats[0];
       for (const [qi, think, want] of [[1, 6000, 110], [2, 11000, 100]]) {
-        await pA.getByRole("button", { name: "Next question" }).click();
+        await pA.getByRole("button", { name: "Next question" }).click({ timeout: 3000 }).catch(() => {}); // D-AA-01: or it moved on by itself
         const { q } = await answerableAt(pA, room, seat, qi);
         await sleep(think);
         const r = await answer(pA, room, seat, q);

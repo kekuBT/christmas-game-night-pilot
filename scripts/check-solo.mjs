@@ -56,7 +56,8 @@ async function playRound(page, rightFor, { doubleTapFirst = false } = {}) {
     else await slabs.nth(idx).click();
     if (i < 9) {
       await page.getByTestId("mz-math-next").waitFor({ timeout: 20000 });
-      await page.getByTestId("mz-math-next").click();
+      // D-AA-01: the locked view also moves on by itself after a few seconds; a tap that loses that race is the same outcome.
+      await page.getByTestId("mz-math-next").click({ timeout: 3000 }).catch(() => {});
     }
   }
   await page.getByTestId("solo-results").waitFor({ timeout: 20000 });
@@ -291,7 +292,9 @@ try {
     byKeyboard++;
     if (i < 9) {
       await kp.getByTestId("mz-math-next").waitFor({ timeout: 20000 });
-      if (!(await tabTo((f) => f === "mz-math-next"))) break;
+      // D-AA-01: the locked view also moves on by itself after a few seconds; if that won the race, the next
+      // question is already up and the loop goes on answering it by keyboard (check-quiz-advance pins Next by keyboard).
+      if (!(await tabTo((f) => f === "mz-math-next"))) { if ((await kp.getByTestId("mz-math-next").count()) === 0) continue; break; }
       await kp.keyboard.press("Enter");
     }
   }

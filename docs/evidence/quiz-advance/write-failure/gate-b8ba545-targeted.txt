@@ -1,0 +1,10 @@
+
+PASSED (exit 0) | targeted | run 20261120-150740-b8ba545c-31691
+  11 passed, 0 failed, 0 timed out, 0 infrastructure, 0 invalid, 0 cancelled, 0 not run
+  timing   wall 6m 58s · step time 20m 29s (sum) · 3 workers, 98% busy · 2.94× the same steps run one after another
+           predicted 2–9m (about 3m 53s, low-confidence) → actual 6m 58s (+79%)
+           longest  check-quiz-advance 4m 14s, check-tv-lifecycle 3m 44s, check-locked-answer 3m 04s · the longest step is 61% of the wall time
+           machine  CPU mean 26%, peak 89% · memory available ≥ 13963 MB · load peak 2.46
+           contention ×1.204 (median step time vs its sequential median)
+           retries  none (the gate never retries a step)
+  report <scratch>/gate-aar2-targeted/20261120-150740-b8ba545c-31691/report.json

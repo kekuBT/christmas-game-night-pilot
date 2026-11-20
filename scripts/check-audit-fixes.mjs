@@ -132,7 +132,7 @@ try {
       }
       // R5 (Beta R1-R): after the last answer the screen says "All your answers are in" and offers no continuation.
       if (await host.locator('main[aria-label="All your answers are in"]').count()) break;
-      await host.getByRole("button", { name: "Next question" }).click();
+      await host.getByRole("button", { name: "Next question" }).click({ timeout: 3000 }).catch(() => {}); // D-AA-01: or it moves on by itself
     }
     await host.unroute("**/intents");
     check(`A-01 ${tag}: while answers lock, no visible card overlaps another and the chosen card is on top`, playProblems.length === 0, playProblems.slice(0, 3).join(" | "));

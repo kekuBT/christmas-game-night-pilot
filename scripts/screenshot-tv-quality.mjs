@@ -36,9 +36,9 @@ async function answerOption(page, optionIndex) {
   for (let i = 0; i < 12; i++) {
     if (await page.getByRole("button", { name: "Back to lobby" }).isVisible({ timeout: 500 }).catch(() => false)) return;
     const slab = page.locator(".mz-slab:not([disabled])").nth(optionIndex);
-    if (await slab.isVisible({ timeout: 1500 }).catch(() => false)) { await slab.click(); await sleep(200); }
+    if (await slab.waitFor({ timeout: 700 }).then(() => true, () => false)) /* D-AA-01: waits out the carry-over guard */ { await slab.click(); await sleep(200); }
     const next = page.getByRole("button", { name: "Next question" });
-    if (await next.isVisible({ timeout: 1000 }).catch(() => false)) { await next.click(); await sleep(200); }
+    if (await next.isVisible({ timeout: 1000 }).catch(() => false)) { await next.click({ timeout: 3000 }).catch(() => {}); /* D-AA-01 */ await sleep(200); }
     const doneBtn = page.getByRole("button", { name: "Waiting for the game to finish" });
     if (await doneBtn.isVisible({ timeout: 1000 }).catch(() => false)) { await doneBtn.click(); await sleep(200); }
   }
@@ -46,9 +46,9 @@ async function answerOption(page, optionIndex) {
 async function answerFirstN(page, n, optionIndex = 0) {
   for (let i = 0; i < n; i++) {
     const slab = page.locator(".mz-slab:not([disabled])").nth(optionIndex);
-    if (await slab.isVisible({ timeout: 15000 }).catch(() => false)) { await slab.click(); await sleep(200); }
+    if (await slab.waitFor({ timeout: 15000 }).then(() => true, () => false)) /* D-AA-01: waits out the carry-over guard */ { await slab.click(); await sleep(200); }
     const next = page.getByRole("button", { name: "Next question" });
-    if (await next.isVisible({ timeout: 1000 }).catch(() => false)) { await next.click(); await sleep(200); }
+    if (await next.isVisible({ timeout: 1000 }).catch(() => false)) { await next.click({ timeout: 3000 }).catch(() => {}); /* D-AA-01 */ await sleep(200); }
   }
 }
 async function startSeeded(host, roomId, seed) {

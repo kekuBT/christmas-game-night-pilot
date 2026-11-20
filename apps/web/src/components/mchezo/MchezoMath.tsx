@@ -48,7 +48,8 @@ import { satOutLabel, serverNowEstimate } from "../../ui/mchezo/lib/lifecycle.js
 import { useEffect, useState } from "react";
 import { usePageVisible } from "../../ui/mchezo/lib/visibility.js";
 import { MchezoWaiting } from "../../ui/mchezo/index.js";
-import { LockedAnswer } from "./LockedAnswer.js";
+import { LockedAnswer, QUIZ_AUTO_ADVANCE_MS, useAdvanceGuard } from "./LockedAnswer.js";
+import { stayScope, useStayPreference } from "./stayPreference.js";
 import { QuestionScreen } from "../../ui/mchezo/index.js";
 import type { PlayerGame, PublicGame, PublicPlayer } from "../../types.js";
 
@@ -80,6 +81,12 @@ export function MchezoMath(deps: MchezoMathDeps) {
   const questions = game.questions ?? [];
   const myAnswers: Record<string, number | null> = game.myAnswers ?? {};
   const [lastAnswered, setLastAnswered] = useState<string | null>(null);
+  // D-AA-01: a locked answer moves on by itself unless the player chose to stay, for the rest of THIS game. The
+  // choice is kept per room or solo session, seat and game instance, through remounts and reloads (review
+  // 7040842858); a new round or Play again is a new game, so it counts down again.
+  const [stayed, stay] = useStayPreference({ scope: stayScope(deps.roomId, deps.solo), seat: playerId, game: game.id });
+  // D-AA-01: a tap that carries over from moving on must not answer the next question.
+  const guard = useAdvanceGuard();
   // Sprint 2: the answered question is recorded at TAP time, and the grid
   // stays locked on the tapped option until the server answers. Recording
   // it only after the request + refresh resolved let the server's push
@@ -136,7 +143,11 @@ export function MchezoMath(deps: MchezoMathDeps) {
         questionNumber={questions.indexOf(lockedQ) + 1}
         questionCount={questions.length}
         remaining={questions.filter((q) => myAnswers[q.id] === undefined || myAnswers[q.id] === null).length}
-        onNext={() => setLastAnswered(null)}
+        onNext={() => { guard.advanced(); setLastAnswered(null); }}
+        key={lockedQ.id}
+        autoAdvanceMs={QUIZ_AUTO_ADVANCE_MS}
+        stayed={stayed}
+        onStay={stay}
         players={players}
         playerId={playerId}
         publicGame={publicGame}
@@ -184,11 +195,13 @@ export function MchezoMath(deps: MchezoMathDeps) {
       }}
       secondsLeft={secondsLeft}
       totalSeconds={totalSeconds}
+      arming={guard.arming}
       extra={deps.solo ? undefined :
         <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
           <button
             type="button"
             className="mz-chip-btn"
+            disabled={guard.arming}
             onClick={() => { void intent(game.id, "abstain", {}); }}
           >
             Sit this game out

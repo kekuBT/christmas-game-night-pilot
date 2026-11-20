@@ -39,9 +39,9 @@ async function answerAllTrivia(page) {
   for (let i = 0; i < 12; i++) {
     if (await page.getByRole("button", { name: "Back to lobby" }).isVisible({ timeout: 500 }).catch(() => false)) return;
     const slab = page.locator(".mz-slab:not([disabled])").first();
-    if (await slab.isVisible({ timeout: 1500 }).catch(() => false)) { await slab.click(); await sleep(300); }
+    if (await slab.waitFor({ timeout: 700 }).then(() => true, () => false)) /* D-AA-01: waits out the carry-over guard */ { await slab.click(); await sleep(300); }
     const next = page.getByRole("button", { name: "Next question" });
-    if (await next.isVisible({ timeout: 1500 }).catch(() => false)) { await next.click(); await sleep(300); }
+    if (await next.isVisible({ timeout: 1500 }).catch(() => false)) { await next.click({ timeout: 3000 }).catch(() => {}); /* D-AA-01 */ await sleep(300); }
     const doneBtn = page.getByRole("button", { name: "Waiting for the game to finish" });
     if (await doneBtn.isVisible({ timeout: 1500 }).catch(() => false)) { await doneBtn.click(); await sleep(300); }
   }
@@ -82,7 +82,7 @@ try {
   await host.locator(".mz-slab:not([disabled])").first().click();
   await host.locator('main[aria-label="Answer locked in"]').waitFor({ timeout: 15000 });
   await host.screenshot({ path: join(OUT, "04-trivia-locked.png") });
-  await host.getByRole("button", { name: "Next question" }).click();
+  await host.getByRole("button", { name: "Next question" }).click({ timeout: 3000 }).catch(() => {}); // D-AA-01: or it moves on by itself
   await host.locator(".mz-question").waitFor({ timeout: 15000 });
   await answerAllTrivia(host);
   await host.getByText("All your answers are in").waitFor({ timeout: 15000 });

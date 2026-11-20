@@ -55,8 +55,17 @@ try {
     await bea.waitForTimeout(600);
     // Slow ONLY Bea's projection polls/refreshes; the WebSocket push is untouched.
     await bea.route("**/projection?audience=player", async (route) => { await new Promise((r) => setTimeout(r, 1500)); await route.continue(); });
-    let posts = 0;
-    bea.on("request", (req) => { if (req.method() === "POST" && req.url().includes("/intents")) posts++; });
+    // Count the ANSWER intents. D-AA-01: Math's locked view now moves on by itself after a few seconds, and opening
+    // the next question is its own intent (math-open), which may land inside this window on a slow machine; it is not
+    // an answer. Every intent's action is listed in the detail.
+    const ANSWER_ACTIONS = new Set(["trivia-answer", "submit-math-answer", "geography-answer"]);
+    const actions = [];
+    bea.on("request", (req) => {
+      if (req.method() !== "POST" || !req.url().includes("/intents")) return;
+      let action = "?";
+      try { action = JSON.parse(req.postData() ?? "{}")?.intent?.action ?? "?"; } catch { /* not JSON */ }
+      actions.push(action);
+    });
     // Record every screen state for 3.5s after the tap.
     await bea.evaluate(() => {
       window.__states = [];
@@ -75,7 +84,8 @@ try {
     const nextBeforeLock = states.slice(0, firstLocked < 0 ? states.length : firstLocked).some((s) => /^Question \d+ of/.test(s) && s !== tapped);
     check(`${gameId}: the answer locks on the same question`, firstLocked >= 0, seen.join(" → "));
     check(`${gameId}: no other question flashes before the lock`, !nextBeforeLock, `tapped "${tapped}": ${seen.join(" → ")}`);
-    check(`${gameId}: a double tap sends one answer`, posts === 1, `${posts} answer requests`);
+    const answers = actions.filter((x) => ANSWER_ACTIONS.has(x)).length;
+    check(`${gameId}: a double tap sends one answer`, answers === 1, `${answers} answer requests (intents sent: ${actions.join(", ") || "none"})`);
     await host.context().close();
     await bea.context().close();
   }

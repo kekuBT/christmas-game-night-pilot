@@ -79,7 +79,7 @@ const W8_INTENDED = {
     removed: [">main.mz-screen", ">section.mz-lockcard", ">span.mz-kicker", ">span.mz-lockcard__answer", ">span.mz-lockcard__stamp.mz-stamp",
       ">button.mz-key.mz-key--block.mz-key--lg.mz-key--neutral", ">p.mz-kicker", ">p.mz-foot", ">div.mz-wait", ">div.mz-wait__center", ">svg.", ">circle.",
       ">span.mz-wait__seat", ">span.mz-token", ">span.mz-token.mz-token--you", ">span.mz-seat__name", ">span.mz-wait__count", ">small."],
-    addedPrefixes: ["mz-locked>", "mz-lockcard>", "mz-locked-lead>", "mz-next-question>", "mz-locked-room>"],
+    addedPrefixes: ["mz-locked>", "mz-lockcard>", "mz-locked-lead>", "mz-next-question>", "mz-locked-room>", "mz-advance>", "mz-advance-count>", "mz-advance-stay>", "mz-advance-paused>"],
   },
 };
 /**
@@ -498,7 +498,7 @@ try {
     // timeout, so a slower answer reply skipped the click and W6 read the locked view, which has no question counter.)
     const next = host.getByRole("button", { name: "Next question" });
     await next.waitFor({ timeout: 10000 });
-    await next.click();
+    await next.click({ timeout: 3000 }).catch(() => {}); // D-AA-01: or it moves on by itself
     await host.getByText(/Question 2 of \d+/).first().waitFor({ timeout: 10000 });
     const before = await host.evaluate(() => [document.documentElement.dataset.mzTheme, document.body.innerText.match(/Question \d+ of \d+/)?.[0], window.__mark, location.pathname]);
     const other = await host.context().newPage();

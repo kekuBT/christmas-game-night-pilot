@@ -235,6 +235,11 @@ export interface QuestionScreenProps {
   extra?: ReactNode;
   /** Stage 8.1: a per-game class on the screen (Math's landscape answer area). */
   className?: string;
+  /**
+   * D-AA-01: just moved on from the locked view; the answers ignore taps for a moment, so a tap that carries over
+   * (a second tap on Next question, or one as its countdown ran out) can't answer this question. They look the same.
+   */
+  arming?: boolean;
 }
 
 export function QuestionScreen(p: QuestionScreenProps) {
@@ -249,7 +254,7 @@ export function QuestionScreen(p: QuestionScreenProps) {
       </header>
       <h1 className="mz-question">{p.questionNode ?? p.question}</h1>
       <div className="mz-grow mz-grow--min" />
-      <AnswerGrid options={p.options} selectedId={p.selectedId} locked={p.locked} onSelect={p.onSelect} disabled={p.secondsLeft <= 0} sending={p.sending} />
+      <AnswerGrid options={p.options} selectedId={p.selectedId} locked={p.locked} onSelect={p.onSelect} disabled={p.secondsLeft <= 0 || !!p.arming} sending={p.sending} />
       <p className="mz-foot" role="status">{p.selectedId ? 'Locked in.' : p.secondsLeft <= 0 ? 'Time’s up.' : 'One tap locks your answer.'}</p>
       {p.extra}
     </PhoneScreen>

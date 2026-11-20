@@ -109,7 +109,7 @@ async function answerOnPhone(page, choose) {
   const seen = [];
   for (let guard = 0; guard < 80 && seen.length < 10; guard++) {
     const nextBtn = page.getByRole("button", { name: "Next question" });
-    if (await nextBtn.isVisible({ timeout: 200 }).catch(() => false)) await nextBtn.click();
+    if (await nextBtn.isVisible({ timeout: 200 }).catch(() => false)) await nextBtn.click({ timeout: 3000 }).catch(() => {}); // D-AA-01
     const head = page.locator(".mz-qhead .mz-muted").first();
     if (await head.isVisible({ timeout: 1500 }).catch(() => false)) {
       const k = Number(/Question (\d+) of/.exec(await head.innerText({ timeout: 3000 }).catch(() => ""))?.[1]);
@@ -120,7 +120,7 @@ async function answerOnPhone(page, choose) {
       await page.locator(".mz-slab:not([disabled])").filter({ hasText: exact(label) }).first().click();
       seen.push({ k, prompt, label });
       const next = page.getByRole("button", { name: "Next question" });
-      if (await next.isVisible({ timeout: 3000 }).catch(() => false)) await next.click();
+      if (await next.isVisible({ timeout: 3000 }).catch(() => false)) await next.click({ timeout: 3000 }).catch(() => {}); // D-AA-01
       continue;
     }
     await sleep(300);

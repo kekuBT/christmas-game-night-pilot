@@ -242,6 +242,9 @@
 .mz-lockcard--compact .mz-lockcard__stamp { font-size: 12px; padding: 4px 10px; border-width: 2px; }
 .mz-locked__go { display: flex; flex-direction: column; gap: 10px; margin-top: 14px; }
 .mz-locked__go .mz-game-clock { text-align: center; }
+/* D-AA-01: the auto-advance countdown and "Stay on this screen", under Next question (layout only; existing styles). */
+.mz-locked__advance { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 6px 12px; }
+.mz-locked__advance .mz-foot { margin: 0; text-align: center; }
 .mz-locked__lead { margin: 0; text-align: center; font-size: 16px; font-weight: 700; line-height: 1.35; color: var(--mz-text); text-wrap: balance; }
 /* The room's progress is secondary: set apart below the action by space alone (no new colour on Everyday, W8). */
 .mz-locked__room { margin-top: 28px; }
