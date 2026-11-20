@@ -1,0 +1,58 @@
+FAIL A Math Mayhem (320 px): the shelf's action says How to play, not Start — Start
+FAIL A Math Mayhem (320 px): How to play lands on the game's instructions, with one Start — not within 10000ms
+FAIL A Math Mayhem (320 px): waiting on the instructions made no room, started no round and polled nothing — {"rooms":1,"starts":1,"polls":15}
+FAIL A Math Mayhem (320 px): still the instructions after waiting, no round on screen
+FAIL A Math Mayhem (320 px): the server has no open round
+PASS B Math Mayhem (320 px): browser Back from the instructions is the shelf
+PASS B Math Mayhem (320 px): browser Forward is the instructions again
+FAIL C Math Mayhem (320 px): re-entry from the shelf is the instructions — not within 10000ms
+FAIL B/C Math Mayhem (320 px): Back, Forward and re-entry started nothing — {"rooms":1,"starts":2,"polls":29}
+FAIL A–G Math Mayhem (320 px): the rest of these steps could not run — locator.dblclick: Timeout 30000ms exceeded.
+PASS H Math Mayhem (320 px): a direct URL on a fresh device lands on the instructions
+PASS H Math Mayhem (320 px): a direct URL made no room, started no round and polled nothing — {"rooms":0,"starts":0,"polls":0}
+PASS H Math Mayhem (320 px): after a reload, still the instructions
+PASS H Math Mayhem (320 px): the reload started nothing either — {"rooms":0,"starts":0,"polls":0}
+PASS H Math Mayhem (320 px): one Start begins the round
+PASS H Math Mayhem (320 px): one Start sent one start — {"rooms":1,"starts":1,"polls":2}
+PASS H Math Mayhem (320 px): the server has exactly one open round
+FAIL A Pattern Pulse (320 px): the shelf's action says How to play, not Start — Start
+FAIL A Pattern Pulse (320 px): How to play lands on the game's instructions, with one Start — not within 10000ms
+FAIL A Pattern Pulse (320 px): waiting on the instructions made no room, started no round and polled nothing — {"rooms":1,"starts":1,"polls":14}
+FAIL A Pattern Pulse (320 px): still the instructions after waiting, no round on screen
+FAIL A Pattern Pulse (320 px): the server has no open round
+PASS B Pattern Pulse (320 px): browser Back from the instructions is the shelf
+PASS B Pattern Pulse (320 px): browser Forward is the instructions again
+FAIL C Pattern Pulse (320 px): re-entry from the shelf is the instructions — not within 10000ms
+FAIL B/C Pattern Pulse (320 px): Back, Forward and re-entry started nothing — {"rooms":1,"starts":2,"polls":27}
+FAIL A–G Pattern Pulse (320 px): the rest of these steps could not run — locator.dblclick: Timeout 30000ms exceeded.
+PASS H Pattern Pulse (320 px): a direct URL on a fresh device lands on the instructions
+PASS H Pattern Pulse (320 px): a direct URL made no room, started no round and polled nothing — {"rooms":0,"starts":0,"polls":0}
+PASS H Pattern Pulse (320 px): after a reload, still the instructions
+PASS H Pattern Pulse (320 px): the reload started nothing either — {"rooms":0,"starts":0,"polls":0}
+PASS H Pattern Pulse (320 px): one Start begins the round
+PASS H Pattern Pulse (320 px): one Start sent one start — {"rooms":1,"starts":1,"polls":1}
+PASS H Pattern Pulse (320 px): the server has exactly one open round
+FAIL A Word Connections (320 px): the shelf's action says How to play, not Start — Start
+FAIL A Word Connections (320 px): How to play lands on the game's instructions, with one Start — not within 10000ms
+FAIL A Word Connections (320 px): waiting on the instructions made no room, started no round and polled nothing — {"rooms":1,"starts":1,"polls":14}
+FAIL A Word Connections (320 px): still the instructions after waiting, no round on screen
+FAIL A Word Connections (320 px): the server has no open round
+PASS B Word Connections (320 px): browser Back from the instructions is the shelf
+PASS B Word Connections (320 px): browser Forward is the instructions again
+FAIL C Word Connections (320 px): re-entry from the shelf is the instructions — not within 10000ms
+FAIL B/C Word Connections (320 px): Back, Forward and re-entry started nothing — {"rooms":1,"starts":2,"polls":27}
+FAIL A–G Word Connections (320 px): the rest of these steps could not run — locator.dblclick: Timeout 30000ms exceeded.
+PASS H Word Connections (320 px): a direct URL on a fresh device lands on the instructions
+PASS H Word Connections (320 px): a direct URL made no room, started no round and polled nothing — {"rooms":0,"starts":0,"polls":0}
+PASS H Word Connections (320 px): after a reload, still the instructions
+PASS H Word Connections (320 px): the reload started nothing either — {"rooms":0,"starts":0,"polls":0}
+PASS H Word Connections (320 px): one Start begins the round
+PASS H Word Connections (320 px): one Start sent one start — {"rooms":1,"starts":1,"polls":1}
+PASS H Word Connections (320 px): the server has exactly one open round
+FAIL I Math Mayhem (375 px): How to play lands on the instructions — not within 10000ms
+FAIL I Math Mayhem (375 px): nothing started — {"rooms":1,"starts":1,"polls":14}
+FAIL I Pattern Pulse (375 px): How to play lands on the instructions — not within 10000ms
+FAIL I Pattern Pulse (375 px): nothing started — {"rooms":1,"starts":1,"polls":13}
+FAIL I Word Connections (375 px): How to play lands on the instructions — not within 10000ms
+FAIL I Word Connections (375 px): nothing started — {"rooms":1,"starts":1,"polls":13}
+SOLO RULES FAILURES: 30

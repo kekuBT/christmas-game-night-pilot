@@ -1,0 +1,9 @@
+
+PASSED (exit 0) | targeted | run 20261120-041617-cbdb1242-6009
+  13 passed, 0 failed, 0 timed out, 0 infrastructure, 0 invalid, 0 cancelled, 0 not run
+  timing   wall 7m 17s · step time 19m 10s (sum) · 3 workers, 88% busy · 2.63× the same steps run one after another
+           predicted 0–14m (about 4m 05s, low-confidence) → actual 7m 17s (+78%)
+           longest  check-mobile-everyday 3m 16s, check-solo-shelf 2m 59s, check-solo 2m 45s · the longest step is 45% of the wall time
+           machine  CPU mean 24%, peak 89% · memory available ≥ 14050 MB · load peak 4.65 · backpressure 1 wait(s), 18s
+           retries  none (the gate never retries a step)
+  report $SCRATCH/sr-gate/20261120-041617-cbdb1242-6009/report.json

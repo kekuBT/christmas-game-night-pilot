@@ -4266,10 +4266,12 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
   - ChatGPT's independent engineering review and private-browser audit;
   - the sweep backlog (DECISIONS, H8 sweep), for independent review.
 - **Next:** ChatGPT's review of `436f272`.
-- **ChatGPT's review [7029967180](https://github.com/kekuBT/christmas-game-night-pilot/pull/51#issuecomment-7029967180): H8 cleared for development.**
-  - **What it covered:** tested `436f272`, with head `3cc1c2f` re-fetched (documentation and evidence only above it). It found **no blocking finding**.
-  - **Its independent checks:** on a hash-verified reconstruction, 127/127 focused tests, the production build and CONTENT OK; a briefing frozen on the old Geography pack was cancelled as `content-changed` and reopened on 1.0.1; and a loopback Chromium run at 320×568 passed 32/32.
-  - **What it did not do:** a second clean-checkout gate or a native device check.
+- **ChatGPT's review [7029967180](https://github.com/kekuBT/christmas-game-night-pilot/pull/51#issuecomment-7029967180): engineering review of H8, no blocking finding.**
+  - **What it covered:** tested `436f272`, head `3cc1c2f`.
+  - **Its independent checks:** 127/127 focused tests, the production build, CONTENT OK, the frozen-briefing check, and a loopback Chromium run at 320×568 of 32/32.
+- **Its status is qualified by [7029976608](https://github.com/kekuBT/christmas-game-night-pilot/pull/51#issuecomment-7029976608) and [7029986532](https://github.com/kekuBT/christmas-game-night-pilot/pull/51#issuecomment-7029986532).** H8 is **engineering-reviewed, with the mandatory private Codespace interactive audit pending**.
+  - **Why it is pending:** the cloud browser is at GitHub sign-in, and the owner has to restore it.
+  - **Not requested:** an H8 code repair.
   - **Still open:** the sweep items stay in the backlog, and H3's native check stays owner-deferred.
 
 ## Post-beta: solo players read the rules before they start (handoff 7029967180)
@@ -4278,7 +4280,13 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
 - **The fix (D-SR-01):**
   - The shelf's action is **How to play** and opens the game's instructions. Their one Start makes the round, and nothing starts on arrival, a direct URL, a reload or Back.
   - **Files:** `apps/web/src/App.tsx`, `apps/web/src/components/mchezo/Solo.tsx`, `Solo.test.tsx` (new), `scripts/check-solo-rules.mjs` (new), the updated solo drivers and stage screenshot scripts, `docs/DECISIONS.md`.
-- **Tests so far:**
-  - `check-solo-rules`: `3cc1c2f` FAILS 30; the fix passes 88/88, on development builds.
-  - **Unit:** 2151 tests (2146 + 5).
+- **HELD (7029976608; 7030250257 on #56):** the hold reached this session (at 04:16 UTC, delayed delivery) after the slice had begun.
+  - **What happened next:** work stopped. The validation already running was finished on its exact revision, and its report was published. No full gate and no completed handoff; the slice is not accepted.
+  - **The status comment:** 7030250085 on #51.
+- **Tests (on `cbdb124`):**
+  - `check-solo-rules`: `3cc1c2f` FAILS 30; development build 88/88.
+  - **Unit:** 2151 tests (2146 + 5). Lint and typecheck are clean.
+  - **Targeted gate:** `PASSED (exit 0)`, 13/13, run `20261120-041617-cbdb1242-6009`.
+- **Evidence:** `docs/evidence/solo-rules/`.
+- **Next:** wait for ChatGPT's private audit of H8 and its release of this slice. Then run the full gate on the exact candidate and post the completed handoff.
 
