@@ -2687,6 +2687,9 @@ The reported symptom: a nearly black **drawer** screen in an iPhone in-app brows
     - **Tolerant taps:** the shared `scripts/lib/answer.mjs` and the drivers that tap Next question in a loop. They make the tap with a short timeout, because losing the race to the countdown has the same outcome.
     - **Longer holds** (`check-locked-answer` T, Z and M, and `check-math`'s 3-second linger) first press Stay on this screen, as a slow reader would, and measure that layout too. `check-locked-answer`'s guest reload now asserts that it happens during the countdown.
     - **`check-warm-ivory` W8:** allows the four new locked-view keys, each reusing a style this screen had.
+    - **Found by the gates (driver fixes only):**
+      - The fixed 12-pass answer loops in `check-mchezo`, `check-reveal`, `check-spectator`, `check-tv-entry`, `check-tv-lifecycle`, `check-tv-spectator` and two screenshot scripts now wait up to 700 ms for an enabled answer. Inside the carry-over guard a pass was wasted (targeted run `20261120-112523-fd9ff395-7559`).
+      - `check-answer-race` now counts answer intents by action. With auto-advance, Math's `math-open` for question 2 can fall inside its 3.7 s window on a loaded machine. It is not an answer (full run `20261120-114819-5fb22906-14972`, and a probe recording `submit-math-answer, math-open`).
   - **Alternatives:**
     - **A room-wide step after every question.** Rejected: the games are paced per player, and the handoff asks to keep each player's opportunity to answer.
     - **Moving on with no visible countdown.** Rejected: it surprises players, and WCAG 2.2.1 needs a way to stop it.

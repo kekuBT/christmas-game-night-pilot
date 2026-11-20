@@ -1,0 +1,12 @@
+
+FAILED (exit 1) | full | run 20261120-114819-5fb22906-14972
+  116 passed, 1 failed, 0 timed out, 0 infrastructure, 0 invalid, 0 cancelled, 0 not run
+  FAIL      check-answer-race (w2) [functional]: FAIL math-mayhem: a double tap sends one answer — 2 answer requests
+  timing   wall 45m 32s · step time 2h 11m (sum) · 3 workers, 96% busy · 2.88× the same steps run one after another
+           predicted 23–78m (about 38m 07s, low-confidence) → actual 45m 32s (+19%)
+           longest  e2e-chromium 8m 12s, check-f5 7m 36s, check-leaderboard 5m 11s · the longest step is 18% of the wall time
+           machine  CPU mean 36%, peak 100% · memory available ≥ 13216 MB · load peak 6.43 · backpressure 11 wait(s), 123s
+           contention ×1.174 (median step time vs its sequential median)
+           baseline sequential full gate: about 1h 17m (mean of recorded sequential passes)
+           retries  none (the gate never retries a step)
+  report <scratch>/gate-aa-full/20261120-114819-5fb22906-14972/report.json

@@ -1,0 +1,11 @@
+$ node scripts/check-reveal.mjs http://localhost:39491
+# timeout 600s | worker w1 | server http://localhost:39491 (data <scratch>/gate-aa-targeted/20261120-112523-fd9ff395-7559/server-data/w1)
+
+[+37.3s] FAIL reveal driver crashed — TimeoutError: locator.waitFor: Timeout 30000ms exceeded.
+[+37.3s] Call log:
+[+37.3s]   - waiting for getByRole('button', { name: 'Back to lobby' }) to be visible
+[+37.3s] 
+[+37.4s] REVEAL FAILED: 1 failed
+[+37.4s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":2,"pages":3,"peakOpenPages":3}
+
+# FAIL (exit 1) in 37.4s | cpu 2.7s, peak memory 339 MB

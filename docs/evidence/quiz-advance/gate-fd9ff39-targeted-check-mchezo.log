@@ -1,0 +1,34 @@
+$ node scripts/check-mchezo.mjs http://localhost:42973
+# timeout 900s | worker w3 | server http://localhost:42973 (data <scratch>/gate-aa-targeted/20261120-112523-fd9ff395-7559/server-data/w3)
+
+[+1.0s] PASS Home shows the Mchezo wordmark with Join and Host in the dock
+[+1.5s] PASS Join has a 6-character code input
+[+2.3s] PASS Host asks for the host's name before the room exists
+[+4.4s] PASS room code is 6 alphanumeric — 6LTETF
+[+7.0s] PASS 4-player lobby: host sees all seats
+[+7.0s] PASS 4-player lobby: up next is Trivia Showdown
+[+7.0s] PASS 4-player lobby: no horizontal overflow
+[+10.4s] PASS 8-player lobby: seats render
+[+10.4s] PASS 8-player lobby: no horizontal overflow
+[+12.1s] PASS 10-player lobby: room is full
+[+12.2s] PASS 10-player lobby: no horizontal overflow
+[+12.7s] PASS disconnection: host sees reconnecting
+[+12.7s] PASS disconnection: seat shows Away
+[+17.2s] PASS guest sees no game-setup controls
+[+17.2s] PASS host sees chooser and mode controls
+[+17.3s] PASS chooser lists all 21 games a Cup can play
+[+17.7s] PASS chooser sets up next to Math Mayhem
+[+17.8s] PASS practice mode moves the Start testid
+[+18.3s] PASS chooser returns up next to Trivia Showdown
+[+19.0s] PASS everyone ready opens the question screen (no intro countdown)
+[+19.0s] PASS trivia question: no horizontal overflow
+[+19.4s] PASS answer selection locks (LOCKED IN stamp)
+[+19.8s] PASS second question presented after Next
+[+34.9s] FAIL check-mchezo journey crashed — TimeoutError: locator.waitFor: Timeout 15000ms exceeded.
+[+34.9s] Call log:
+[+34.9s]   - waiting for getByText('All your answers are in') to be visible
+[+34.9s] 
+[+35.0s] MCHEZO FAILED: 1/24 failed
+[+35.0s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":2,"pages":14,"peakOpenPages":10}
+
+# FAIL (exit 1) in 35s | cpu 4.4s, peak memory 263 MB

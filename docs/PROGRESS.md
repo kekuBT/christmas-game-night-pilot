@@ -1,5 +1,5 @@
 # Muse local progress and resume checkpoint
-Updated: 2026-11-20 ~6:50 a.m. EST (handoff 7037561069: #56 engineering-reviewed and cleared to build on, its private browser audit at cbdb124 deferred by the owner; Trivia/Math auto-advance slice D-AA-01 on claude/quiz-auto-advance, stacked on #56 at ce626a8; not merged, not deployed)
+Updated: 2026-11-20 ~8:30 a.m. EST (handoff 7037561069: #56 engineering-reviewed and cleared to build on, its private browser audit at cbdb124 deferred by the owner; Trivia/Math auto-advance D-AA-01 on draft #57 (tested 9f7ed98, full gate PASSED 117/117); not merged, not deployed)
 
 ## Current milestone
 M0–M5: COMPLETED as backend/engine checkpoints ONLY — see docs/FRONTEND_MILESTONES.md. They are NOT evidence the full product is finished.
@@ -4317,4 +4317,19 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
 - **Local results before the commit:**
   - **Unit:** 2157 tests (2151 + 6). Lint and typecheck are clean.
   - **`check-quiz-advance`:** base `ce626a8` FAILS 22 checks; development build 61/61.
-- **Gates on the committed SHA:** pending (recorded in the evidence commit).
+- **Draft PR:** #57, base `claude/solo-rules-first`.
+- **The tested commit:** `9f7ed984f589576933bae788cf8b0699d7123af7`.
+  - The product change is `fd9ff39`. `5fb2290` and `9f7ed98` change only drivers; everything above `9f7ed98` is docs only.
+- **Gates (each verdict is its own run and revision):**
+  - `fd9ff39` targeted, 20 drivers: `FAILED (exit 1)`, 20/22 (`check-mchezo`, `check-reveal`). Their 12-pass answer loops wasted a pass inside the carry-over guard; fixed in the drivers. Run `20261120-112523-fd9ff395-7559`.
+  - `5fb2290` targeted, 14 drivers: `PASSED (exit 0)`, 16/16. Run `20261120-113924-5fb22906-12746`.
+  - `5fb2290` full: `FAILED (exit 1)`, 116/117 (`check-answer-race` counted the auto-advance's `math-open` as a second answer request). A probe showed it was one answer plus the open, so the driver now counts answer intents. Run `20261120-114819-5fb22906-14972`.
+  - `9f7ed98` targeted (`answer-race`, `quiz-advance`, `math`): `PASSED (exit 0)`, 5/5. Run `20261120-123600-9f7ed984-5134`.
+  - **`9f7ed98` full: `PASSED (exit 0)`, 117/117.** Run `20261120-123848-9f7ed984-5747`.
+- **Evidence:** `docs/evidence/quiz-advance/`.
+- **Open:**
+  - ChatGPT's review of `9f7ed98`.
+  - Owner sign-off on the 4 s reading time and the 450 ms guard.
+  - Geography auto-advance (backlog).
+  - The #56 private audit (deferred) and H3 native iPhone.
+- **Next:** wait for review. Results restructuring and the broader visual redesign are separate slices.

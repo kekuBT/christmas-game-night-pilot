@@ -1,0 +1,9 @@
+
+PASSED (exit 0) | targeted | run 20261120-123600-9f7ed984-5134
+  5 passed, 0 failed, 0 timed out, 0 infrastructure, 0 invalid, 0 cancelled, 0 not run
+  timing   wall 2m 42s · step time 4m 09s (sum) · 3 workers, 51% busy · 1.54× the same steps run one after another
+           predicted 0–4m (about 1m 01s, low-confidence) → actual 2m 42s (+166%)
+           longest  check-quiz-advance 2m 34s, check-math 1m 02s, check-answer-race 26s · the longest step is 95% of the wall time
+           machine  CPU mean 15%, peak 87% · memory available ≥ 14541 MB · load peak 1.52
+           retries  none (the gate never retries a step)
+  report <scratch>/gate-aa-targeted3/20261120-123600-9f7ed984-5134/report.json
