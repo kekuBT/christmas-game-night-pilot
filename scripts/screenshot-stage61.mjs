@@ -47,7 +47,7 @@ async function playRound(page, rightFor) {
     const answer = solveMath(await page.locator("h1.mz-question").innerText());
     const labels = (await slabs.allInnerTexts()).map(slabNumber);
     await slabs.nth(rightFor(i) ? labels.indexOf(answer) : labels.findIndex((v) => v !== answer)).click();
-    if (i < 9) { await page.getByTestId("mz-math-next").waitFor({ timeout: 20000 }); await page.getByTestId("mz-math-next").click(); }
+    if (i < 9) { await page.getByTestId("mz-math-next").waitFor({ timeout: 20000 }); await page.getByTestId("mz-math-next").click({ timeout: 3000 }).catch(() => {}); } // D-AA-01: or it moves on by itself
   }
   await page.getByTestId("solo-results").waitFor({ timeout: 20000 });
 }

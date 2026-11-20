@@ -2651,3 +2651,43 @@ The reported symptom: a nearly black **drawer** screen in an iPhone in-app brows
     - `check-solo`, `check-solo-shelf`, `check-mobile-everyday`, `check-install`, `check-install-builds`, `check-casual` and `check-themes-seasonal` now tap the instructions' Start after the shelf. The stage screenshot scripts have the same change.
     - `check-solo` now checks that tap 2 is the instructions and tap 3 is the round, and its keyboard path tabs to Start on the instructions.
   - **Alternative:** a modal over the shelf with the rules and Start. Rejected: the game's own instructions screen already exists, is reachable by URL and survives a reload.
+
+## Post-beta: Trivia and Math Mayhem move on after the answer locks (handoff 7037561069; acknowledged 7037632425; docs/evidence/quiz-advance/)
+- **D-AA-01 A locked answer moves on by itself after a reading time; Next question still works; Stay on this screen keeps it** (owner-directed in the handoff; the 4-second reading time is a provisional, configurable default, not an owner-approved number).
+  - **What the trace found (both games, room and solo Math):**
+    - Each player goes at their own pace. The server takes answers in any order, and a phone shows its first unanswered question.
+    - The locked view (`LockedAnswer`) appears only once the server's projection carries the answer, so it always follows a lock the server confirmed.
+    - Its routine Next question tap only cleared a local "just answered" marker. Math's next question then asks the server to open it (`math-open`), which starts its speed clock, and only on a visible page (S3-MTH-01).
+    - There is no room-wide step between questions. The room reaches its results when the server finishes the game: everyone answered, its deadline, or a host skip.
+  - **What:**
+    - **Trivia and Math Mayhem** (room and solo) pass `autoAdvanceMs` (`QUIZ_AUTO_ADVANCE_MS`, 4000 ms) to `LockedAnswer`. A nonfinal locked view counts down ("Next question in 4 s") and then does what Next question did.
+    - **The countdown starts on the server-confirmed lock.** It pauses while the page is hidden, and it fires once.
+    - **Next question works at once**, as before. Tapping it and the countdown are the same action (clear the marker; show the first unanswered question), so the two cannot add up to two steps.
+    - **Stay on this screen** turns the countdown off for the rest of that game (keyed by the game's id, so Play again or a new game counts down again). A status line says so, and Next question then moves on (WCAG 2.2.1, timing adjustable).
+    - **Screen readers:** the existing `role="status"` line gains one static sentence ("The next question opens by itself in 4 seconds."). The ticking number is `aria-hidden` and sits in no live region. Stay follows Next question in the tab order.
+    - **The final answer** has no countdown and no continuation, as before.
+  - **The carry-over guard (found by this slice's regression):**
+    - **The finding:** a second tap on Next question landed on an answer of the next Trivia question and locked it. Answers can't be changed once locked. The old manual flow had the same double-tap hazard; solo Math showed it on the base too. A tap just as the countdown runs out is a new way in.
+    - **The fix:** for `QUIZ_ARM_MS` (450 ms) after moving on, the next question's answers and Sit this game out are disabled. They look the same (`.mz-slab:disabled` keeps full opacity).
+    - **Where:** `useAdvanceGuard` and `QuestionScreen`'s new `arming` prop. Only Trivia and Math use it, and only after a locked view, not on a game's first question.
+    - A deliberate answer takes longer than 450 ms. Math is timed from the server's open, so the guard runs mostly during the open's round trip.
+  - **Unchanged:**
+    - scoring, answer immutability, reveal permissions (the locked view shows the chosen answer, no correctness), the TV and spectator projections;
+    - the authoritative deadline and Math's open-then-time rule (the next question opens only when it is shown on a visible page, now after the countdown);
+    - Geography (it passes no `autoAdvanceMs` and stays manual; following it is a backlog item), and every other game.
+  - **Multiplayer:** moving on is per player, so a slow player keeps their question open. A missing player holds nobody up. Only the server's existing rules move the whole room to its results.
+  - **Reconnect during feedback:** a reload drops the local "just answered" marker, and the phone resumes at the next unanswered question. The answer and seat are kept, and nothing is recorded twice. A socket reconnect keeps the component, so the countdown carries on.
+  - **The regression:** `scripts/check-quiz-advance.mjs` (new, its own servers, 61 checks).
+    - **Solo Math, 320×568:** the countdown and its accessibility; moving on without a tap within 3.5–6.5 s of the lock, with the server not opening the next question during the countdown; hidden-page pause; two taps as it runs out (one step, no answer); Next at once; keyboard (Tab to Next, then Stay; Enter); Stay for the rest of the game; ten questions in order to the results; Play again counts down again.
+    - **Room Trivia, host 390×844 + guest 320×568, test-only `MCHEZO_LIFECYCLE_SCALE=0.2`:** the host moves on while the guest keeps question 1; the host's end has no continuation while the room plays on; the guest reloads during the countdown; two taps on Next; the guest stops, and only the server deadline ends the game.
+    - **Room Math:** the next question opens after the countdown and is timed from that open; everyone finishes, and the server ends the game.
+    - **The result:** on base `ce626a8` it FAILS 22 checks. That includes the double-tap answer in solo Math (the existing hazard). On the fix it passes 61/61.
+    - `LockedAnswer.test.tsx` pins the countdown, the sentence, the hidden number, Stay, the stayed line, no countdown on the final answer and solo.
+  - **Drivers updated for the new flow:**
+    - **Tolerant taps:** the shared `scripts/lib/answer.mjs` and the drivers that tap Next question in a loop. They make the tap with a short timeout, because losing the race to the countdown has the same outcome.
+    - **Longer holds** (`check-locked-answer` T, Z and M, and `check-math`'s 3-second linger) first press Stay on this screen, as a slow reader would, and measure that layout too. `check-locked-answer`'s guest reload now asserts that it happens during the countdown.
+    - **`check-warm-ivory` W8:** allows the four new locked-view keys, each reusing a style this screen had.
+  - **Alternatives:**
+    - **A room-wide step after every question.** Rejected: the games are paced per player, and the handoff asks to keep each player's opportunity to answer.
+    - **Moving on with no visible countdown.** Rejected: it surprises players, and WCAG 2.2.1 needs a way to stop it.
+    - **A longer or shorter reading time.** 4 s is a provisional default in one constant, for the owner to tune.

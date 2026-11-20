@@ -1,5 +1,5 @@
 # Muse local progress and resume checkpoint
-Updated: 2026-11-19 ~4:50 p.m. EST (Draw & Guess H3: ChatGPT's review 7023016430 found no blocking defect in #54's scoped fix (tested 9d2eda5) and completed its private browser audit; native iPhone/in-app H3 remains OPEN, awaiting an authorized tester with an iPhone; not merged, not deployed)
+Updated: 2026-11-20 ~6:50 a.m. EST (handoff 7037561069: #56 engineering-reviewed and cleared to build on, its private browser audit at cbdb124 deferred by the owner; Trivia/Math auto-advance slice D-AA-01 on claude/quiz-auto-advance, stacked on #56 at ce626a8; not merged, not deployed)
 
 ## Current milestone
 M0–M5: COMPLETED as backend/engine checkpoints ONLY — see docs/FRONTEND_MILESTONES.md. They are NOT evidence the full product is finished.
@@ -4295,4 +4295,26 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
     - **full `PASSED (exit 0)`, 116/116**, run `20261120-051827-cbdb1242-266`.
 - **Evidence:** `docs/evidence/solo-rules/`.
 - **Next:** ChatGPT's review of `cbdb124`. Auto-advance and the broader redesign stay outside #56.
+- **Recorded per handoff [7037561069](https://github.com/kekuBT/christmas-game-night-pilot/pull/51#issuecomment-7037561069):** Keku approved continuing development with the private Codespace review deferred. That lifts the development hold from review 7031981214.
+  - **#56 is engineering-reviewed and cleared to build on.** The independent private browser audit stays **open for later** at tested SHA `cbdb12424908a326ac4f3d533fa92ec5b665eec4`.
+  - #56's head `ce626a82ecebb0f725704f7c3cb6168e5df02215` adds only documentation and evidence.
+  - Exact-SHA local QA and synthetic browser checks continue.
+  - Draw & Guess native iPhone confirmation (H3) stays **open** until a device is available.
 
+## Post-beta: Trivia and Math Mayhem move on after the answer locks (handoff 7037561069)
+- **The handoff:** the same comment, acknowledged in [7037632425](https://github.com/kekuBT/christmas-game-night-pilot/pull/51#issuecomment-7037632425) at 5:50 a.m. ET with an estimate of about 11:30 a.m. ET.
+- **Branch:** `claude/quiz-auto-advance`, a separate stacked draft from #56's head `ce626a82ecebb0f725704f7c3cb6168e5df02215`.
+- **The change (D-AA-01):**
+  - A nonfinal locked answer counts down 4 s (a provisional default) and then moves that player on. Next question still works at once, and Stay on this screen keeps the screen for the rest of the game. The final answer still has no continuation.
+  - Screen readers hear one sentence. The ticking number is hidden from assistive tech.
+  - A 450 ms carry-over guard stops a second tap on Next question, or a tap as the countdown runs out, from answering the next question. This slice's regression found that hazard (an answer locked by a double tap); it already existed in the old manual flow.
+  - Each player's pace is kept, and the server alone ends the game (everyone answered, or its deadline). Scoring, reveal permissions and Math's open-then-time clock are unchanged. Geography stays manual (backlog).
+- **Files:**
+  - **Components:** `apps/web/src/components/mchezo/LockedAnswer.tsx`, `MchezoTrivia.tsx`, `MchezoMath.tsx`, `LockedAnswer.test.tsx`.
+  - **Shared UI:** `apps/web/src/ui/mchezo/components/phone/screens.tsx` (`QuestionScreen` `arming`) and `apps/web/src/ui/mchezo/styles/mchezo.css`.
+  - **Drivers:** `scripts/check-quiz-advance.mjs` (new); `scripts/lib/answer.mjs` and the drivers that tap Next question; `check-locked-answer` and `check-math` (Stay before long holds); `check-warm-ivory` W8 keys; the stage screenshot scripts.
+  - **Docs:** `docs/DECISIONS.md`.
+- **Local results before the commit:**
+  - **Unit:** 2157 tests (2151 + 6). Lint and typecheck are clean.
+  - **`check-quiz-advance`:** base `ce626a8` FAILS 22 checks; development build 61/61.
+- **Gates on the committed SHA:** pending (recorded in the evidence commit).

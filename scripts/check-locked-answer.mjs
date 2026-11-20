@@ -44,6 +44,11 @@
 //    B5  the TV goes to the finished game's review (answers now allowed)
 //    B6  Play again: both seats kept, readiness reset, and the TV shows the
 //        new game with no answers before it finishes
+// D-AA-01 (handoff 7037561069): Trivia's and Math's locked view now moves on by itself a few seconds after the lock,
+// with "Stay on this screen" to keep it. Each measurement here is taken during that countdown (within about 1.5 s of
+// the lock); where a step holds the screen longer (T, Z, M, the second player's turn in A), the player first presses
+// Stay on this screen, as a slow reader would, and that stayed layout is measured too (L1s). Geography has no countdown.
+// The countdown itself, its timing and its accessibility are check-quiz-advance's.
 // Usage: node scripts/check-locked-answer.mjs <baseUrl>   (the gate passes its server)
 import { spawn } from "node:child_process";
 import { mkdirSync, mkdtempSync, rmSync } from "node:fs";
@@ -179,6 +184,16 @@ async function lockOne(page, index = 0) {
   await page.locator(AFTER_LOCK).first().waitFor({ timeout: 15000 });
   await settled(page);
 }
+/** Keep the locked view (D-AA-01): press the screen's own Stay on this screen while its countdown is still running. */
+async function stay(page, tag) {
+  const running = (await page.getByTestId("mz-advance").count()) === 1;
+  check(`${tag} the countdown is still running when the player chooses to stay`, running);
+  if (!running) return false;
+  await page.getByTestId("mz-advance-stay").click();
+  await page.getByTestId("mz-advance-paused").waitFor({ timeout: 5000 });
+  await sleep(150);
+  return true;
+}
 const questionNumber = async (page) => {
   const t = await page.locator(".mz-qhead .mz-muted").first().innerText({ timeout: 15000 }).catch(() => "");
   return Number((/Question (\d+) of/.exec(t) ?? [])[1] ?? NaN);
@@ -189,8 +204,9 @@ async function finishAll(page) {
     await lockOne(page);
     if (await page.locator(FINAL).count()) return true;
     const nx = page.getByRole("button", { name: "Next question" });
-    await nx.scrollIntoViewIfNeeded();
-    await nx.click();
+    // D-AA-01: a player who has not chosen to stay also moves on by itself; a tap that loses that race is the same outcome.
+    await nx.scrollIntoViewIfNeeded({ timeout: 3000 }).catch(() => {});
+    await nx.click({ timeout: 3000 }).catch(() => {});
   }
   return false;
 }
@@ -263,6 +279,11 @@ try {
       const m = await measure(p);
       await p.screenshot({ path: pathJoin(SHOTS, `trivia-nonfinal-${who}-${size.tag}.png`) });
       nonfinalChecks(size.tag, who, m);
+      // L1s: the player keeps the screen (D-AA-01); the stayed layout holds L1–L4 too.
+      if (await stay(p, `${size.tag} ${who}`)) {
+        nonfinalChecks(`${size.tag} L1s stayed`, who, await measure(p));
+        await p.screenshot({ path: pathJoin(SHOTS, `trivia-nonfinal-${who}-stayed-${size.tag}.png`) });
+      }
     }
     // T: the longest supported answer in the rendered card.
     if (size.phone) {
@@ -302,6 +323,7 @@ try {
     await lockOne(h);
     const m = await measure(h);
     await h.screenshot({ path: pathJoin(SHOTS, `trivia-nonfinal-host-${z.tag}.png`) });
+    await stay(h, `${z.tag} Z`);
     check(`${z.tag} Z no sideways scroll`, !m.sideways);
     check(`${z.tag} Z no seat token or label overlaps text or a control`, m.collisions.length === 0, JSON.stringify(m.collisions));
     check(`${z.tag} Z Next question comes before the room's progress`, m.nextBeforeRing === true);
@@ -336,6 +358,7 @@ try {
     const m = await measure(h);
     await h.screenshot({ path: pathJoin(SHOTS, `${gameId}-nonfinal-host-320x480.png`) });
     nonfinalChecks(`${gameId} 320x480`, "host", m);
+    if (gameId === "math-mayhem") await stay(h, "math-mayhem 320x480 host");
     if (gameId === "math-mayhem") {
       // M (scope answer 6905044291): Math's next prompt and its speed clock begin only through the existing
       // open flow after Next question, visibility guard included. The player's own projection (current
@@ -347,7 +370,7 @@ try {
       });
       check("math-mayhem M on the locked screen, question 2 is not opened", !(await mine()).q2Opened);
       await sleep(3500); // longer than the open retry (OPEN_RETRY_MS, 3 s)
-      check("math-mayhem M still not opened 3.5 s later (nothing opens it from the locked screen)", !(await mine()).q2Opened);
+      check("math-mayhem M still not opened 3.5 s later (nothing opens it from a locked screen the player stays on)", !(await mine()).q2Opened);
       await h.evaluate(() => { window.__mzHidden = true; document.dispatchEvent(new Event("visibilitychange")); });
       await h.getByRole("button", { name: "Next question" }).click();
       await sleep(3500);
@@ -444,6 +467,8 @@ try {
   check("B2 the host moves on to question 2 by themself", (await questionNumber(h)) === 2);
   await lockOne(g);
   nonfinalChecks("B2", "guest 320x480", await measure(g));
+  // Reconnect during feedback (D-AA-01): the reload lands while the locked view's countdown is still running.
+  check("B2 the guest reloads during the locked view's countdown", (await g.getByTestId("mz-advance").count()) === 1);
   const seatBefore = await g.evaluate(() => sessionStorage.getItem("cgn_playerId"));
   await g.reload({ waitUntil: "domcontentloaded" });
   await soon("B2 after a reload on the locked view, the guest resumes at question 2", async () => (await questionNumber(g)) === 2, 20000);

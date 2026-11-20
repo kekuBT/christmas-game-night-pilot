@@ -191,7 +191,7 @@ async function act(page, gameId, name) {
     const slab = page.locator(".mz-slab:not([disabled])").first();
     if (await slab.isVisible()) { await slab.click(); await sleep(300); return true; }
     const next = page.getByRole("button", { name: "Next question" });
-    if (await next.isVisible()) { await next.click(); await sleep(300); return true; }
+    if (await next.isVisible()) { await next.click({ timeout: 3000 }).catch(() => {}); /* D-AA-01 */ await sleep(300); return true; }
     return false;
   }
   if (gameId === "closest-wins") return await actClosest(page);

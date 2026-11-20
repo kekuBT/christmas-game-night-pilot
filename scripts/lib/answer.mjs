@@ -70,7 +70,10 @@ export async function answerKitQuestions(page, { player, choose, timeout = 20000
     if (st.kind === "locked") {
       // R5: the locked view follows a nonfinal answer only and always offers Next question.
       if (!st.next) throw await stuck(page, player, `${player}: the locked view has no Next question (the last answer should show "All your answers are in")`);
-      await page.getByRole("button", { name: "Next question" }).click();
+      // D-AA-01: Trivia and Math also move on by themselves a few seconds after the lock, so the tap can lose the
+      // race to the countdown (the button is gone and the next question is up). That is the same outcome; a locked
+      // view that never moves on (a manual game whose Next does nothing) still fails at the wait below.
+      await page.getByRole("button", { name: "Next question" }).click({ timeout: 3000 }).catch(() => {});
       await waitForState(page, (s) => s.kind !== "locked" && s.kind !== "other", { timeout, player, context: "after 'Next question'" });
       continue;
     }

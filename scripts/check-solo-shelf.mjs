@@ -189,7 +189,7 @@ try {
     const answer = solveMath(await page.locator("h1.mz-question").innerText());
     const labels = (await slabs.allInnerTexts()).map(slabNumber);
     await slabs.nth(labels.indexOf(answer)).click();
-    if (i < 9) { await page.getByTestId("mz-math-next").waitFor({ timeout: 20000 }); await page.getByTestId("mz-math-next").click(); }
+    if (i < 9) { await page.getByTestId("mz-math-next").waitFor({ timeout: 20000 }); await page.getByTestId("mz-math-next").click({ timeout: 3000 }).catch(() => {}); } // D-AA-01: or it moves on by itself
   }
   const m1 = await results(page);
   check("G Math: 10 of 10, with the Math headline and its own first best", /^10 of 10 correct$/.test(m1.headline) && m1.score >= 1000 && /first personal best/.test(m1.pb), JSON.stringify(m1));

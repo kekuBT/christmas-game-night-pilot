@@ -333,7 +333,7 @@ try {
     await passBriefing([host, P.Bea, P.Cal, P.Dee, tv]); // D3
     await host.locator(".mz-question").waitFor({ timeout: 30000 });
     await answerFirstN(P.Dee, 3, 0);
-    await P.Dee.getByRole("button", { name: "Next question" }).click();
+    await P.Dee.getByRole("button", { name: "Next question" }).click({ timeout: 3000 }).catch(() => {}); // D-AA-01: or it moved on by itself
     await P.Dee.getByRole("button", { name: "Sit this game out" }).click();
     await P.Dee.locator(".mz-wait").waitFor({ timeout: 15000 });
     await P.Dee.close();

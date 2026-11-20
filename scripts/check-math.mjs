@@ -112,7 +112,7 @@ async function answerAll(page, picks) {
     // A nonfinal locked view always offers Next question (R5); its absence is a failure, not a skip.
     const next = page.getByRole("button", { name: "Next question" });
     if (!(await next.isVisible({ timeout: 2000 }).catch(() => false))) throw new Error(`the locked view after question ${i + 1} has no Next question`);
-    await next.click();
+    await next.click({ timeout: 3000 }).catch(() => {}); // D-AA-01: or it moved on by itself
     await sleep(300);
   }
 }
@@ -176,7 +176,10 @@ try {
   check("locked view shows the server-measured time for this question (>= 10 s, past the bonus)",
     // S3-MTH-01: the copy says what is measured: from when the game SENT the question to this phone.
     /Answered in \d+(\.\d)? s/.test(elapsedText) && elapsedSecs >= 10 && /from when it sent this question to your phone/.test(elapsedText), elapsedText);
-  // Linger 3 s on the locked view: question 2's clock must NOT be running yet.
+  // Linger 3 s on the locked view: question 2's clock must NOT be running yet. D-AA-01: the locked view now moves on
+  // by itself after a few seconds, so this player first chooses to stay (the screen's own control), as a slow reader would.
+  await host.getByTestId("mz-advance-stay").click();
+  await host.getByTestId("mz-advance-paused").waitFor({ timeout: 5000 });
   await sleep(3000);
   await host.getByRole("button", { name: "Next question" }).click();
   await sleep(500);
