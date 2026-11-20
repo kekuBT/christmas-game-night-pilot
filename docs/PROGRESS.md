@@ -1,5 +1,5 @@
 # Muse local progress and resume checkpoint
-Updated: 2026-11-20 ~9:55 a.m. EST (draft #57: review 7040842858 found Stay reset on reload (P2); repaired in cfef39f, full gate PASSED 117/117; awaiting review; not merged, not deployed)
+Updated: 2026-11-20 ~11:05 a.m. EST (draft #57: review 7042658020 (P2) found a later storage write failure let an older record hide a new Stay choice; repaired in b8ba545, full gate PASSED 117/117; awaiting review; not merged, not deployed)
 
 ## Current milestone
 M0–M5: COMPLETED as backend/engine checkpoints ONLY — see docs/FRONTEND_MILESTONES.md. They are NOT evidence the full product is finished.
@@ -4349,3 +4349,18 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
   - **Evidence:** `docs/evidence/quiz-advance/stay-lifetime/`.
   - **Known driver inefficiency, not fixed in this checkpoint:** section P's detail line waits 30 s on a missing countdown element (Playwright `textContent()`). The checks are unaffected, and the step took 404.8 s of its 600 s limit.
   - **Next:** review of `cfef39f`.
+- **Review [7042658020](https://github.com/kekuBT/christmas-game-night-pilot/pull/51#issuecomment-7042658020) on `cfef39f`: changes requested (P2).**
+  - **Confirmed fixed:** the ordinary reload case.
+  - **Still broken:** a later failing storage write let an older stored record hide the new in-memory Stay choice.
+  - Acknowledged in [7042671799](https://github.com/kekuBT/christmas-game-night-pilot/pull/51#issuecomment-7042671799) at 9:55 a.m. ET, with an estimate of about 12:15 p.m. ET.
+  - **The repair:** `createStayStorage` latches into memory mode after the first failed write, so memory is authoritative. The stale persistent copy is removed, later writes are still tried, and removes act on both copies.
+  - **The same driver edit** removed the known 30 s waits; section P now takes about 100 s.
+  - **The tested commit:** `b8ba545c7e3c165c3e69bd9f6ce3c561e4ab5d56`.
+  - **Tests:**
+    - **Section P8:** `cfef39f` FAILS 6; development build 10/10. The whole driver passes 98/98.
+    - **Unit:** 2173 tests (2167 + 6). Lint and typecheck are clean.
+  - **Gates on `b8ba545`:**
+    - targeted, 9 drivers: `PASSED (exit 0)`, 11/11, run `20261120-150740-b8ba545c-31691`;
+    - **full: `PASSED (exit 0)`, 117/117**, run `20261120-151444-b8ba545c-1295`.
+  - **Evidence:** `docs/evidence/quiz-advance/write-failure/`.
+  - **Next:** review of `b8ba545`. No new milestone until then.
