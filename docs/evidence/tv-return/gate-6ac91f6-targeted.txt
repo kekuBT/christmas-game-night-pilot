@@ -1,0 +1,31 @@
+
+PASSED (exit 0) | targeted | run 20261120-164146-6ac91f63-31692
+  19 passed, 0 failed, 0 timed out, 0 infrastructure, 0 invalid, 0 cancelled, 0 not run
+  timing   wall 10m 27s · step time 29m 30s (sum) · 3 workers, 94% busy · 2.82× the same steps run one after another
+           predicted 6–16m (about 8m 46s, low-confidence) → actual 10m 27s (+19%)
+           longest  check-leaderboard 5m 12s, check-quiz-advance 4m 15s, check-audit-fixes 4m 11s · the longest step is 50% of the wall time
+           machine  CPU mean 34%, peak 94% · memory available ≥ 12971 MB · load peak 4.7
+           contention ×1.15 (median step time vs its sequential median)
+           retries  none (the gate never retries a step)
+  report <scratch>/gate-tv-targeted/20261120-164146-6ac91f63-31692/report.json
+
+Steps (from the run's console):
+[ 1/19] PASS         5.6s  build-web  w1
+[ 2/19] PASS         2.4s  browser-preflight  w1
+[ 3/19] PASS       228.6s  check-tv-lifecycle  w3
+[ 4/19] PASS       251.1s  check-audit-fixes  w2
+[ 5/19] PASS       311.9s  check-leaderboard  w1
+[ 6/19] PASS        90.8s  check-tv-reveal  w2
+[ 7/19] PASS       133.6s  check-mchezo  w3
+[ 8/19] PASS        53.2s  check-family-questions  w1
+[ 9/19] PASS        42.9s  check-one-path  w2
+[10/19] PASS        23.5s  check-tv-moments  w1
+[11/19] PASS          70s  check-tv-return  w2
+[12/19] PASS        70.4s  check-warm-ivory  w1
+[13/19] PASS        55.8s  check-stage2  w2
+[14/19] PASS        52.4s  check-reveal  w1
+[15/19] PASS        31.4s  check-answer-reveal  w1
+[16/19] PASS        52.9s  check-tv-spectator  w2
+[17/19] PASS        26.2s  check-tv-entry  w1
+[18/19] PASS        12.4s  check-tv-show  w2
+[19/19] PASS       255.2s  check-quiz-advance  w3

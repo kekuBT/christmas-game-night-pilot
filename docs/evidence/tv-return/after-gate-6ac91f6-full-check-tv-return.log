@@ -1,0 +1,224 @@
+$ node scripts/check-tv-return.mjs http://localhost:34903
+# timeout 600s | worker w2 | server http://localhost:34903 (data <scratch>/gate-tv-full/20261120-165227-6ac91f63-2592/server-data/w2)
+
+[+5.1s] PASS V everyday 320×568 TV show: the page is in the everyday look — everyday
+[+5.1s] PASS V everyday 320×568 TV show: the way back is on the first screen, not covered (visible without scrolling) — {"top":192,"bottom":240,"vh":568,"uncovered":true}
+[+5.1s] PASS V everyday 320×568 TV show: the way back is a usable touch target (at least 44×44) — 191×48
+[+5.1s] PASS V everyday 320×568 TV show: the page has no sideways overflow and is not zoomed out — {"sideways":0,"layoutWidth":320,"width":320,"zoom":1}
+[+5.1s] PASS V everyday 320×568 TV show: no control overlaps the picture or another control — {"overPicture":[],"overlapping":[]}
+[+5.5s] PASS V everyday 320×568 TV show: after scrolling, an ordinary tap on the way back returns to the lobby
+[+7.2s] PASS V everyday 375×667 TV show: the page is in the everyday look — everyday
+[+7.2s] PASS V everyday 375×667 TV show: the way back is on the first screen, not covered (visible without scrolling) — {"top":223,"bottom":271,"vh":667,"uncovered":true}
+[+7.2s] PASS V everyday 375×667 TV show: the way back is a usable touch target (at least 44×44) — 191×48
+[+7.2s] PASS V everyday 375×667 TV show: the page has no sideways overflow and is not zoomed out — {"sideways":0,"layoutWidth":375,"width":375,"zoom":1}
+[+7.2s] PASS V everyday 375×667 TV show: no control overlaps the picture or another control — {"overPicture":[],"overlapping":[]}
+[+7.5s] PASS V everyday 375×667 TV show: after scrolling, an ordinary tap on the way back returns to the lobby
+[+9.3s] PASS V everyday 390×844 TV show: the page is in the everyday look — everyday
+[+9.3s] PASS V everyday 390×844 TV show: the way back is on the first screen, not covered (visible without scrolling) — {"top":231,"bottom":279,"vh":844,"uncovered":true}
+[+9.3s] PASS V everyday 390×844 TV show: the way back is a usable touch target (at least 44×44) — 191×48
+[+9.3s] PASS V everyday 390×844 TV show: the page has no sideways overflow and is not zoomed out — {"sideways":0,"layoutWidth":390,"width":390,"zoom":1}
+[+9.3s] PASS V everyday 390×844 TV show: no control overlaps the picture or another control — {"overPicture":[],"overlapping":[]}
+[+9.6s] PASS V everyday 390×844 TV show: after scrolling, an ordinary tap on the way back returns to the lobby
+[+11.8s] PASS V christmas 320×568 TV show: the page is in the christmas look — christmas
+[+11.8s] PASS V christmas 320×568 TV show: the way back is on the first screen, not covered (visible without scrolling) — {"top":192,"bottom":240,"vh":568,"uncovered":true}
+[+11.8s] PASS V christmas 320×568 TV show: the way back is a usable touch target (at least 44×44) — 191×48
+[+11.8s] PASS V christmas 320×568 TV show: the page has no sideways overflow and is not zoomed out — {"sideways":0,"layoutWidth":320,"width":320,"zoom":1}
+[+11.8s] PASS V christmas 320×568 TV show: no control overlaps the picture or another control — {"overPicture":[],"overlapping":[]}
+[+12.1s] PASS V christmas 320×568 TV show: after scrolling, an ordinary tap on the way back returns to the lobby
+[+14.3s] PASS V christmas 375×667 TV show: the page is in the christmas look — christmas
+[+14.3s] PASS V christmas 375×667 TV show: the way back is on the first screen, not covered (visible without scrolling) — {"top":223,"bottom":271,"vh":667,"uncovered":true}
+[+14.3s] PASS V christmas 375×667 TV show: the way back is a usable touch target (at least 44×44) — 191×48
+[+14.3s] PASS V christmas 375×667 TV show: the page has no sideways overflow and is not zoomed out — {"sideways":0,"layoutWidth":375,"width":375,"zoom":1}
+[+14.3s] PASS V christmas 375×667 TV show: no control overlaps the picture or another control — {"overPicture":[],"overlapping":[]}
+[+14.6s] PASS V christmas 375×667 TV show: after scrolling, an ordinary tap on the way back returns to the lobby
+[+16.9s] PASS V christmas 390×844 TV show: the page is in the christmas look — christmas
+[+16.9s] PASS V christmas 390×844 TV show: the way back is on the first screen, not covered (visible without scrolling) — {"top":231,"bottom":279,"vh":844,"uncovered":true}
+[+16.9s] PASS V christmas 390×844 TV show: the way back is a usable touch target (at least 44×44) — 191×48
+[+16.9s] PASS V christmas 390×844 TV show: the page has no sideways overflow and is not zoomed out — {"sideways":0,"layoutWidth":390,"width":390,"zoom":1}
+[+16.9s] PASS V christmas 390×844 TV show: no control overlaps the picture or another control — {"overPicture":[],"overlapping":[]}
+[+17.2s] PASS V christmas 390×844 TV show: after scrolling, an ordinary tap on the way back returns to the lobby
+[+18.6s] PASS B everyday 320×568 briefing TV: a player on the TV view sees the briefing on it
+[+18.9s] PASS B everyday 320×568 briefing TV: the way back is on the first screen and at least 44×44 — {"w":167,"h":46,"top":62}
+[+19.3s] PASS B everyday 320×568 briefing TV: after scrolling, an ordinary tap on Back to phone view returns to the briefing (its I'm ready button)
+[+19.3s] PASS B everyday 375×667 briefing TV: a player on the TV view sees the briefing on it
+[+19.6s] PASS B everyday 375×667 briefing TV: the way back is on the first screen and at least 44×44 — {"w":167,"h":46,"top":62}
+[+19.9s] PASS B everyday 375×667 briefing TV: after scrolling, an ordinary tap on Back to phone view returns to the briefing (its I'm ready button)
+[+19.9s] PASS B everyday 390×844 briefing TV: a player on the TV view sees the briefing on it
+[+20.2s] PASS B everyday 390×844 briefing TV: the way back is on the first screen and at least 44×44 — {"w":167,"h":46,"top":62}
+[+20.5s] PASS B everyday 390×844 briefing TV: after scrolling, an ordinary tap on Back to phone view returns to the briefing (its I'm ready button)
+[+20.5s] PASS B christmas 320×568 briefing TV: a player on the TV view sees the briefing on it
+[+20.8s] PASS B christmas 320×568 briefing TV: the way back is on the first screen and at least 44×44 — {"w":167,"h":46,"top":62}
+[+21.1s] PASS B christmas 320×568 briefing TV: after scrolling, an ordinary tap on Back to phone view returns to the briefing (its I'm ready button)
+[+21.1s] PASS B christmas 375×667 briefing TV: a player on the TV view sees the briefing on it
+[+21.4s] PASS B christmas 375×667 briefing TV: the way back is on the first screen and at least 44×44 — {"w":167,"h":46,"top":62}
+[+21.7s] PASS B christmas 375×667 briefing TV: after scrolling, an ordinary tap on Back to phone view returns to the briefing (its I'm ready button)
+[+21.7s] PASS B christmas 390×844 briefing TV: a player on the TV view sees the briefing on it
+[+22.0s] PASS B christmas 390×844 briefing TV: the way back is on the first screen and at least 44×44 — {"w":167,"h":46,"top":62}
+[+22.3s] PASS B christmas 390×844 briefing TV: after scrolling, an ordinary tap on Back to phone view returns to the briefing (its I'm ready button)
+[+22.4s] PASS T everyday 320×568 Trivia TV stage: the question screen is up
+[+23.2s] PASS T everyday 320×568 Trivia TV stage: the page is in the everyday look — everyday
+[+23.2s] PASS T everyday 320×568 Trivia TV stage: the way back is on the first screen, not covered (visible without scrolling) — {"top":192,"bottom":240,"vh":568,"uncovered":true}
+[+23.2s] PASS T everyday 320×568 Trivia TV stage: the way back is a usable touch target (at least 44×44) — 191×48
+[+23.2s] PASS T everyday 320×568 Trivia TV stage: the page has no sideways overflow and is not zoomed out — {"sideways":0,"layoutWidth":320,"width":320,"zoom":1}
+[+23.2s] PASS T everyday 320×568 Trivia TV stage: no control overlaps the picture or another control — {"overPicture":[],"overlapping":[]}
+[+23.6s] PASS T everyday 320×568 Trivia TV stage: after scrolling, an ordinary TAP (touch) on Back to phone view returns to the question — 42 ms
+[+25.2s] PASS T everyday 320×568 Trivia TV stage: after scrolling, an ordinary CLICK (mouse) on Back to phone view returns to the question — 32 ms
+[+25.2s] PASS T everyday 320×568 Trivia TV stage: the same room, seat, game and question came back — Question 1 of 10
+[+25.2s] PASS T everyday 320×568 Trivia TV stage: returning fired nothing on the server (no answer, no reveal, no host action)
+[+25.2s] PASS T everyday 375×667 Trivia TV stage: the question screen is up
+[+25.7s] PASS T everyday 375×667 Trivia TV stage: the page is in the everyday look — everyday
+[+25.7s] PASS T everyday 375×667 Trivia TV stage: the way back is on the first screen, not covered (visible without scrolling) — {"top":223,"bottom":271,"vh":667,"uncovered":true}
+[+25.7s] PASS T everyday 375×667 Trivia TV stage: the way back is a usable touch target (at least 44×44) — 191×48
+[+25.7s] PASS T everyday 375×667 Trivia TV stage: the page has no sideways overflow and is not zoomed out — {"sideways":0,"layoutWidth":375,"width":375,"zoom":1}
+[+25.7s] PASS T everyday 375×667 Trivia TV stage: no control overlaps the picture or another control — {"overPicture":[],"overlapping":[]}
+[+26.1s] PASS T everyday 375×667 Trivia TV stage: after scrolling, an ordinary TAP (touch) on Back to phone view returns to the question — 41 ms
+[+27.7s] PASS T everyday 375×667 Trivia TV stage: after scrolling, an ordinary CLICK (mouse) on Back to phone view returns to the question — 31 ms
+[+27.7s] PASS T everyday 375×667 Trivia TV stage: the same room, seat, game and question came back — Question 1 of 10
+[+27.7s] PASS T everyday 375×667 Trivia TV stage: returning fired nothing on the server (no answer, no reveal, no host action)
+[+27.7s] PASS T everyday 390×844 Trivia TV stage: the question screen is up
+[+28.2s] PASS T everyday 390×844 Trivia TV stage: the page is in the everyday look — everyday
+[+28.2s] PASS T everyday 390×844 Trivia TV stage: the way back is on the first screen, not covered (visible without scrolling) — {"top":231,"bottom":279,"vh":844,"uncovered":true}
+[+28.2s] PASS T everyday 390×844 Trivia TV stage: the way back is a usable touch target (at least 44×44) — 191×48
+[+28.2s] PASS T everyday 390×844 Trivia TV stage: the page has no sideways overflow and is not zoomed out — {"sideways":0,"layoutWidth":390,"width":390,"zoom":1}
+[+28.2s] PASS T everyday 390×844 Trivia TV stage: no control overlaps the picture or another control — {"overPicture":[],"overlapping":[]}
+[+28.6s] PASS T everyday 390×844 Trivia TV stage: after scrolling, an ordinary TAP (touch) on Back to phone view returns to the question — 47 ms
+[+30.2s] PASS T everyday 390×844 Trivia TV stage: after scrolling, an ordinary CLICK (mouse) on Back to phone view returns to the question — 31 ms
+[+30.2s] PASS T everyday 390×844 Trivia TV stage: the same room, seat, game and question came back — Question 1 of 10
+[+30.2s] PASS T everyday 390×844 Trivia TV stage: returning fired nothing on the server (no answer, no reveal, no host action)
+[+30.2s] PASS T christmas 320×568 Trivia TV stage: the question screen is up
+[+30.7s] PASS T christmas 320×568 Trivia TV stage: the page is in the christmas look — christmas
+[+30.7s] PASS T christmas 320×568 Trivia TV stage: the way back is on the first screen, not covered (visible without scrolling) — {"top":192,"bottom":240,"vh":568,"uncovered":true}
+[+30.7s] PASS T christmas 320×568 Trivia TV stage: the way back is a usable touch target (at least 44×44) — 191×48
+[+30.7s] PASS T christmas 320×568 Trivia TV stage: the page has no sideways overflow and is not zoomed out — {"sideways":0,"layoutWidth":320,"width":320,"zoom":1}
+[+30.7s] PASS T christmas 320×568 Trivia TV stage: no control overlaps the picture or another control — {"overPicture":[],"overlapping":[]}
+[+31.0s] PASS T christmas 320×568 Trivia TV stage: after scrolling, an ordinary TAP (touch) on Back to phone view returns to the question — 50 ms
+[+32.7s] PASS T christmas 320×568 Trivia TV stage: after scrolling, an ordinary CLICK (mouse) on Back to phone view returns to the question — 28 ms
+[+32.7s] PASS T christmas 320×568 Trivia TV stage: the same room, seat, game and question came back — Question 1 of 10
+[+32.7s] PASS T christmas 320×568 Trivia TV stage: returning fired nothing on the server (no answer, no reveal, no host action)
+[+32.7s] PASS T christmas 375×667 Trivia TV stage: the question screen is up
+[+33.1s] PASS T christmas 375×667 Trivia TV stage: the page is in the christmas look — christmas
+[+33.1s] PASS T christmas 375×667 Trivia TV stage: the way back is on the first screen, not covered (visible without scrolling) — {"top":223,"bottom":271,"vh":667,"uncovered":true}
+[+33.1s] PASS T christmas 375×667 Trivia TV stage: the way back is a usable touch target (at least 44×44) — 191×48
+[+33.1s] PASS T christmas 375×667 Trivia TV stage: the page has no sideways overflow and is not zoomed out — {"sideways":0,"layoutWidth":375,"width":375,"zoom":1}
+[+33.1s] PASS T christmas 375×667 Trivia TV stage: no control overlaps the picture or another control — {"overPicture":[],"overlapping":[]}
+[+33.5s] PASS T christmas 375×667 Trivia TV stage: after scrolling, an ordinary TAP (touch) on Back to phone view returns to the question — 44 ms
+[+35.2s] PASS T christmas 375×667 Trivia TV stage: after scrolling, an ordinary CLICK (mouse) on Back to phone view returns to the question — 46 ms
+[+35.2s] PASS T christmas 375×667 Trivia TV stage: the same room, seat, game and question came back — Question 1 of 10
+[+35.2s] PASS T christmas 375×667 Trivia TV stage: returning fired nothing on the server (no answer, no reveal, no host action)
+[+35.2s] PASS T christmas 390×844 Trivia TV stage: the question screen is up
+[+35.7s] PASS T christmas 390×844 Trivia TV stage: the page is in the christmas look — christmas
+[+35.7s] PASS T christmas 390×844 Trivia TV stage: the way back is on the first screen, not covered (visible without scrolling) — {"top":231,"bottom":279,"vh":844,"uncovered":true}
+[+35.7s] PASS T christmas 390×844 Trivia TV stage: the way back is a usable touch target (at least 44×44) — 191×48
+[+35.7s] PASS T christmas 390×844 Trivia TV stage: the page has no sideways overflow and is not zoomed out — {"sideways":0,"layoutWidth":390,"width":390,"zoom":1}
+[+35.7s] PASS T christmas 390×844 Trivia TV stage: no control overlaps the picture or another control — {"overPicture":[],"overlapping":[]}
+[+36.1s] PASS T christmas 390×844 Trivia TV stage: after scrolling, an ordinary TAP (touch) on Back to phone view returns to the question — 41 ms
+[+37.7s] PASS T christmas 390×844 Trivia TV stage: after scrolling, an ordinary CLICK (mouse) on Back to phone view returns to the question — 30 ms
+[+37.7s] PASS T christmas 390×844 Trivia TV stage: the same room, seat, game and question came back — Question 1 of 10
+[+37.7s] PASS T christmas 390×844 Trivia TV stage: returning fired nothing on the server (no answer, no reveal, no host action)
+[+37.8s] PASS K everyday 320×568 keyboard: Tab reaches Back to phone view
+[+37.8s] PASS K everyday 320×568 keyboard: Enter on it returns to the question
+[+39.7s] PASS S1 everyday 320×568: Stay chosen (the stayed status shows, no countdown)
+[+40.3s] PASS S1 everyday 320×568: an ordinary tap on Back to phone view returns to the game (the next unanswered question) — Question 2 of 10
+[+41.3s] PASS S1 everyday 320×568: the next answer shows the stayed status and no countdown (Stay still holds after the TV stage)
+[+48.3s] PASS S1 everyday 320×568: still locked past the reading time (no automatic advance) — Answer locked in
+[+48.9s] PASS S2 everyday 390×844, no Stay: an ordinary tap on Back to phone view returns to the game
+[+50.0s] PASS S2 everyday 390×844, no Stay: the next answer counts down (no Stay was chosen)
+[+53.9s] PASS S2 everyday 390×844, no Stay: the next question opens by itself after the reading time (normal auto-advance) — Question 2 of 10 -> Question 3 of 10 in 3926 ms
+[+54.1s] PASS R the Trivia game finished (both seats answered every question)
+[+54.2s] PASS R everyday 320×568 Trivia results TV stage: the results screen is up
+[+55.0s] PASS R everyday 320×568 Trivia results TV stage: the page is in the everyday look — everyday
+[+55.0s] PASS R everyday 320×568 Trivia results TV stage: the way back is on the first screen, not covered (visible without scrolling) — {"top":192,"bottom":240,"vh":568,"uncovered":true}
+[+55.0s] PASS R everyday 320×568 Trivia results TV stage: the way back is a usable touch target (at least 44×44) — 191×48
+[+55.0s] PASS R everyday 320×568 Trivia results TV stage: the page has no sideways overflow and is not zoomed out — {"sideways":0,"layoutWidth":320,"width":320,"zoom":1}
+[+55.0s] PASS R everyday 320×568 Trivia results TV stage: no control overlaps the picture or another control — {"overPicture":[],"overlapping":[]}
+[+55.4s] PASS R everyday 320×568 Trivia results TV stage: after scrolling, an ordinary tap on Back to phone view returns to the results
+[+55.4s] PASS R everyday 375×667 Trivia results TV stage: the results screen is up
+[+55.9s] PASS R everyday 375×667 Trivia results TV stage: the page is in the everyday look — everyday
+[+55.9s] PASS R everyday 375×667 Trivia results TV stage: the way back is on the first screen, not covered (visible without scrolling) — {"top":223,"bottom":271,"vh":667,"uncovered":true}
+[+55.9s] PASS R everyday 375×667 Trivia results TV stage: the way back is a usable touch target (at least 44×44) — 191×48
+[+55.9s] PASS R everyday 375×667 Trivia results TV stage: the page has no sideways overflow and is not zoomed out — {"sideways":0,"layoutWidth":375,"width":375,"zoom":1}
+[+55.9s] PASS R everyday 375×667 Trivia results TV stage: no control overlaps the picture or another control — {"overPicture":[],"overlapping":[]}
+[+56.2s] PASS R everyday 375×667 Trivia results TV stage: after scrolling, an ordinary tap on Back to phone view returns to the results
+[+56.2s] PASS R everyday 390×844 Trivia results TV stage: the results screen is up
+[+56.6s] PASS R everyday 390×844 Trivia results TV stage: the page is in the everyday look — everyday
+[+56.6s] PASS R everyday 390×844 Trivia results TV stage: the way back is on the first screen, not covered (visible without scrolling) — {"top":231,"bottom":279,"vh":844,"uncovered":true}
+[+56.6s] PASS R everyday 390×844 Trivia results TV stage: the way back is a usable touch target (at least 44×44) — 191×48
+[+56.6s] PASS R everyday 390×844 Trivia results TV stage: the page has no sideways overflow and is not zoomed out — {"sideways":0,"layoutWidth":390,"width":390,"zoom":1}
+[+56.6s] PASS R everyday 390×844 Trivia results TV stage: no control overlaps the picture or another control — {"overPicture":[],"overlapping":[]}
+[+57.0s] PASS R everyday 390×844 Trivia results TV stage: after scrolling, an ordinary tap on Back to phone view returns to the results
+[+57.0s] PASS R christmas 320×568 Trivia results TV stage: the results screen is up
+[+57.5s] PASS R christmas 320×568 Trivia results TV stage: the page is in the christmas look — christmas
+[+57.5s] PASS R christmas 320×568 Trivia results TV stage: the way back is on the first screen, not covered (visible without scrolling) — {"top":192,"bottom":240,"vh":568,"uncovered":true}
+[+57.5s] PASS R christmas 320×568 Trivia results TV stage: the way back is a usable touch target (at least 44×44) — 191×48
+[+57.5s] PASS R christmas 320×568 Trivia results TV stage: the page has no sideways overflow and is not zoomed out — {"sideways":0,"layoutWidth":320,"width":320,"zoom":1}
+[+57.5s] PASS R christmas 320×568 Trivia results TV stage: no control overlaps the picture or another control — {"overPicture":[],"overlapping":[]}
+[+57.9s] PASS R christmas 320×568 Trivia results TV stage: after scrolling, an ordinary tap on Back to phone view returns to the results
+[+57.9s] PASS R christmas 375×667 Trivia results TV stage: the results screen is up
+[+58.3s] PASS R christmas 375×667 Trivia results TV stage: the page is in the christmas look — christmas
+[+58.3s] PASS R christmas 375×667 Trivia results TV stage: the way back is on the first screen, not covered (visible without scrolling) — {"top":223,"bottom":271,"vh":667,"uncovered":true}
+[+58.3s] PASS R christmas 375×667 Trivia results TV stage: the way back is a usable touch target (at least 44×44) — 191×48
+[+58.3s] PASS R christmas 375×667 Trivia results TV stage: the page has no sideways overflow and is not zoomed out — {"sideways":0,"layoutWidth":375,"width":375,"zoom":1}
+[+58.3s] PASS R christmas 375×667 Trivia results TV stage: no control overlaps the picture or another control — {"overPicture":[],"overlapping":[]}
+[+58.7s] PASS R christmas 375×667 Trivia results TV stage: after scrolling, an ordinary tap on Back to phone view returns to the results
+[+58.7s] PASS R christmas 390×844 Trivia results TV stage: the results screen is up
+[+59.1s] PASS R christmas 390×844 Trivia results TV stage: the page is in the christmas look — christmas
+[+59.1s] PASS R christmas 390×844 Trivia results TV stage: the way back is on the first screen, not covered (visible without scrolling) — {"top":231,"bottom":279,"vh":844,"uncovered":true}
+[+59.1s] PASS R christmas 390×844 Trivia results TV stage: the way back is a usable touch target (at least 44×44) — 191×48
+[+59.1s] PASS R christmas 390×844 Trivia results TV stage: the page has no sideways overflow and is not zoomed out — {"sideways":0,"layoutWidth":390,"width":390,"zoom":1}
+[+59.1s] PASS R christmas 390×844 Trivia results TV stage: no control overlaps the picture or another control — {"overPicture":[],"overlapping":[]}
+[+59.5s] PASS R christmas 390×844 Trivia results TV stage: after scrolling, an ordinary tap on Back to phone view returns to the results
+[+61.3s] PASS D christmas 1280×800 Trivia TV stage: the picture keeps its full size (never shrunk for the controls) — 1280×720, full 1280×720
+[+61.3s] PASS D christmas 1280×800 Trivia TV stage: no control overlaps the picture or another control; no sideways scrolling — {"overPicture":[],"overlapping":[],"sideways":0}
+[+61.3s] PASS D christmas 1280×800 Trivia TV stage: on a screen taller than 16:9 the way back is in the band under the picture, on the first screen — {"top":732,"bottom":780}
+[+61.5s] PASS D christmas 1280×800 Trivia TV stage: an ordinary click on Back to phone view returns to the results
+[+63.2s] PASS D everyday 1920×1080 Trivia TV stage: the picture keeps its full size (never shrunk for the controls) — 1920×1080, full 1920×1080
+[+63.2s] PASS D everyday 1920×1080 Trivia TV stage: no control overlaps the picture or another control; no sideways scrolling — {"overPicture":[],"overlapping":[],"sideways":0}
+[+63.2s] PASS D everyday 1920×1080 Trivia TV stage: an ordinary click on Back to phone view returns to the results
+[+64.1s] PASS M everyday 320×568 Math Mayhem live on the TV show: a player on the TV view sees the game live on it
+[+64.5s] PASS M everyday 320×568 Math Mayhem live on the TV show: the page is in the everyday look — everyday
+[+64.5s] PASS M everyday 320×568 Math Mayhem live on the TV show: the way back is on the first screen, not covered (visible without scrolling) — {"top":192,"bottom":240,"vh":568,"uncovered":true}
+[+64.5s] PASS M everyday 320×568 Math Mayhem live on the TV show: the way back is a usable touch target (at least 44×44) — 191×48
+[+64.5s] PASS M everyday 320×568 Math Mayhem live on the TV show: the page has no sideways overflow and is not zoomed out — {"sideways":0,"layoutWidth":320,"width":320,"zoom":1}
+[+64.5s] PASS M everyday 320×568 Math Mayhem live on the TV show: no control overlaps the picture or another control — {"overPicture":[],"overlapping":[]}
+[+64.9s] PASS M everyday 320×568 Math Mayhem live on the TV show: after scrolling, an ordinary tap on the way back returns to the game
+[+64.9s] PASS M everyday 375×667 Math Mayhem live on the TV show: a player on the TV view sees the game live on it
+[+65.2s] PASS M everyday 375×667 Math Mayhem live on the TV show: the page is in the everyday look — everyday
+[+65.2s] PASS M everyday 375×667 Math Mayhem live on the TV show: the way back is on the first screen, not covered (visible without scrolling) — {"top":223,"bottom":271,"vh":667,"uncovered":true}
+[+65.2s] PASS M everyday 375×667 Math Mayhem live on the TV show: the way back is a usable touch target (at least 44×44) — 191×48
+[+65.2s] PASS M everyday 375×667 Math Mayhem live on the TV show: the page has no sideways overflow and is not zoomed out — {"sideways":0,"layoutWidth":375,"width":375,"zoom":1}
+[+65.2s] PASS M everyday 375×667 Math Mayhem live on the TV show: no control overlaps the picture or another control — {"overPicture":[],"overlapping":[]}
+[+65.5s] PASS M everyday 375×667 Math Mayhem live on the TV show: after scrolling, an ordinary tap on the way back returns to the game
+[+65.5s] PASS M everyday 390×844 Math Mayhem live on the TV show: a player on the TV view sees the game live on it
+[+65.8s] PASS M everyday 390×844 Math Mayhem live on the TV show: the page is in the everyday look — everyday
+[+65.8s] PASS M everyday 390×844 Math Mayhem live on the TV show: the way back is on the first screen, not covered (visible without scrolling) — {"top":231,"bottom":279,"vh":844,"uncovered":true}
+[+65.8s] PASS M everyday 390×844 Math Mayhem live on the TV show: the way back is a usable touch target (at least 44×44) — 191×48
+[+65.8s] PASS M everyday 390×844 Math Mayhem live on the TV show: the page has no sideways overflow and is not zoomed out — {"sideways":0,"layoutWidth":390,"width":390,"zoom":1}
+[+65.8s] PASS M everyday 390×844 Math Mayhem live on the TV show: no control overlaps the picture or another control — {"overPicture":[],"overlapping":[]}
+[+66.2s] PASS M everyday 390×844 Math Mayhem live on the TV show: after scrolling, an ordinary tap on the way back returns to the game
+[+66.2s] PASS M christmas 320×568 Math Mayhem live on the TV show: a player on the TV view sees the game live on it
+[+66.5s] PASS M christmas 320×568 Math Mayhem live on the TV show: the page is in the christmas look — christmas
+[+66.5s] PASS M christmas 320×568 Math Mayhem live on the TV show: the way back is on the first screen, not covered (visible without scrolling) — {"top":192,"bottom":240,"vh":568,"uncovered":true}
+[+66.5s] PASS M christmas 320×568 Math Mayhem live on the TV show: the way back is a usable touch target (at least 44×44) — 191×48
+[+66.5s] PASS M christmas 320×568 Math Mayhem live on the TV show: the page has no sideways overflow and is not zoomed out — {"sideways":0,"layoutWidth":320,"width":320,"zoom":1}
+[+66.5s] PASS M christmas 320×568 Math Mayhem live on the TV show: no control overlaps the picture or another control — {"overPicture":[],"overlapping":[]}
+[+66.9s] PASS M christmas 320×568 Math Mayhem live on the TV show: after scrolling, an ordinary tap on the way back returns to the game
+[+66.9s] PASS M christmas 375×667 Math Mayhem live on the TV show: a player on the TV view sees the game live on it
+[+67.2s] PASS M christmas 375×667 Math Mayhem live on the TV show: the page is in the christmas look — christmas
+[+67.2s] PASS M christmas 375×667 Math Mayhem live on the TV show: the way back is on the first screen, not covered (visible without scrolling) — {"top":223,"bottom":271,"vh":667,"uncovered":true}
+[+67.2s] PASS M christmas 375×667 Math Mayhem live on the TV show: the way back is a usable touch target (at least 44×44) — 191×48
+[+67.2s] PASS M christmas 375×667 Math Mayhem live on the TV show: the page has no sideways overflow and is not zoomed out — {"sideways":0,"layoutWidth":375,"width":375,"zoom":1}
+[+67.2s] PASS M christmas 375×667 Math Mayhem live on the TV show: no control overlaps the picture or another control — {"overPicture":[],"overlapping":[]}
+[+67.5s] PASS M christmas 375×667 Math Mayhem live on the TV show: after scrolling, an ordinary tap on the way back returns to the game
+[+67.5s] PASS M christmas 390×844 Math Mayhem live on the TV show: a player on the TV view sees the game live on it
+[+67.8s] PASS M christmas 390×844 Math Mayhem live on the TV show: the page is in the christmas look — christmas
+[+67.8s] PASS M christmas 390×844 Math Mayhem live on the TV show: the way back is on the first screen, not covered (visible without scrolling) — {"top":231,"bottom":279,"vh":844,"uncovered":true}
+[+67.8s] PASS M christmas 390×844 Math Mayhem live on the TV show: the way back is a usable touch target (at least 44×44) — 191×48
+[+67.8s] PASS M christmas 390×844 Math Mayhem live on the TV show: the page has no sideways overflow and is not zoomed out — {"sideways":0,"layoutWidth":390,"width":390,"zoom":1}
+[+67.8s] PASS M christmas 390×844 Math Mayhem live on the TV show: no control overlaps the picture or another control — {"overPicture":[],"overlapping":[]}
+[+68.1s] PASS M christmas 390×844 Math Mayhem live on the TV show: after scrolling, an ordinary tap on the way back returns to the game
+[+68.9s] PASS D TV 1920×1080 TV show: the picture fills the screen and its director (with Stop watching) stays inside it — {"inside":true,"picture":{"w":1920,"h":1080}}
+[+69.9s] PASS D TV 1280×800 TV show: the picture fills the screen and its director (with Stop watching) stays inside it — {"inside":true,"picture":{"w":1280,"h":800}}
+[+70.3s] TV RETURN ALL PASSED
+[+70.3s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":11,"pages":11,"peakOpenPages":8}
+
+# PASS (exit 0) in 70.3s | cpu 9.8s, peak memory 405 MB

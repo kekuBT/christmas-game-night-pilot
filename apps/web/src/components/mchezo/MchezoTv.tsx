@@ -8,7 +8,7 @@
 // then the leaderboard. The director controls only change what THIS
 // screen shows; manual jumps switch auto off.
 import { useEffect, useState } from "react";
-import { DirectorBar, TVLeaderboard, TVQuestion, TVReveal, TVStage, TVTopBar, useLeaderboardPhases } from "../../ui/mchezo/index.js";
+import { DirectorBar, TVControls, TVLeaderboard, TVQuestion, TVReveal, TVStage, TVTopBar, useLeaderboardPhases } from "../../ui/mchezo/index.js";
 import type { TVStageId } from "../../ui/mchezo/index.js";
 import type { GameState, PublicGame, PublicPlayer } from "../../types.js";
 import { asRecord } from "../../types.js";
@@ -96,9 +96,37 @@ export function MchezoTvStage({ publicGame, players, joinCode, onBack, spectator
     delta: previousScores && playerId in previousScores ? score - previousScores[playerId]! : undefined,
   }));
 
+  // D-TV-01 (handoff 7044277833): every control lives in the screen's control layer, outside the scaled picture, with
+  // the way back first. Before, the director bar (styled for a spot inside the 1920×1080 picture) was positioned
+  // against the page instead: on a phone it floated over the picture and spilled the page sideways to about 788 px,
+  // so a phone browser zoomed the page out and a tap on Back to phone view landed on the picture.
+  const controls = (
+    <TVControls backLabel={backLabel ?? "Back to phone view"} onBack={onBack} backTestId="tv-stage-back">
+      {finished && questions.length > 0 && (stage === "question" || stage === "reveal") && (
+        <div className="mz-tv-controls__row" role="group" aria-label="Questions">
+          {questions.map((qq, i) => (
+            <button key={qq.id} type="button" className="mz-chip-btn" aria-pressed={i === picked} onClick={() => { setAuto(false); setPicked(i); }}>
+              Q{i + 1}
+            </button>
+          ))}
+        </div>
+      )}
+      {finished && nextLine && <p className="mz-tvshow-next" data-testid="tv-next" data-flow={nextLine.kind}>{nextLine.text}</p>}
+      <DirectorBar
+        stage={stage}
+        auto={auto}
+        onAutoChange={setAuto}
+        onJump={(s) => { setAuto(false); setStage(s); }}
+        onNext={() => { setAuto(false); setStage(stage === "question" ? "reveal" : stage === "reveal" ? "leaderboard" : "question"); }}
+        onPrev={() => { setAuto(false); setStage(stage === "leaderboard" ? "reveal" : stage === "reveal" ? "question" : "leaderboard"); }}
+      />
+      {(spectatorCount ?? 0) > 0 && <p className="mz-foot" data-testid="tv-watching-count">👁 {spectatorCount} watching</p>}
+    </TVControls>
+  );
+
   return (
     <div>
-      <TVStage>
+      <TVStage controls={controls}>
         <TVTopBar
           game={{ name: "Trivia Showdown", kind: "Trivia", accentIndex: 3 }}
           // Say which step of the after-game review is on screen, so the
@@ -137,28 +165,6 @@ export function MchezoTvStage({ publicGame, players, joinCode, onBack, spectator
           <TVLeaderboard players={mzPlayers} scores={scores} phase={lbPhase} kicker="Trivia Showdown" title="This game's standings" previous={previous} movementNote={previous ? "Rank movement vs the previous Trivia game" : undefined} />
         )}
       </TVStage>
-      {finished && questions.length > 0 && (stage === "question" || stage === "reveal") && (
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 8, padding: 12 }}>
-          {questions.map((qq, i) => (
-            <button key={qq.id} type="button" className="mz-chip-btn" aria-pressed={i === picked} onClick={() => { setAuto(false); setPicked(i); }}>
-              Q{i + 1}
-            </button>
-          ))}
-        </div>
-      )}
-      <div style={{ padding: 12 }}>
-        {finished && nextLine && <p className="mz-tvshow-next" data-testid="tv-next" data-flow={nextLine.kind}>{nextLine.text}</p>}
-        <DirectorBar
-          stage={stage}
-          auto={auto}
-          onAutoChange={setAuto}
-          onJump={(s) => { setAuto(false); setStage(s); }}
-          onNext={() => { setAuto(false); setStage(stage === "question" ? "reveal" : stage === "reveal" ? "leaderboard" : "question"); }}
-          onPrev={() => { setAuto(false); setStage(stage === "leaderboard" ? "reveal" : stage === "reveal" ? "question" : "leaderboard"); }}
-        />
-        <button type="button" className="mz-chip-btn" style={{ marginTop: 12 }} onClick={onBack}>{backLabel ?? "Back to phone view"}</button>
-        {(spectatorCount ?? 0) > 0 && <p className="mz-foot" data-testid="tv-watching-count">👁 {spectatorCount} watching</p>}
-      </div>
     </div>
   );
 }

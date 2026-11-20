@@ -7,8 +7,16 @@ import { EventBadge, ICON, Icon, PlayerToken, Stamp, Wordmark } from '../primiti
 
 /* ============================================================ stage frame */
 
-/** Designs at 1920×1080 and scales uniformly to whatever screen it is cast to. */
-export function TVStage({ children, label = 'Mchezo big screen' }: { children: ReactNode; label?: string }) {
+/**
+ * Designs at 1920×1080 and scales uniformly to whatever screen it is cast to.
+ *
+ * D-TV-01 (handoff 7044277833): `controls` is the screen's control layer (see TVControls). It is rendered right after
+ * the picture, in the page's normal flow and outside the scaled canvas, so the picture never covers it and its buttons
+ * keep their real size. With controls, the picture's box is sized so they follow it: on a narrow screen the box is the
+ * picture's own 16:9 height (the way back sits right under the picture, with no scrolling); on a wider screen the
+ * picture keeps its full-screen size and the controls take any spare band below it.
+ */
+export function TVStage({ children, label = 'Mchezo big screen', controls }: { children: ReactNode; label?: string; controls?: ReactNode }) {
   const outer = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(1);
   useLayoutEffect(() => {
@@ -21,11 +29,51 @@ export function TVStage({ children, label = 'Mchezo big screen' }: { children: R
     return () => ro.disconnect();
   }, []);
   return (
-    <div ref={outer} className="mz-tv-outer">
-      <div className="mz-tv" style={{ transform: `scale(${scale})` }} role="region" aria-label={label}>
-        <div className="mz-tv__spot" aria-hidden="true" />
-        {children}
+    <>
+      <div ref={outer} className={controls ? 'mz-tv-outer mz-tv-outer--controls' : 'mz-tv-outer'}>
+        <div className="mz-tv" style={{ transform: `scale(${scale})` }} role="region" aria-label={label}>
+          <div className="mz-tv__spot" aria-hidden="true" />
+          {children}
+        </div>
       </div>
+      {controls}
+    </>
+  );
+}
+
+/**
+ * D-TV-01: below this width the TV picture is too small for buttons drawn inside it (a phone, a narrow window): a TV
+ * screen whose controls normally sit inside the picture (the TV show) moves them into its control layer instead.
+ */
+export const TV_COMPACT_QUERY = '(max-width: 899px)';
+
+/** Whether this screen is narrow enough for TV_COMPACT_QUERY (follows resizes and rotation). */
+export function useTvCompact(): boolean {
+  const query = () => typeof window !== 'undefined' && typeof window.matchMedia === 'function' && window.matchMedia(TV_COMPACT_QUERY).matches;
+  const [compact, setCompact] = useState(query);
+  useEffect(() => {
+    if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return;
+    const mq = window.matchMedia(TV_COMPACT_QUERY);
+    const sync = () => setCompact(mq.matches);
+    sync();
+    mq.addEventListener('change', sync);
+    return () => mq.removeEventListener('change', sync);
+  }, []);
+  return compact;
+}
+
+/**
+ * D-TV-01: a TV screen's control layer, passed to TVStage as `controls`. The way back comes first, as a full-size
+ * button; the screen's other controls follow and wrap to the width of a phone. It never overlaps the picture: it sits
+ * in the flow below it, above it in stacking order, so nothing in the picture can take its taps.
+ */
+export function TVControls({ backLabel, onBack, backTestId, children }: { backLabel: string; onBack: () => void; backTestId?: string; children?: ReactNode }) {
+  return (
+    <div className="mz-tv-controls" data-testid="tv-controls">
+      <button type="button" className="mz-chip-btn mz-tv-controls__back" data-testid={backTestId} onClick={onBack}>
+        <Icon d={ICON.prev} size={18} stroke={2.6} />{backLabel}
+      </button>
+      {children}
     </div>
   );
 }

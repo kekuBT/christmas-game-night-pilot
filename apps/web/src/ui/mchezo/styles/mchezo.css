@@ -370,6 +370,33 @@
 .mz-director__ctl { display: flex; gap: 12px; align-items: center; }
 .mz-director .mz-key { margin-bottom: 4px; font-size: 18px; }
 
+/* D-TV-01 (handoff 7044277833): a TV screen's control layer (TVControls), outside the scaled picture. It sits in the
+   page's normal flow right under the picture and above it in stacking order, so the picture never takes its taps; its
+   buttons keep their real size and wrap to the width of a phone (nothing spills the page sideways). The way back is
+   first. */
+.mz-tv-controls { position: relative; z-index: 1; display: flex; flex-wrap: wrap; align-items: center; gap: 10px 12px; padding: 12px; background: var(--mz-ground); color: var(--mz-text); }
+.mz-tv-controls > * { min-width: 0; max-width: 100%; }
+.mz-tv-controls__back { min-height: 48px; gap: 8px; padding: 0 18px 0 12px; }
+.mz-tv-controls__row { display: flex; flex-wrap: wrap; gap: 8px; flex: 1 1 100%; }
+.mz-tv-controls .mz-tvshow-next { flex: 1 1 100%; margin: 0; font-size: 16px; }
+.mz-tv-controls .mz-foot { flex: 1 1 100%; margin: 0; }
+/* The director bar was drawn for a spot inside the 1920×1080 picture; in the control layer it flows and wraps. */
+.mz-tv-controls .mz-director { position: static; height: auto; flex: 1 1 auto; flex-wrap: wrap; gap: 10px 12px; justify-content: space-between; }
+.mz-tv-controls .mz-director__stages, .mz-tv-controls .mz-director__ctl { flex-wrap: wrap; }
+.mz-tv-controls .mz-director__stage { min-height: 46px; font-size: 16px; padding: 0 16px; }
+.mz-tv-controls .mz-director .mz-key { font-size: 16px; }
+/* The TV show's director buttons, when a narrow screen moves them here from the picture's footer. */
+.mz-tv-controls .mz-tvshow-director { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-start; flex: 1 1 100%; }
+.mz-tv-controls .mz-tvshow-director .mz-chip-btn { font-size: 14px; min-height: 46px; padding: 0 16px; }
+/* The picture is never shrunk to make room: on a screen taller than 16:9 the control layer takes the spare band under
+   it; on an exactly 16:9 TV the picture fills the screen and the controls are one scroll below. */
+.mz-tv-outer--controls { min-height: min(100dvh, max(56.25vw, calc(100dvh - 88px))); }
+/* A narrow screen (a phone): the picture's box is the picture's own 16:9 height, so the controls follow right under
+   it instead of below a screen-tall empty box. */
+@media (max-width: 899px) {
+  .mz-tv-outer--controls { height: auto; min-height: 0; aspect-ratio: 16 / 9; max-height: 100dvh; }
+}
+
 /* ---------------------------------------------------------------- short phones (SE-class, landscape-ish) */
 @media (max-height: 760px) {
   .mz-hero { min-height: 92px; }

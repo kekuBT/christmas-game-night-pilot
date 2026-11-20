@@ -81,6 +81,16 @@ const W8_INTENDED = {
       ">span.mz-wait__seat", ">span.mz-token", ">span.mz-token.mz-token--you", ">span.mz-seat__name", ">span.mz-wait__count", ">small."],
     addedPrefixes: ["mz-locked>", "mz-lockcard>", "mz-locked-lead>", "mz-next-question>", "mz-locked-room>", "mz-advance>", "mz-advance-count>", "mz-advance-stay>", "mz-advance-paused>"],
   },
+  // D-TV-01 (handoff 7044277833): Trivia's TV stage keeps its controls in a control layer outside the picture (test id
+  // tv-controls) with the way back first (tv-stage-back), and the picture's box gains a modifier class. The same
+  // elements and colours under new keys: each new key must still reuse a style this screen had.
+  "tv-question": {
+    added: [">div.mz-tv-outer.mz-tv-outer--controls"],
+    removed: [">div.mz-tv-outer", ">button.mz-chip-btn", ">button.mz-director__stage", ">button.mz-director__stage.mz-director__stage--on",
+      ">button.mz-key.mz-key--brand.mz-key--md", ">button.mz-key.mz-key--md.mz-key--surface", ">div.mz-director__ctl", ">div.mz-director__stages",
+      ">nav.mz-director", ">path.", ">svg."],
+    addedPrefixes: ["tv-controls>", "tv-stage-back>"],
+  },
 };
 /**
  * A cover's gradient is referenced by an id React generates in render order (`url("#mzcov-_r_2_")`). A new game's cover
@@ -387,7 +397,7 @@ try {
       // On a failure, every difference (up to 40 each way), so the log alone says what changed.
       if (added.length || gone.length) for (const [sign, xs] of [["+", added], ["-", gone]]) for (const x of xs.slice(0, 40)) console.log(`  W8 ${screen} ${sign} ${x.slice(0, 400)}`);
       check(`W8 Everyday ${screen}: every element kind's computed colours equal the base build's (d4dc408)`, was.size > 0 && added.length === 0 && gone.length === 0,
-        was.size === 0 ? "no baseline for this screen" : `${now.length} kinds; new ${added.length}, missing ${gone.length}${allowed ? `; ${allowed} intended element change(s) (Stage 12.1, 12.4–12.14, Beta R1-R R5), each reusing a base style` : ""}${added.length ? ` e.g. ${added[0].slice(0, 240)}` : ""}${gone.length ? ` | missing e.g. ${gone[0].slice(0, 240)}` : ""}`);
+        was.size === 0 ? "no baseline for this screen" : `${now.length} kinds; new ${added.length}, missing ${gone.length}${allowed ? `; ${allowed} intended element change(s) (Stage 12.1, 12.4–12.14, Beta R1-R R5, D-TV-01), each reusing a base style` : ""}${added.length ? ` e.g. ${added[0].slice(0, 240)}` : ""}${gone.length ? ` | missing e.g. ${gone[0].slice(0, 240)}` : ""}`);
     }
   }
 

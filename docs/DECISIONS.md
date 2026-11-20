@@ -2719,3 +2719,38 @@ The reported symptom: a nearly black **drawer** screen in an iPhone in-app brows
     - **A room-wide step after every question.** Rejected: the games are paced per player, and the handoff asks to keep each player's opportunity to answer.
     - **Moving on with no visible countdown.** Rejected: it surprises players, and WCAG 2.2.1 needs a way to stop it.
     - **A longer or shorter reading time.** 4 s is a provisional default in one constant, for the owner to tune.
+
+## Post-beta: getting back from the TV view on a phone (handoff 7044277833; acknowledged 7044287517; docs/evidence/tv-return/)
+- **D-TV-01 A TV screen's controls live in a control layer outside its scaled picture, with the way back first** (owner-directed architecture in the handoff; the 900 px breakpoint and the layer's look are provisional, configurable defaults).
+  - **What the trace found** (Chromium phone emulation with touch: 320×568, 375×667 and 390×844, base `640d2ee`):
+    - **Trivia's TV stage, while playing and at its results:** an ordinary tap or click on Back to phone view timed out; `.mz-tv-outer` (or `.mz-tv`) took the event. The keyboard path worked.
+    - **The cause:** `DirectorBar` is styled for a spot inside the 1920×1080 picture (`.mz-director { position: absolute; left/right 72px; bottom 34px }`). `MchezoTvStage` rendered it outside the picture, under no positioned ancestor, so it was placed against the page itself.
+      - On a phone it floated over the picture's box and spilled the page sideways to about 788 px.
+      - The mobile browser widened the layout viewport to 788 px (the page zoomed out), and the tap's point landed on the picture.
+      - The picture's box also filled the whole screen (`min-height: 100dvh`) with the picture only at its top, so the way back sat below the fold anyway.
+    - **The TV show** (a room's TV view, before a game and while another game plays): the way back is drawn inside the scaled picture, about 34×9 px at 320 px. It could be tapped, but it is not a usable touch target.
+    - **The briefing TV:** an ordinary page; its Back to phone view (167×46) worked.
+  - **What (shared, one layer for every TV screen):**
+    - **`TVStage`** takes `controls`, rendered right after the picture, in the page's normal flow, outside the scaled canvas and above it in stacking order (`.mz-tv-controls`, `z-index: 1`). The picture can never take its taps, and its buttons keep their real size.
+    - **The picture's box with controls:**
+      - On a narrow screen (below 900 px) it is the picture's own 16:9 height, so the controls follow right under the picture.
+      - On a wider screen the picture keeps its full-screen size, and the controls take any spare band below it. At 1280×800 that is the 80 px band under a 1280×720 picture. On an exactly 16:9 TV the picture still fills the screen and the controls are one scroll below.
+    - **`TVControls`** (new, in the design kit): the way back first, as a full-size chip button (at least 48 px tall), then the screen's other controls, wrapping to a phone's width.
+    - **Trivia's TV stage** puts its question chips, next line, director bar and watching count in the layer. The director bar flows and wraps there.
+    - **The TV show** keeps its director inside the picture on TVs and desktops (the full-screen presentation is unchanged). On a narrow screen its buttons and the way back move to the layer. Only one copy is ever rendered, so test ids and screen readers see one set.
+  - **Unchanged:** server authority, scores, reveal privacy, the read-only spectator boundary (a spectator's phone gets the same local-only controls and Stop watching), player state, Stay and auto-advance. There is no server change.
+  - **The regression:** `scripts/check-tv-return.mjs` (new, its own server, 218 checks).
+    - **Ordinary activation only:** Playwright's own `tap()` (touch) and `click()` (mouse), which scroll into view and refuse when something else would take the event. No force, no synthetic dispatch, no devtools. The keyboard is checked separately and never stands in for the tap.
+    - **Phones:** 320×568, 375×667 and 390×844, emulated with touch, in the Everyday and the Christmas look.
+    - **Routes:** the TV show before a game; the briefing TV; Trivia while playing (tap and click); Trivia at its results; Math Mayhem live on the TV show.
+    - **Each route's checks:** the way back is on the first screen and not covered, at least 44×44, the page has no sideways overflow and is not zoomed out, and no control overlaps the picture or another control. After a normal scroll, an ordinary tap returns.
+    - **Returning:** the same room, seat, game and question come back, and the server's state is unchanged (no answer, reveal or host action).
+    - **Stay and auto-advance:** with Stay, the next answer after the TV stage still shows the stayed status and holds past the reading time. Without Stay, the next answer counts down and the next question opens by itself.
+    - **Desktop and TV (1280×800, 1920×1080):** Trivia's picture keeps its full size, no control overlaps it, and a click returns. The TV show's picture fills the screen with its director inside it.
+    - **The result:** on base `640d2ee` (its own worktree and web build) it FAILS 59 checks. That includes the reported tap/click interception on Trivia while playing at all three sizes in both looks, and the same at the results. On the fix it passes 218/218.
+  - **`check-warm-ivory` W8:** lists the TV question screen's moved controls as intended: the same elements and colours under new keys (`tv-controls>`, `tv-stage-back>`).
+  - **Not claimed:** real devices. This is Chromium emulation; native iPhone and Android checks are separate (H3's native confirmation also remains open).
+  - **Alternatives:**
+    - Keep the director inside the picture on phones too: at 320 px it would be drawn at a sixth of its size, so its buttons would be far too small to tap.
+    - A fixed bottom bar over the picture: it would overlap the picture.
+    - Hiding the director on phones, or turning pointer events off on the picture: the handoff rules both out.

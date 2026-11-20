@@ -22,7 +22,7 @@ import { TvTeamResults, TvTeamsCard } from "./Teams.js";
 import { TEAM_NATIVE_GAMES, teamWinnerLine } from "../../../../../src/shared/teams.js";
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import QRCode from "qrcode";
-import { GameClock, PlayerToken, TVRing, TVStage, Wordmark, rankStandings } from "../../ui/mchezo/index.js";
+import { GameClock, PlayerToken, TVControls, TVRing, TVStage, Wordmark, rankStandings, useTvCompact } from "../../ui/mchezo/index.js";
 import { gameModeWord, lineupLine, resultLine, TV_MODE_LABEL, tvModeFor, winnerLine, type TvChoice, type TvFeed, type TvMode } from "../../ui/mchezo/lib/tvfeed.js";
 import { cupPodium, cupRows, dayLeaderLine, MEDAL_ICON, MEDAL_WORD, medalTable, podiumOf, type CupRow, type PodiumStep } from "../../ui/mchezo/lib/medals.js";
 import { toMzPlayers } from "./adapters.js";
@@ -124,9 +124,31 @@ export function TvShow({ feed, registry, renderLive, renderFinal, renderReview, 
   const modeLabel = showMoment ? (moment === "champion" ? "Family Cup complete" : "Night complete") : mode === "final" ? finalLabel : mode === "trophy" && trophy ? `Day ${trophy.day} complete` : TV_MODE_LABEL[mode];
   const before = latest ? cupBefore.current.get(latest.id) : undefined;
 
+  // D-TV-01 (handoff 7044277833): the director's buttons. On a TV or a desktop they sit in the picture's footer, as
+  // designed; on a narrow screen (a phone) the picture is too small for them (the way back was about 34×9 px), so they
+  // move to the control layer under the picture, with the way back first and full size.
+  const compact = useTvCompact();
+  const directorButtons = (
+    <>
+      {latest?.status === "finished" && <button type="button" className="mz-chip-btn" aria-pressed={!showMoment && mode === "final"} data-testid="tv-dir-final" onClick={() => setChoice("final")}>{finalLabel}</button>}
+      {/* Stage 12.4: under a moment the review is one step away (Final standings, then review), so the row stays on one line. */}
+      {latest?.status === "finished" && review && !showMoment && <button type="button" className="mz-chip-btn" aria-pressed={mode === "review"} data-testid="tv-dir-review" onClick={() => setChoice("review")}>Post-game review</button>}
+      {(latest?.status === "finished" || mode === "cup" || mode === "trophy" || showMoment) && <button type="button" className="mz-chip-btn" aria-pressed={!showMoment && mode === "lobby"} data-testid="tv-dir-lobby" onClick={() => setChoice("lobby")}>Lobby view</button>}
+      {moment && <button type="button" className="mz-chip-btn" aria-pressed={showMoment} data-testid="tv-dir-moment" onClick={() => setChoice("moment")}>{moment === "champion" ? "Champion" : "Night recap"}</button>}
+      {feed.cup && mode !== "live" && mode !== "briefing" && <button type="button" className="mz-chip-btn" aria-pressed={mode === "cup"} data-testid="tv-dir-cup" onClick={() => setChoice("cup")}>Cup standings</button>}
+      <button type="button" className="mz-chip-btn" aria-pressed={paused} data-testid="tv-dir-pause" onClick={() => setPaused((p) => !p)}>{paused ? "Resume animations" : "Pause animations"}</button>
+      <button type="button" className="mz-chip-btn" data-testid="tv-dir-replay" onClick={() => { setPaused(false); setReplay((n) => n + 1); }}>Replay</button>
+      <button type="button" className="mz-chip-btn" aria-pressed={soundOn} aria-label={soundOn ? "TV sound is on. Turn it off" : "TV sound is off. Turn it on"} data-testid="tv-dir-sound" data-plays={chimesPlayed()}
+        onClick={() => { const on = !soundOn; setSoundOn(on); rememberSound(on); if (on && chime("soft")) setPlays((n) => n + 1); }}>{soundOn ? "🔊 Sound" : "🔇 Sound"}</button>
+    </>
+  );
+  const controls = compact
+    ? <TVControls backLabel={backLabel} onBack={onBack} backTestId="tv-back"><nav className="mz-tvshow-director" aria-label="TV controls">{directorButtons}</nav></TVControls>
+    : undefined;
+
   return (
     <div className={`mz-tvshow${paused ? " mz-tvshow--paused" : ""}`} data-testid="tv-show" data-mode={showMoment ? moment : mode} data-game={game?.gameId ?? ""}>
-      <TVStage label="Game night TV">
+      <TVStage label="Game night TV" controls={controls}>
         <header className="mz-tvshow-top">
           <div className="mz-tvshow-top__left"><Wordmark size={34} />{game && <span className="mz-tvshow-title">{titleOf(game.gameId)}</span>}</div>
           <div className="mz-tvshow-top__mid">
@@ -155,19 +177,12 @@ export function TvShow({ feed, registry, renderLive, renderFinal, renderReview, 
         </main>
         <footer className="mz-tvshow-foot">
           <span className="mz-tvshow-privacy">Public view: no secret words, private answers, or answers that can still be played.</span>
-          <nav className="mz-tvshow-director" aria-label="TV controls">
-            {latest?.status === "finished" && <button type="button" className="mz-chip-btn" aria-pressed={!showMoment && mode === "final"} data-testid="tv-dir-final" onClick={() => setChoice("final")}>{finalLabel}</button>}
-            {/* Stage 12.4: under a moment the review is one step away (Final standings, then review), so the row stays on one line. */}
-            {latest?.status === "finished" && review && !showMoment && <button type="button" className="mz-chip-btn" aria-pressed={mode === "review"} data-testid="tv-dir-review" onClick={() => setChoice("review")}>Post-game review</button>}
-            {(latest?.status === "finished" || mode === "cup" || mode === "trophy" || showMoment) && <button type="button" className="mz-chip-btn" aria-pressed={!showMoment && mode === "lobby"} data-testid="tv-dir-lobby" onClick={() => setChoice("lobby")}>Lobby view</button>}
-            {moment && <button type="button" className="mz-chip-btn" aria-pressed={showMoment} data-testid="tv-dir-moment" onClick={() => setChoice("moment")}>{moment === "champion" ? "Champion" : "Night recap"}</button>}
-            {feed.cup && mode !== "live" && mode !== "briefing" && <button type="button" className="mz-chip-btn" aria-pressed={mode === "cup"} data-testid="tv-dir-cup" onClick={() => setChoice("cup")}>Cup standings</button>}
-            <button type="button" className="mz-chip-btn" aria-pressed={paused} data-testid="tv-dir-pause" onClick={() => setPaused((p) => !p)}>{paused ? "Resume animations" : "Pause animations"}</button>
-            <button type="button" className="mz-chip-btn" data-testid="tv-dir-replay" onClick={() => { setPaused(false); setReplay((n) => n + 1); }}>Replay</button>
-            <button type="button" className="mz-chip-btn" aria-pressed={soundOn} aria-label={soundOn ? "TV sound is on. Turn it off" : "TV sound is off. Turn it on"} data-testid="tv-dir-sound" data-plays={chimesPlayed()}
-              onClick={() => { const on = !soundOn; setSoundOn(on); rememberSound(on); if (on && chime("soft")) setPlays((n) => n + 1); }}>{soundOn ? "🔊 Sound" : "🔇 Sound"}</button>
-            <button type="button" className="mz-chip-btn" data-testid="tv-back" onClick={onBack}>{backLabel}</button>
-          </nav>
+          {!compact && (
+            <nav className="mz-tvshow-director" aria-label="TV controls">
+              {directorButtons}
+              <button type="button" className="mz-chip-btn" data-testid="tv-back" onClick={onBack}>{backLabel}</button>
+            </nav>
+          )}
         </footer>
       </TVStage>
     </div>

@@ -4364,3 +4364,36 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
     - **full: `PASSED (exit 0)`, 117/117**, run `20261120-151444-b8ba545c-1295`.
   - **Evidence:** `docs/evidence/quiz-advance/write-failure/`.
   - **Next:** review of `b8ba545`. No new milestone until then.
+
+## Post-beta: getting back from the TV view on a phone (handoff 7044277833)
+- **#57 cleared:** ChatGPT's review (report 7044187564) gave scoped engineering clearance to both Stay repairs, on tested `b8ba545` with docs-only head `640d2ee`. The private Codespace audit remains owner-deferred, not passed.
+- **The handoff:** the same comment set this slice, [7044277833](https://github.com/kekuBT/christmas-game-night-pilot/pull/51#issuecomment-7044277833). It was acknowledged in 7044287517 at 11:06 a.m. ET, estimating about 2:30 p.m. ET.
+- **Branch:** `claude/tv-return-touch`, draft PR #58, stacked on #57 (exact base `640d2ee`). Not for merge or deploy.
+- **The tested commit:** `6ac91f63f8e3a64fd78af6315063d4e72a455769`.
+- **The defect, reproduced on `640d2ee`:**
+  - Chromium phone emulation with touch, at 320×568, 375×667 and 390×844.
+  - In Trivia's TV stage (while playing and at results), an ordinary tap or click on Back to phone view timed out: `.mz-tv-outer` / `.mz-tv` intercepted it. The keyboard worked.
+  - **The cause:** the director bar was styled for inside the 1920×1080 picture but placed against the page. It floated over the picture, spilled the page to about 788 px, and the phone browser zoomed out.
+  - **The TV show:** its way back was about 34×9 px inside the scaled picture.
+  - **The briefing TV:** worked.
+- **The fix (D-TV-01):**
+  - A shared control layer outside the scaled picture (`TVStage` `controls`, `TVControls`), with the way back first and full size.
+  - On phones the picture's box is its own 16:9 height.
+  - On TVs and desktops the full-screen picture is kept, and the TV show keeps its in-picture director.
+  - **Files:** `apps/web/src/ui/mchezo/components/tv/tv.tsx`, `apps/web/src/ui/mchezo/styles/mchezo.css`, `apps/web/src/components/mchezo/MchezoTv.tsx`, `apps/web/src/components/mchezo/TvShow.tsx`, `scripts/check-tv-return.mjs` (new), `scripts/check-warm-ivory.mjs` (W8 intended keys), `docs/DECISIONS.md`.
+- **Tests:**
+  - **`check-tv-return` (218 checks):** ordinary tap and click only, three phone sizes, both looks, five routes, keyboard separately, Stay and auto-advance, desktop and TV.
+    - On `640d2ee` (its own worktree and build): **59 FAIL**.
+    - On the fix: 218/218.
+  - **Unit tests:** 2173. Typecheck and lint are clean.
+  - **Gates:**
+    - targeted on `6ac91f6`: **`PASSED (exit 0)`**, 19/19 (17 drivers), run `20261120-164146-6ac91f63-31692`;
+    - **full on `6ac91f6`: `PASSED (exit 0)`, 118/118**, run `20261120-165227-6ac91f63-2592` (`check-tv-return` 218 checks in 70.3 s).
+- **Evidence:** `docs/evidence/tv-return/`.
+- **Open:**
+  - Real-device checks (emulation only).
+  - The broader crowded-layout redesign, which needs owner-selected options first.
+  - The private Codespace audits of #56/#57 (owner-deferred).
+  - H3's native iPhone confirmation.
+- **Seen, not changed:** the briefing TV's rules card is 15 px wider than a 320 px screen and is clipped.
+- **Next:** ChatGPT's review of #58.
