@@ -1,0 +1,95 @@
+$ node scripts/check-solo-rules.mjs http://localhost:39541
+# timeout 600s | worker w3 | server http://localhost:39541 (data $SCRATCH/sr-gate/20261120-041617-cbdb1242-6009/server-data/w3)
+
+[+1.3s] PASS A Math Mayhem (320 px): the shelf's action says How to play, not Start — How to play
+[+1.7s] PASS A Math Mayhem (320 px): How to play lands on the game's instructions, with one Start
+[+4.7s] PASS A Math Mayhem (320 px): waiting on the instructions made no room, started no round and polled nothing — {"rooms":0,"starts":0,"polls":0}
+[+4.8s] PASS A Math Mayhem (320 px): still the instructions after waiting, no round on screen
+[+4.8s] PASS A Math Mayhem (320 px): the server has no open round
+[+4.9s] PASS B Math Mayhem (320 px): browser Back from the instructions is the shelf
+[+4.9s] PASS B Math Mayhem (320 px): browser Forward is the instructions again
+[+6.2s] PASS C Math Mayhem (320 px): re-entry from the shelf is the instructions
+[+7.2s] PASS B/C Math Mayhem (320 px): Back, Forward and re-entry started nothing — {"rooms":0,"starts":0,"polls":0}
+[+7.4s] PASS D Math Mayhem (320 px): Start begins the round
+[+8.4s] PASS D Math Mayhem (320 px): a double tap on Start sent one start, not two — {"rooms":1,"starts":1,"polls":3}
+[+8.5s] PASS D Math Mayhem (320 px): the server has exactly one open round
+[+21.0s] PASS E Math Mayhem (320 px): the round plays to its results
+[+22.0s] PASS F Math Mayhem (320 px): Play again explicitly starts a new round
+[+22.5s] PASS F Math Mayhem (320 px): Play again sent exactly one start — {"rooms":0,"starts":1,"polls":3}
+[+22.5s] PASS F Math Mayhem (320 px): the server has one open round and keeps the finished one
+[+22.5s] PASS G Math Mayhem (320 px): browser Back mid-round is the shelf
+[+22.6s] PASS G Math Mayhem (320 px): and the round is removed (the existing rule)
+[+23.5s] PASS G Math Mayhem (320 px): re-entry after a round is the instructions again
+[+25.5s] PASS G Math Mayhem (320 px): re-entry started nothing — {"rooms":0,"starts":0,"polls":0}
+[+25.7s] PASS H Math Mayhem (320 px): a direct URL on a fresh device lands on the instructions
+[+28.7s] PASS H Math Mayhem (320 px): a direct URL made no room, started no round and polled nothing — {"rooms":0,"starts":0,"polls":0}
+[+28.8s] PASS H Math Mayhem (320 px): after a reload, still the instructions
+[+30.8s] PASS H Math Mayhem (320 px): the reload started nothing either — {"rooms":0,"starts":0,"polls":0}
+[+31.0s] PASS H Math Mayhem (320 px): one Start begins the round
+[+31.5s] PASS H Math Mayhem (320 px): one Start sent one start — {"rooms":1,"starts":1,"polls":2}
+[+31.5s] PASS H Math Mayhem (320 px): the server has exactly one open round
+[+31.8s] PASS A Pattern Pulse (320 px): the shelf's action says How to play, not Start — How to play
+[+32.2s] PASS A Pattern Pulse (320 px): How to play lands on the game's instructions, with one Start
+[+35.2s] PASS A Pattern Pulse (320 px): waiting on the instructions made no room, started no round and polled nothing — {"rooms":0,"starts":0,"polls":0}
+[+35.2s] PASS A Pattern Pulse (320 px): still the instructions after waiting, no round on screen
+[+35.2s] PASS A Pattern Pulse (320 px): the server has no open round
+[+35.3s] PASS B Pattern Pulse (320 px): browser Back from the instructions is the shelf
+[+35.3s] PASS B Pattern Pulse (320 px): browser Forward is the instructions again
+[+37.1s] PASS C Pattern Pulse (320 px): re-entry from the shelf is the instructions
+[+38.1s] PASS B/C Pattern Pulse (320 px): Back, Forward and re-entry started nothing — {"rooms":0,"starts":0,"polls":0}
+[+38.3s] PASS D Pattern Pulse (320 px): Start begins the round
+[+39.3s] PASS D Pattern Pulse (320 px): a double tap on Start sent one start, not two — {"rooms":1,"starts":1,"polls":2}
+[+39.3s] PASS D Pattern Pulse (320 px): the server has exactly one open round
+[+39.3s] PASS D Pattern Pulse (320 px): the first pattern still waits for its own open action
+[+72.5s] PASS E Pattern Pulse (320 px): the round plays to its results
+[+73.6s] PASS F Pattern Pulse (320 px): Play again explicitly starts a new round
+[+74.1s] PASS F Pattern Pulse (320 px): Play again sent exactly one start — {"rooms":0,"starts":1,"polls":2}
+[+74.1s] PASS F Pattern Pulse (320 px): the server has one open round and keeps the finished one
+[+74.1s] PASS G Pattern Pulse (320 px): browser Back mid-round is the shelf
+[+74.1s] PASS G Pattern Pulse (320 px): and the round is removed (the existing rule)
+[+75.0s] PASS G Pattern Pulse (320 px): re-entry after a round is the instructions again
+[+77.0s] PASS G Pattern Pulse (320 px): re-entry started nothing — {"rooms":0,"starts":0,"polls":0}
+[+77.3s] PASS H Pattern Pulse (320 px): a direct URL on a fresh device lands on the instructions
+[+80.3s] PASS H Pattern Pulse (320 px): a direct URL made no room, started no round and polled nothing — {"rooms":0,"starts":0,"polls":0}
+[+80.4s] PASS H Pattern Pulse (320 px): after a reload, still the instructions
+[+82.4s] PASS H Pattern Pulse (320 px): the reload started nothing either — {"rooms":0,"starts":0,"polls":0}
+[+82.6s] PASS H Pattern Pulse (320 px): one Start begins the round
+[+83.1s] PASS H Pattern Pulse (320 px): one Start sent one start — {"rooms":1,"starts":1,"polls":1}
+[+83.1s] PASS H Pattern Pulse (320 px): the server has exactly one open round
+[+83.3s] PASS A Word Connections (320 px): the shelf's action says How to play, not Start — How to play
+[+83.7s] PASS A Word Connections (320 px): How to play lands on the game's instructions, with one Start
+[+86.7s] PASS A Word Connections (320 px): waiting on the instructions made no room, started no round and polled nothing — {"rooms":0,"starts":0,"polls":0}
+[+86.7s] PASS A Word Connections (320 px): still the instructions after waiting, no round on screen
+[+86.7s] PASS A Word Connections (320 px): the server has no open round
+[+86.8s] PASS B Word Connections (320 px): browser Back from the instructions is the shelf
+[+86.9s] PASS B Word Connections (320 px): browser Forward is the instructions again
+[+88.7s] PASS C Word Connections (320 px): re-entry from the shelf is the instructions
+[+89.7s] PASS B/C Word Connections (320 px): Back, Forward and re-entry started nothing — {"rooms":0,"starts":0,"polls":0}
+[+89.9s] PASS D Word Connections (320 px): Start begins the round
+[+90.9s] PASS D Word Connections (320 px): a double tap on Start sent one start, not two — {"rooms":1,"starts":1,"polls":2}
+[+90.9s] PASS D Word Connections (320 px): the server has exactly one open round
+[+92.7s] PASS E Word Connections (320 px): the round plays to its results
+[+93.3s] PASS F Word Connections (320 px): Play again explicitly starts a new round
+[+93.8s] PASS F Word Connections (320 px): Play again sent exactly one start — {"rooms":0,"starts":1,"polls":2}
+[+93.8s] PASS F Word Connections (320 px): the server has one open round and keeps the finished one
+[+93.8s] PASS G Word Connections (320 px): browser Back mid-round is the shelf
+[+93.8s] PASS G Word Connections (320 px): and the round is removed (the existing rule)
+[+94.7s] PASS G Word Connections (320 px): re-entry after a round is the instructions again
+[+96.7s] PASS G Word Connections (320 px): re-entry started nothing — {"rooms":0,"starts":0,"polls":0}
+[+97.0s] PASS H Word Connections (320 px): a direct URL on a fresh device lands on the instructions
+[+100.0s] PASS H Word Connections (320 px): a direct URL made no room, started no round and polled nothing — {"rooms":0,"starts":0,"polls":0}
+[+100.1s] PASS H Word Connections (320 px): after a reload, still the instructions
+[+102.1s] PASS H Word Connections (320 px): the reload started nothing either — {"rooms":0,"starts":0,"polls":0}
+[+102.3s] PASS H Word Connections (320 px): one Start begins the round
+[+102.8s] PASS H Word Connections (320 px): one Start sent one start — {"rooms":1,"starts":1,"polls":1}
+[+102.8s] PASS H Word Connections (320 px): the server has exactly one open round
+[+103.4s] PASS I Math Mayhem (375 px): How to play lands on the instructions
+[+105.4s] PASS I Math Mayhem (375 px): nothing started — {"rooms":0,"starts":0,"polls":0}
+[+106.1s] PASS I Pattern Pulse (375 px): How to play lands on the instructions
+[+108.1s] PASS I Pattern Pulse (375 px): nothing started — {"rooms":0,"starts":0,"polls":0}
+[+109.3s] PASS I Word Connections (375 px): How to play lands on the instructions
+[+111.3s] PASS I Word Connections (375 px): nothing started — {"rooms":0,"starts":0,"polls":0}
+[+111.3s] SOLO RULES ALL PASSED
+[+111.3s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":9,"pages":9,"peakOpenPages":1}
+
+# PASS (exit 0) in 111.3s | cpu 7.4s, peak memory 343 MB

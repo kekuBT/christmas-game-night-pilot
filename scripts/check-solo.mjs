@@ -101,8 +101,10 @@ try {
   check("the solo list is honest about requirements: 1–10 players, best with 2+", /1–10 players · best with 2\+/.test(await page.getByTestId("solo-game-math-mayhem").innerText()));
   check("the other games are pointed to rooms, with no invented player minimum", /More solo games are on the way\. For now the other games are played in a room/.test(await page.getByTestId("solo-others").innerText()) && !/at least 2/.test(await page.getByTestId("solo-others").innerText()));
   check("a fresh device has no personal best yet", /No personal best on this device yet/.test(await page.getByTestId("solo-best-math-mayhem").innerText()));
-  await page.getByTestId("solo-start-math-mayhem").click(); // tap 2
-  await soon("tap 2 is the round itself: no room code, no name, no lobby", async () => (await page.getByTestId("solo-round").isVisible()) && new URL(page.url()).pathname === "/solo/math-mayhem" && (await page.getByPlaceholder("e.g. Auntie June").count()) === 0, 15000);
+  await page.getByTestId("solo-start-math-mayhem").click(); // tap 2 (D-SR-01): the game's instructions, no round yet
+  await soon("tap 2 is the game's instructions with one Start (no round, no room code, no name, no lobby)", async () => (await page.getByTestId("solo-ready").isVisible()) && (await page.getByTestId("solo-howto").isVisible()) && new URL(page.url()).pathname === "/solo/math-mayhem" && (await page.getByTestId("solo-round").count()) === 0, 15000);
+  await page.getByTestId("solo-round-start").click(); // tap 3: Start
+  await soon("tap 3 (Start) is the round itself: no room code, no name, no lobby", async () => (await page.getByTestId("solo-round").isVisible()) && new URL(page.url()).pathname === "/solo/math-mayhem" && (await page.getByPlaceholder("e.g. Auntie June").count()) === 0, 15000);
 
   // ---- B. Three consecutive rounds with Play again ----
   const r1 = await playRound(page, (i) => i < 5);
@@ -135,7 +137,8 @@ try {
   await page.getByTestId("solo-home").waitFor({ timeout: 10000 });
 
   // ---- C. Leaving mid-round ----
-  await page.getByTestId("solo-start-math-mayhem").click();
+  await page.getByTestId("solo-start-math-mayhem").click(); // D-SR-01: the shelf opens the instructions
+  await page.getByTestId("solo-round-start").click(); // and their one Start begins the round
   await page.locator("h1.mz-question").waitFor({ timeout: 20000 });
   await page.getByTestId("solo-leave").click();
   check("Leave round asks first", await page.getByTestId("solo-leave-confirm").isVisible());
@@ -154,14 +157,16 @@ try {
 
   // ---- D. Browser Back mid-round ----
   await page.getByTestId("home-solo").click();
-  await page.getByTestId("solo-start-math-mayhem").click();
+  await page.getByTestId("solo-start-math-mayhem").click(); // D-SR-01: the shelf opens the instructions
+  await page.getByTestId("solo-round-start").click(); // and their one Start begins the round
   await page.locator("h1.mz-question").waitFor({ timeout: 20000 });
   await page.goBack();
   await page.getByTestId("solo-home").waitFor({ timeout: 10000 });
   await soon("browser Back mid-round: the round is removed too", async () => !((await serverRoom(seat)).games ?? []).some((g) => g.status === "playing"), 10000);
 
   // ---- E. Reload mid-round ----
-  await page.getByTestId("solo-start-math-mayhem").click();
+  await page.getByTestId("solo-start-math-mayhem").click(); // D-SR-01: the shelf opens the instructions
+  await page.getByTestId("solo-round-start").click(); // and their one Start begins the round
   await page.locator("h1.mz-question").waitFor({ timeout: 20000 });
   const before = ((await serverRoom(seat)).games ?? []).find((g) => g.status === "playing")?.id;
   await page.reload({ waitUntil: "domcontentloaded" });
@@ -178,7 +183,8 @@ try {
   // ---- E2. Two tabs on one device: the later Start replaces the round ----
   const tabB = await ctx.newPage();
   const roomsB = countRooms(tabB);
-  await page.getByTestId("solo-start-math-mayhem").click();
+  await page.getByTestId("solo-start-math-mayhem").click(); // D-SR-01: the shelf opens the instructions
+  await page.getByTestId("solo-round-start").click(); // and their one Start begins the round
   await page.locator("h1.mz-question").waitFor({ timeout: 20000 });
   const gA = ((await serverRoom(seat)).games ?? []).find((g) => g.status === "playing")?.id;
   await tabB.goto(`${BASE}/solo/math-mayhem`, { waitUntil: "domcontentloaded" });
@@ -211,8 +217,9 @@ try {
   const bRooms = countRooms(bp);
   await bp.goto(`${BASE}/solo`, { waitUntil: "domcontentloaded" });
   await bp.getByTestId("solo-home").waitFor({ timeout: 15000 });
-  check("blocked storage: the list says bests can't be kept, and still offers Start", /can’t be kept on this device/.test(await bp.getByTestId("solo-best-math-mayhem").innerText()) && await bp.getByTestId("solo-start-math-mayhem").isEnabled());
-  await bp.getByTestId("solo-start-math-mayhem").click();
+  check("blocked storage: the list says bests can't be kept, and still offers each game", /can’t be kept on this device/.test(await bp.getByTestId("solo-best-math-mayhem").innerText()) && await bp.getByTestId("solo-start-math-mayhem").isEnabled());
+  await bp.getByTestId("solo-start-math-mayhem").click(); // D-SR-01: the shelf opens the instructions
+  await bp.getByTestId("solo-round-start").click(); // and their one Start begins the round
   const rb = await playRound(bp, (i) => i < 3);
   check("blocked storage: the round plays to its results", rb.correct === 3, JSON.stringify(rb));
   check("blocked storage: the results say the best couldn't be saved", /couldn’t be saved/.test(rb.pb), rb.pb);
@@ -220,7 +227,8 @@ try {
   await bp.locator("h1.mz-question").waitFor({ timeout: 20000 });
   check("blocked storage: Play again still works", true);
   await bp.getByTestId("solo-leave").click(); await bp.getByTestId("solo-leave-yes").click();
-  await bp.getByTestId("solo-start-math-mayhem").click();
+  await bp.getByTestId("solo-start-math-mayhem").click(); // D-SR-01: the shelf opens the instructions
+  await bp.getByTestId("solo-round-start").click(); // and their one Start begins the round
   await bp.locator("h1.mz-question").waitFor({ timeout: 20000 });
   check("blocked storage: the seat is kept for the page, one room across replays and a new Start", bRooms.n === 1, `${bRooms.n} rooms created`);
   await blocked.close();
@@ -236,7 +244,8 @@ try {
   await op.reload({ waitUntil: "domcontentloaded" });
   await op.getByTestId("solo-home").waitFor({ timeout: 15000 });
   check("a best under other rules (version 0) is not shown as this game's best", /No personal best on this device yet/.test(await op.getByTestId("solo-best-math-mayhem").innerText()));
-  await op.getByTestId("solo-start-math-mayhem").click();
+  await op.getByTestId("solo-start-math-mayhem").click(); // D-SR-01: the shelf opens the instructions
+  await op.getByTestId("solo-round-start").click(); // and their one Start begins the round
   const ro = await playRound(op, (i) => i < 2);
   check("a round under the current rules is its own first best (not compared with version 0)", /first personal best/.test(ro.pb), ro.pb);
   const stored = JSON.parse(await op.evaluate(() => localStorage.getItem("mchezo.pb.v1")));
@@ -249,7 +258,8 @@ try {
   await lp.goto(`${lan.base}/solo`, { waitUntil: "domcontentloaded" });
   const ctxInfo = await lp.evaluate(() => ({ secure: isSecureContext, randomUUID: typeof crypto.randomUUID }));
   check(`plain http (${lan.real ? `real insecure context at ${new URL(lan.base).hostname}` : "simulated: no network address, randomUUID removed"}): no crypto.randomUUID`, ctxInfo.randomUUID === "undefined" && (!lan.real || ctxInfo.secure === false), JSON.stringify(ctxInfo));
-  await lp.getByTestId("solo-start-math-mayhem").click();
+  await lp.getByTestId("solo-start-math-mayhem").click(); // D-SR-01: the shelf opens the instructions
+  await lp.getByTestId("solo-round-start").click(); // and their one Start begins the round
   const rl = await playRound(lp, (i) => i < 7);
   check("plain http: the whole round plays and every answer counts (7 of 10)", rl.correct === 7, JSON.stringify(rl));
   await lan.ctx.close();
@@ -265,7 +275,11 @@ try {
   }
   await kp.goto(`${BASE}/solo`, { waitUntil: "domcontentloaded" });
   await kp.getByTestId("solo-home").waitFor({ timeout: 15000 });
-  check("keyboard: Tab reaches Start on the solo list", await tabTo((f) => f === "solo-start-math-mayhem"));
+  check("keyboard: Tab reaches How to play on the solo list", await tabTo((f) => f === "solo-start-math-mayhem"));
+  await kp.keyboard.press("Enter");
+  await kp.getByTestId("solo-ready").waitFor({ timeout: 15000 });
+  check("keyboard: Enter opens the game's instructions (D-SR-01)", (await kp.getByTestId("solo-round").count()) === 0);
+  check("keyboard: Tab reaches Start on the instructions", await tabTo((f) => f === "solo-round-start"));
   await kp.keyboard.press("Enter");
   await kp.locator("h1.mz-question").waitFor({ timeout: 20000 });
   check("keyboard: Enter on Start begins the round", true);
@@ -310,7 +324,8 @@ try {
   let held = 0;
   await fp.route(isPath(/^\/rooms\/[^/]+\/games$/), (route) => { if (route.request().method() === "POST") { held++; return; } return route.continue(); }); // never answered
   let t0 = Date.now();
-  await fp.getByTestId("solo-start-math-mayhem").click();
+  await fp.getByTestId("solo-start-math-mayhem").click(); // D-SR-01: the shelf opens the instructions
+  await fp.getByTestId("solo-round-start").click(); // and their one Start begins the round
   await soon("I1 Start with no reply ends in an error with Try again (not a stuck Starting…)", async () => (await fp.getByTestId("solo-error").isVisible()) && (await fp.getByTestId("solo-round-start").innerText()).trim() === "Try again", 15000);
   check("I1 it ended within the request allowance (about 6 s), and the request had been sent", Date.now() - t0 < 12000 && held >= 1, `${Date.now() - t0} ms, ${held} held`);
   await fp.unrouteAll({ behavior: "ignoreErrors" });
@@ -345,7 +360,8 @@ try {
   await fp.getByTestId("solo-leave").click(); await fp.getByTestId("solo-leave-yes").click();
   await fp.getByTestId("solo-home").waitFor({ timeout: 10000 });
   await fp.route(isPath(/\/projection$/), (route) => route.fulfill({ status: 500, contentType: "application/json", body: '{"error":"busy"}' }));
-  await fp.getByTestId("solo-start-math-mayhem").click();
+  await fp.getByTestId("solo-start-math-mayhem").click(); // D-SR-01: the shelf opens the instructions
+  await fp.getByTestId("solo-round-start").click(); // and their one Start begins the round
   await soon("I4 the seat check fails for a moment: Start says so, with Try again", async () => (await fp.getByTestId("solo-error").isVisible()) && (await fp.getByTestId("solo-round-start").innerText()).trim() === "Try again", 15000);
   check("I4 no new room was made for a passing failure", fRooms.n === 2, `${fRooms.n} rooms`);
   await fp.unrouteAll({ behavior: "ignoreErrors" });

@@ -1,0 +1,11 @@
+
+PASSED (exit 0) | full | run 20261120-051827-cbdb1242-266
+  116 passed, 0 failed, 0 timed out, 0 infrastructure, 0 invalid, 0 cancelled, 0 not run
+  timing   wall 43m 37s · step time 2h 07m (sum) · 3 workers, 98% busy · 2.93× the same steps run one after another
+           predicted 28–74m (about 40m 24s, low-confidence) → actual 43m 37s (+8%)
+           longest  e2e-chromium 8m 13s, check-f5 7m 36s, check-leaderboard 6m 36s · the longest step is 19% of the wall time
+           machine  CPU mean 32%, peak 100% · memory available ≥ 13173 MB · load peak 5.03 · backpressure 9 wait(s), 39s
+           contention ×1.063 (median step time vs its sequential median)
+           baseline sequential full gate: about 1h 17m (mean of recorded sequential passes)
+           retries  none (the gate never retries a step)
+  report $SCRATCH/sr-gate/20261120-051827-cbdb1242-266/report.json

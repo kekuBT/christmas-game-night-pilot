@@ -5,9 +5,11 @@
  *  /solo                  the games that really work alone (manifest soloPlay
  *                         AND an adapter in solo/soloGames.tsx: Math Mayhem,
  *                         Pattern Pulse, Word Connections), each with its
- *                         personal best on this device and Start.
- *  /solo/<gameId>         the round, then its results: Play again, Back to
- *                         solo, Home.
+ *                         personal best on this device and How to play.
+ *  /solo/<gameId>         the game's instructions and one Start (D-SR-01:
+ *                         however it is reached, opening it starts nothing),
+ *                         then the round, then its results: Play again, Back
+ *                         to solo, Home.
  *
  * The round itself is the existing game: a private solo room on the server
  * (SoloSession) and the game's existing screen in solo mode, chosen by its
@@ -57,7 +59,7 @@ function bestLine(best: PersonalBest | undefined, storageOk: boolean): string {
 }
 
 /** /solo: the solo games list. */
-export function SoloHome({ catalog, onStart, onBack, onHost }: { catalog: readonly CatalogGame[]; onStart: (gameId: string) => void; onBack: () => void; onHost: () => void }) {
+export function SoloHome({ catalog, onOpen, onBack, onHost }: { catalog: readonly CatalogGame[]; onOpen: (gameId: string) => void; onBack: () => void; onHost: () => void }) {
   const store = useMemo(() => deviceStore(), []);
   const solo = soloShelf(catalog);
   const [season, setSeason] = useSoloSeason();
@@ -83,7 +85,9 @@ export function SoloHome({ catalog, onStart, onBack, onHost }: { catalog: readon
                 <p className="mz-solo__best" data-testid={`solo-best-${g.id}`}>{bestLine(best, store !== null)}</p>
                 {adapter.bestNote && <p className="mz-solo__best-note" data-testid={`solo-note-${g.id}`}>{adapter.bestNote}</p>}
               </div>
-              <Keycap block data-testid={`solo-start-${g.id}`} onClick={() => onStart(g.id)} aria-label={`Start ${g.title}`}>Start</Keycap>
+              {/* D-SR-01: this opens the game's instructions, where its own Start begins the round. The test id is kept
+                  (the Everyday style baseline and drivers key on it); the label no longer promises immediate play. */}
+              <Keycap block data-testid={`solo-start-${g.id}`} onClick={() => onOpen(g.id)} aria-label={`${g.title}: how to play`}>How to play</Keycap>
             </li>
           );
         })}
@@ -103,10 +107,8 @@ function roundViews(state: SoloState) {
 }
 
 /** /solo/<gameId>: one round, then its results. */
-export function SoloRound({ game, autostart, onAutostartUsed, onBackToSolo, onHome, store: injected }: {
+export function SoloRound({ game, onBackToSolo, onHome, store: injected }: {
   game: CatalogGame;
-  autostart: boolean;
-  onAutostartUsed: () => void;
   onBackToSolo: () => void;
   onHome: () => void;
   store?: KeyValueStore | null;
@@ -136,10 +138,11 @@ export function SoloRound({ game, autostart, onAutostartUsed, onBackToSolo, onHo
   // StrictMode (development) runs this effect, its cleanup and the effect
   // again on the same component: the cleanup disposed the first session, so
   // a fresh one takes its place rather than one that ignores every tap.
+  // D-SR-01: mounting never starts a round (no auto-start from the shelf, a direct URL, a reload or Back); only the
+  // instructions' Start, Try again or the results' Play again does, one round per press.
   useEffect(() => {
     if (sessionRef.current!.isDisposed) sessionRef.current = newSession();
     const s = sessionRef.current!;
-    if (autostart) { onAutostartUsed(); void s.start(game.id, seasonRef.current); }
     return () => { void s.leave(); s.dispose(); };
   }, []);
 
@@ -225,7 +228,7 @@ export function SoloRound({ game, autostart, onAutostartUsed, onBackToSolo, onHo
     );
   }
 
-  // Not started (or back here after a reload): the round's start screen.
+  // Not started (every way in, and back here after a reload): the game's instructions and its one Start.
   const best = readBest(store, game.id, rules);
   return (
     <main className="mz-screen mz-entry mz-solo" aria-label={`${game.title} solo`} data-testid="solo-ready" style={{ ["--mz-accent" as string]: accentColor(game.id) }}>

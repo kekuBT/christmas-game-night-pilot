@@ -2619,3 +2619,35 @@ The reported symptom: a nearly black **drawer** screen in an iPhone in-app brows
   5. Practice-only reasons name approval status (e.g. "practice-only until its Cup scoring is approved"). This is honest status and acceptable as is; listed for the owner's wording pass.
   6. Accuracy, not a team note: the details sheet's chip "Can count in the Cup (2+ players)" (`Home.tsx`) gives the Cup's two-player minimum. It shows that number on games that need more, such as Who Said That? (4–10 players). Suggested: name the game's own minimum.
   - **Result of the sweep:** no other game's tutorial, details description or briefing line trips the guard, and no other pack item does (pack titles such as "Sprint 4" are never shown to players).
+
+## Post-beta: solo players read the rules before they start (handoff 7029967180; acknowledged 7029976924; docs/evidence/solo-rules/)
+- **D-SR-01 Every way into a solo game lands on its instructions; only their Start makes a round** (owner-approved fix of the solo entry flow).
+  - **What live playtests found:** in Math Mayhem, Pattern Pulse and Word Connections, the solo shelf's Start opened a round before the instructions could be read.
+    - **The cause:** the shelf set an `autostart` flag, and `SoloRound` started a round on mount. The game's own instructions screen (`solo-howto` and one `solo-round-start`) was skipped.
+    - **The base already got some paths right:** a direct `/solo/<game>` URL and a reload landed on that screen without starting anything.
+  - **What:**
+    - `autostart` is gone (`App.tsx`, `Solo.tsx`), so mounting `SoloRound` never starts a round.
+    - The shelf's action now says **How to play** (screen readers hear "<game>: how to play") and opens the instructions. Its test id `solo-start-<game>` is kept, because the Everyday style baseline and other drivers key on it.
+    - A round starts only from the instructions' Start (or Try again), or from Play again on the results.
+  - **Unchanged:**
+    - content selection, scoring, personal bests, solo recovery (a reload lands on the instructions; Start replaces any round left open) and the season choice;
+    - Leave round, and browser Back mid-round, both still remove the round;
+    - Pattern Pulse: each pattern still opens on its own in-round action, with its timing rules unchanged.
+    - One press is still one round: `SoloSession.start` sets `starting` synchronously, so a second tap returns.
+  - **Out of scope:** Trivia/Math auto-advance, results restructuring and the broader redesign.
+  - **The regression:**
+    - `scripts/check-solo-rules.mjs` (new, its own server, 320×568 and 375×667 touch phones) runs every step for all three games:
+      - shelf → instructions, then waiting there;
+      - Back and Forward, and re-entry;
+      - a rapid double tap on Start;
+      - Pattern Pulse's first pattern still waiting for its open action;
+      - play to the results, then Play again;
+      - Back mid-round, then re-entry;
+      - a direct URL on a fresh device, then a reload.
+    - It counts every room made, round started and projection poll.
+    - **The result:** on `3cc1c2f` it FAILS 30 checks; every shelf entry made a room, a start and polls before anything was read. On the fix it passes 88/88.
+    - `apps/web/src/components/mchezo/Solo.test.tsx` pins the shelf's How to play label and the instructions screen, with one Start, for each game.
+  - **The drivers updated for the new flow:**
+    - `check-solo`, `check-solo-shelf`, `check-mobile-everyday`, `check-install`, `check-install-builds`, `check-casual` and `check-themes-seasonal` now tap the instructions' Start after the shelf. The stage screenshot scripts have the same change.
+    - `check-solo` now checks that tap 2 is the instructions and tap 3 is the round, and its keyboard path tabs to Start on the instructions.
+  - **Alternative:** a modal over the shelf with the rules and Start. Rejected: the game's own instructions screen already exists, is reachable by URL and survives a reload.

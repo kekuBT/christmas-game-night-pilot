@@ -343,8 +343,6 @@ export function App() {
     try { const v = JSON.parse(localStorage.getItem("mz_cup_nudge_hidden") ?? "[]"); return new Set(Array.isArray(v) ? v.filter((x): x is string => typeof x === "string") : []); } catch { return new Set(); }
   });
   const [cupErr, setCupErr] = useState("");
-  // Stage 6.1: Start on the Play solo list starts the round on arrival; a reload does not.
-  const [soloAutostart, setSoloAutostart] = useState<string | null>(null);
   // Phase 2.1 lobby simplification: one mode for the single Start action,
   // and one compact chooser instead of per-game official/practice buttons.
   const [gameMode, setGameModeRaw] = useState<"official" | "practice">("official");
@@ -1410,11 +1408,13 @@ export function App() {
         // Back to solo / Home step back to that screen when it is the one
         // beneath, else replace this entry, so neither Back nor browser Back
         // ever returns to a finished or left round's screen.
-        <SoloRound key={soloGame.id} game={soloGame} autostart={soloAutostart === soloGame.id} onAutostartUsed={() => setSoloAutostart(null)}
+        // Solo rules first (handoff 7029967180, D-SR-01): every way in lands on the game's instructions; only its
+        // Start makes a round. Nothing starts on arrival, a reload, Back or a direct URL.
+        <SoloRound key={soloGame.id} game={soloGame}
           onBackToSolo={() => backTo({ name: "solo" })} onHome={() => navigate(HOME, { replace: true })} />
       ) : (
         <SoloHome catalog={catalog} onBack={() => backTo(HOME)} onHost={() => navigate({ name: "host" })}
-          onStart={(id) => { setSoloAutostart(id); navigate({ name: "solo", gameId: id }); }} />
+          onOpen={(id) => navigate({ name: "solo", gameId: id })} />
       );
     } else if (route.name === "library") {
       screen = <MchezoLibrary manifests={GAME_MANIFESTS} catalog={catalog} canSelect={false} inRoom={false}

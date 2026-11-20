@@ -161,7 +161,7 @@ try {
     check(`${where}: every card keeps its description, players and time, and its personal best line`, wordsKept);
     check(`${where}: Word Connections keeps its note that the best spans boards`, /across boards/.test(await text(p.getByTestId("solo-note-word-connections"))));
     const startH = (await p.getByTestId("solo-start-math-mayhem").boundingBox())?.height ?? 0;
-    check(`${where}: Start is a full-size target (at least 52 px tall)`, startH >= 52, `${Math.round(startH)} px`);
+    check(`${where}: How to play (the shelf's action) is a full-size target (at least 52 px tall)`, startH >= 52, `${Math.round(startH)} px`);
     if (vp.width < 600) {
       check(`${where}: the cover is a small square beside the title, not a banner`, ((await p.locator(".mz-solo__cover").first().boundingBox())?.width ?? 999) <= 90);
       // R81-01: the cards must stay compact whatever font the phone renders.
@@ -196,9 +196,9 @@ try {
     } else {
       check(`${where}: a grid: the first two games side by side`, Math.abs(boxes[0].y - boxes[1].y) < 2 && boxes[1].x > boxes[0].x + boxes[0].width - 1, JSON.stringify(boxes.map((b) => [Math.round(b.x), Math.round(b.y)])));
     }
-    if (vp.width === 390) check(`${where}: two games' Start buttons on the first screen, no scrolling`, (await inView(p.getByTestId("solo-start-math-mayhem"))) && (await inView(p.getByTestId("solo-start-pattern-pulse"))));
+    if (vp.width === 390) check(`${where}: two games' How to play buttons on the first screen, no scrolling`, (await inView(p.getByTestId("solo-start-math-mayhem"))) && (await inView(p.getByTestId("solo-start-pattern-pulse"))));
     if (vp.width === 1440) {
-      check(`${where}: all three games side by side, every Start on the first screen`, (await inView(p.getByTestId("solo-start-math-mayhem"))) && (await inView(p.getByTestId("solo-start-pattern-pulse"))) && (await inView(p.getByTestId("solo-start-word-connections"))) && Math.abs(boxes[0].y - boxes[2].y) < 2);
+      check(`${where}: all three games side by side, every How to play on the first screen`, (await inView(p.getByTestId("solo-start-math-mayhem"))) && (await inView(p.getByTestId("solo-start-pattern-pulse"))) && (await inView(p.getByTestId("solo-start-word-connections"))) && Math.abs(boxes[0].y - boxes[2].y) < 2);
     }
     await shot(p, "01-solo-shelf", `The solo shelf (${vp.width}×${vp.height})`);
     await ctx.close();
@@ -212,7 +212,8 @@ try {
     await p.goto(`${GATE_BASE}/`, { waitUntil: "domcontentloaded" });
     await p.getByTestId("home-solo").click();
     await p.getByTestId("solo-home").waitFor({ timeout: 15000 });
-    await p.getByTestId("solo-start-pattern-pulse").click();
+    await p.getByTestId("solo-start-pattern-pulse").click(); // D-SR-01: the shelf opens the instructions
+    await p.getByTestId("solo-round-start").click(); // and their one Start begins the round
     await p.getByTestId("mz-pp-ready").waitFor({ timeout: 20000 });
     const panel = p.getByTestId("mz-pp-gameclock");
     await soon("B the ready screen shows the game's time left", async () => (await panel.count()) === 1 && /\d:\d\d/.test(await text(p.getByTestId("mz-pp-gameclock-left"))));
@@ -245,7 +246,8 @@ try {
     await p.getByTestId("solo-home").waitFor({ timeout: 10000 });
 
     // A complete solo journey with replay: Math Mayhem, results, Play again, results.
-    await p.getByTestId("solo-start-math-mayhem").click();
+    await p.getByTestId("solo-start-math-mayhem").click(); // D-SR-01: the shelf opens the instructions
+    await p.getByTestId("solo-round-start").click(); // and their one Start begins the round
     await playMath(p);
     check("B Math results: the score, and Play again on the first screen", (await p.getByTestId("solo-score").isVisible()) && (await inView(p.getByTestId("solo-play-again"))));
     await checkLayout(p, "B 390×844 solo results");
@@ -359,7 +361,8 @@ try {
     const ctx = await browser.newContext({ viewport: { width: 844, height: 390 } });
     const p = await ctx.newPage();
     await p.goto(`${GATE_BASE}/solo`, { waitUntil: "domcontentloaded" });
-    await p.getByTestId("solo-start-pattern-pulse").click();
+    await p.getByTestId("solo-start-pattern-pulse").click(); // D-SR-01: the shelf opens the instructions
+    await p.getByTestId("solo-round-start").click(); // and their one Start begins the round
     await p.getByTestId("mz-pp-ready").waitFor({ timeout: 20000 });
     await sleep(300);
     check("D 844×390 Pulse ready: the game clock and Show me the pattern on screen, no scrolling", (await inView(p.getByTestId("mz-pp-gameclock"))) && (await inView(p.getByTestId("mz-pp-open"))));
@@ -376,7 +379,8 @@ try {
     await p.getByTestId("solo-leave").click();
     await p.getByTestId("solo-leave-yes").click();
     await p.getByTestId("solo-home").waitFor({ timeout: 10000 });
-    await p.getByTestId("solo-start-math-mayhem").click();
+    await p.getByTestId("solo-start-math-mayhem").click(); // D-SR-01: the shelf opens the instructions
+    await p.getByTestId("solo-round-start").click(); // and their one Start begins the round
     await p.locator("h1.mz-question").waitFor({ timeout: 20000 });
     for (let k = 0; k < 50 && (await p.locator(".mz-slab").count()) !== 4; k++) await sleep(100);
     let allSlabs = true;
@@ -393,7 +397,8 @@ try {
     const ctx = await browser.newContext({ viewport: { width: 650, height: 300 } });
     const p = await ctx.newPage();
     await p.goto(`${GATE_BASE}/solo`, { waitUntil: "domcontentloaded" });
-    await p.getByTestId("solo-start-pattern-pulse").click();
+    await p.getByTestId("solo-start-pattern-pulse").click(); // D-SR-01: the shelf opens the instructions
+    await p.getByTestId("solo-round-start").click(); // and their one Start begins the round
     await p.getByTestId("mz-pp-ready").waitFor({ timeout: 20000 });
     await p.getByTestId("mz-pp-open").click();
     await p.getByTestId("mz-pp-input").waitFor({ timeout: 15000 });
@@ -407,7 +412,8 @@ try {
     await p.getByTestId("solo-leave").click();
     await p.getByTestId("solo-leave-yes").click();
     await p.getByTestId("solo-home").waitFor({ timeout: 10000 });
-    await p.getByTestId("solo-start-math-mayhem").click();
+    await p.getByTestId("solo-start-math-mayhem").click(); // D-SR-01: the shelf opens the instructions
+    await p.getByTestId("solo-round-start").click(); // and their one Start begins the round
     await p.locator("h1.mz-question").waitFor({ timeout: 20000 });
     for (let k = 0; k < 50 && (await p.locator(".mz-slab").count()) !== 4; k++) await sleep(100);
     await checkLayout(p, "D2 650×300 (130 %) Math");

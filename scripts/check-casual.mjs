@@ -175,7 +175,8 @@ try {
   const soloCtx = await browser.newContext({ viewport: { width: 390, height: 844 } });
   const sp = await soloCtx.newPage();
   await sp.goto(`${BASE}/solo`, { waitUntil: "domcontentloaded" });
-  await sp.getByTestId("solo-start-math-mayhem").click();
+  await sp.getByTestId("solo-start-math-mayhem").click(); // D-SR-01: the shelf opens the instructions
+  await sp.getByTestId("solo-round-start").click(); // and their one Start begins the round
   await sp.locator("h1.mz-question").waitFor({ timeout: 20000 });
   const soloCode = await sp.evaluate(async () => {
     const seat = JSON.parse(localStorage.getItem("mchezo.solo.v1") ?? "null");
