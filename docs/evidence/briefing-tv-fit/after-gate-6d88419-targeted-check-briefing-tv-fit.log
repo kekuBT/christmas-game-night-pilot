@@ -1,0 +1,193 @@
+$ node scripts/check-briefing-tv-fit.mjs http://localhost:40131
+# timeout 600s | worker w3 | server http://localhost:40131 (data <scratch>/gate-bf-targeted/20261120-174946-6d884195-26796/server-data/w3)
+
+[+9.1s] PASS K the server holds Know Your Rivals in its briefing
+[+9.1s] PASS K everyday 320×568 invited player: the briefing TV shows the rules, who is ready and the teams
+[+9.4s] PASS K everyday 320×568 invited player: the briefing is in the everyday look — everyday
+[+9.4s] PASS K everyday 320×568 invited player: the expected cards are on screen (topbar, briefing-tv-here, rules, ready, briefing-teams) — topbar, briefing-tv-here, rules, ready, briefing-teams
+[+9.4s] PASS K everyday 320×568 invited player: card "topbar" lies inside the briefing's content box and the screen — {"left":15,"right":305,"content":{"left":15,"right":305},"vw":320}
+[+9.4s] PASS K everyday 320×568 invited player: nothing in card "topbar" spills past its edges
+[+9.4s] PASS K everyday 320×568 invited player: card "briefing-tv-here" lies inside the briefing's content box and the screen — {"left":15,"right":305,"content":{"left":15,"right":305},"vw":320}
+[+9.4s] PASS K everyday 320×568 invited player: nothing in card "briefing-tv-here" spills past its edges
+[+9.4s] PASS K everyday 320×568 invited player: card "rules" lies inside the briefing's content box and the screen — {"left":15,"right":305,"content":{"left":15,"right":305},"vw":320}
+[+9.4s] PASS K everyday 320×568 invited player: nothing in card "rules" spills past its edges
+[+9.4s] PASS K everyday 320×568 invited player: card "ready" lies inside the briefing's content box and the screen — {"left":15,"right":305,"content":{"left":15,"right":305},"vw":320}
+[+9.4s] PASS K everyday 320×568 invited player: nothing in card "ready" spills past its edges
+[+9.4s] PASS K everyday 320×568 invited player: card "briefing-teams" lies inside the briefing's content box and the screen — {"left":15,"right":305,"content":{"left":15,"right":305},"vw":320}
+[+9.4s] PASS K everyday 320×568 invited player: nothing in card "briefing-teams" spills past its edges
+[+9.4s] PASS K everyday 320×568 invited player: the page has no sideways overflow — 0
+[+9.4s] PASS K everyday 320×568 invited player: the long names and the long team name are shown in full
+[+10.3s] PASS K everyday 320×568 spectator: the briefing TV shows the rules, who is ready and the teams
+[+10.6s] PASS K everyday 320×568 spectator: the briefing is in the everyday look — everyday
+[+10.6s] PASS K everyday 320×568 spectator: the expected cards are on screen (topbar, rules, ready, briefing-teams) — topbar, rules, ready, briefing-teams
+[+10.6s] PASS K everyday 320×568 spectator: card "topbar" lies inside the briefing's content box and the screen — {"left":15,"right":305,"content":{"left":15,"right":305},"vw":320}
+[+10.6s] PASS K everyday 320×568 spectator: nothing in card "topbar" spills past its edges
+[+10.6s] PASS K everyday 320×568 spectator: card "rules" lies inside the briefing's content box and the screen — {"left":15,"right":305,"content":{"left":15,"right":305},"vw":320}
+[+10.6s] PASS K everyday 320×568 spectator: nothing in card "rules" spills past its edges
+[+10.6s] PASS K everyday 320×568 spectator: card "ready" lies inside the briefing's content box and the screen — {"left":15,"right":305,"content":{"left":15,"right":305},"vw":320}
+[+10.6s] PASS K everyday 320×568 spectator: nothing in card "ready" spills past its edges
+[+10.6s] PASS K everyday 320×568 spectator: card "briefing-teams" lies inside the briefing's content box and the screen — {"left":15,"right":305,"content":{"left":15,"right":305},"vw":320}
+[+10.6s] PASS K everyday 320×568 spectator: nothing in card "briefing-teams" spills past its edges
+[+10.6s] PASS K everyday 320×568 spectator: the page has no sideways overflow — 0
+[+10.6s] PASS K everyday 320×568 spectator: the long names and the long team name are shown in full
+[+10.6s] PASS K everyday 320×568 spectator: the spectator's briefing is read-only (its only control is Stop watching) — ["Stop watching"]
+[+11.4s] PASS K everyday 1280×800 invited player: the briefing TV shows the rules, who is ready and the teams
+[+11.7s] PASS K everyday 1280×800 invited player: the briefing is in the everyday look — everyday
+[+11.7s] PASS K everyday 1280×800 invited player: the expected cards are on screen (topbar, briefing-tv-here, rules, ready, briefing-teams) — topbar, briefing-tv-here, rules, ready, briefing-teams
+[+11.7s] PASS K everyday 1280×800 invited player: card "topbar" lies inside the briefing's content box and the screen — {"left":60,"right":1220,"content":{"left":60,"right":1220},"vw":1280}
+[+11.7s] PASS K everyday 1280×800 invited player: nothing in card "topbar" spills past its edges
+[+11.7s] PASS K everyday 1280×800 invited player: card "briefing-tv-here" lies inside the briefing's content box and the screen — {"left":60,"right":1220,"content":{"left":60,"right":1220},"vw":1280}
+[+11.7s] PASS K everyday 1280×800 invited player: nothing in card "briefing-tv-here" spills past its edges
+[+11.7s] PASS K everyday 1280×800 invited player: card "rules" lies inside the briefing's content box and the screen — {"left":60,"right":436,"content":{"left":60,"right":1220},"vw":1280}
+[+11.7s] PASS K everyday 1280×800 invited player: nothing in card "rules" spills past its edges
+[+11.7s] PASS K everyday 1280×800 invited player: card "ready" lies inside the briefing's content box and the screen — {"left":452,"right":828,"content":{"left":60,"right":1220},"vw":1280}
+[+11.7s] PASS K everyday 1280×800 invited player: nothing in card "ready" spills past its edges
+[+11.7s] PASS K everyday 1280×800 invited player: card "briefing-teams" lies inside the briefing's content box and the screen — {"left":844,"right":1220,"content":{"left":60,"right":1220},"vw":1280}
+[+11.7s] PASS K everyday 1280×800 invited player: nothing in card "briefing-teams" spills past its edges
+[+11.7s] PASS K everyday 1280×800 invited player: the page has no sideways overflow — 0
+[+11.7s] PASS K everyday 1280×800 invited player: the long names and the long team name are shown in full
+[+11.7s] PASS K everyday 1280×800 invited player: the desktop layout is kept: the grid's cards side by side in one row, each at least 320 px wide — [["rules",376,250],["ready",376,250],["briefing-teams",376,250]]
+[+11.8s] PASS K everyday 1280×800 spectator: the briefing TV shows the rules, who is ready and the teams
+[+12.1s] PASS K everyday 1280×800 spectator: the briefing is in the everyday look — everyday
+[+12.1s] PASS K everyday 1280×800 spectator: the expected cards are on screen (topbar, rules, ready, briefing-teams) — topbar, rules, ready, briefing-teams
+[+12.1s] PASS K everyday 1280×800 spectator: card "topbar" lies inside the briefing's content box and the screen — {"left":60,"right":1220,"content":{"left":60,"right":1220},"vw":1280}
+[+12.1s] PASS K everyday 1280×800 spectator: nothing in card "topbar" spills past its edges
+[+12.1s] PASS K everyday 1280×800 spectator: card "rules" lies inside the briefing's content box and the screen — {"left":60,"right":436,"content":{"left":60,"right":1220},"vw":1280}
+[+12.1s] PASS K everyday 1280×800 spectator: nothing in card "rules" spills past its edges
+[+12.1s] PASS K everyday 1280×800 spectator: card "ready" lies inside the briefing's content box and the screen — {"left":452,"right":828,"content":{"left":60,"right":1220},"vw":1280}
+[+12.1s] PASS K everyday 1280×800 spectator: nothing in card "ready" spills past its edges
+[+12.1s] PASS K everyday 1280×800 spectator: card "briefing-teams" lies inside the briefing's content box and the screen — {"left":844,"right":1220,"content":{"left":60,"right":1220},"vw":1280}
+[+12.1s] PASS K everyday 1280×800 spectator: nothing in card "briefing-teams" spills past its edges
+[+12.1s] PASS K everyday 1280×800 spectator: the page has no sideways overflow — 0
+[+12.1s] PASS K everyday 1280×800 spectator: the long names and the long team name are shown in full
+[+12.1s] PASS K everyday 1280×800 spectator: the desktop layout is kept: the grid's cards side by side in one row, each at least 320 px wide — [["rules",376,115],["ready",376,115],["briefing-teams",376,115]]
+[+12.1s] PASS K everyday 1280×800 spectator: the spectator's briefing is read-only (its only control is Stop watching) — ["Stop watching"]
+[+12.2s] PASS K christmas 320×568 invited player: the briefing TV shows the rules, who is ready and the teams
+[+12.5s] PASS K christmas 320×568 invited player: the briefing is in the christmas look — christmas
+[+12.5s] PASS K christmas 320×568 invited player: the expected cards are on screen (topbar, briefing-tv-here, rules, ready, briefing-teams) — topbar, briefing-tv-here, rules, ready, briefing-teams
+[+12.5s] PASS K christmas 320×568 invited player: card "topbar" lies inside the briefing's content box and the screen — {"left":15,"right":305,"content":{"left":15,"right":305},"vw":320}
+[+12.5s] PASS K christmas 320×568 invited player: nothing in card "topbar" spills past its edges
+[+12.5s] PASS K christmas 320×568 invited player: card "briefing-tv-here" lies inside the briefing's content box and the screen — {"left":15,"right":305,"content":{"left":15,"right":305},"vw":320}
+[+12.5s] PASS K christmas 320×568 invited player: nothing in card "briefing-tv-here" spills past its edges
+[+12.5s] PASS K christmas 320×568 invited player: card "rules" lies inside the briefing's content box and the screen — {"left":15,"right":305,"content":{"left":15,"right":305},"vw":320}
+[+12.5s] PASS K christmas 320×568 invited player: nothing in card "rules" spills past its edges
+[+12.5s] PASS K christmas 320×568 invited player: card "ready" lies inside the briefing's content box and the screen — {"left":15,"right":305,"content":{"left":15,"right":305},"vw":320}
+[+12.5s] PASS K christmas 320×568 invited player: nothing in card "ready" spills past its edges
+[+12.5s] PASS K christmas 320×568 invited player: card "briefing-teams" lies inside the briefing's content box and the screen — {"left":15,"right":305,"content":{"left":15,"right":305},"vw":320}
+[+12.5s] PASS K christmas 320×568 invited player: nothing in card "briefing-teams" spills past its edges
+[+12.5s] PASS K christmas 320×568 invited player: the page has no sideways overflow — 0
+[+12.5s] PASS K christmas 320×568 invited player: the long names and the long team name are shown in full
+[+13.3s] PASS K christmas 320×568 spectator: the briefing TV shows the rules, who is ready and the teams
+[+13.6s] PASS K christmas 320×568 spectator: the briefing is in the christmas look — christmas
+[+13.6s] PASS K christmas 320×568 spectator: the expected cards are on screen (topbar, rules, ready, briefing-teams) — topbar, rules, ready, briefing-teams
+[+13.6s] PASS K christmas 320×568 spectator: card "topbar" lies inside the briefing's content box and the screen — {"left":15,"right":305,"content":{"left":15,"right":305},"vw":320}
+[+13.6s] PASS K christmas 320×568 spectator: nothing in card "topbar" spills past its edges
+[+13.6s] PASS K christmas 320×568 spectator: card "rules" lies inside the briefing's content box and the screen — {"left":15,"right":305,"content":{"left":15,"right":305},"vw":320}
+[+13.6s] PASS K christmas 320×568 spectator: nothing in card "rules" spills past its edges
+[+13.6s] PASS K christmas 320×568 spectator: card "ready" lies inside the briefing's content box and the screen — {"left":15,"right":305,"content":{"left":15,"right":305},"vw":320}
+[+13.6s] PASS K christmas 320×568 spectator: nothing in card "ready" spills past its edges
+[+13.6s] PASS K christmas 320×568 spectator: card "briefing-teams" lies inside the briefing's content box and the screen — {"left":15,"right":305,"content":{"left":15,"right":305},"vw":320}
+[+13.6s] PASS K christmas 320×568 spectator: nothing in card "briefing-teams" spills past its edges
+[+13.6s] PASS K christmas 320×568 spectator: the page has no sideways overflow — 0
+[+13.6s] PASS K christmas 320×568 spectator: the long names and the long team name are shown in full
+[+13.6s] PASS K christmas 320×568 spectator: the spectator's briefing is read-only (its only control is Stop watching) — ["Stop watching"]
+[+14.5s] PASS K christmas 1280×800 invited player: the briefing TV shows the rules, who is ready and the teams
+[+14.8s] PASS K christmas 1280×800 invited player: the briefing is in the christmas look — christmas
+[+14.8s] PASS K christmas 1280×800 invited player: the expected cards are on screen (topbar, briefing-tv-here, rules, ready, briefing-teams) — topbar, briefing-tv-here, rules, ready, briefing-teams
+[+14.8s] PASS K christmas 1280×800 invited player: card "topbar" lies inside the briefing's content box and the screen — {"left":60,"right":1220,"content":{"left":60,"right":1220},"vw":1280}
+[+14.8s] PASS K christmas 1280×800 invited player: nothing in card "topbar" spills past its edges
+[+14.8s] PASS K christmas 1280×800 invited player: card "briefing-tv-here" lies inside the briefing's content box and the screen — {"left":60,"right":1220,"content":{"left":60,"right":1220},"vw":1280}
+[+14.8s] PASS K christmas 1280×800 invited player: nothing in card "briefing-tv-here" spills past its edges
+[+14.8s] PASS K christmas 1280×800 invited player: card "rules" lies inside the briefing's content box and the screen — {"left":60,"right":436,"content":{"left":60,"right":1220},"vw":1280}
+[+14.8s] PASS K christmas 1280×800 invited player: nothing in card "rules" spills past its edges
+[+14.8s] PASS K christmas 1280×800 invited player: card "ready" lies inside the briefing's content box and the screen — {"left":452,"right":828,"content":{"left":60,"right":1220},"vw":1280}
+[+14.8s] PASS K christmas 1280×800 invited player: nothing in card "ready" spills past its edges
+[+14.8s] PASS K christmas 1280×800 invited player: card "briefing-teams" lies inside the briefing's content box and the screen — {"left":844,"right":1220,"content":{"left":60,"right":1220},"vw":1280}
+[+14.8s] PASS K christmas 1280×800 invited player: nothing in card "briefing-teams" spills past its edges
+[+14.8s] PASS K christmas 1280×800 invited player: the page has no sideways overflow — 0
+[+14.8s] PASS K christmas 1280×800 invited player: the long names and the long team name are shown in full
+[+14.8s] PASS K christmas 1280×800 invited player: the desktop layout is kept: the grid's cards side by side in one row, each at least 320 px wide — [["rules",376,250],["ready",376,250],["briefing-teams",376,250]]
+[+14.8s] PASS K christmas 1280×800 spectator: the briefing TV shows the rules, who is ready and the teams
+[+15.2s] PASS K christmas 1280×800 spectator: the briefing is in the christmas look — christmas
+[+15.2s] PASS K christmas 1280×800 spectator: the expected cards are on screen (topbar, rules, ready, briefing-teams) — topbar, rules, ready, briefing-teams
+[+15.2s] PASS K christmas 1280×800 spectator: card "topbar" lies inside the briefing's content box and the screen — {"left":60,"right":1220,"content":{"left":60,"right":1220},"vw":1280}
+[+15.2s] PASS K christmas 1280×800 spectator: nothing in card "topbar" spills past its edges
+[+15.2s] PASS K christmas 1280×800 spectator: card "rules" lies inside the briefing's content box and the screen — {"left":60,"right":436,"content":{"left":60,"right":1220},"vw":1280}
+[+15.2s] PASS K christmas 1280×800 spectator: nothing in card "rules" spills past its edges
+[+15.2s] PASS K christmas 1280×800 spectator: card "ready" lies inside the briefing's content box and the screen — {"left":452,"right":828,"content":{"left":60,"right":1220},"vw":1280}
+[+15.2s] PASS K christmas 1280×800 spectator: nothing in card "ready" spills past its edges
+[+15.2s] PASS K christmas 1280×800 spectator: card "briefing-teams" lies inside the briefing's content box and the screen — {"left":844,"right":1220,"content":{"left":60,"right":1220},"vw":1280}
+[+15.2s] PASS K christmas 1280×800 spectator: nothing in card "briefing-teams" spills past its edges
+[+15.2s] PASS K christmas 1280×800 spectator: the page has no sideways overflow — 0
+[+15.2s] PASS K christmas 1280×800 spectator: the long names and the long team name are shown in full
+[+15.2s] PASS K christmas 1280×800 spectator: the desktop layout is kept: the grid's cards side by side in one row, each at least 320 px wide — [["rules",376,115],["ready",376,115],["briefing-teams",376,115]]
+[+15.2s] PASS K christmas 1280×800 spectator: the spectator's briefing is read-only (its only control is Stop watching) — ["Stop watching"]
+[+15.3s] PASS K everyday 320×568 invited player: an ordinary tap on Back to my phone to get ready leaves the briefing TV
+[+15.4s] PASS K everyday 320×568 spectator: an ordinary tap on Stop watching leaves the briefing TV
+[+15.4s] PASS K everyday 1280×800 invited player: an ordinary click on Back to my phone to get ready leaves the briefing TV
+[+15.5s] PASS K everyday 1280×800 spectator: an ordinary click on Stop watching leaves the briefing TV
+[+15.6s] PASS K christmas 320×568 invited player: an ordinary tap on Back to my phone to get ready leaves the briefing TV
+[+15.7s] PASS K christmas 320×568 spectator: an ordinary tap on Stop watching leaves the briefing TV
+[+15.7s] PASS K christmas 1280×800 invited player: an ordinary click on Back to my phone to get ready leaves the briefing TV
+[+15.8s] PASS K christmas 1280×800 spectator: an ordinary click on Stop watching leaves the briefing TV
+[+20.7s] PASS S everyday 320×568 invited player: the Spectrum briefing is on the TV
+[+21.0s] PASS S everyday 320×568 invited player: the briefing is in the everyday look — everyday
+[+21.0s] PASS S everyday 320×568 invited player: the expected cards are on screen (topbar, briefing-tv-here, rules, ready) — topbar, briefing-tv-here, rules, ready
+[+21.0s] PASS S everyday 320×568 invited player: card "topbar" lies inside the briefing's content box and the screen — {"left":15,"right":305,"content":{"left":15,"right":305},"vw":320}
+[+21.0s] PASS S everyday 320×568 invited player: nothing in card "topbar" spills past its edges
+[+21.0s] PASS S everyday 320×568 invited player: card "briefing-tv-here" lies inside the briefing's content box and the screen — {"left":15,"right":305,"content":{"left":15,"right":305},"vw":320}
+[+21.0s] PASS S everyday 320×568 invited player: nothing in card "briefing-tv-here" spills past its edges
+[+21.0s] PASS S everyday 320×568 invited player: card "rules" lies inside the briefing's content box and the screen — {"left":15,"right":305,"content":{"left":15,"right":305},"vw":320}
+[+21.0s] PASS S everyday 320×568 invited player: nothing in card "rules" spills past its edges
+[+21.0s] PASS S everyday 320×568 invited player: card "ready" lies inside the briefing's content box and the screen — {"left":15,"right":305,"content":{"left":15,"right":305},"vw":320}
+[+21.0s] PASS S everyday 320×568 invited player: nothing in card "ready" spills past its edges
+[+21.0s] PASS S everyday 320×568 invited player: the page has no sideways overflow — 0
+[+21.1s] PASS S everyday 320×568 spectator: the Spectrum briefing is on the TV
+[+21.4s] PASS S everyday 320×568 spectator: the briefing is in the everyday look — everyday
+[+21.4s] PASS S everyday 320×568 spectator: the expected cards are on screen (topbar, rules, ready) — topbar, rules, ready
+[+21.4s] PASS S everyday 320×568 spectator: card "topbar" lies inside the briefing's content box and the screen — {"left":15,"right":305,"content":{"left":15,"right":305},"vw":320}
+[+21.4s] PASS S everyday 320×568 spectator: nothing in card "topbar" spills past its edges
+[+21.4s] PASS S everyday 320×568 spectator: card "rules" lies inside the briefing's content box and the screen — {"left":15,"right":305,"content":{"left":15,"right":305},"vw":320}
+[+21.4s] PASS S everyday 320×568 spectator: nothing in card "rules" spills past its edges
+[+21.4s] PASS S everyday 320×568 spectator: card "ready" lies inside the briefing's content box and the screen — {"left":15,"right":305,"content":{"left":15,"right":305},"vw":320}
+[+21.4s] PASS S everyday 320×568 spectator: nothing in card "ready" spills past its edges
+[+21.4s] PASS S everyday 320×568 spectator: the page has no sideways overflow — 0
+[+21.5s] PASS S christmas 320×568 invited player: the Spectrum briefing is on the TV
+[+21.8s] PASS S christmas 320×568 invited player: the briefing is in the christmas look — christmas
+[+21.8s] PASS S christmas 320×568 invited player: the expected cards are on screen (topbar, briefing-tv-here, rules, ready) — topbar, briefing-tv-here, rules, ready
+[+21.8s] PASS S christmas 320×568 invited player: card "topbar" lies inside the briefing's content box and the screen — {"left":15,"right":305,"content":{"left":15,"right":305},"vw":320}
+[+21.8s] PASS S christmas 320×568 invited player: nothing in card "topbar" spills past its edges
+[+21.8s] PASS S christmas 320×568 invited player: card "briefing-tv-here" lies inside the briefing's content box and the screen — {"left":15,"right":305,"content":{"left":15,"right":305},"vw":320}
+[+21.8s] PASS S christmas 320×568 invited player: nothing in card "briefing-tv-here" spills past its edges
+[+21.8s] PASS S christmas 320×568 invited player: card "rules" lies inside the briefing's content box and the screen — {"left":15,"right":305,"content":{"left":15,"right":305},"vw":320}
+[+21.8s] PASS S christmas 320×568 invited player: nothing in card "rules" spills past its edges
+[+21.8s] PASS S christmas 320×568 invited player: card "ready" lies inside the briefing's content box and the screen — {"left":15,"right":305,"content":{"left":15,"right":305},"vw":320}
+[+21.8s] PASS S christmas 320×568 invited player: nothing in card "ready" spills past its edges
+[+21.8s] PASS S christmas 320×568 invited player: the page has no sideways overflow — 0
+[+21.9s] PASS S christmas 320×568 spectator: the Spectrum briefing is on the TV
+[+22.2s] PASS S christmas 320×568 spectator: the briefing is in the christmas look — christmas
+[+22.2s] PASS S christmas 320×568 spectator: the expected cards are on screen (topbar, rules, ready) — topbar, rules, ready
+[+22.2s] PASS S christmas 320×568 spectator: card "topbar" lies inside the briefing's content box and the screen — {"left":15,"right":305,"content":{"left":15,"right":305},"vw":320}
+[+22.2s] PASS S christmas 320×568 spectator: nothing in card "topbar" spills past its edges
+[+22.2s] PASS S christmas 320×568 spectator: card "rules" lies inside the briefing's content box and the screen — {"left":15,"right":305,"content":{"left":15,"right":305},"vw":320}
+[+22.2s] PASS S christmas 320×568 spectator: nothing in card "rules" spills past its edges
+[+22.2s] PASS S christmas 320×568 spectator: card "ready" lies inside the briefing's content box and the screen — {"left":15,"right":305,"content":{"left":15,"right":305},"vw":320}
+[+22.2s] PASS S christmas 320×568 spectator: nothing in card "ready" spills past its edges
+[+22.2s] PASS S christmas 320×568 spectator: the page has no sideways overflow — 0
+[+22.3s] PASS S everyday 1280×800 spectator: the Spectrum briefing is on the TV
+[+22.6s] PASS S everyday 1280×800 spectator: the briefing is in the everyday look — everyday
+[+22.6s] PASS S everyday 1280×800 spectator: the expected cards are on screen (topbar, rules, ready) — topbar, rules, ready
+[+22.6s] PASS S everyday 1280×800 spectator: card "topbar" lies inside the briefing's content box and the screen — {"left":60,"right":1220,"content":{"left":60,"right":1220},"vw":1280}
+[+22.6s] PASS S everyday 1280×800 spectator: nothing in card "topbar" spills past its edges
+[+22.6s] PASS S everyday 1280×800 spectator: card "rules" lies inside the briefing's content box and the screen — {"left":60,"right":632,"content":{"left":60,"right":1220},"vw":1280}
+[+22.6s] PASS S everyday 1280×800 spectator: nothing in card "rules" spills past its edges
+[+22.6s] PASS S everyday 1280×800 spectator: card "ready" lies inside the briefing's content box and the screen — {"left":648,"right":1220,"content":{"left":60,"right":1220},"vw":1280}
+[+22.6s] PASS S everyday 1280×800 spectator: nothing in card "ready" spills past its edges
+[+22.6s] PASS S everyday 1280×800 spectator: the page has no sideways overflow — 0
+[+22.6s] PASS S everyday 1280×800 spectator: the desktop layout is kept: the grid's cards side by side in one row, each at least 320 px wide — [["rules",572,115],["ready",572,115]]
+[+22.6s] PASS S everyone ready starts play on the server
+[+22.6s] PASS S the spectator's TV leaves the briefing when play starts
+[+23.0s] BRIEFING TV FIT ALL PASSED
+[+23.0s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":14,"pages":14,"peakOpenPages":8}
+
+# PASS (exit 0) in 23s | cpu 7.5s, peak memory 414 MB

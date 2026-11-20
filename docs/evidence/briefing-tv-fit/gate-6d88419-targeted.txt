@@ -1,0 +1,25 @@
+
+PASSED (exit 0) | targeted | run 20261120-174946-6d884195-26796
+  13 passed, 0 failed, 0 timed out, 0 infrastructure, 0 invalid, 0 cancelled, 0 not run
+  timing   wall 4m 55s · step time 13m 48s (sum) · 3 workers, 93% busy · 2.81× the same steps run one after another
+           predicted 3–11m (about 4m 38s, low-confidence) → actual 4m 55s (+6%)
+           longest  check-audit-fixes 4m 04s, check-spectrum 2m 05s, check-briefing 1m 36s · the longest step is 83% of the wall time
+           machine  CPU mean 35%, peak 89% · memory available ≥ 13015 MB · load peak 4.1
+           contention ×1.123 (median step time vs its sequential median)
+           retries  none (the gate never retries a step)
+  report <scratch>/gate-bf-targeted/20261120-174946-6d884195-26796/report.json
+
+Steps (from the run's console):
+[ 1/13] PASS         5.5s  build-web  w1
+[ 2/13] PASS         0.7s  browser-preflight  w1
+[ 3/13] PASS          23s  check-briefing-tv-fit  w3
+[ 4/13] PASS        95.8s  check-briefing  w2
+[ 5/13] PASS        76.8s  check-know-your-rivals  w3
+[ 6/13] PASS          41s  check-one-path  w2
+[ 7/13] PASS        11.9s  check-teams  w2
+[ 8/13] PASS          69s  check-tv-return  w2
+[ 9/13] PASS         125s  check-spectrum  w3
+[10/13] PASS       243.6s  check-audit-fixes  w1
+[11/13] PASS        12.1s  check-tv-show  w1
+[12/13] PASS          53s  check-tv-spectator  w3
+[13/13] PASS        70.2s  check-warm-ivory  w2

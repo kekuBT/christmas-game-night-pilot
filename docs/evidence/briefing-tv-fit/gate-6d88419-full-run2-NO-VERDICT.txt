@@ -1,0 +1,11 @@
+Full gate run 2 on 6d88419: 20261120-185358-6d884195-24239
+No verdict: the session's worker process was restarted while it ran (6 of 119 steps done, all passed), which stopped the run.
+
+   running   e2e-chromium 36s (w1), check-f5 20s (w2), check-leaderboard 20s (w3)
+   remaining 23–80m · total 25–82m · done around 19:19–20:15 UTC (low-confidence)
+── progress  6/119 done · 6 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 3m 00s
+   running   e2e-chromium 1m 36s (w1), check-f5 1m 20s (w2), check-leaderboard 1m 20s (w3)
+   remaining 22–79m · total 25–82m · done around 19:19–20:15 UTC (low-confidence)
+── progress  6/119 done · 6 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 4m 00s
+   running   e2e-chromium 2m 36s (w1), check-f5 2m 20s (w2), check-leaderboard 2m 20s (w3)
+   remaining 21–78m · total 25–82m · done around 19:19–20:15 UTC (low-confidence)

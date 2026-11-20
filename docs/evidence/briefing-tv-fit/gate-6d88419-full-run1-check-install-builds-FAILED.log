@@ -1,0 +1,43 @@
+$ node scripts/check-install-builds.mjs http://localhost:41579
+# timeout 600s | worker w3 | server http://localhost:41579 (data <scratch>/gate-bf-full/20261120-175449-6d884195-29338/server-data/w3)
+
+[+24.3s]   (four real builds in 24 s: A 654a7428e2c621a4, W e53a77ceedc1f749, P 0bc1aabb9282dd93)
+[+24.3s] PASS B setup: build A names its version in its page and its worker
+[+24.3s] PASS B setup: build A2 names its version in its page and its worker
+[+24.3s] PASS B setup: build W names its version in its page and its worker
+[+24.3s] PASS B setup: build P names its version in its page and its worker
+[+24.3s] PASS B the same source built twice gives the same version, the same worker byte for byte, the same page and the same files
+[+24.3s] PASS B and the same as the build under test (built separately, elsewhere) — 654a7428e2c621a4 vs 654a7428e2c621a4
+[+24.3s] PASS B a worker-only change (sw.ts) is a new version and a new worker
+[+24.3s] PASS B a worker-policy change (swPolicy.ts, a dependency of the worker only) is a new version too
+[+24.3s] PASS B neither change touches the app: the same files, byte for byte, and the same page apart from its build marker
+[+25.8s] PASS E setup: A's worker is active and controls the page
+[+27.7s] PASS E setup: A's live cache holds every file it precaches (14 entries)
+[+27.9s] PASS E1 W deployed with a listed file missing: W's install runs and fails — redundant
+[+28.0s] PASS E1 A's live cache is exactly as it was: every entry, the same bytes, the same order
+[+28.0s] FAIL E1 no candidate is left, nothing else is touched — ["mchezo-shell-654a7428e2c621a4","mchezo-stage-e53a77ceedc1f749-mwpav1zd-jwpjkx0p","not-mchezo"]
+[+28.3s] PASS E1 the round in the other tab plays on (a guess answered, the same page)
+[+29.7s] PASS E1 offline, A's shell is whole: A's page, scripts, styles and assets, saying it can't reach Mchezo — {"notice":true,"build":"654a7428e2c621a4","files":2,"foreign":[]}
+[+29.9s] PASS E2 W with storage full (Chromium's quota override): W's install runs and fails — redundant
+[+29.9s] PASS E2 A's live cache is exactly as it was
+[+29.9s] PASS E2 no candidate is left — ["mchezo-shell-654a7428e2c621a4","not-mchezo"]
+[+30.2s] PASS E2 the round plays on
+[+30.6s] PASS E3 W complete: it installs and waits; A stays in charge — installed
+[+30.6s] PASS E3 while W waits, A's live cache is untouched, and W's files are only in W's own candidate
+[+31.0s] PASS E3 the round plays on while W waits
+[+32.4s] PASS E3 every A page closed and one reopened: W is activated and controls it
+[+32.4s] PASS E3 scoped cleanup: W's live cache and someone else's remain; A's cache and every candidate are gone — ["mchezo-shell-e53a77ceedc1f749","not-mchezo"]
+[+32.4s] PASS E3 W's live cache holds every file it precaches, and nothing of A's that W doesn't list
+[+33.6s] PASS E3 offline, W's shell is whole — {"notice":true,"build":"e53a77ceedc1f749","files":2,"foreign":[]}
+[+34.0s] PASS E4 P (a policy change) deployed with a listed file missing: its install fails; W's cache exactly as it was; no candidate left — redundant
+[+34.4s] PASS E4 P complete: it installs and waits; W's cache untouched — installed
+[+35.8s] PASS E4 P activates; only P's live cache and someone else's remain — ["mchezo-shell-0bc1aabb9282dd93","not-mchezo"]
+[+36.0s] PASS E5 a worker with P's version but different bytes, a listed file missing: its install fails; P's cache exactly as it was; no candidate left — redundant
+[+36.3s] PASS E5 complete, it installs and waits without touching P's live cache (only its own candidate) — installed
+[+37.7s] PASS E5 on activation: one complete live cache, no candidate left — ["mchezo-shell-0bc1aabb9282dd93","not-mchezo"]
+[+39.1s] PASS E5 offline, the shell is whole — {"notice":true,"build":"0bc1aabb9282dd93","files":2,"foreign":[]}
+[+39.5s] 
+[+39.5s] 1 build-update check(s) FAILED
+[+39.5s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":1,"pages":5,"peakOpenPages":2}
+
+# FAIL (exit 1) in 39.5s | cpu 43.7s, peak memory 751 MB

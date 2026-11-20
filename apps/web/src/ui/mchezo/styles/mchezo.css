@@ -566,7 +566,10 @@
 .mz-brief__note { display: block; color: var(--mz-highlight); font-weight: 700; margin-bottom: 4px; }
 .mz-brief__confirm-row { display: block; color: var(--mz-text); font-weight: 600; }
 .mz-brief__when { display: block; color: var(--mz-text-muted); font-size: 13px; font-weight: 700; margin-bottom: 2px; }
-.mz-brief__tvgrid { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); align-items: start; margin-top: 12px; }
+/* D-BF-01 (handoff 7046501193): a track's minimum is capped at the grid's own width (min(…, 100%)), so on a phone
+   narrower than 320 px of content each card takes the full width instead of running past the screen's edge. Wider
+   screens are unchanged: the cards sit side by side, each at least 320 px. */
+.mz-brief__tvgrid { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr)); align-items: start; margin-top: 12px; }
 .mz-brief__tvgrid .mz-card + .mz-card, .mz-brief__tvgrid .mz-brief__rules { margin-top: 0; }
 .mz-brief--tv .mz-brief__objective { font-size: 26px; }
-.mz-brief__people--tv { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); }
+.mz-brief__people--tv { grid-template-columns: repeat(auto-fill, minmax(min(220px, 100%), 1fr)); }
