@@ -49,9 +49,25 @@ import { launchChromium } from "./lib/driver-env.mjs";
 const ROOT = process.cwd();
 const GATE_DIST = process.env.MCHEZO_WEB_DIST ?? null;
 const SHOTS = process.env.MCHEZO_SCREENSHOT_DIR ?? null;
+// Fault modes, only for scripts/check-install-builds-no-worker.mjs (review 7057502077); the gate never sets them.
+//   e1-no-new-worker  E1 deploys the build already in charge again, so the driver's own update starts no attempt.
+//   e1-watch-too-late the second tab's watch is armed only after the driver's attempt has ended, so it misses it.
+// Either way the run must fail E1 by name, end, and clean up.
+const FAULTS = ["e1-no-new-worker", "e1-watch-too-late"];
+const FAULT = process.env.MCHEZO_INSTALL_BUILDS_FAULT ?? null;
+if (FAULT !== null && !FAULTS.includes(FAULT)) { console.error(`MCHEZO_INSTALL_BUILDS_FAULT must be one of: ${FAULTS.join(", ")}`); process.exit(2); }
+if (FAULT) console.log(`FAULT MODE ${FAULT}: ${FAULT === "e1-no-new-worker" ? "E1 deploys the build already in charge, so no new worker appears" : "the second tab's watch starts after the driver's attempt has ended"} (this run is expected to FAIL E1)`);
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 let failures = 0;
 function check(name, ok, detail = "") { console.log(`${ok ? "PASS" : "FAIL"} ${name}${detail ? ` — ${detail}` : ""}`); if (!ok) failures++; }
+/** A wait in a page that must end: `p` (an evaluate), or after `ms` either `fallback` or, without one, a named error (which ends the run in its catch and finally). */
+function within(ms, what, p, fallback) {
+  let timer;
+  const late = new Promise((resolve, reject) => {
+    timer = setTimeout(() => (fallback !== undefined ? resolve(fallback) : reject(new Error(`${what}: no answer within ${Math.round(ms / 1000)} s`))), ms);
+  });
+  return Promise.race([p, late]).finally(() => clearTimeout(timer));
+}
 async function soon(fn, timeout = 15000, every = 200) {
   const end = Date.now() + timeout; let last;
   while (Date.now() < end) { try { const v = await fn(); if (v) return v; } catch (e) { last = e; } await sleep(every); }
@@ -164,10 +180,11 @@ const watchAttempts = (page) => page.evaluate(async () => {
   reg?.addEventListener("updatefound", () => track(reg.installing));
 });
 const QUIET_MS = 1000;
+const OWN_DEADLINE_MS = 20000;
 /** Wait until no install attempt is in flight and none has started for QUIET_MS (false if that doesn't happen within `timeout`). */
 async function settle(page, timeout = 30000) {
-  await watchAttempts(page);
-  return page.evaluate(async ({ quiet, timeout }) => {
+  await within(10000, "watching install attempts", watchAttempts(page));
+  return within(timeout + 5000, "waiting for install attempts to settle", page.evaluate(async ({ quiet, timeout }) => {
     const reg = await navigator.serviceWorker.getRegistration();
     const end = Date.now() + timeout;
     let calmSince = Date.now();
@@ -178,7 +195,7 @@ async function settle(page, timeout = 30000) {
       await new Promise((r) => setTimeout(r, 20));
     }
     return false;
-  }, { quiet: QUIET_MS, timeout });
+  }, { quiet: QUIET_MS, timeout }));
 }
 /**
  * The driver's own update attempt (D-IB-01): settle, `prepare()` (a deploy), ask for an update, follow the worker that
@@ -188,39 +205,76 @@ async function settle(page, timeout = 30000) {
 async function ownUpdate(page, prepare = async () => {}) {
   const calmBefore = await settle(page);
   await prepare();
-  const r = await page.evaluate(async () => {
+  const r = await within(OWN_DEADLINE_MS + 10000, "the driver's own update attempt", page.evaluate(async (deadlineMs) => {
     const reg = await navigator.serviceWorker.getRegistration();
     const from = window.__mzAttempts.length;
     const known = [...window.__mzWorkers];
-    await reg.update().catch(() => {});
+    await Promise.race([reg.update().catch(() => {}), new Promise((res) => setTimeout(res, deadlineMs))]);
     const w = reg.installing;
     if (!w) return { own: "no new worker", from, mine: -1 };
     if (known.includes(w)) return { own: "joined an attempt already in flight", from, mine: -1 };
     window.__mzTrack(w);
     const mine = window.__mzWorkers.indexOf(w);
-    const end = Date.now() + 20000;
+    const end = Date.now() + deadlineMs;
     while (!["redundant", "installed", "activating", "activated"].includes(w.state) && Date.now() < end) await new Promise((res) => setTimeout(res, 50));
     return { own: w.state, from, mine };
-  });
+  }, OWN_DEADLINE_MS));
   const calmAfter = await settle(page);
-  const others = await page.evaluate(({ from, mine }) => window.__mzAttempts.map((a, i) => ({ i, state: a.state })).filter((a) => a.i >= from && a.i !== mine).map((a) => a.state), r);
+  const others = await within(10000, "reading the other attempts", page.evaluate(({ from, mine }) => window.__mzAttempts.map((a, i) => ({ i, state: a.state })).filter((a) => a.i >= from && a.i !== mine).map((a) => a.state), r));
   return { own: r.own, others, calm: calmBefore && calmAfter };
 }
-/** Another tab asks for an update the moment the next install attempt ends, as the browser or the app may: a second attempt, not the driver's. */
-const armSecondAttempt = (tab) => tab.evaluate(() => {
+/**
+ * Another tab asks for an update the moment the next install attempt ends, as the browser or the app may: a second
+ * attempt, not the driver's. Bounded (review 7057502077): the first attempt must appear and end, and the second must
+ * start, within SECOND_DEADLINE_MS; every listener is removed on completion, timeout or cancel; the outcome is always
+ * one named string in window.__mzSecond. window.__mzSecondCancel(why) ends it at once.
+ */
+const SECOND_DEADLINE_MS = 15000;
+const armSecondAttempt = (tab) => within(10000, "arming the second attempt", tab.evaluate((deadlineMs) => {
+  let cancelled = null;
+  let wake = () => {};
+  window.__mzSecondCancel = (why) => { if (cancelled === null) { cancelled = why; wake(); } };
   window.__mzSecond = (async () => {
     const reg = await navigator.serviceWorker.getRegistration();
-    const w = reg.installing ?? await new Promise((res) => reg.addEventListener("updatefound", () => res(reg.installing), { once: true }));
-    await new Promise((res) => { const done = () => ["redundant", "installed"].includes(w.state); if (done()) res(); else w.addEventListener("statechange", () => { if (done()) res(); }); });
-    // Until the browser has finished that job, an update joins it and starts nothing: ask again, briefly.
-    for (let i = 0; i < 40; i++) {
-      await reg.update().catch(() => {});
-      if (reg.installing && reg.installing !== w) return "started";
+    if (!reg) return "no registration in the second tab";
+    const end = Date.now() + deadlineMs;
+    const ended = (w) => ["redundant", "installed", "activating", "activated"].includes(w.state);
+    let first = null;
+    const off = [];
+    try {
+      // The first attempt: it appears (installing now, or updatefound later) and ends, or the deadline or a cancel comes first.
+      const outcome = await new Promise((resolve) => {
+        wake = () => resolve(`cancelled: ${cancelled}`);
+        if (cancelled !== null) { wake(); return; } // cancelled before this watch began
+        const timer = setTimeout(() => resolve(first ? `the first attempt did not end within ${deadlineMs / 1000} s` : `no first attempt appeared within ${deadlineMs / 1000} s`), deadlineMs);
+        off.push(() => clearTimeout(timer));
+        const follow = (w) => {
+          if (first || !w) return;
+          first = w;
+          if (ended(w)) { resolve("ended"); return; }
+          const onState = () => { if (ended(w)) resolve("ended"); };
+          w.addEventListener("statechange", onState);
+          off.push(() => w.removeEventListener("statechange", onState));
+        };
+        const onFound = () => follow(reg.installing);
+        reg.addEventListener("updatefound", onFound);
+        off.push(() => reg.removeEventListener("updatefound", onFound));
+        follow(reg.installing);
+      });
+      if (outcome !== "ended") return outcome;
+    } finally {
+      for (const f of off) f();
+      wake = () => {};
+    }
+    // Until the browser has finished that job, an update joins it and starts nothing: ask again, briefly, within the same deadline.
+    while (Date.now() < end && cancelled === null) {
+      await Promise.race([reg.update().catch(() => {}), new Promise((res) => setTimeout(res, Math.max(0, end - Date.now())))]);
+      if (reg.installing && reg.installing !== first) return "started";
       await new Promise((res) => setTimeout(res, 50));
     }
-    return "never started";
+    return cancelled !== null ? `cancelled: ${cancelled}` : `no second attempt started within ${deadlineMs / 1000} s`;
   })();
-});
+}, SECOND_DEADLINE_MS));
 /** Open the app on a fresh page and wait until `version`'s worker is activated and controls it. */
 async function openControlled(ctx, base, version) {
   const p = await ctx.newPage();
@@ -311,8 +365,18 @@ try {
   const okNames = (names, v) => JSON.stringify(names) === JSON.stringify([live(v), "not-mchezo"].sort());
 
   // E1: W, a listed file missing. The round's tab asks for an update right after W's install ends: a second attempt.
-  const e1 = await ownUpdate(home, async () => { deploy(LIVE_DIR, W, { missing: "/icons/icon-512.png" }); await armSecondAttempt(round); });
-  const second = await round.evaluate(() => window.__mzSecond);
+  const e1 = await ownUpdate(home, async () => {
+    if (FAULT === "e1-no-new-worker") deploy(LIVE_DIR, A); // the build in charge again: no new worker
+    else deploy(LIVE_DIR, W, { missing: "/icons/icon-512.png" });
+    if (FAULT !== "e1-watch-too-late") await armSecondAttempt(round);
+  });
+  if (FAULT === "e1-watch-too-late") {
+    deploy(LIVE_DIR, A); // the build in charge again, so no later attempt can come either: only the watch's deadline ends it
+    await armSecondAttempt(round); // it missed the attempt it was meant to follow
+  }
+  // No attempt of the driver's own: nothing will start the second tab's, so end its watch now (it is bounded anyway).
+  if (!["redundant", "installed"].includes(e1.own)) await within(5000, "cancelling the second attempt", round.evaluate((why) => window.__mzSecondCancel?.(why), `the driver's own update gave "${e1.own}"`), null);
+  const second = await within(SECOND_DEADLINE_MS + 5000, "the second tab's watch", round.evaluate(() => window.__mzSecond), `the second tab did not answer within ${(SECOND_DEADLINE_MS + 5000) / 1000} s`);
   check("E1 W deployed with a listed file missing: W's install runs and fails", e1.own === "redundant" && e1.calm && (await workerBuild(home, "active")) === A.version, JSON.stringify(e1));
   check("E1 another tab asks for an update the moment W's install ends: a second attempt, not the driver's, starts and fails too", second === "started" && e1.others.length >= 1 && e1.others.every((x) => x === "redundant"), JSON.stringify({ second, others: e1.others }));
   check("E1 A's live cache is exactly as it was: every entry, the same bytes, the same order", JSON.stringify(await digests(home, live(A.version))) === JSON.stringify(a0));
