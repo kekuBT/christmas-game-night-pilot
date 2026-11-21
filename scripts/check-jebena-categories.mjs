@@ -12,6 +12,12 @@
 //   S3 at a change both phones say "Category · new!" for the turn it starts;
 //   S4 a rejected try mid-streak and a phone reload mid-streak change nothing:
 //      the same category, no "new!", and the streak still ends within bounds.
+//   S5 (review 7058749487) right after each change, the watching phone (the one
+//      that just answered: "You named …") and the TV say which category the last
+//      answer was named in ("… named “X” in Sports."), also after that phone
+//      reloads (Christmas at 320 px after change 1, Everyday at 390 after change 2);
+//      after the first answer in the new category, the plain line is back. The
+//      holder's turn screen has no last-play line (it shows the input instead).
 // On the base (rules version 1) S2 fails: the first category never moves.
 // Usage: node scripts/check-jebena-categories.mjs [gateBaseUrl]   (without one it starts its own server)
 import { spawn } from "node:child_process";
@@ -55,6 +61,21 @@ const view = async (page) => {
   const p = (await api(page, "GET", "/rooms/:room/projection?audience=player")).body;
   return (p.myGames ?? []).filter((g) => g.gameId === "jebena-rush").slice(-1)[0] ?? null;
 };
+const textOf = async (loc) => ((await loc.count()) ? ((await loc.first().textContent()) ?? "").trim() : null);
+/** The last-play lines as written (DOM text): the watching phone, the TV, and whether the holder's screen has one. */
+const lastLines = async (watcher, holder, TV) => ({
+  phone: await textOf(watcher.getByTestId("jr-last")),
+  tv: await textOf(TV.getByTestId("tv-jr-last")),
+  holderHasLine: (await holder.getByTestId("jr-last").count()) > 0,
+});
+/** Reload a phone in another look at another width (a later init script wins); returns the look it shows. */
+async function reloadAs(page, look, width) {
+  await page.context().addInitScript((l) => { try { localStorage.setItem("mz_look", l); } catch { /* none */ } }, look);
+  await page.setViewportSize({ width, height: 760 });
+  await page.reload({ waitUntil: "domcontentloaded" });
+  await page.getByTestId("jr-category").waitFor({ timeout: 8000 });
+  return page.evaluate(() => document.querySelector(".mz-root")?.getAttribute("data-mz-theme"));
+}
 /** Screenshots only into MCHEZO_SCREENSHOT_DIR (never into the checkout). */
 /** The category kicker's own text ("Category" or "Category · new!"); CSS shows it in capitals, so read the DOM text, not the rendered one. */
 const kicker = async (page) => ((await page.locator('[data-testid="jr-category"] .mz-kicker').textContent()) ?? "").trim();
@@ -133,6 +154,23 @@ try {
   let rejectedDone = false;
   let reloadDone = false;
   let shotBefore = false;
+  /** After a change: the next accepted answer must bring back the plain line. */
+  let plainPending = false;
+  const lastAccepted = (st) => (st.log ?? []).filter((e) => e.kind === "accepted").slice(-1)[0];
+  /** The phone that just answered watches now; the other holds the jebena. */
+  const sides = (st) => { const last = lastAccepted(st); const w = pageOf[last?.player]; return { last, watcher: w, holder: w === K ? A : K, who: w === K ? "Keku" : "Amina" }; };
+  let seen = null;
+  async function plainCheck(st) {
+    const { last, watcher, holder, who } = sides(st);
+    const want = `named “${last?.answer}”.`;
+    const lines = await soon(`S5 the first answer in the new category: the plain line on ${who}'s phone and the TV`, async () => {
+      const l = (seen = await lastLines(watcher, holder, TV));
+      return l.phone === `You ${want}` && l.tv?.endsWith(want) && !l.tv.includes(" in ") && !l.holderHasLine ? l : null;
+    }, 4000);
+    if (lines) check(`S5 the first answer in the new category: the plain line on ${who}'s phone and the TV (no category named)`, true, JSON.stringify(lines));
+    else console.log("  seen:", JSON.stringify(seen));
+    plainPending = false;
+  }
   // Two whole streaks can take up to 8 + 8 accepted answers (D-JR-01: each lasts 5 to 8); one more to see the second change land.
   const MAX_STREAK = 8;
   for (let i = 0; i < 2 * MAX_STREAK + 1 && streakChanges < 2; i++) {
@@ -159,6 +197,7 @@ try {
     const st = await agree(`after accepted answer ${i + 1}`);
     if (!st) break;
     sinceChange += 1;
+    if (plainPending && st.category.round === before.category.round) await plainCheck(st);
     if (st.category.round !== before.category.round) {
       const entry = (st.log ?? []).filter((e) => e.kind === "category").slice(-1)[0];
       check(`S2 change ${streakChanges + 1} comes from a streak of accepted answers (not a timeout)`, entry?.reason === "streak" && !(st.log ?? []).some((e) => e.kind === "timeout"), JSON.stringify(entry));
@@ -170,18 +209,50 @@ try {
         return k === "Category · new!" && a === "Category · new!" ? { k, a } : null;
       }, 4000);
       if (kickers) check(`S3 change ${streakChanges + 1}: both phones say "Category · new!" for the turn it starts`, true, JSON.stringify(kickers));
+      // S5: the last answer belongs to the previous category, and every screen says so.
+      const prevName = before.category.name;
+      const { last, watcher, holder, who } = sides(st);
+      const want = `named “${last?.answer}” in ${prevName}.`;
+      const ctxLines = await soon(`S5 change ${streakChanges + 1}: ${who}'s phone and the TV say the last answer was named in ${prevName}`, async () => {
+        const l = (seen = await lastLines(watcher, holder, TV));
+        return l.phone === `You ${want}` && l.tv === `${who} ${want}` && !l.holderHasLine ? l : null;
+      }, 4000);
+      if (ctxLines) check(`S5 change ${streakChanges + 1}: ${who}'s phone and the TV say the last answer was named in ${prevName} (now ${st.category.name}); the holder's turn screen has no last-play line`, true, JSON.stringify(ctxLines));
+      else console.log("  seen:", JSON.stringify(seen));
       if (kickers && streakChanges === 0) { await shot(K, "jrc-after-change-390-everyday"); await shot(A, "jrc-after-change-320-christmas"); await shot(TV, "jrc-after-change-tv"); }
+      // S5 after a reload, in the other look at the other width: Keku's phone after the first change, Amina's after the second.
+      const [look, width] = streakChanges === 0 ? ["christmas", 320] : ["everyday", 390];
+      const theme = await reloadAs(watcher, look, width);
+      const line = await soon(`S5 change ${streakChanges + 1}: ${who}'s phone shows the line again after the reload`, async () => {
+        const t = await textOf(watcher.getByTestId("jr-last")); return t === `You ${want}` ? t : null;
+      }, 4000);
+      const noScroll = await watcher.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1);
+      check(`S5 change ${streakChanges + 1}: after ${who}'s phone reloads in ${look} at ${width} px, it still says “You ${want}” with no sideways scroll`, theme === look && !!line && noScroll, JSON.stringify({ theme, line, noScroll }));
+      // Let the reload's entrance fade finish (finite animations only; the steam loops), at most 1.5 s.
+      await watcher.evaluate(() => Promise.race([
+        Promise.all(document.getAnimations().filter((a) => Number.isFinite(a.effect?.getComputedTiming().endTime)).map((a) => a.finished.catch(() => null))),
+        new Promise((r) => setTimeout(r, 1500)),
+      ]));
+      await shot(watcher, `jrc-after-change-reload-${width}-${look}`);
+      plainPending = true;
       gaps.push(sinceChange);
       streakChanges += 1;
       sinceChange = 0;
     }
   }
-  await shot(K, "jrc-end-390-everyday"); await shot(TV, "jrc-end-tv");
+  // The loop stops at the second change: one more answer for its plain-line check.
+  if (plainPending && streakChanges >= 2 && (await playAccepted())) { const st = await agree("after the answer that follows the second change"); if (st) await plainCheck(st); }
+  /** Name a shot by the page's width and look as they are now (the S5 reloads change them). */
+  const tag = (pg) => pg.evaluate(() => `${window.innerWidth}-${document.querySelector(".mz-root")?.getAttribute("data-mz-theme")}`);
+  await shot(K, `jrc-end-keku-${await tag(K)}`); await shot(A, `jrc-end-amina-${await tag(A)}`); await shot(TV, "jrc-end-tv");
   check("S2 sustained correct play changes the category, and again after the next streak", streakChanges >= 2, `changes ${streakChanges}, gaps ${JSON.stringify(gaps)}, first ${firstCategory}`);
   check("S4 both the rejected try and the reload happened mid-streak", rejectedDone && reloadDone);
   const fin = (await view(K)).state;
   check("no turn ran out (every change was a streak's, every player kept every cup)", !(fin.log ?? []).some((e) => e.kind === "timeout") && (fin.order ?? []).every((r) => r.hearts === fin.startHearts), JSON.stringify((fin.order ?? []).map((r) => r.hearts)));
-  check("at 320 px Amina's phone has no sideways scroll", await A.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1));
+  for (const [who, pg] of [["Keku", K], ["Amina", A]]) {
+    const w = await pg.evaluate(() => window.innerWidth);
+    check(`${who}'s phone (${w} px now) has no sideways scroll`, await pg.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1));
+  }
 } catch (e) {
   check("no unexpected error", false, String(e?.stack ?? e).split("\n").slice(0, 3).join(" | "));
 } finally {

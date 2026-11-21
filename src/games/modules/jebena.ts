@@ -105,6 +105,8 @@ export interface JebenaState {
   end: null | "last-standing" | "banks-exhausted";
 }
 
+/** A category's public name, or undefined for an id this bank doesn't know (never a raw id in place of a name). */
+const categoryNameOf = (id: string | undefined): string | undefined => (id ? JEBENA_CATEGORIES.find((x) => x.id === id)?.name : undefined);
 const categoryById = (id: string): JebenaCategory => {
   const c = JEBENA_CATEGORIES.find((x) => x.id === id);
   if (!c) throw new Error(`Unknown Jebena category ${id}`);
@@ -235,7 +237,13 @@ function publicView(s: JebenaState, scale = 1) {
     turn: s.turn ? { n: s.turn.n, player: s.turn.player } : null,
     category: { id: cat.id, name: cat.name, definition: cat.definition, round: s.categoryRound, named: thisCategory.length },
     named: thisCategory.slice(-12),
-    log: s.log.slice(-LOG_IN_VIEW),
+    // Each accepted answer carries its own category's public name (review 7058749487): after a change, the
+    // last-play line can say which category it was named in. Worked out here, so older saved matches get it too.
+    // Only categories already played appear in the log; nothing of the bank is added.
+    log: s.log.slice(-LOG_IN_VIEW).map((e) => {
+      const categoryName = e.kind === "accepted" ? categoryNameOf(e.categoryId) : undefined;
+      return categoryName ? { ...e, categoryName } : e;
+    }),
     end: s.end,
     // Always (public facts only): when the room's match limit ends the game, the module's own
     // `end` stays null, and the results still need the places.

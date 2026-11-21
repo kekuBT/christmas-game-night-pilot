@@ -7,7 +7,7 @@
 
 export type JebenaVerdict = "accepted" | "used" | "not-in-bank" | "ambiguous" | "near-miss" | "empty";
 /** `hearts` is the server's name for whole cups left (D-S101-02); `at` is the server time it happened. */
-export interface JebenaLogEntry { seq: number; turn: number; kind: "accepted" | "timeout" | "out" | "category" | "sat-out"; reason?: "start" | "streak" | "timeout" | "used-up"; player?: string; answer?: string; via?: string; categoryId?: string; hearts?: number; at?: number }
+export interface JebenaLogEntry { seq: number; turn: number; kind: "accepted" | "timeout" | "out" | "category" | "sat-out"; reason?: "start" | "streak" | "timeout" | "used-up"; player?: string; answer?: string; via?: string; categoryId?: string; categoryName?: string; hearts?: number; at?: number }
 export interface JebenaStanding { id: string; place: number; hearts: number; out: boolean; satOut: boolean; answers: number; timeouts: number; points: number }
 export interface JebenaAttemptView { turn: number; text: string; verdict: JebenaVerdict; reason?: string; answer?: string }
 export type JebenaEnd = null | "last-standing" | "banks-exhausted";
@@ -47,13 +47,22 @@ export function verdictLine(a: JebenaAttemptView, category: string): { tone: "go
   }
 }
 
-/** The last thing that happened, for everyone: an answer, a timeout, an out, a player leaving. */
-export function lastPlayLine(log: readonly JebenaLogEntry[] | undefined, nameOf: (id?: string) => string, meId?: string): string | null {
+/**
+ * The last thing that happened, for everyone: an answer, a timeout, an out, a player leaving. `currentCategoryId` is the category on screen: when the last accepted answer was named in
+ * another one (a streak or a timeout has changed it since), the line says which (review 7058749487), so "Boxing"
+ * never seems to be an animal. Its name comes from the server's public view; without one, the line says only that the
+ * category has changed since, never a raw id or a guessed label.
+ */
+export function lastPlayLine(log: readonly JebenaLogEntry[] | undefined, nameOf: (id?: string) => string, meId?: string, currentCategoryId?: string): string | null {
   const e = [...(log ?? [])].reverse().find((x) => x.kind !== "category");
   if (!e) return null;
   const who = e.player === meId ? "You" : nameOf(e.player);
   switch (e.kind) {
-    case "accepted": return `${who} named “${e.answer}”.`;
+    case "accepted": {
+      const named = `${who} named “${e.answer}”`;
+      if (!currentCategoryId || !e.categoryId || e.categoryId === currentCategoryId) return `${named}.`;
+      return e.categoryName ? `${named} in ${e.categoryName}.` : `${named}, before the category changed.`;
+    }
     case "timeout": return `${who} ran out of time: ${e.hearts === 0 ? "the last cup broke" : `a cup broke (${e.hearts} left)`}.`;
     case "out": return `${who} ${who === "You" ? "are" : "is"} out: every cup is broken.`;
     case "sat-out": return `${who} left the game.`;

@@ -234,7 +234,7 @@ export function MchezoJebena({ game, players, playerId, title, intent, error, la
     finally { setPending(false); inputRef.current?.focus(); }
   };
   const failure = <SendNote shown={failedTurn !== null && failedTurn === turnN} landed={landed} error={error} testId="jr-error" />;
-  const last = lastPlayLine(st.log, nameOf, playerId);
+  const last = lastPlayLine(st.log, nameOf, playerId, st.category?.id);
   const newCategory = (st.log ?? []).some((x) => x.kind === "category" && x.turn === turnN && turnN > 1);
   const header = (
     <div className="mz-jr-top">
@@ -392,7 +392,7 @@ export function JebenaTv({ game, title, nameOf }: { game: PublicGame; title: str
   const st = (game.state ?? {}) as JebenaView;
   const { seconds, urgency } = useTurnClock(game, st);
   const name = (id?: string) => (id ? nameOf(id) : "Someone");
-  const last = lastPlayLine(st.log, name);
+  const last = lastPlayLine(st.log, name, undefined, st.category?.id);
   return (
     <section className="mz-jr-tv" data-testid="tv-live-jebena-rush">
       <span className="mz-tv-kicker">{title} · {st.startHearts ?? 5} cups each · category {st.category?.round ?? 1}</span>
@@ -430,7 +430,7 @@ export function JebenaReview({ game, nameOf }: { game: PublicGame; nameOf: (id: 
 export function JebenaTvFinal({ game, title, nameOf }: { game: PublicGame; title: string; nameOf: (id: string) => string }) {
   const st = (game.state ?? {}) as JebenaView;
   const name = (id?: string) => (id ? nameOf(id) : "Someone");
-  const last = lastPlayLine(st.log, name);
+  const last = lastPlayLine(st.log, name, undefined, st.category?.id);
   return (
     <section className="mz-jr-tv mz-jr-tv--final" data-testid="tv-jr-final">
       <span className="mz-tv-kicker">{title} · {st.startHearts ?? 5} cups each · final</span>

@@ -15,6 +15,7 @@ import { JEBENA_CATEGORIES } from "../src/games/modules/packs/jebena-banks.js";
 import { JEBENA_POINTS, jebenaModule, jebenaPoints, type JebenaState } from "../src/games/modules/jebena.js";
 import * as jebena from "../src/games/modules/jebena.js";
 import { RoomEngine } from "../src/server/room.js";
+import { lastPlayLine, type JebenaLogEntry } from "../apps/web/src/ui/mchezo/lib/jebena.js";
 
 type Json = Record<string, unknown>;
 const cat = (id: string) => JEBENA_CATEGORIES.find((c) => c.id === id)!;
@@ -282,5 +283,63 @@ describe("the reported 120-0, under the existing points (100 per player outlaste
     expect(jebenaPoints(s)).toEqual({ [winner]: 1 * JEBENA_POINTS.perOutlasted + 2 * JEBENA_POINTS.perHeart, [loser]: 0 });
     expect(jebenaPoints(s)[winner]).toBe(120);
     // Accepted answers are tracked separately (9 against 10) and earn no points under this rule.
+  });
+});
+
+describe("review 7058749487: after a change, the last-play line says which category the answer was named in", () => {
+  const nameOf = (id?: string) => ({ k: "Keku", a: "Amina" } as Record<string, string>)[id ?? ""] ?? "Someone";
+  const sports: JebenaLogEntry = { seq: 5, turn: 5, kind: "accepted", player: "k", answer: "Boxing", categoryId: "jr-sports", categoryName: "Sports" };
+  const toAnimals: JebenaLogEntry = { seq: 6, turn: 6, kind: "category", categoryId: "jr-animals", reason: "streak" };
+  it("the transition: the answer is qualified with its own category; the current one is left to the heading", () => {
+    expect(lastPlayLine([sports, toAnimals], nameOf, undefined, "jr-animals")).toBe("Keku named “Boxing” in Sports.");
+    expect(lastPlayLine([sports, toAnimals], nameOf, "k", "jr-animals")).toBe("You named “Boxing” in Sports.");
+  });
+  it("the same category: the ordinary, concise line", () => {
+    expect(lastPlayLine([sports], nameOf, undefined, "jr-sports")).toBe("Keku named “Boxing”.");
+    const lion: JebenaLogEntry = { seq: 7, turn: 6, kind: "accepted", player: "a", answer: "Lion", categoryId: "jr-animals", categoryName: "Animals" };
+    expect(lastPlayLine([sports, toAnimals, lion], nameOf, undefined, "jr-animals")).toBe("Amina named “Lion”.");
+  });
+  it("legacy or missing context: no raw id and no guessed name", () => {
+    const noName: JebenaLogEntry = { ...sports, categoryName: undefined };
+    const line = lastPlayLine([noName, toAnimals], nameOf, undefined, "jr-animals");
+    expect(line).toBe("Keku named “Boxing”, before the category changed.");
+    expect(line).not.toContain("jr-");
+    const noCategory: JebenaLogEntry = { seq: 1, turn: 1, kind: "accepted", player: "k", answer: "Boxing" };
+    expect(lastPlayLine([noCategory], nameOf, undefined, "jr-animals")).toBe("Keku named “Boxing”.");
+    // A caller that doesn't say which category is on screen gets the line it always had.
+    expect(lastPlayLine([sports, toAnimals], nameOf)).toBe("Keku named “Boxing”.");
+  });
+  it("other plays are unchanged by the category argument", () => {
+    expect(lastPlayLine([{ seq: 1, turn: 1, kind: "timeout", player: "a", hearts: 3, categoryId: "jr-sports" }], nameOf, undefined, "jr-animals")).toBe("Amina ran out of time: a cup broke (3 left).");
+  });
+
+  it("in the room engine: after a streak's change, every view's last accepted entry names its own (previous) category; older saved logs get names too; only played categories appear", () => {
+    const engine = new RoomEngine("JR context", { kind: "casual", timing: 2 });
+    let t = 1_800_000_000_000;
+    engine.clock = () => t;
+    const ids = [engine.join("Keku", { asHost: true }).player.id, engine.join("Amina").player.id];
+    const send = (pid: string, gid: string, action: string, payload: Json) => engine.submitIntent({ kind: "intent", schemaVersion: 1, clientEventId: randomUUID(), roomId: engine.id, gameInstanceId: gid, action, payload }, pid);
+    const g = engine.startGame(ids[0]!, "jebena-rush", { official: false });
+    for (const p of ids) send(p, g.id, "briefing-ready", { ready: true });
+    const st = () => engine.games.get(g.id)!.extra as JebenaState;
+    const first = st().category;
+    const firstName = JEBENA_CATEGORIES.find((c) => c.id === first)!.name;
+    const len = st().streak!.changeAfter;
+    for (let i = 0; i < len; i++) { t += 500; expect(send(st().turn!.player, g.id, "jebena-answer", { turn: st().turn!.n, text: unused(st()).name }).accepted).toBe(true); }
+    expect(st().category).not.toBe(first);
+    type View = { category: { id: string }; log: JebenaLogEntry[] };
+    const views: View[] = [
+      (engine.project("tv") as { games: { id: string; state: View }[] }).games.find((x) => x.id === g.id)!.state,
+      ...ids.map((pid) => (engine.project("player", pid) as { myGames: { id: string; state: View }[] }).myGames.find((x) => x.id === g.id)!.state),
+    ];
+    for (const v of views) {
+      const lastAccepted = v.log.filter((e) => e.kind === "accepted").slice(-1)[0]!;
+      expect(lastAccepted).toMatchObject({ categoryId: first, categoryName: firstName });
+      expect(lastPlayLine(v.log, (id) => (id === ids[0] ? "Keku" : "Amina"), undefined, v.category.id)).toMatch(new RegExp(`named “.+” in ${firstName}\\.$`));
+      const played = new Set(v.log.filter((e) => e.kind === "category").map((e) => e.categoryId));
+      for (const e of v.log) if (e.categoryName) expect(played.has(e.categoryId)).toBe(true);
+    }
+    // The saved state itself is unchanged: names are worked out for the view, so a log saved before this repair gets them too.
+    expect(st().log.some((e) => "categoryName" in e)).toBe(false);
   });
 });
