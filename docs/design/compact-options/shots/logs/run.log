@@ -1,0 +1,7 @@
+head c220279df7ee8b33f9fc0e3cd3bc62167d5d890f dirty=0
+build ok
+capture exit 0; captured 19 measurements
+render exit 0; ALL 106 PASS
+compare exit 0; 8 sheets
+dirty after=0 head c220279df7ee8b33f9fc0e3cd3bc62167d5d890f
+PASS DONE

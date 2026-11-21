@@ -1,0 +1,338 @@
+<!doctype html>
+<html lang="en" data-look="everyday">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Option A · Compact list</title>
+<link rel="stylesheet" href="shared.css">
+<style>
+/* ================================================================== Option A: "Compact list"
+   Text-led rows, everything visible, one primary action in a thumb dock. Art shrinks to 44-48 px thumbnails.
+   Spacing 4/8/12/16/24; type 13/15/17/20; controls 44 (secondary) and 48 (primary). */
+.phone { display: flex; flex-direction: column; width: 100%; max-width: 480px; min-height: 100vh; margin: 0 auto; padding: 0 16px; }
+.bar { display: flex; align-items: center; gap: 8px; min-height: 56px; padding-top: 6px; }
+.bar__title { flex: 1; min-width: 0; font-size: var(--t-meta); color: var(--text-muted); text-align: right; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.icon-btn { flex: none; width: 44px; height: 44px; display: grid; place-items: center; border-radius: 12px; border: 1.5px solid var(--line); background: var(--surface-1); cursor: pointer; }
+.icon-btn svg { width: 20px; height: 20px; }
+.btn { min-height: var(--c-min); padding: 0 16px; border-radius: 12px; border: 1.5px solid var(--line); background: var(--surface-1); font-weight: 700; display: inline-flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer; text-align: center; }
+.btn--primary { min-height: var(--c-primary); border: 0; background: var(--brand); color: var(--on-accent); font-size: 16px; box-shadow: 0 3px 0 var(--brand-deep); }
+.btn--block { width: 100%; }
+.btn--quiet { border-color: transparent; background: transparent; text-decoration: underline; text-underline-offset: 3px; }
+.kicker { margin: 0; font-size: 12px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--text-muted); }
+.section { margin-top: 16px; }
+.section__head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin-bottom: 8px; }
+.link { font-weight: 700; color: var(--text); text-decoration: underline; text-underline-offset: 3px; min-height: 44px; display: inline-flex; align-items: center; }
+.list { margin: 0; padding: 0; list-style: none; border-radius: var(--radius); background: var(--surface-1); overflow: hidden; }
+.row { display: flex; align-items: center; gap: 12px; min-height: 60px; padding: 8px 12px; border-top: 1px solid color-mix(in srgb, var(--line) 45%, transparent); width: 100%; background: none; border-left: 0; border-right: 0; border-bottom: 0; text-align: left; cursor: pointer; }
+.list > li:first-child > .row, .list > .row:first-child { border-top: 0; }
+.row__main { flex: 1; min-width: 0; }
+.row__title { display: block; font-weight: 750; font-size: 16px; overflow-wrap: anywhere; }
+.row__meta { display: block; font-size: var(--t-meta); color: var(--text-muted); }
+.chev { flex: none; color: var(--text-muted); }
+.badge { display: inline-block; padding: 1px 8px; border-radius: 999px; border: 1px solid var(--line); font-size: 12px; font-weight: 750; color: var(--text-muted); }
+.dock { position: sticky; bottom: 0; margin: auto -16px 0; padding: 10px 16px max(12px, env(safe-area-inset-bottom)); background: var(--ground); border-top: 1px solid color-mix(in srgb, var(--line) 55%, transparent); }
+.dock__note { margin: 6px 0 0; text-align: center; font-size: var(--t-meta); color: var(--text-muted); }
+.help { margin: 8px 0 0; padding: 8px 12px; border-radius: 12px; border: 1.5px solid var(--danger); color: var(--text); font-size: 14px; }
+.help b { color: var(--danger); }
+
+/* ---- Home: Join and Host share one row at the top; games are a list. */
+.entry { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 4px; }
+.entry .btn { min-height: var(--c-primary); font-size: 16px; }
+.solo { text-align: center; margin: 2px 0 0; font-size: 14px; color: var(--text-muted); }
+.solo .btn--quiet { min-height: 44px; padding: 0 6px; font-size: 14px; color: var(--text); }
+.feature { display: flex; gap: 12px; align-items: center; padding: 10px; border-radius: var(--radius); background: var(--surface-1); }
+.feature .art { width: 64px; height: 64px; font-size: 24px; }
+.lede { margin: 16px 0 0; font-size: 14px; color: var(--text-muted); }
+
+/* ---- Lobby */
+.code { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 12px; border-radius: 12px; border: 1.5px solid var(--line); background: var(--surface-1); font: 700 15px var(--font-display); letter-spacing: .08em; cursor: pointer; }
+.code small { font: 700 13px var(--font-body); letter-spacing: 0; color: var(--text-muted); }
+.status { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: 4px; }
+.status__you { font-size: var(--t-head); font-weight: 800; letter-spacing: -0.01em; margin-right: auto; }
+.pill { display: inline-flex; align-items: center; gap: 4px; min-height: 26px; padding: 0 10px; border-radius: 999px; background: var(--surface-2); font-size: 13px; font-weight: 750; }
+.pill--role { background: var(--brand); color: var(--on-accent); }
+.pill--ok { color: var(--success); background: transparent; border: 1.5px solid currentColor; }
+.players { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0 0; padding: 0; list-style: none; }
+.player { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; max-width: 100%; padding: 0 12px 0 4px; text-align: left; border-radius: 999px; background: var(--surface-1); border: 1.5px solid transparent; cursor: pointer; }
+.player--you { border-color: var(--brand); }
+.avatar { flex: none; width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; font-weight: 800; color: #16111D; }
+.player__name { min-width: 0; font-weight: 700; overflow-wrap: anywhere; }
+.tick { flex: none; color: var(--success); font-weight: 900; }
+.upnext { margin-top: 16px; padding: 12px; border-radius: var(--radius); background: var(--surface-1); }
+.upnext__head { display: flex; gap: 12px; align-items: center; }
+.upnext .art { width: 52px; height: 52px; }
+.seg { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 4px; margin-top: 8px; padding: 4px; border-radius: 12px; background: var(--surface-2); }
+.seg button { min-height: 44px; border: 0; border-radius: 9px; background: transparent; font-weight: 750; cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--ground); box-shadow: inset 0 0 0 2px var(--text); }
+.setting { margin-top: 12px; }
+.setting__label { display: flex; justify-content: space-between; gap: 8px; font-size: var(--t-meta); font-weight: 750; color: var(--text-muted); }
+.reacts { display: flex; gap: 6px; }
+.reacts .icon-btn { font-size: 18px; }
+
+/* ---- Picker (a bottom sheet over the lobby) */
+.scrim { position: fixed; inset: 0; background: rgba(10, 6, 14, .55); }
+.sheet { position: fixed; left: 0; right: 0; bottom: 0; max-width: 480px; margin: 0 auto; max-height: 92vh; display: flex; flex-direction: column; border-radius: 20px 20px 0 0; background: var(--ground); box-shadow: 0 -8px 30px rgba(0,0,0,.35); }
+.sheet__head { display: flex; align-items: center; gap: 8px; padding: 12px 16px 8px; }
+.sheet__title { flex: 1; margin: 0; font-size: var(--t-head); font-weight: 800; }
+.sheet__body { overflow: auto; padding: 0 16px 16px; }
+.search { width: 100%; min-height: 44px; padding: 0 14px; border-radius: 12px; border: 1.5px solid var(--line); background: var(--surface-1); }
+.chips { display: flex; gap: 6px; overflow-x: auto; margin: 8px -16px 4px; padding: 0 16px 4px; scrollbar-width: none; }
+.chip { flex: none; min-height: 44px; padding: 0 14px; border-radius: 999px; border: 1.5px solid var(--line); background: var(--surface-1); font-weight: 750; cursor: pointer; }
+.chip[aria-pressed="true"] { background: var(--text); color: var(--ground); border-color: var(--text); }
+.pick .art { width: 44px; height: 44px; font-size: 16px; }
+.pick[aria-current="true"] { background: color-mix(in srgb, var(--brand) 14%, transparent); }
+
+/* ---- Results */
+.result { margin-top: 8px; padding: 12px; border-radius: var(--radius); background: var(--surface-1); border: 1.5px solid var(--highlight); }
+.result__head { display: flex; gap: 12px; align-items: center; }
+.result .art { width: 48px; height: 48px; }
+.result__title { margin: 0; font-size: var(--t-head); font-weight: 800; letter-spacing: -0.01em; overflow-wrap: anywhere; }
+.result__you { display: flex; justify-content: space-between; gap: 8px; margin-top: 10px; padding-top: 10px; border-top: 1px solid color-mix(in srgb, var(--line) 55%, transparent); font-weight: 750; }
+.result__pts { color: var(--highlight); font-variant-numeric: tabular-nums; }
+.moment { margin: 8px 0 0; font-size: 14px; color: var(--text-muted); }
+.standings { margin: 12px 0 0; padding: 0; list-style: none; display: grid; gap: 6px; }
+.standing { display: grid; grid-template-columns: 22px 1fr auto; gap: 2px 10px; align-items: start; padding: 10px 12px; border-radius: var(--radius); background: var(--surface-1); }
+.standing--you { box-shadow: inset 0 0 0 2px var(--brand); }
+.standing__place { font: 700 18px var(--font-display); line-height: 1.3; }
+.standing__name { font-weight: 800; overflow-wrap: anywhere; }
+.standing__pts { font: 700 20px var(--font-display); font-variant-numeric: tabular-nums; text-align: right; }
+.standing__line { grid-column: 2 / 4; font-size: 14px; }
+.standing__line--muted { color: var(--text-muted); font-size: 13px; }
+.foot { margin: 12px 0 0; font-size: 13px; color: var(--text-muted); text-align: center; }
+.next-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; }
+
+/* ---- Desktop companion (1280): the same rows, two columns, nothing stretched. */
+.desk { max-width: 1040px; margin: 0 auto; padding: 0 32px 32px; display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, .9fr); gap: 24px; }
+.desk__top { grid-column: 1 / -1; }
+.desk .dock { position: static; margin: 16px 0 0; padding: 0; border: 0; }
+
+/* ---- TV companion (1920x1080): a list scoreboard, sized for the room. */
+.tv { width: 100vw; height: 100vh; padding: 56px 88px; display: grid; grid-template-rows: auto 1fr auto; gap: 28px; font-size: 26px; }
+.tv__top { display: flex; align-items: center; gap: 24px; }
+.tv__brand { font-size: 34px; }
+.tv__join { margin-left: auto; text-align: right; font-size: 24px; color: var(--text-muted); }
+.tv__join b { display: block; font: 700 64px var(--font-display); letter-spacing: .12em; color: var(--text); }
+.tv h1 { margin: 0; font-size: 64px; letter-spacing: -0.02em; }
+.tv__list { margin: 0; padding: 0; list-style: none; display: grid; gap: 16px; align-content: start; }
+.tv__row { display: grid; grid-template-columns: 64px 1fr auto; gap: 4px 28px; align-items: center; padding: 22px 32px; border-radius: 22px; background: var(--surface-1); }
+.tv__place { font: 700 40px var(--font-display); }
+.tv__name { font-size: 38px; font-weight: 800; }
+.tv__pts { font: 700 48px var(--font-display); }
+.tv__why { grid-column: 2 / 3; font-size: 26px; color: var(--text-muted); }
+.tv__players { display: flex; flex-wrap: wrap; gap: 16px; }
+.tv__player { display: inline-flex; align-items: center; gap: 14px; padding: 10px 28px 10px 10px; border-radius: 999px; background: var(--surface-1); font-size: 34px; font-weight: 800; }
+.tv__player .avatar { width: 64px; height: 64px; font-size: 28px; }
+.tv__foot { font-size: 24px; color: var(--text-muted); }
+</style>
+</head>
+<body>
+
+<!-- ============================================================ HOME -->
+<main class="phone" data-screen="home" aria-label="Home">
+  <header class="bar">
+    <span class="wordmark" style="font-size:19px"><i data-mark="28"></i><span>mchezo</span></span>
+    <span class="bar__title"></span>
+    <button class="icon-btn" type="button" aria-label="Settings" data-tab="1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3.2"/><path d="M12 2.8v2.4M12 18.8v2.4M2.8 12h2.4M18.8 12h2.4M5.5 5.5l1.7 1.7M16.8 16.8l1.7 1.7M5.5 18.5l1.7-1.7M16.8 7.2l1.7-1.7"/></svg></button>
+  </header>
+  <nav class="entry" aria-label="Start playing" data-measure="entry-start">
+    <button class="btn btn--primary" type="button" data-primary data-tab="2">Join a room</button>
+    <button class="btn" type="button" data-primary data-tab="3">Host a game</button>
+  </nav>
+  <p class="solo" data-measure="entry-end">Just you? <button class="btn btn--quiet" type="button" data-tab="4">Play solo</button></p>
+  <p class="help" data-help role="alert"><b>That code didn't match a room.</b> Check the six letters and numbers on the host's screen.</p>
+
+  <section class="section" aria-labelledby="a-feat">
+    <div class="section__head"><h2 class="kicker" id="a-feat">Featured today</h2></div>
+    <button class="feature row" type="button" style="border:0" data-tab="5" data-measure="featured">
+      <span class="art art--math">+×</span>
+      <span class="row__main"><span class="row__title">Math Mayhem</span><span class="row__meta">1–10 players · best with 2+ · about 5 min</span></span>
+      <span class="chev" aria-hidden="true">›</span>
+    </button>
+  </section>
+
+  <section class="section" aria-labelledby="a-party">
+    <div class="section__head"><h2 class="kicker" id="a-party">Party games</h2><a class="link" href="#all" data-tab="6">All 24 games</a></div>
+    <ul class="list">
+      <li><button class="row" type="button" data-tab="7"><span class="art art--impostor" style="width:44px;height:44px">●▲</span><span class="row__main"><span class="row__title">Impostor</span><span class="row__meta">4–10 players · about 10 min · practice only</span></span><span class="chev" aria-hidden="true">›</span></button></li>
+      <li><button class="row" type="button" data-tab="8"><span class="art art--caption" style="width:44px;height:44px">💬</span><span class="row__main"><span class="row__title">Caption Clash</span><span class="row__meta">4–10 players · about 10 min</span></span><span class="chev" aria-hidden="true">›</span></button></li>
+      <li><button class="row" type="button" data-tab="9"><span class="art art--trivia" style="width:44px;height:44px">▲■</span><span class="row__main"><span class="row__title">Trivia Showdown</span><span class="row__meta">2–10 players · about 10 min</span></span><span class="chev" aria-hidden="true">›</span></button></li>
+    </ul>
+  </section>
+  <p class="lede">Play on your own, or host games for the people in the room. Your phone is your controller; no account needed.</p>
+  <div style="height:16px"></div>
+</main>
+
+<!-- ============================================================ LOBBY (host) -->
+<main class="phone" data-screen="lobby" aria-label="Lobby">
+  <header class="bar">
+    <button class="code" type="button" aria-label="Share room code 3QC2UZ" data-aria-code data-tab="1"><span data-slot="code">3QC2UZ</span> <small>Invite</small></button>
+    <span class="bar__title" data-room-name>Game night</span>
+    <button class="icon-btn" type="button" aria-label="Room menu" data-tab="2"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+  </header>
+  <div class="status">
+    <span class="status__you" data-name="Keku">You're in, Keku.</span>
+    <span class="pill pill--role">You're hosting</span>
+    <span class="pill pill--ok">3 here · all ready</span>
+  </div>
+  <ul class="players" aria-label="Players">
+    <li><button class="player player--you" type="button" data-tab="3"><span class="avatar" style="background:#FF8A6A">K</span><span class="player__name" data-name="Keku">Keku (you)</span><span class="tick" aria-label="ready">✓</span></button></li>
+    <li><button class="player" type="button" data-tab="4"><span class="avatar" style="background:#7FE0CC">A</span><span class="player__name" data-name="Amina">Amina</span><span class="tick" aria-label="ready">✓</span></button></li>
+    <li><button class="player" type="button" data-tab="5"><span class="avatar" style="background:#FFD670">B</span><span class="player__name" data-name="Baraka">Baraka</span><span class="tick" aria-label="ready">✓</span></button></li>
+  </ul>
+
+  <section class="upnext" aria-labelledby="a-up">
+    <div class="upnext__head">
+      <span class="art art--jebena">☕</span>
+      <div class="row__main"><p class="kicker" id="a-up">Up next</p><span class="row__title">Jebena Rush</span><span class="row__meta">2–10 players · about 8 min · Casual, just for fun</span></div>
+      <button class="btn" type="button" data-tab="6">Change</button>
+    </div>
+    <div class="setting" data-measure="setting">
+      <div class="setting__label"><span>Cups each</span><span>Run out of time: one breaks</span></div>
+      <div class="seg" role="group" aria-label="Cups"><button type="button" aria-pressed="true" data-tab="7">3 cups</button><button type="button" aria-pressed="false" data-tab="8">5 cups</button><button type="button" aria-pressed="false" data-tab="9">7 cups</button></div>
+    </div>
+    <div class="setting">
+      <div class="setting__label"><span>Content</span><span>Each phone keeps its own look</span></div>
+      <div class="seg" role="group" aria-label="Content"><button type="button" aria-pressed="true" data-tab="10">Everyday</button><button type="button" aria-pressed="false" data-tab="11">Christmas</button></div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="a-more">
+    <div class="section__head"><h2 class="kicker" id="a-more">More for tonight</h2></div>
+    <ul class="list">
+      <li><button class="row" type="button" style="min-height:52px" data-tab="12"><span class="row__main"><span class="row__title">Quick Party</span><span class="row__meta">A short lineup for who's here</span></span><span class="chev" aria-hidden="true">›</span></button></li>
+      <li><button class="row" type="button" style="min-height:52px" data-tab="13"><span class="row__main"><span class="row__title">Teams</span><span class="row__meta">Split the room for the night</span></span><span class="chev" aria-hidden="true">›</span></button></li>
+      <li><button class="row" type="button" style="min-height:52px" data-tab="14"><span class="row__main"><span class="row__title">Family questions</span><span class="row__meta">Write questions about the family</span></span><span class="chev" aria-hidden="true">›</span></button></li>
+    </ul>
+    <div class="section__head" style="margin-top:12px"><div class="reacts" aria-label="React"><button class="icon-btn" type="button" aria-label="Love" data-tab="15">❤</button><button class="icon-btn" type="button" aria-label="Bravo" data-tab="16">★</button><button class="icon-btn" type="button" aria-label="Ha" data-tab="17">☺</button></div><button class="btn" type="button" data-tab="18">Take a break</button></div>
+  </section>
+
+  <div class="dock" data-measure="dock">
+    <p class="help" data-help role="status" style="margin:0 0 8px"><b>Amina is away.</b> Start anyway and she joins the next game, or tap her name to nudge her.</p>
+    <button class="btn btn--primary btn--block" type="button" data-primary data-tab="19">Start Jebena Rush</button>
+    <p class="dock__note">Casual game: just for fun, no Cup · Everyday content</p>
+  </div>
+</main>
+
+<!-- ============================================================ PICKER -->
+<main class="phone" data-screen="picker" aria-label="Pick a game">
+  <div aria-hidden="true" style="opacity:.6">
+    <header class="bar"><span class="code"><span data-slot="code">3QC2UZ</span> <small>Invite</small></span><span class="bar__title">Game night</span></header>
+    <div class="status"><span class="status__you">You're in, Keku.</span></div>
+  </div>
+  <div class="scrim" aria-hidden="true"></div>
+  <section class="sheet" role="dialog" aria-modal="true" aria-labelledby="a-pick">
+    <div class="sheet__head">
+      <div style="flex:1;min-width:0"><p class="kicker">Fits the 3 here first</p><h2 class="sheet__title" id="a-pick">Pick a game</h2></div>
+      <button class="icon-btn" type="button" aria-label="Close" data-tab="1">✕</button>
+    </div>
+    <div class="sheet__body">
+      <label class="sr" for="a-search">Search games</label>
+      <input class="search" id="a-search" placeholder="Search 24 games" data-tab="2">
+      <div class="chips" role="group" aria-label="Filter"><button class="chip" type="button" aria-pressed="true" data-tab="3">All</button><button class="chip" type="button" aria-pressed="false" data-tab="4">Words</button><button class="chip" type="button" aria-pressed="false" data-tab="5">Quick</button><button class="chip" type="button" aria-pressed="false" data-tab="6">Drawing</button><button class="chip" type="button" aria-pressed="false" data-tab="7">Teams</button></div>
+      <p class="help" data-help role="status" style="margin:4px 0 8px"><b>Draw &amp; Guess needs 4 players.</b> It shows here, greyed, so you know it exists.</p>
+      <ul class="list">
+        <li><button data-game class="row pick" type="button" aria-current="true" data-tab="8"><span class="art art--jebena">☕</span><span class="row__main"><span class="row__title">Jebena Rush <span class="badge">Up next</span></span><span class="row__meta">2–10 players · about 8 min · practice only</span></span></button></li>
+        <li><button data-game class="row pick" type="button" data-tab="9"><span class="art art--trivia">▲■</span><span class="row__main"><span class="row__title">Trivia Showdown</span><span class="row__meta">2–10 players · about 10 min</span></span></button></li>
+        <li><button data-game class="row pick" type="button" data-tab="10"><span class="art art--words">▦</span><span class="row__main"><span class="row__title">Word Connections</span><span class="row__meta">1–10 players · about 8 min</span></span></button></li>
+        <li><button data-game class="row pick" type="button" data-tab="11"><span class="art art--closest">◷</span><span class="row__main"><span class="row__title">Closest Wins</span><span class="row__meta">2–10 players · about 8 min</span></span></button></li>
+        <li><button data-game class="row pick" type="button" data-tab="12"><span class="art art--spectrum">◉</span><span class="row__main"><span class="row__title">Spectrum</span><span class="row__meta">2–10 players · about 10 min · co-op · practice only</span></span></button></li>
+        <li><button data-game class="row pick" type="button" data-tab="13"><span class="art art--math">+×</span><span class="row__main"><span class="row__title">Math Mayhem</span><span class="row__meta">1–10 players · about 5 min</span></span></button></li>
+        <li><button data-game class="row pick" type="button" data-tab="14"><span class="art art--year">’78</span><span class="row__main"><span class="row__title">Guess the Year</span><span class="row__meta">2–10 players · about 8 min</span></span></button></li>
+        <li><button data-game class="row pick" type="button" data-tab="15" aria-disabled="true" style="opacity:.72"><span class="art art--draw">✎</span><span class="row__main"><span class="row__title">Draw &amp; Guess</span><span class="row__meta">Needs 4+ players · practice only</span></span></button></li>
+      </ul>
+    </div>
+  </section>
+</main>
+
+<!-- ============================================================ RESULTS (Keku) -->
+<main class="phone" data-screen="results" aria-label="Results">
+  <header class="bar">
+    <span class="code" aria-hidden="true" style="cursor:default"><span data-slot="code">3QC2UZ</span></span>
+    <span class="bar__title" data-room-name>Game night</span>
+    <button class="icon-btn" type="button" aria-label="Room menu" data-tab="1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+  </header>
+  <section class="result" aria-labelledby="a-res">
+    <div class="result__head">
+      <span class="art art--jebena">☕</span>
+      <div style="min-width:0"><p class="kicker">Jebena Rush · Casual</p><h1 class="result__title" id="a-res" data-name="Keku">Keku kept the jebena!</h1></div>
+    </div>
+    <div class="result__you"><span>You came 1st of 3</span><span class="result__pts">230 pts</span></div>
+    <p class="moment">All 3 cups still whole. Not a single crack.</p>
+  </section>
+  <ol class="standings" aria-label="Standings" data-measure="explained">
+    <li class="standing standing--you"><span class="standing__place">1</span><span class="standing__name" data-name="Keku">Keku (you)</span><span class="standing__pts">230</span>
+      <span class="standing__line">Outlasted 2 players (200) + 3 whole cups (30) = 230</span>
+      <span class="standing__line standing__line--muted"><span class="cups" aria-label="3 of 3 cups whole"><i class="cup"></i><i class="cup"></i><i class="cup"></i></span> Kept the jebena · Played: <span data-slot="ka">2 answers</span> · 0 timeouts</span></li>
+    <li class="standing"><span class="standing__place">2</span><span class="standing__name" data-slot="p2">Amina</span><span class="standing__pts">100</span>
+      <span class="standing__line">Outlasted 1 player (100) + no whole cups (0) = 100</span>
+      <span class="standing__line standing__line--muted">Out: every cup broken · Played: 0 answers · 3 timeouts</span></li>
+    <li class="standing"><span class="standing__place">3</span><span class="standing__name" data-slot="p3">Baraka</span><span class="standing__pts">0</span>
+      <span class="standing__line">Outlasted nobody (0) + no whole cups (0) = 0</span>
+      <span class="standing__line standing__line--muted">Out: every cup broken · Played: 0 answers · 3 timeouts</span></li>
+  </ol>
+  <p class="foot">100 points for each player you outlast, plus 10 for every cup still whole. Right answers keep you in the game; they don't add points. Casual game: just for fun.</p>
+  <button class="btn btn--block" type="button" style="margin-top:12px" data-tab="2">Save a memory</button>
+  <div style="height:12px"></div>
+  <div class="dock">
+    <p class="help" data-help role="status" style="margin:0 0 8px"><b>Only the host starts the next game.</b> Keku will pick; you'll see it here.</p>
+    <button class="btn btn--primary btn--block" type="button" data-primary data-tab="3">Play again: Jebena Rush</button>
+    <div class="next-row"><button class="btn" type="button" data-tab="4">Pick another</button><button class="btn" type="button" data-tab="5">Take a break</button></div>
+    <p class="dock__note">Next game: Everyday content</p>
+  </div>
+</main>
+
+<!-- ============================================================ DESKTOP lobby (1280) -->
+<main data-screen="desktop-lobby" aria-label="Lobby on a computer">
+  <div class="desk">
+    <header class="bar desk__top">
+      <span class="wordmark" style="font-size:20px;margin-right:16px"><i data-mark="30"></i><span>mchezo</span></span>
+      <button class="code" type="button" aria-label="Share room code 3QC2UZ" data-aria-code><span data-slot="code">3QC2UZ</span> <small>Invite</small></button>
+      <span class="bar__title" data-room-name>Game night</span>
+      <button class="icon-btn" type="button" aria-label="Room menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+    </header>
+    <div>
+      <div class="status"><span class="status__you">You're in, Keku.</span><span class="pill pill--role">You're hosting</span><span class="pill pill--ok">3 here · all ready</span></div>
+      <ul class="players"><li><span class="player player--you"><span class="avatar" style="background:#FF8A6A">K</span><span class="player__name">Keku (you)</span><span class="tick">✓</span></span></li><li><span class="player"><span class="avatar" style="background:#7FE0CC">A</span><span class="player__name">Amina</span><span class="tick">✓</span></span></li><li><span class="player"><span class="avatar" style="background:#FFD670">B</span><span class="player__name">Baraka</span><span class="tick">✓</span></span></li></ul>
+      <section class="upnext"><div class="upnext__head"><span class="art art--jebena">☕</span><div class="row__main"><p class="kicker">Up next</p><span class="row__title">Jebena Rush</span><span class="row__meta">2–10 players · about 8 min · Casual, just for fun</span></div><button class="btn" type="button">Change</button></div>
+        <div class="setting"><div class="setting__label"><span>Cups each</span><span>Run out of time: one breaks</span></div><div class="seg"><button aria-pressed="true">3 cups</button><button aria-pressed="false">5 cups</button><button aria-pressed="false">7 cups</button></div></div>
+        <div class="setting"><div class="setting__label"><span>Content</span><span>Each phone keeps its own look</span></div><div class="seg"><button aria-pressed="true">Everyday</button><button aria-pressed="false">Christmas</button></div></div></section>
+      <div class="dock"><button class="btn btn--primary btn--block" type="button">Start Jebena Rush</button><p class="dock__note">Casual game: just for fun, no Cup · Everyday content</p></div>
+    </div>
+    <div>
+      <h2 class="kicker" style="margin:12px 0 8px">More for tonight</h2>
+      <ul class="list"><li><button class="row"><span class="row__main"><span class="row__title">Quick Party</span><span class="row__meta">A short lineup for who's here</span></span><span class="chev">›</span></button></li><li><button class="row"><span class="row__main"><span class="row__title">Teams</span><span class="row__meta">Split the room for the night</span></span><span class="chev">›</span></button></li><li><button class="row"><span class="row__main"><span class="row__title">Family questions</span><span class="row__meta">Write questions about the family</span></span><span class="chev">›</span></button></li><li><button class="row"><span class="row__main"><span class="row__title">Take a break</span><span class="row__meta">Pause the night; phones stay in the room</span></span><span class="chev">›</span></button></li></ul>
+      <h2 class="kicker" style="margin:16px 0 8px">Last game</h2>
+      <ul class="list"><li><span class="row" style="cursor:default"><span class="art art--jebena" style="width:44px;height:44px">☕</span><span class="row__main"><span class="row__title">Jebena Rush · Keku kept the jebena</span><span class="row__meta">230 · 100 · 0 · Casual</span></span></span></li></ul>
+    </div>
+  </div>
+</main>
+
+<!-- ============================================================ TV lobby (1920x1080) -->
+<main data-screen="tv-lobby" aria-label="TV lobby">
+  <div class="tv">
+    <div class="tv__top"><span class="wordmark tv__brand"><i data-mark="52"></i><span>mchezo</span></span><span style="font-size:28px;color:var(--text-muted)" data-room-name>Game night</span><span class="tv__join">Join at mchezo on your phone<b><span data-slot="code">3QC2UZ</span></b></span></div>
+    <div style="display:grid;grid-template-columns:1.2fr 1fr;gap:56px;align-content:center">
+      <div><p class="kicker" style="font-size:22px">Up next</p><h1>Jebena Rush</h1><p style="margin:12px 0 0;color:var(--text-muted)">2–10 players · about 8 min · 3 cups each · Casual, just for fun</p></div>
+      <div><p class="kicker" style="font-size:22px;margin-bottom:16px">In the room · all ready</p><div class="tv__players"><span class="tv__player"><span class="avatar" style="background:#FF8A6A">K</span>Keku</span><span class="tv__player"><span class="avatar" style="background:#7FE0CC">A</span>Amina</span><span class="tv__player"><span class="avatar" style="background:#FFD670">B</span>Baraka</span></div></div>
+    </div>
+    <p class="tv__foot">Keku is hosting · the game starts from Keku's phone</p>
+  </div>
+</main>
+
+<!-- ============================================================ TV results (1920x1080) -->
+<main data-screen="tv-results" aria-label="TV results">
+  <div class="tv">
+    <div class="tv__top"><span class="wordmark tv__brand"><i data-mark="52"></i><span>mchezo</span></span><span style="font-size:28px;color:var(--text-muted)">Jebena Rush · final · Casual</span><span class="tv__join">Join<b><span data-slot="code">3QC2UZ</span></b></span></div>
+    <div><h1 style="margin-bottom:24px">Keku kept the jebena!</h1>
+      <ol class="tv__list">
+        <li class="tv__row"><span class="tv__place">1</span><span class="tv__name">Keku</span><span class="tv__pts">230</span><span class="tv__why">Outlasted 2 players (200) + 3 whole cups (30) · Played: <span data-slot="ka">2 answers</span> · 0 timeouts</span></li>
+        <li class="tv__row"><span class="tv__place">2</span><span class="tv__name" data-slot="p2">Amina</span><span class="tv__pts">100</span><span class="tv__why">Outlasted 1 player (100) + no whole cups (0) · Played: 0 answers · 3 timeouts</span></li>
+        <li class="tv__row"><span class="tv__place">3</span><span class="tv__name" data-slot="p3">Baraka</span><span class="tv__pts">0</span><span class="tv__why">Outlasted nobody (0) + no whole cups (0) · Played: 0 answers · 3 timeouts</span></li>
+      </ol></div>
+    <p class="tv__foot">100 points for each player you outlast, plus 10 for every cup still whole. Right answers keep you in; they don't add points.</p>
+  </div>
+</main>
+
+<script src="shared.js"></script>
+</body>
+</html>

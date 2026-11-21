@@ -1,0 +1,513 @@
+{
+  "home-320-everyday": {
+    "viewport": [
+      320,
+      568
+    ],
+    "scrollY": 0,
+    "scrollHeight": 716,
+    "sideScroll": false,
+    "parts": {
+      "home-dock": {
+        "top": 437,
+        "height": 131,
+        "shareOfViewport": 23
+      },
+      "home-join": {
+        "top": 448,
+        "height": 56,
+        "shareOfViewport": 10
+      },
+      "home-host": {
+        "top": 448,
+        "height": 56,
+        "shareOfViewport": 10
+      },
+      "home-featured": {
+        "top": 109,
+        "height": 163,
+        "shareOfViewport": 29
+      },
+      "home-solo": {
+        "top": 512,
+        "height": 44,
+        "shareOfViewport": 8
+      }
+    }
+  },
+  "home-390-everyday": {
+    "viewport": [
+      390,
+      844
+    ],
+    "scrollY": 0,
+    "scrollHeight": 844,
+    "sideScroll": false,
+    "parts": {
+      "home-dock": {
+        "top": 709,
+        "height": 135,
+        "shareOfViewport": 16
+      },
+      "home-join": {
+        "top": 720,
+        "height": 60,
+        "shareOfViewport": 7
+      },
+      "home-host": {
+        "top": 720,
+        "height": 60,
+        "shareOfViewport": 7
+      },
+      "home-featured": {
+        "top": 109,
+        "height": 199,
+        "shareOfViewport": 24
+      },
+      "home-solo": {
+        "top": 788,
+        "height": 44,
+        "shareOfViewport": 5
+      }
+    }
+  },
+  "home-320-christmas": {
+    "viewport": [
+      320,
+      568
+    ],
+    "scrollY": 0,
+    "scrollHeight": 716,
+    "sideScroll": false,
+    "parts": {
+      "home-dock": {
+        "top": 437,
+        "height": 131,
+        "shareOfViewport": 23
+      },
+      "home-join": {
+        "top": 448,
+        "height": 56,
+        "shareOfViewport": 10
+      },
+      "home-host": {
+        "top": 448,
+        "height": 56,
+        "shareOfViewport": 10
+      },
+      "home-featured": {
+        "top": 109,
+        "height": 163,
+        "shareOfViewport": 29
+      },
+      "home-solo": {
+        "top": 512,
+        "height": 44,
+        "shareOfViewport": 8
+      }
+    }
+  },
+  "home-390-christmas": {
+    "viewport": [
+      390,
+      844
+    ],
+    "scrollY": 0,
+    "scrollHeight": 844,
+    "sideScroll": false,
+    "parts": {
+      "home-dock": {
+        "top": 709,
+        "height": 135,
+        "shareOfViewport": 16
+      },
+      "home-join": {
+        "top": 720,
+        "height": 60,
+        "shareOfViewport": 7
+      },
+      "home-host": {
+        "top": 720,
+        "height": 60,
+        "shareOfViewport": 7
+      },
+      "home-featured": {
+        "top": 109,
+        "height": 199,
+        "shareOfViewport": 24
+      },
+      "home-solo": {
+        "top": 788,
+        "height": 44,
+        "shareOfViewport": 5
+      }
+    }
+  },
+  "home-desktop-1280-everyday": {
+    "viewport": [
+      1280,
+      800
+    ],
+    "scrollY": 0,
+    "scrollHeight": 2038,
+    "sideScroll": false,
+    "parts": {
+      "home-dock": {
+        "top": 665,
+        "height": 135,
+        "shareOfViewport": 17
+      },
+      "home-featured": {
+        "top": 109,
+        "height": 473,
+        "shareOfViewport": 59
+      }
+    }
+  },
+  "lobby-320-everyday": {
+    "viewport": [
+      320,
+      568
+    ],
+    "scrollY": 0,
+    "scrollHeight": 1692,
+    "sideScroll": false,
+    "parts": {
+      "lobby-dock": {
+        "top": 385,
+        "height": 183,
+        "shareOfViewport": 32
+      },
+      "lobby-status": {
+        "top": 98,
+        "height": 21,
+        "shareOfViewport": 4
+      },
+      "lobby-hearts": {
+        "top": 1034,
+        "height": 107,
+        "shareOfViewport": 19
+      },
+      "choose-game": {
+        "top": 799,
+        "height": 46,
+        "shareOfViewport": 8
+      }
+    }
+  },
+  "picker-320-everyday": {
+    "viewport": [
+      320,
+      568
+    ],
+    "scrollY": 622,
+    "scrollHeight": 1692,
+    "sideScroll": false,
+    "parts": {
+      "choose-sheet": {
+        "top": 0,
+        "height": 568,
+        "shareOfViewport": 100
+      }
+    },
+    "gamesFullyVisible": 2
+  },
+  "lobby-390-everyday": {
+    "viewport": [
+      390,
+      844
+    ],
+    "scrollY": 0,
+    "scrollHeight": 1644,
+    "sideScroll": false,
+    "parts": {
+      "lobby-dock": {
+        "top": 676,
+        "height": 168,
+        "shareOfViewport": 20
+      },
+      "lobby-status": {
+        "top": 106,
+        "height": 21,
+        "shareOfViewport": 3
+      },
+      "lobby-hearts": {
+        "top": 1028,
+        "height": 107,
+        "shareOfViewport": 13
+      },
+      "choose-game": {
+        "top": 800,
+        "height": 46,
+        "shareOfViewport": 5
+      }
+    }
+  },
+  "picker-390-everyday": {
+    "viewport": [
+      390,
+      844
+    ],
+    "scrollY": 478,
+    "scrollHeight": 1644,
+    "sideScroll": false,
+    "parts": {
+      "choose-sheet": {
+        "top": 0,
+        "height": 844,
+        "shareOfViewport": 100
+      }
+    },
+    "gamesFullyVisible": 4
+  },
+  "lobby-320-christmas": {
+    "viewport": [
+      320,
+      568
+    ],
+    "scrollY": 0,
+    "scrollHeight": 1692,
+    "sideScroll": false,
+    "parts": {
+      "lobby-dock": {
+        "top": 385,
+        "height": 183,
+        "shareOfViewport": 32
+      },
+      "lobby-status": {
+        "top": 98,
+        "height": 21,
+        "shareOfViewport": 4
+      },
+      "lobby-hearts": {
+        "top": 1034,
+        "height": 107,
+        "shareOfViewport": 19
+      },
+      "choose-game": {
+        "top": 799,
+        "height": 46,
+        "shareOfViewport": 8
+      }
+    }
+  },
+  "picker-320-christmas": {
+    "viewport": [
+      320,
+      568
+    ],
+    "scrollY": 622,
+    "scrollHeight": 1692,
+    "sideScroll": false,
+    "parts": {
+      "choose-sheet": {
+        "top": 0,
+        "height": 568,
+        "shareOfViewport": 100
+      }
+    },
+    "gamesFullyVisible": 2
+  },
+  "lobby-390-christmas": {
+    "viewport": [
+      390,
+      844
+    ],
+    "scrollY": 0,
+    "scrollHeight": 1644,
+    "sideScroll": false,
+    "parts": {
+      "lobby-dock": {
+        "top": 676,
+        "height": 168,
+        "shareOfViewport": 20
+      },
+      "lobby-status": {
+        "top": 106,
+        "height": 21,
+        "shareOfViewport": 3
+      },
+      "lobby-hearts": {
+        "top": 1028,
+        "height": 107,
+        "shareOfViewport": 13
+      },
+      "choose-game": {
+        "top": 800,
+        "height": 46,
+        "shareOfViewport": 5
+      }
+    }
+  },
+  "picker-390-christmas": {
+    "viewport": [
+      390,
+      844
+    ],
+    "scrollY": 478,
+    "scrollHeight": 1644,
+    "sideScroll": false,
+    "parts": {
+      "choose-sheet": {
+        "top": 0,
+        "height": 844,
+        "shareOfViewport": 100
+      }
+    },
+    "gamesFullyVisible": 4
+  },
+  "roomCode": "7A8E88",
+  "standings": [
+    {
+      "name": "Keku",
+      "place": 1,
+      "points": 230,
+      "outlasted": 2,
+      "hearts": 3,
+      "answers": 3,
+      "timeouts": 0
+    },
+    {
+      "name": "Amina",
+      "place": 2,
+      "points": 100,
+      "outlasted": 1,
+      "hearts": 0,
+      "answers": 0,
+      "timeouts": 3
+    },
+    {
+      "name": "Baraka",
+      "place": 3,
+      "points": 0,
+      "outlasted": 0,
+      "hearts": 0,
+      "answers": 0,
+      "timeouts": 3
+    }
+  ],
+  "results-320-everyday": {
+    "viewport": [
+      320,
+      568
+    ],
+    "scrollY": 0,
+    "scrollHeight": 568,
+    "sideScroll": false,
+    "parts": {
+      "results-hero": {
+        "top": 14,
+        "height": 266,
+        "shareOfViewport": 47
+      },
+      "whats-next": {
+        "top": 310,
+        "height": 249,
+        "shareOfViewport": 44
+      },
+      "jr-standings": {
+        "top": 802,
+        "height": 525,
+        "shareOfViewport": 92
+      },
+      "jr-howscore": {
+        "top": 1348,
+        "height": 81,
+        "shareOfViewport": 14
+      }
+    }
+  },
+  "results-390-everyday": {
+    "viewport": [
+      390,
+      844
+    ],
+    "scrollY": 0,
+    "scrollHeight": 844,
+    "sideScroll": false,
+    "parts": {
+      "results-hero": {
+        "top": 14,
+        "height": 240,
+        "shareOfViewport": 28
+      },
+      "whats-next": {
+        "top": 284,
+        "height": 197,
+        "shareOfViewport": 23
+      },
+      "jr-standings": {
+        "top": 706,
+        "height": 378,
+        "shareOfViewport": 45
+      },
+      "jr-howscore": {
+        "top": 1106,
+        "height": 81,
+        "shareOfViewport": 10
+      }
+    }
+  },
+  "results-320-christmas": {
+    "viewport": [
+      320,
+      568
+    ],
+    "scrollY": 0,
+    "scrollHeight": 568,
+    "sideScroll": false,
+    "parts": {
+      "results-hero": {
+        "top": 14,
+        "height": 266,
+        "shareOfViewport": 47
+      },
+      "whats-next": {
+        "top": 310,
+        "height": 249,
+        "shareOfViewport": 44
+      },
+      "jr-standings": {
+        "top": 802,
+        "height": 525,
+        "shareOfViewport": 92
+      },
+      "jr-howscore": {
+        "top": 1348,
+        "height": 81,
+        "shareOfViewport": 14
+      }
+    }
+  },
+  "results-390-christmas": {
+    "viewport": [
+      390,
+      844
+    ],
+    "scrollY": 0,
+    "scrollHeight": 844,
+    "sideScroll": false,
+    "parts": {
+      "results-hero": {
+        "top": 14,
+        "height": 240,
+        "shareOfViewport": 28
+      },
+      "whats-next": {
+        "top": 284,
+        "height": 197,
+        "shareOfViewport": 23
+      },
+      "jr-standings": {
+        "top": 706,
+        "height": 378,
+        "shareOfViewport": 45
+      },
+      "jr-howscore": {
+        "top": 1106,
+        "height": 81,
+        "shareOfViewport": 10
+      }
+    }
+  }
+}

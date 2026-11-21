@@ -4590,3 +4590,36 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
   - the broader redesign (owner-selected options);
   - Draw & Guess native confirmation.
 - **Next:** ChatGPT's review of the new draft.
+
+## Post-beta: two compact UI options for owner selection (handoff 7060711859)
+- **#62 cleared:** ChatGPT's review [7060711859](https://github.com/kekuBT/christmas-game-night-pilot/pull/51#issuecomment-7060711859) cleared #62 at `2c9394d` (head `f263362`, docs only above it). It found no blocking findings.
+  - Its independent QA ran 37/37 focused tests and 247 browser assertions, all passing, plus a web build.
+  - The browser runs were Chromium emulation. Native iPhone/Android checks and the private audits remain open.
+- **The handoff:** the same comment set this slice. It was acknowledged in [7060716374](https://github.com/kekuBT/christmas-game-night-pilot/pull/51#issuecomment-7060716374) at 4:38 a.m. ET, estimating about 9:30 a.m. ET.
+- **Branch:** `claude/compact-ui-options`, stacked on #62 (exact base `f263362`). Proposal only: not for merge or deploy, and no app code changed.
+- **The artifact revision:** `c220279df7ee8b33f9fc0e3cd3bc62167d5d890f`, with commits:
+  - `b192c2a`: the mockups, capture, render and compare scripts;
+  - `037b702`: the captured content passed to the mockups, and measures taken at scroll 0;
+  - `2808558`: practice-only labels as the app shows them;
+  - `c220279`: the current app's lobby shot from the top.
+  - The docs commit above it adds the README, the screenshots and these records.
+- **The proposal (D-UI-01):** `docs/design/compact-options/README.md`.
+  - Two options, each with home host/join, lobby, picker and Jebena results at 320 and 390 px in Everyday and Christmas, plus desktop and TV:
+    - **A · Compact list:** rows, the entry at the top, settings in the Up next card, results that lead with the standings;
+    - **B · Focus and sheets:** a code field, a stage card with chips, tiles, a podium and More….
+  - **Recommended:** A.
+  - **Also in the README:** a principles table mapping the shared scale to settings, other lobbies, other results and the TV.
+- **Measured** (first screen, 320 px Christmas; Now → A / B):
+  - Home host/join area: 131 px fixed dock → 94 / 112 px; the featured game 163 → 84 / 120 px.
+  - Lobby: the cups setting at 1034 px, below the first screen → 374 / 227 px; the dock 183 → 113 / 94 px.
+  - Picker: 2 games fully visible → 5 / 6.
+  - Results: the explained standings at 802 px, below the first screen → 220 / 299 px.
+  - At 390 px the pattern is the same (README table).
+- **Checks:** 106 of 106 renders pass on `c220279`: 96 phone, 10 desktop/TV, 2843 text contrast checks and 32 keyboard walks, all in order with rings. There is no sideways scroll, no target under 44 × 44 px and no page error, and both fonts loaded.
+- **Evidence:** `docs/design/compact-options/shots/`: before (21), option-a (29), option-b (29), compare (8), `metrics.json`, `checks.json` and the pass's logs.
+- **Not run:** no gameplay gate; the handoff asks for none on a docs/static slice, and no app code changed.
+- **Open:**
+  - **The owner's selection:** A, B or a mix. Nothing is built until Keku chooses.
+  - Native-device and private audits of whichever option is chosen.
+  - Draw & Guess native iPhone confirmation.
+- **Next:** ChatGPT's review of the draft, and Keku's selection.
