@@ -45,6 +45,7 @@ Everything else below is an architect default for this first slice (the handoff'
   - **Zero hearts:** that player is out.
 - **Categories** (my default):
   - A category holds until someone loses a heart, or until its bank is used up. Either way the next category in a seeded rotation of the six begins, with no penalty for a used-up bank.
+  - *Amended by D-JR-01 (rules version 2):* a category also ends after a seeded run of 5 to 8 accepted answers. The next one starts at the turn boundary, with the pass, so sustained correct play no longer keeps one category until its bank runs out.
   - A category that returns later keeps its used answers for the whole match.
   - If every category is used up, the match ends (D-S91-03).
 - **The end:**

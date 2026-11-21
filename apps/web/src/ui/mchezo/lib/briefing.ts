@@ -290,7 +290,7 @@ const RULES: Record<string, { objective: string; steps: string[] }> = {
     steps: [
       "Hold the jebena? Name something in the category before the steam boils over: 10 seconds a turn.",
       "A right answer passes the jebena to the next player. A wrong one costs only time: try again.",
-      "Each answer counts once. Time runs out: one of your cups breaks, and a new category starts.",
+      "Each answer counts once. After a run of 5 to 8 right answers, a new category starts. Time runs out: one of your cups breaks, and a new category starts too.",
       "When all your cups are broken, you're out. The last player with a whole cup keeps the jebena.",
       "The clock never stops for anyone: if your phone drops off, your turns still run out, and coming back gives no time or cups back.",
     ],

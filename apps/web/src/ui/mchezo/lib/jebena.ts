@@ -7,7 +7,7 @@
 
 export type JebenaVerdict = "accepted" | "used" | "not-in-bank" | "ambiguous" | "near-miss" | "empty";
 /** `hearts` is the server's name for whole cups left (D-S101-02); `at` is the server time it happened. */
-export interface JebenaLogEntry { seq: number; turn: number; kind: "accepted" | "timeout" | "out" | "category" | "sat-out"; player?: string; answer?: string; via?: string; categoryId?: string; hearts?: number; at?: number }
+export interface JebenaLogEntry { seq: number; turn: number; kind: "accepted" | "timeout" | "out" | "category" | "sat-out"; reason?: "start" | "streak" | "timeout" | "used-up"; player?: string; answer?: string; via?: string; categoryId?: string; hearts?: number; at?: number }
 export interface JebenaStanding { id: string; place: number; hearts: number; out: boolean; satOut: boolean; answers: number; timeouts: number; points: number }
 export interface JebenaAttemptView { turn: number; text: string; verdict: JebenaVerdict; reason?: string; answer?: string }
 export type JebenaEnd = null | "last-standing" | "banks-exhausted";

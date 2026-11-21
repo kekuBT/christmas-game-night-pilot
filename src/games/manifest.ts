@@ -379,7 +379,7 @@ export const GAME_MANIFESTS: GameManifest[] = [
     scoring: { type: "per-player-points", teamDerived: false },
     features: { practice: true, official: false, abstention: "whole-game" },
     tournament: { usesPerPlayerScores: true, supportsTeams: false },
-    details: "Turns of 10 seconds in a seeded order; an answer the bank accepts passes the jebena, a timeout breaks one of your cups (5 by default; 3, 5 or 7). The last player with a whole cup keeps the jebena; the match ends by 12 minutes. 100 points for each player you outlast, 10 for each cup still whole. Casual rooms only; practice-only (Stage 9.1).",
+    details: "Turns of 10 seconds in a seeded order; an answer the bank accepts passes the jebena, a timeout breaks one of your cups (5 by default; 3, 5 or 7). The category changes after a seeded run of 5 to 8 accepted answers, after every timeout, and when its answers run out. The last player with a whole cup keeps the jebena; the match ends by 12 minutes. 100 points for each player you outlast, 10 for each cup still whole. Casual rooms only; practice-only (Stage 9.1).",
   },
   {
     id: "spectrum",

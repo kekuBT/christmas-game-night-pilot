@@ -9,6 +9,14 @@
  * doesn't move. Time out: one heart lost, a new category, and the jebena
  * passes. No hearts left: out. The last player with hearts keeps the jebena.
  *
+ * A streak of accepted answers changes the category too (D-JR-01, rules
+ * version 2): each category lasts a seeded 5 to 8 accepted answers, then the
+ * next one in the rotation starts at the turn boundary (with the jebena's
+ * pass). The length is set when the category starts and saved in the state,
+ * so every client sees the same category and a restart resumes the same
+ * count. Only an accepted answer counts toward it: a rejected try, a
+ * duplicate or late send and a reconnect leave it alone.
+ *
  * The server owns everything here: the order, the turn, the category, the
  * answers already used, the hearts. The turn's clock is RoomEngine's phase
  * clock (phase "turn:<n>", policy phaseMs.turn), so a deadline is processed
@@ -26,8 +34,8 @@ import { JEBENA_BANK_VERSION, JEBENA_CATEGORIES, type JebenaCategory } from "./p
 import { answerName, matchJebena } from "./jebenaMatch.js";
 import { JEBENA_DEFAULT_HEARTS, JEBENA_HEART_CHOICES } from "../settings.js";
 
-/** Bump when the rules below change (turn length, hearts, rotation, points). */
-export const JEBENA_RULES_VERSION = 1;
+/** Bump when the rules below change (turn length, hearts, rotation, points). 2: categories also change after a seeded streak of accepted answers (D-JR-01). */
+export const JEBENA_RULES_VERSION = 2;
 /** A turn, as players see it (before the test time scale). */
 export const JEBENA_TURN_MS = 10_000;
 /** Network grace: the server takes an answer until the turn's deadline plus this (src/server/lifecycle.ts phaseMs.turn). */
@@ -35,6 +43,8 @@ export const JEBENA_GRACE_MS = 500;
 export const JEBENA_MAX_ATTEMPTS = 20;
 export const JEBENA_MAX_INPUT = 40;
 export const JEBENA_POINTS = { perOutlasted: 100, perHeart: 10 } as const;
+/** D-JR-01: a category lasts this many accepted answers (seeded per category, inclusive), unless a timeout or a used-up bank changes it first. */
+export const JEBENA_STREAK = { min: 5, max: 8 } as const;
 /** How many recent played facts the views carry. */
 const LOG_IN_VIEW = 24;
 
@@ -55,6 +65,8 @@ export interface JebenaLogEntry {
   seq: number;
   turn: number;
   kind: "accepted" | "timeout" | "out" | "category" | "sat-out";
+  /** For a category entry: why it started (the first one, a streak of accepted answers, a timeout, a used-up bank). */
+  reason?: "start" | "streak" | "timeout" | "used-up";
   player?: string;
   answerId?: string;
   answer?: string;
@@ -78,6 +90,11 @@ export interface JebenaState {
   rotationAt: number;
   category: string;
   categoryRound: number;
+  /**
+   * D-JR-01 (rules version 2; absent in a version 1 match, which keeps its own rules): accepted answers since this
+   * category started, and how many it lasts (seeded from the match's seed and the category round).
+   */
+  streak?: { accepted: number; changeAfter: number };
   /** Answer ids used so far, per category (they stay used if the category comes back). */
   used: Record<string, string[]>;
   turn: { n: number; player: string; attempts: number } | null;
@@ -95,6 +112,12 @@ const categoryById = (id: string): JebenaCategory => {
 };
 
 const alive = (s: JebenaState) => s.order.filter((p) => s.per[p]!.outOrder === null);
+
+/** D-JR-01: how many accepted answers category round `round` of the match with `seed` lasts: JEBENA_STREAK.min to .max, the same everywhere. */
+export function jebenaStreakLength(seed: number, round: number): number {
+  const r = moduleRng(((seed >>> 0) ^ Math.imul(round, 0x9e3779b1)) >>> 0)();
+  return JEBENA_STREAK.min + Math.floor(r * (JEBENA_STREAK.max - JEBENA_STREAK.min + 1));
+}
 const exhausted = (s: JebenaState, cat: string) => (s.used[cat]?.length ?? 0) >= categoryById(cat).answers.length;
 
 function log(s: JebenaState, e: Omit<JebenaLogEntry, "seq">): void {
@@ -133,19 +156,25 @@ function endIfOver(s: JebenaState): boolean {
   return false;
 }
 
-/** The next category in the rotation that still has unused answers; none left ends the match. */
-function nextCategory(s: JebenaState, at: number, turn: number): boolean {
+/**
+ * The next category in the rotation that still has unused answers. None left ends the match, except after a streak
+ * (`otherOnly`): then the category stays only if no other has answers left, and the match goes on.
+ */
+function nextCategory(s: JebenaState, at: number, turn: number, reason: "streak" | "timeout" | "used-up", otherOnly = false): boolean {
   for (let k = 1; k <= s.rotation.length; k++) {
     const idx = (s.rotationAt + k) % s.rotation.length;
     const cat = s.rotation[idx]!;
+    if (otherOnly && cat === s.category) continue;
     if (!exhausted(s, cat)) {
       s.rotationAt = idx;
       s.category = cat;
       s.categoryRound += 1;
-      log(s, { turn, kind: "category", categoryId: cat, at });
+      if (s.streak) s.streak = { accepted: 0, changeAfter: jebenaStreakLength(s.seed, s.categoryRound) };
+      log(s, { turn, kind: "category", categoryId: cat, reason, at });
       return true;
     }
   }
+  if (otherOnly) return false;
   finish(s, "banks-exhausted");
   return false;
 }
@@ -233,6 +262,7 @@ export const jebenaModule: GameModule<JebenaState> = {
       rotationAt: 0,
       category: rotation[0]!,
       categoryRound: 1,
+      streak: { accepted: 0, changeAfter: jebenaStreakLength(seed, 1) },
       used: {},
       turn: order.length ? { n: 1, player: order[0]!, attempts: 0 } : null,
       outCount: 0,
@@ -240,7 +270,7 @@ export const jebenaModule: GameModule<JebenaState> = {
       attempts: {},
       end: null,
     };
-    log(s, { turn: 1, kind: "category", categoryId: s.category, at: 0 });
+    log(s, { turn: 1, kind: "category", categoryId: s.category, reason: "start", at: 0 });
     endIfOver(s);
     return s;
   },
@@ -281,9 +311,13 @@ export const jebenaModule: GameModule<JebenaState> = {
     p.answers += 1;
     const turnNo = s.turn.n;
     log(s, { turn: turnNo, kind: "accepted", player: actorId, answerId: m.answerId, answer: name, via: m.via, categoryId: s.category, at: ctx.now });
+    if (s.streak) s.streak.accepted += 1;
     // A bank used up moves to the next category, with no penalty (none left ends the match).
-    if (exhausted(s, s.category) && !nextCategory(s, ctx.now, turnNo + 1)) {
-      return { ok: true, result: { verdict: "accepted", turn: turnNo, answer: name, via: m.via } };
+    if (exhausted(s, s.category)) {
+      if (!nextCategory(s, ctx.now, turnNo + 1, "used-up")) return { ok: true, result: { verdict: "accepted", turn: turnNo, answer: name, via: m.via } };
+    } else if (s.streak && s.streak.accepted >= s.streak.changeAfter) {
+      // D-JR-01: the streak's last answer; the next turn starts the next category (if another has answers left).
+      nextCategory(s, ctx.now, turnNo + 1, "streak", true);
     }
     passFrom(s, actorId);
     return { ok: true, result: { verdict: "accepted", turn: turnNo, answer: name, via: m.via } };
@@ -319,7 +353,7 @@ export const jebenaModule: GameModule<JebenaState> = {
       log(s, { turn: turnNo, kind: "out", player: who, at: ctx.now });
     }
     if (endIfOver(s)) return;
-    if (!nextCategory(s, ctx.now, turnNo + 1)) return;
+    if (!nextCategory(s, ctx.now, turnNo + 1, "timeout")) return;
     passFrom(s, who);
   },
   finished: (s) => s.end !== null,
