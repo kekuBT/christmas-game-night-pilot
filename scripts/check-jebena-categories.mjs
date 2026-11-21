@@ -133,7 +133,9 @@ try {
   let rejectedDone = false;
   let reloadDone = false;
   let shotBefore = false;
-  for (let i = 0; i < 14 && streakChanges < 2; i++) {
+  // Two whole streaks can take up to 8 + 8 accepted answers (D-JR-01: each lasts 5 to 8); one more to see the second change land.
+  const MAX_STREAK = 8;
+  for (let i = 0; i < 2 * MAX_STREAK + 1 && streakChanges < 2; i++) {
     const before = (await view(K)).state;
     // S4: once, mid-streak, a rejected try on the holder's phone first; once, a reload of Amina's phone.
     if (!rejectedDone && sinceChange === 2) {
