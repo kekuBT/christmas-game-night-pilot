@@ -257,7 +257,8 @@ try {
     await h.getByTestId("choose-game").click();
     await h.getByTestId("select-game-word-connections").click();
     await soon("C the room is Everyday at first: the up-next card says so on both phones", async () => /Everyday content/.test(await h.getByTestId("up-next-content").innerText()) && /Everyday content/.test(await g.getByTestId("up-next-content").innerText()));
-    check("C only the host has the content choice; the guest sees it, can't change it", (await h.getByTestId("lobby-content").count()) === 1 && (await g.getByTestId("lobby-content").count()) === 0);
+    // D-UI-02: the content is a chip on the next-game card; the host's opens the settings sheet with the choice in it.
+    check("C only the host has the content choice; the guest sees it, can't change it", (await h.getByTestId("lobby-chip-content").count()) === 1 && (await g.getByTestId("lobby-chip-content").count()) === 0 && (await g.getByTestId("lobby-content").count()) === 0);
     // The guest pins the Christmas look on their phone (room menu → This phone → Look).
     await g.getByTestId("room-menu").click();
     await g.getByTestId("look-christmas").click();
@@ -271,9 +272,12 @@ try {
     await tv.getByTestId("watch-spectator").click();
     await tv.getByRole("button", { name: "Stop watching" }).waitFor({ timeout: 15000 });
     await soon("C the TV says Everyday content, in the Everyday look", async () => /Everyday content/.test(await tv.getByTestId("tv-content").innerText()) && (await isLook(tv, "everyday")));
-    // The host chooses Christmas.
+    // The host chooses Christmas (content chip → settings sheet → Christmas → Done).
+    await h.getByTestId("lobby-chip-content").click();
     await h.getByTestId("lobby-content-christmas").click();
     await soon("C the host's Christmas reaches the guest's phone and dock", async () => /Christmas content/.test(await g.getByTestId("up-next-content").innerText()) && /Christmas content/.test(await g.getByTestId("dock-guest-content").innerText()));
+    await h.getByTestId("lobby-settings-done").click();
+    await soon("C the host's chip says Christmas once the sheet closes", async () => (await h.getByTestId("lobby-settings-sheet").count()) === 0 && /Christmas content/.test(await h.getByTestId("lobby-chip-content").innerText()));
     await soon("C …and the TV, which takes the Christmas look (Match the game)", async () => /Christmas content/.test(await tv.getByTestId("tv-content").innerText()) && (await isLook(tv, "christmas")));
     check("C the host's phone takes the Christmas look (Match the game)", await isLook(h, "christmas"));
     await layoutOk(h, "C 390×844 host lobby, Christmas look");
@@ -330,9 +334,11 @@ try {
     await h.getByTestId("whats-next").waitFor({ timeout: 25000 });
     // The host goes back to the lobby and sets the NEXT game to Everyday; the guest keeps the results open.
     await h.getByRole("button", { name: /Back to (the )?lobby/ }).first().click();
-    await h.getByTestId("lobby-content-everyday").waitFor({ timeout: 15000 });
+    await h.getByTestId("lobby-chip-content").waitFor({ timeout: 15000 });
+    await h.getByTestId("lobby-chip-content").click();
     await h.getByTestId("lobby-content-everyday").click();
     await soon("C the host's lobby: the Everyday look, and the next game says Everyday", async () => (await isLook(h, "everyday")) && /Everyday content/.test(await h.getByTestId("up-next-content").innerText()));
+    await h.getByTestId("lobby-settings-done").click();
     await soon("C the guest's results: What's next now says the NEXT game is Everyday", async () => /Next game: Everyday content/.test(await g.getByTestId("whats-next-content").innerText()));
     check("C …while the Christmas game on the guest's screen keeps its Christmas look (a setting for the next game never recolours a game shown)", await isLook(g, "christmas"), JSON.stringify(await look(g)));
     check("C the TV still shows the last game (Christmas), so it keeps that game's look until the next one starts", await isLook(tv, "christmas"), JSON.stringify(await look(tv)));

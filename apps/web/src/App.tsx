@@ -293,6 +293,10 @@ export function App() {
   // briefing. It stays until OK, and goes as soon as another game opens its
   // briefing or is being played, so it never speaks for a later round.
   const [briefingNote, setBriefingNote] = useState<{ gameInstanceId: string; text: string } | null>(null);
+  // Review 7067254640 (D-UI-02): the host's Save a memory is opened from More… on Jebena Rush results. memRequest counts
+  // the taps for one finished game; memKind is that game's composer state, so More… can say "Your saved memory".
+  const [memRequest, setMemRequest] = useState<{ gameId: string; n: number } | null>(null);
+  const [memKind, setMemKind] = useState<{ gameId: string; kind: "closed" | "open" | "saving" | "saved" } | null>(null);
   const lastBriefingRef = useRef<string | null>(null);
   // A-05 (live audit): a player in a game whose briefing just opened, but who
   // is on another screen (Library, Studio, Championship, Memory Book), is
@@ -1582,14 +1586,30 @@ export function App() {
   // so every phone tells the same story.
   // Stage 10.4 (D-S104-01..04): Save a memory on Spectrum and Jebena Rush results, bound to the game shown (fromGame),
   // one request key per draft. A fresh composer per game (key); none on the TV (its own final views).
-  const saveMemoryFor = (g: PlayerGame, pub?: PublicGame) => {
+  // Review 7067254640 (D-UI-02): on Jebena Rush results the host opens this from More…; `fromMore` drops the composer's own
+  // button, counts the host's taps (memRequest) and returns focus to More… after Cancel.
+  const saveMemoryFor = (g: PlayerGame, pub?: PublicGame, fromMore = false) => {
     if (!roomId || !SAVE_MEMORY_GAMES.includes(g.gameId)) return null;
     const title = games.find((x) => x.id === g.gameId)?.title ?? g.gameId;
     return (
       <SaveMemory key={g.id} facts={saveMemoryFacts({ game: g, publicGame: pub, players, title })}
         send={(b) => postBounded(`/rooms/${roomId}/memory`, { day: proj?.championshipDay ?? 1, fromGame: g.id, text: b.text, requestId: b.requestId })}
-        newKey={() => uuid()} canApprove={!!(me?.isHost || me?.isCohost)} onOpenBook={() => setView("memory")} />
+        newKey={() => uuid()} canApprove={!!(me?.isHost || me?.isCohost)} onOpenBook={() => setView("memory")}
+        {...(fromMore ? { openFrom: {
+          request: memRequest?.gameId === g.id ? memRequest.n : 0,
+          onClosed: () => document.querySelector<HTMLElement>('[data-testid="next-more"]')?.focus(),
+          onState: (kind) => setMemKind((k) => (k?.gameId === g.id && k.kind === kind ? k : { gameId: g.id, kind })),
+        } } : {})} />
     );
+  };
+  /** The host's Save a memory entry in More… (Jebena Rush results), when this game's memory can be saved. */
+  const saveMemoryEntry = (g: PlayerGame, pub?: PublicGame) => {
+    if (!isHostish || !roomId || !SAVE_MEMORY_GAMES.includes(g.gameId)) return undefined;
+    if (!saveMemoryFacts({ game: g, publicGame: pub, players, title: g.gameId }).saveable) return undefined;
+    return {
+      onOpen: () => setMemRequest((r) => ({ gameId: g.id, n: (r?.gameId === g.id ? r.n : 0) + 1 })),
+      saved: memKind?.gameId === g.id && memKind.kind === "saved",
+    };
   };
   // D3: tell everyone when a briefing ended without play (host cancel, the stall guard, or content that changed).
   // Fair starts (handoff 7004097156, H6/H7): one note, in the lobby and on top of whatever results someone is back on
@@ -1780,7 +1800,8 @@ export function App() {
   const onBreak = proj?.roomKind === "casual" && !!proj?.session?.onBreak;
   const roomLatest = (proj?.games ?? []).at(-1);
   /** The "What's next" panel under a finished casual game's results (casual rooms only). */
-  const nextPanel = (g: PlayerGame): ReactNode => {
+  // Handoff 7065498313 (D-UI-02): Jebena Rush results show What's next as their dock (`dock`), with Back to lobby in it.
+  const nextPanel = (g: PlayerGame, dock?: { onBackToLobby: () => void; saveMemory?: { onOpen: () => void; saved: boolean } }): ReactNode => {
     if (!partyRoom) return undefined;
     const party = proj?.party;
     // Stage 12.3: a Family Cup's results keep their own shape unless the Cup is running a lineup.
@@ -1820,6 +1841,7 @@ export function App() {
         error={err || undefined}
         onNext={(index, gameId) => { if (party) void startGame(gameId, lineupOfficial(index), { kind: "next", revision: party.revision, index }); }}
         onPlayAgain={() => void startGame(g.gameId, false, { kind: "rematch", source: g.id })}
+        {...(dock ? { variant: "dock" as const, onBackToLobby: dock.onBackToLobby, ...(dock.saveMemory ? { saveMemory: dock.saveMemory } : {}) } : {})}
         {...(proj?.roomKind === "casual" && proj.contentSeason ? { content: proj.contentSeason } : {})}
         onBreakChange={(on) => void changeBreak(on)}
         onPlan={() => { dismissResults(g.id); setPartyReplan(undefined); openSheet("party"); }}
@@ -2094,11 +2116,13 @@ export function App() {
           firstTime={!roomGames.some((g) => g.status === "finished")}
           content={proj?.roomKind === "casual" ? { season: proj.contentSeason ?? "everyday", ...(isHostish ? { onChange: (s: SessionSeason) => void changeContent(s), busy: contentBusy } : {}) } : undefined}
           // Stage 9.1 (§8): Jebena Rush's lives (cups, Stage 10.1): the host or a cohost chooses; everyone sees the choice.
-          gameSettings={proj?.roomKind === "casual" && upNext?.id === "jebena-rush" ? (() => {
+          // Handoff 7065498313 (D-UI-02): the host changes it in the lobby's settings sheet; everyone sees it as a chip.
+          gameSettings={proj?.roomKind === "casual" && upNext?.id === "jebena-rush" && isHostish
+            ? <JebenaHeartsChoice value={proj.lobbySettings?.["jebena-rush"]?.hearts ?? 5} onChange={(h) => void changeHearts(h)} busy={settingsBusy} />
+            : undefined}
+          gameSettingsChip={proj?.roomKind === "casual" && upNext?.id === "jebena-rush" ? (() => {
             const hearts = proj.lobbySettings?.["jebena-rush"]?.hearts ?? 5;
-            return isHostish
-              ? <JebenaHeartsChoice value={hearts} onChange={(h) => void changeHearts(h)} busy={settingsBusy} />
-              : <p className="mz-foot mz-lobby__hearts"><JebenaCupsLabel hearts={hearts} testId="lobby-hearts-guest" text={`Everyone starts with ${hearts} cups.`} /></p>;
+            return <JebenaCupsLabel hearts={hearts} testId={isHostish ? "lobby-hearts-chip" : "lobby-hearts-guest"} text={`${hearts} cups each`} />;
           })() : undefined}
           code={proj?.joinCode ?? "…"}
           sessionLabel={proj?.name ?? "Mchezo"}
@@ -2264,9 +2288,13 @@ export function App() {
     );
   }
   if (view === "lobby" && showPhase === "results" && jebenaFinished && latestFinished) {
+    // Review 7067254640: the host's Save a memory is in More… whenever the dock (and so More…) is there; guests and a
+    // results screen without the dock keep the composer's own button.
+    const memEntry = saveMemoryEntry(latestFinished, publicFinished);
+    const jrNext = nextPanel(latestFinished, { onBackToLobby: () => dismissResults(latestFinished.id), ...(memEntry ? { saveMemory: memEntry } : {}) });
     return (
       <MchezoProvider theme={theme} {...resultsMotion}>
-        <MchezoJebenaResults game={latestFinished} publicGame={publicFinished} players={players} playerId={playerId ?? ""} title={games.find((x) => x.id === latestFinished.gameId)?.title ?? "Jebena Rush"} onBackToLobby={() => dismissResults(latestFinished.id)} hero={resultsHero(latestFinished, publicFinished)} next={nextPanel(latestFinished)} save={saveMemoryFor(latestFinished, publicFinished)} />
+        <MchezoJebenaResults game={latestFinished} publicGame={publicFinished} players={players} playerId={playerId ?? ""} title={games.find((x) => x.id === latestFinished.gameId)?.title ?? "Jebena Rush"} onBackToLobby={() => dismissResults(latestFinished.id)} hero={resultsHero(latestFinished, publicFinished)} next={jrNext} save={saveMemoryFor(latestFinished, publicFinished, !!memEntry && jrNext !== undefined)} />
       </MchezoProvider>
     );
   }

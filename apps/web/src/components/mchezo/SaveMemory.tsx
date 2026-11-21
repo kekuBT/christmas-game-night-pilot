@@ -17,7 +17,19 @@ type State =
   | { kind: "saving" }
   | { kind: "saved"; entry: MemoryEntry; earlier: boolean };
 
-export function SaveMemory({ facts, send, newKey, canApprove, onOpenBook }: {
+/**
+ * Review 7067254640 (D-UI-02): on Jebena Rush results the host opens Save a memory from More…, so the composer has no
+ * button of its own while closed. `request` counts the host's taps on that entry (only a rise opens it); `onClosed` puts
+ * focus back where the host came from after Cancel; `onState` lets the entry say whether this game's memory is saved.
+ * The composer itself, its facts, its one request key per draft and its confirmation are the same as everywhere.
+ */
+export interface SaveMemoryLauncher {
+  request: number;
+  onClosed: () => void;
+  onState?: (kind: "closed" | "open" | "saving" | "saved") => void;
+}
+
+export function SaveMemory({ facts, send, newKey, canApprove, onOpenBook, openFrom }: {
   facts: SaveMemoryFacts;
   send: SaveMemorySend;
   /** A fresh request key (one per draft). */
@@ -25,6 +37,8 @@ export function SaveMemory({ facts, send, newKey, canApprove, onOpenBook }: {
   /** Host or cohost: their own saves still wait for approval, which they give in the Memory Book. */
   canApprove: boolean;
   onOpenBook: () => void;
+  /** Opened from elsewhere (the host's More… sheet): no button of its own while closed. */
+  openFrom?: SaveMemoryLauncher;
 }) {
   const id = useId();
   const [state, setState] = useState<State>({ kind: "closed" });
@@ -34,12 +48,36 @@ export function SaveMemory({ facts, send, newKey, canApprove, onOpenBook }: {
   const note = useRef<HTMLTextAreaElement>(null);
   const saved = useRef<HTMLParagraphElement>(null);
   const closedBefore = useRef(false);
+  // The launcher's count when this composer appeared: an earlier tap (before a remount) never reopens it.
+  const seenRequest = useRef(openFrom?.request ?? 0);
+  const onClosedRef = useRef(openFrom?.onClosed);
+  onClosedRef.current = openFrom?.onClosed;
+  const onStateRef = useRef(openFrom?.onState);
+  onStateRef.current = openFrom?.onState;
+  const launched = !!openFrom;
+  const launchedRef = useRef(launched);
+  launchedRef.current = launched;
 
+  // Focus follows the composer's own state changes only (a launcher appearing or going never moves it).
   useEffect(() => {
     if (state.kind === "open" && !state.error) note.current?.focus();
     if (state.kind === "saved") saved.current?.focus();
-    if (state.kind === "closed" && closedBefore.current) openBtn.current?.focus();
+    if (state.kind === "closed" && closedBefore.current) {
+      if (launchedRef.current) onClosedRef.current?.();
+      else openBtn.current?.focus();
+    }
+    onStateRef.current?.(state.kind);
   }, [state.kind]);
+
+  // A new tap on the launcher: open the composer, or bring back the one already showing.
+  const request = openFrom?.request ?? 0;
+  useEffect(() => {
+    if (request <= seenRequest.current) return;
+    seenRequest.current = request;
+    if (state.kind === "closed") setState({ kind: "open" });
+    else if (state.kind === "open") note.current?.focus();
+    else if (state.kind === "saved") saved.current?.focus();
+  }, [request]); // only a new tap acts; the state is read as it is at that moment
 
   if (!facts.saveable) {
     return (
@@ -72,6 +110,7 @@ export function SaveMemory({ facts, send, newKey, canApprove, onOpenBook }: {
   }
 
   if (state.kind === "closed") {
+    if (launched) return null; // the host's entry is in More…
     return (
       <section className="mz-save" aria-label="Save a memory" data-testid="save-memory" data-state="closed">
         <button ref={openBtn} type="button" className="mz-key mz-key--md mz-save__open" data-testid="save-memory-open" aria-expanded={false} aria-controls={`${id}-composer`} onClick={() => setState({ kind: "open" })}>Save a memory</button>

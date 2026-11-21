@@ -25,6 +25,8 @@ import './styles/stage1211.css';
 import './styles/stage1212.css';
 import './styles/stage1213.css';
 import './styles/stage1214.css';
+// Handoff 7065498313 (D-UI-02): the compact mix for home, lobby and Jebena Rush results. Last, so it wins ties.
+import './styles/compact.css';
 
 export * from './tokens/tokens.js';
 export * from './types.js';

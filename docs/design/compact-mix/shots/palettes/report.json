@@ -1,0 +1,368 @@
+{
+  "palettes": {
+    "current": "Now (reference)",
+    "warm": "T1 · Warmer, lighter Everyday surfaces",
+    "accent": "T2 · A different accent balance"
+  },
+  "shots": [
+    {
+      "name": "home-390-everyday-current",
+      "contrastFailures": [],
+      "focusJoin": {
+        "id": "home-join",
+        "width": 3,
+        "ratio": 12.11
+      }
+    },
+    {
+      "name": "home-320-everyday-current",
+      "contrastFailures": [],
+      "focusJoin": {
+        "id": "home-join",
+        "width": 3,
+        "ratio": 12.11
+      }
+    },
+    {
+      "name": "home-390-christmas-current",
+      "contrastFailures": [],
+      "focusJoin": {
+        "id": "home-join",
+        "width": 3,
+        "ratio": 5.06
+      }
+    },
+    {
+      "name": "home-320-christmas-current",
+      "contrastFailures": [],
+      "focusJoin": {
+        "id": "home-join",
+        "width": 3,
+        "ratio": 5.06
+      }
+    },
+    {
+      "name": "home-390-everyday-warm",
+      "contrastFailures": [],
+      "focusJoin": {
+        "id": "home-join",
+        "width": 3,
+        "ratio": 10.6
+      }
+    },
+    {
+      "name": "home-320-everyday-warm",
+      "contrastFailures": [],
+      "focusJoin": {
+        "id": "home-join",
+        "width": 3,
+        "ratio": 10.6
+      }
+    },
+    {
+      "name": "home-390-christmas-warm",
+      "contrastFailures": [],
+      "focusJoin": {
+        "id": "home-join",
+        "width": 3,
+        "ratio": 5.06
+      }
+    },
+    {
+      "name": "home-320-christmas-warm",
+      "contrastFailures": [],
+      "focusJoin": {
+        "id": "home-join",
+        "width": 3,
+        "ratio": 5.06
+      }
+    },
+    {
+      "name": "home-390-everyday-accent",
+      "contrastFailures": [],
+      "focusJoin": {
+        "id": "home-join",
+        "width": 3,
+        "ratio": 7.24
+      }
+    },
+    {
+      "name": "home-320-everyday-accent",
+      "contrastFailures": [],
+      "focusJoin": {
+        "id": "home-join",
+        "width": 3,
+        "ratio": 7.24
+      }
+    },
+    {
+      "name": "home-390-christmas-accent",
+      "contrastFailures": [],
+      "focusJoin": {
+        "id": "home-join",
+        "width": 3,
+        "ratio": 6.48
+      }
+    },
+    {
+      "name": "home-320-christmas-accent",
+      "contrastFailures": [],
+      "focusJoin": {
+        "id": "home-join",
+        "width": 3,
+        "ratio": 6.48
+      }
+    },
+    {
+      "name": "lobby-390-everyday-current",
+      "contrastFailures": []
+    },
+    {
+      "name": "lobbycard-390-everyday-current",
+      "contrastFailures": []
+    },
+    {
+      "name": "lobby-320-everyday-current",
+      "contrastFailures": []
+    },
+    {
+      "name": "lobbycard-320-everyday-current",
+      "contrastFailures": []
+    },
+    {
+      "name": "lobby-390-christmas-current",
+      "contrastFailures": []
+    },
+    {
+      "name": "lobbycard-390-christmas-current",
+      "contrastFailures": []
+    },
+    {
+      "name": "lobby-320-christmas-current",
+      "contrastFailures": []
+    },
+    {
+      "name": "lobbycard-320-christmas-current",
+      "contrastFailures": []
+    },
+    {
+      "name": "lobby-390-everyday-warm",
+      "contrastFailures": []
+    },
+    {
+      "name": "lobbycard-390-everyday-warm",
+      "contrastFailures": []
+    },
+    {
+      "name": "lobby-320-everyday-warm",
+      "contrastFailures": []
+    },
+    {
+      "name": "lobbycard-320-everyday-warm",
+      "contrastFailures": []
+    },
+    {
+      "name": "lobby-390-christmas-warm",
+      "contrastFailures": []
+    },
+    {
+      "name": "lobbycard-390-christmas-warm",
+      "contrastFailures": []
+    },
+    {
+      "name": "lobby-320-christmas-warm",
+      "contrastFailures": []
+    },
+    {
+      "name": "lobbycard-320-christmas-warm",
+      "contrastFailures": []
+    },
+    {
+      "name": "lobby-390-everyday-accent",
+      "contrastFailures": []
+    },
+    {
+      "name": "lobbycard-390-everyday-accent",
+      "contrastFailures": []
+    },
+    {
+      "name": "lobby-320-everyday-accent",
+      "contrastFailures": []
+    },
+    {
+      "name": "lobbycard-320-everyday-accent",
+      "contrastFailures": []
+    },
+    {
+      "name": "lobby-390-christmas-accent",
+      "contrastFailures": []
+    },
+    {
+      "name": "lobbycard-390-christmas-accent",
+      "contrastFailures": []
+    },
+    {
+      "name": "lobby-320-christmas-accent",
+      "contrastFailures": []
+    },
+    {
+      "name": "lobbycard-320-christmas-accent",
+      "contrastFailures": []
+    },
+    {
+      "name": "results-390-everyday-current",
+      "contrastFailures": [],
+      "focusPlayAgain": {
+        "id": "next-play-again",
+        "width": 3,
+        "ratio": 12.11
+      }
+    },
+    {
+      "name": "results-320-everyday-current",
+      "contrastFailures": [],
+      "focusPlayAgain": {
+        "id": "next-play-again",
+        "width": 3,
+        "ratio": 12.11
+      }
+    },
+    {
+      "name": "results-390-christmas-current",
+      "contrastFailures": [],
+      "focusPlayAgain": {
+        "id": "next-play-again",
+        "width": 3,
+        "ratio": 5.06
+      }
+    },
+    {
+      "name": "results-320-christmas-current",
+      "contrastFailures": [],
+      "focusPlayAgain": {
+        "id": "next-play-again",
+        "width": 3,
+        "ratio": 5.06
+      }
+    },
+    {
+      "name": "results-390-everyday-warm",
+      "contrastFailures": [],
+      "focusPlayAgain": {
+        "id": "next-play-again",
+        "width": 3,
+        "ratio": 10.6
+      }
+    },
+    {
+      "name": "results-320-everyday-warm",
+      "contrastFailures": [],
+      "focusPlayAgain": {
+        "id": "next-play-again",
+        "width": 3,
+        "ratio": 10.6
+      }
+    },
+    {
+      "name": "results-390-christmas-warm",
+      "contrastFailures": [],
+      "focusPlayAgain": {
+        "id": "next-play-again",
+        "width": 3,
+        "ratio": 5.06
+      }
+    },
+    {
+      "name": "results-320-christmas-warm",
+      "contrastFailures": [],
+      "focusPlayAgain": {
+        "id": "next-play-again",
+        "width": 3,
+        "ratio": 5.06
+      }
+    },
+    {
+      "name": "results-390-everyday-accent",
+      "contrastFailures": [],
+      "focusPlayAgain": {
+        "id": "next-play-again",
+        "width": 3,
+        "ratio": 7.24
+      }
+    },
+    {
+      "name": "results-320-everyday-accent",
+      "contrastFailures": [],
+      "focusPlayAgain": {
+        "id": "next-play-again",
+        "width": 3,
+        "ratio": 7.24
+      }
+    },
+    {
+      "name": "results-390-christmas-accent",
+      "contrastFailures": [],
+      "focusPlayAgain": {
+        "id": "next-play-again",
+        "width": 3,
+        "ratio": 6.48
+      }
+    },
+    {
+      "name": "results-320-christmas-accent",
+      "contrastFailures": [],
+      "focusPlayAgain": {
+        "id": "next-play-again",
+        "width": 3,
+        "ratio": 6.48
+      }
+    }
+  ],
+  "standings": [
+    {
+      "name": "Keku",
+      "place": 1,
+      "points": 230
+    },
+    {
+      "name": "Baraka",
+      "place": 2,
+      "points": 100
+    },
+    {
+      "name": "Amina",
+      "place": 3,
+      "points": 0
+    }
+  ],
+  "currentTokens": {
+    "everyday": {
+      "ground": "#16111D",
+      "surface1": "#211A2B",
+      "surface2": "#2D2539",
+      "line": "#7A6E8E",
+      "text": "#F7F1E8",
+      "textMuted": "#C7BED2",
+      "onAccent": "#16111D",
+      "brand": "#FF6B4A",
+      "brandDeep": "#B8432A",
+      "success": "#3CCFB4",
+      "highlight": "#FFC94A",
+      "danger": "#FF8A7A"
+    },
+    "christmas": {
+      "ground": "#F7F1E6",
+      "surface1": "#FFFCF6",
+      "surface2": "#EFE6D6",
+      "line": "#8C7A66",
+      "text": "#2B211C",
+      "textMuted": "#66564A",
+      "onAccent": "#FFFDF8",
+      "brand": "#A3253A",
+      "brandDeep": "#6E1626",
+      "success": "#2F6A4F",
+      "highlight": "#8A5E12",
+      "danger": "#B3261E"
+    }
+  }
+}

@@ -2912,3 +2912,82 @@ The reported symptom: a nearly black **drawer** screen in an iPhone in-app brows
     1. Implement Option A directly. That skips the owner's selection, which the handoff requires before any broad redesign.
     2. Mock up inside the app behind a flag. That touches production code for a proposal, and the mockups would inherit app state and gates the owner doesn't need to review.
     3. One option with variants. The handoff asks for two distinct options; two let the owner compare density against focus.
+- **D-UI-02 The owner-selected compact mix: Option A's Home, the circle plus Option B's card, chips and sheet in the Lobby, and Option B's podium results with More…; two palette treatments compared, defaults unchanged** (handoff 7065498313; stacked on the proposal head `9992014`).
+  - **Why:**
+    - Keku confirmed the mix, released the implementation hold from the proposal review (7061462484), and asked to explore the colours before any default changes.
+    - Scope: Home, Lobby and Jebena Rush results, plus the shared styles they need. Host/join, readiness, role permissions, replay, casual/practice behaviour and the TV QR code are preserved.
+  - **What:**
+    - **Home (Option A, compact list).**
+      - Join and Host sit in the page under the header, with more room above and between them. They are no longer pinned in a dock.
+      - Games are 64 px rows with 48 px art, in one rounded list (two columns from 720 px). Featured comes first.
+      - `check-lobby-mode`'s Home checks now test this design: Join and Host on the first screen (and a game too, from 600 px tall); every row readable at every scroll position; nothing runs off the side; the lowest row reachable.
+    - **Lobby.**
+      - The seat circle is unchanged and is the only player display.
+      - Below it is one next-game card: cover, title, facts, Change.
+      - The card's facts are chips: the mode (read-only), the cups and the content (the host's are 44 px buttons that open one "Next game settings" sheet; guests' are labels), and the fit.
+      - The night's other activities (Quick Party, Teams, Family Questions) are grouped under "More for tonight".
+      - The Start dock is unchanged.
+      - A Cup room's Official/Practice choice stays inline, not behind a chip: it is the game mode, which must stay easy to find, and about 12 drivers rely on it.
+    - **Jebena Rush results (Option B).**
+      - A tighter result card: the casual quip and the winners list are hidden, because the podium names the winners; your own line stays.
+      - Then the podium: 2nd, 1st, 3rd. It shows the server's places and points as given; a tie at the top raises every 1st place; full names are clamped to two lines.
+      - Then the explained standings (unchanged), Save a memory and the outcome. Save a memory's entry point was revised by review 7067254640 (see **Revision** below).
+      - One dock: the host's single main action (Play again, or Next game or Resume when a lineup or break applies) plus More… (a sheet with Save a memory when it can be saved, Pick another game, Take a break, Plan another lineup when complete, and Back to lobby). Guests get who picks next and Back to lobby.
+      - Every other game's results keep the What's next panel.
+    - **Join.**
+      - A refusal ("Room not found for that code") now shows directly under Join the game, and a new refusal is scrolled into view once.
+      - On `9992014` at 320 × 568 it rendered below the fold, at the end of the screen. This is the one change outside the three surfaces; the handoff asked to verify room-code errors.
+    - **Accessibility.**
+      - Each chip button's name starts with what it shows ("3 cups each, change").
+      - Sheets keep focus inside and return it to the opener.
+      - Focus rings are measured at 3:1 or better.
+      - Primary targets are 48 px and settable chips 44 px.
+    - **Colour exploration.**
+      - The tools are `docs/design/compact-mix/palettes.mjs`, `capture-palettes.mjs` and `compare-palettes.mjs`.
+      - Three palettes are shot on the same live room and layouts: the current palette (reference), T1 (lighter, warmer Everyday surfaces) and T2 (a different accent balance).
+      - Contrast is checked at token level (23 pairs per look) and as rendered.
+      - Treatments are injected into the screenshot browser only; `tokens.ts` is unchanged.
+    - **Tests.**
+      - `CompactMix.test.tsx`: podium order, ties and early exit; dock variants.
+      - New `check-compact-mix` driver.
+      - Updated drivers: `check-lobby-mode`, `check-one-path`, `check-casual`, `check-jebena-rush`, `check-themes-seasonal`.
+      - `check-warm-ivory` W8: the Everyday style baseline was re-recorded for this intended Everyday layout change. Only the Home, Lobby, guest Lobby and menu-over-Lobby records were replaced (diff in the PR); every other screen's recorded styles are byte-identical to `d4dc408`.
+      - Hidden text (the chips' ", change" and the results dock's heading) uses `mz-sr`, the app's visually hidden class that the layout checks already recognise (`414e3d4`; the targeted gate on `7eddbd4` flagged `mz-sr-only` as clipped text).
+  - **Alternatives:**
+    1. Put the Cup mode (Official/Practice) behind a chip as well. Rejected: the game mode must stay easy to find, and it would churn about 12 drivers for no gain.
+    2. Keep a pinned Join/Host dock on Home. Rejected: the owner selected Option A's in-page entry; a pinned dock took 131 of 568 px.
+    3. Move the night's other activities into sheets. Rejected: that hides lineup and teams state behind taps.
+    4. Put Save a memory under More…. Rejected at first, because its inline composer, pending state and focus handling (S10.4) would need rework. Review 7067254640 asked for it, following the selected mock: done in `7603089` (see **Revision**).
+    5. Make a treatment the default now. Rejected: the owner asked to see the side-by-sides and a recommendation first.
+  - **Revision (review 7067254640, `7603089`): the host's Save a memory is in More….**
+    - **Why:** the selected right-column mock places Save a memory in More…. On `414e3d4` the host's More sheet had Pick another game, Take a break and Back to lobby, while the Jebena results still showed the composer's button under the standings. The review asked to move the host's entry into More and keep its eligibility, save confirmation and guest access.
+    - **What:**
+      - **Host, on Jebena Rush results with the dock:** More… lists **Save a memory** first when this game's memory can be saved, and the results have no button of their own for it.
+        - Choosing it closes the sheet and opens the results' own composer in place, under the standings, with focus in the note.
+        - Save moves focus to the confirmation (as before). The entry then reads **Your saved memory** and brings the confirmation back.
+        - Cancel puts focus back on More….
+      - **Guests,** and a results screen without the dock: the composer's own button, unchanged.
+      - **Unchanged for everyone:**
+        - who may save;
+        - the facts;
+        - one request key per draft;
+        - pending approval;
+        - the confirmation.
+      - **A game that can't be saved:** the reason line under the standings is unchanged, and More… has no entry.
+      - **Spectrum and every other game:** unchanged.
+    - **How:**
+      - `SaveMemory` takes an optional launcher: a tap count (only a rise opens it; a count from before a remount never does), where focus goes after Cancel, and its state (for the entry's label).
+      - `WhatsNext` lists the entry in the host's More sheet; the sheet's list is `WhatsNextMoreList`.
+      - `App.tsx` keys the tap count and the composer's state by the finished game, so a replay's results start fresh.
+    - **Alternatives:**
+      1. Open the composer inside the More sheet. Rejected: closing the sheet (Escape, the backdrop, Back) would drop a draft or a save in flight, and the composer's focus and pending handling would need a second home.
+      2. Move it into More for guests too. Rejected: guests' docks have no More…; the review asked to keep guest access as it was.
+      3. Keep a second entry under the standings for the host. Rejected: the mock has one place for it.
+    - **Tests:**
+      - `CompactMix.test.tsx`:
+        - the entry is listed first only when given;
+        - its saved label;
+        - a launched composer has no button of its own;
+        - an unsaveable game still says why.
+      - `check-compact-mix` M: the host's keyboard path at 320 × 568 in both looks; Cancel's return to More…; a guest's inline save. Both saves are checked in the server's Memory Book.
+      - `check-jebena-rush` 10.4 S1 and S2: the host saves the match and the replay through More….

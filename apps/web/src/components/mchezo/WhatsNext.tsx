@@ -14,7 +14,7 @@
  */
 import { useState, type ReactNode } from "react";
 import type { PartyView, PlayerGame, PublicGame, PublicPlayer } from "../../types.js";
-import { Keycap, OutcomeSummary } from "../../ui/mchezo/index.js";
+import { Keycap, OutcomeSummary, Sheet } from "../../ui/mchezo/index.js";
 import { GameHeader, ScoreList } from "../../ui/mchezo/components/GameKit.js";
 import { participationLine } from "../../ui/mchezo/lib/lifecycle.js";
 import { AnswerReview, type ReviewRow } from "./AnswerReview.js";
@@ -52,6 +52,19 @@ export interface WhatsNextProps {
    * break in a Cup (the host ends the Cup day instead).
    */
   cup?: boolean;
+  /**
+   * Handoff 7065498313 (D-UI-02): "dock" is the compact results layout (Jebena Rush): one prominent next step for the
+   * host (Resume, Next game or Play again) and everything else under More, in a sheet; guests read the status and get
+   * Back to lobby. The choices, their test ids and what each one does are the panel's own. Default: the panel.
+   */
+  variant?: "panel" | "dock";
+  /** Dock: Back to lobby (it joins the host's More sheet; for everyone else it is the dock's button). */
+  onBackToLobby?: () => void;
+  /**
+   * Dock, review 7067254640: the host's Save a memory lives in More…; choosing it closes the sheet and opens the
+   * results' own composer (`onOpen`). Given only when this game's memory can be saved. `saved`: it already was.
+   */
+  saveMemory?: { onOpen: () => void; saved: boolean };
 }
 
 export function WhatsNext(p: WhatsNextProps) {
@@ -61,6 +74,7 @@ export function WhatsNext(p: WhatsNextProps) {
   const nextItem = index !== undefined ? p.lineup?.items[index] : undefined;
   // Stage 12.3: in a Family Cup, the next game's mode is part of its name everywhere it's offered.
   const nextTitle = nextItem ? `${p.titleOf(nextItem.gameId)}${p.cup ? ` · ${nextItem.official ? "Official" : "Practice"}` : ""}` : "";
+  if (p.variant === "dock") return <WhatsNextDock p={p} state={state} index={index} nextItem={nextItem} nextTitle={nextTitle} host={host} total={total} />;
   return (
     <section className="mz-card mz-next" aria-labelledby="mz-next-title" data-testid="whats-next" data-state={state} style={{ margin: "8px 16px" }}>
       <span className="mz-kicker" id="mz-next-title">What’s next</span>
@@ -108,6 +122,72 @@ export function WhatsNext(p: WhatsNextProps) {
         </div>
       )}
     </section>
+  );
+}
+
+/**
+ * Handoff 7065498313 (D-UI-02): What's next as a results dock. The same states, words and choices as the panel; the
+ * host's next step is the one big key, the rest wait under More (a sheet), and nothing starts by itself.
+ */
+function WhatsNextDock({ p, state, index, nextItem, nextTitle, host, total }: {
+  p: WhatsNextProps;
+  state: ReturnType<typeof nextState>["state"];
+  index: number | undefined;
+  nextItem: NonNullable<WhatsNextProps["lineup"]>["items"][number] | undefined;
+  nextTitle: string;
+  host: string;
+  total: number;
+}) {
+  const [more, setMore] = useState(false);
+  const canAgain = state !== "break" && p.canPlayAgain && !p.cup;
+  // The one next step: Resume on a break, the lineup's next game, else Play again.
+  const primary = state === "break" ? "resume" : state === "next" && nextItem ? "next" : canAgain ? "again" : null;
+  const status = state === "break" ? (p.isHost ? "On a break · nothing starts until you resume." : `On a break · nothing starts until ${host} resumes.`)
+    : state === "next" && nextItem ? (p.isHost ? `Quick Party: game ${index! + 1} of ${total} is ${nextTitle}.` : `Up next: ${nextTitle} · game ${index! + 1} of ${total}. ${host} starts it.`)
+    : state === "complete" ? (p.isHost ? "That was the whole lineup." : `That was the whole lineup. ${host} picks what’s next.`)
+    : p.isHost ? null : `${host} picks what’s next.`;
+  const close = () => setMore(false);
+  return (
+    <section className="mz-next mz-next--dock" aria-labelledby="mz-next-title" data-testid="whats-next" data-state={state} data-variant="dock">
+      <h2 className="mz-sr" id="mz-next-title">What’s next</h2>
+      {status && <p className="mz-next__status" data-testid="next-status">{status}</p>}
+      {p.isHost && p.ask}
+      {p.isHost && p.error && <p className="err mz-next__error" role="alert" data-testid="next-error">{p.error}</p>}
+      <div className="mz-next__dockrow" role="group" aria-label="Choose what's next">
+        {p.isHost && primary === "resume" && <Keycap block data-testid="next-resume" disabled={p.busy} onClick={() => p.onBreakChange(false)}>Resume</Keycap>}
+        {p.isHost && primary === "next" && nextItem && <Keycap block data-testid="next-game" disabled={p.busy} onClick={() => p.onNext(index!, nextItem.gameId)}>Next game: {nextTitle}</Keycap>}
+        {p.isHost && primary === "again" && <Keycap block data-testid="next-play-again" disabled={p.busy} onClick={p.onPlayAgain}>Play again</Keycap>}
+        {p.isHost
+          ? <Keycap variant="surface" size="md" data-testid="next-more" aria-haspopup="dialog" onClick={() => setMore(true)}>More…</Keycap>
+          : p.onBackToLobby && <Keycap block variant="surface" data-testid="show-back-to-lobby" onClick={p.onBackToLobby}>Back to lobby</Keycap>}
+      </div>
+      {p.content && <p className="mz-next__docknote"><ContentSeasonLabel season={p.content} prefix="Next game: " testId="whats-next-content" /></p>}
+      {more && p.isHost && (
+        <Sheet title="What’s next" onClose={close} testId="next-more-sheet" kicker={p.game.title}>
+          <WhatsNextMoreList p={p} state={state} canAgain={canAgain} primary={primary} close={close} />
+        </Sheet>
+      )}
+    </section>
+  );
+}
+
+/** The host's More… sheet: every choice that isn't the dock's one big key. Each closes the sheet first. */
+export function WhatsNextMoreList({ p, state, canAgain, primary, close }: {
+  p: WhatsNextProps;
+  state: ReturnType<typeof nextState>["state"];
+  canAgain: boolean;
+  primary: "resume" | "next" | "again" | null;
+  close: () => void;
+}) {
+  return (
+    <div className="mz-next__morelist">
+      {p.saveMemory && <Keycap block variant="surface" size="md" data-testid="next-save-memory" onClick={() => { close(); p.saveMemory!.onOpen(); }}>{p.saveMemory.saved ? "Your saved memory" : "Save a memory"}</Keycap>}
+      {canAgain && primary !== "again" && <Keycap block variant="surface" size="md" data-testid="next-play-again" disabled={p.busy} onClick={() => { close(); p.onPlayAgain(); }}>Play again: {p.game.title}</Keycap>}
+      {state === "complete" && p.onPlan && <Keycap block variant="surface" size="md" data-testid="next-plan" disabled={p.busy} onClick={() => { close(); p.onPlan!(); }}>Plan another lineup</Keycap>}
+      {state !== "break" && <Keycap block variant="surface" size="md" data-testid="next-choose" disabled={p.busy} onClick={() => { close(); p.onChoose(); }}>{state === "next" ? "Pick a different game" : "Pick another game"}</Keycap>}
+      {state !== "break" && !p.cup && <Keycap block variant="surface" size="md" data-testid="next-break" disabled={p.busy} onClick={() => { close(); p.onBreakChange(true); }}>Take a break</Keycap>}
+      {p.onBackToLobby && <Keycap block variant="surface" size="md" data-testid="show-back-to-lobby" onClick={() => { close(); p.onBackToLobby!(); }}>Back to lobby</Keycap>}
+    </div>
   );
 }
 

@@ -85,6 +85,21 @@ export interface RoomLobbyProps {
   content?: { season: SessionSeason; onChange?: (season: SessionSeason) => void; busy?: boolean };
   /** Stage 9.1 (§8): the up-next game's settings (Jebena Rush's hearts): the host's choice, or everyone else's label. */
   gameSettings?: ReactNode;
+  /**
+   * Handoff 7065498313 (D-UI-02): the same setting as a short chip on the next-game card ("3 cups each"). For the host
+   * the chip opens the settings sheet, where `gameSettings` is; everyone else sees the chip alone.
+   */
+  gameSettingsChip?: ReactNode;
+}
+
+/**
+ * Handoff 7065498313 (D-UI-02): a fact about the next game, as a chip; the host's settable ones open the settings sheet.
+ * A button's name starts with what it shows (WCAG 2.5.3, label in name), then says what it does.
+ */
+function FactChip({ children, onOpen, testId, action }: { children: ReactNode; onOpen?: () => void; testId?: string; action?: string }) {
+  return onOpen
+    ? <li><button type="button" className="mz-factchip mz-factchip--btn" data-testid={testId} aria-haspopup="dialog" onClick={onOpen}>{children}{action && <span className="mz-sr">, {action}</span>}<span className="mz-factchip__edit" aria-hidden="true">›</span></button></li>
+    : <li className="mz-factchip" data-testid={testId}>{children}</li>;
 }
 
 export function RoomLobby(p: RoomLobbyProps) {
@@ -107,6 +122,10 @@ export function RoomLobby(p: RoomLobbyProps) {
     : connected < p.upNext.minPlayers ? { tone: "warn", text: `Needs ${p.upNext.minPlayers - connected} more ${p.upNext.minPlayers - connected === 1 ? "player" : "players"} · ${connected} here` }
     : connected > p.upNext.maxPlayers ? { tone: "warn", text: `Up to ${p.upNext.maxPlayers} players · ${connected} here` }
     : { tone: "ok", text: `Fits the ${connected} here` };
+  // Handoff 7065498313 (D-UI-02): the host (or a cohost) changes the next game's settings in one sheet, from its chips.
+  const canSet = p.isHost;
+  const chipsShown = !!(p.content || p.gameSettingsChip);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   return (
     <main className="mz-screen mz-screen--docked mz-lobby" aria-label="Lobby">
       {/* The lobby scrolls ABOVE its Start dock, never under it (S3-HOME-01 applied to the lobby). */}
@@ -154,35 +173,62 @@ export function RoomLobby(p: RoomLobbyProps) {
         />
       </div>
       <ReactionBar onReact={p.onReact} />
-      {p.party}
-      {p.upNext && (
-        <section className="mz-upnext-card" aria-label="Up next" data-testid="up-next-card" style={{ ["--mz-accent" as string]: accentColor(p.upNext.id) }}>
-          <button type="button" className="mz-upnext-card__main" onClick={p.onGameDetails} aria-label={`Up next: ${p.upNext.title}. Show details`}>
-            <GameCover gameId={p.upNext.id} decorative className="mz-upnext-card__cover" />
-            <span className="mz-upnext-card__text">
-              <span className="mz-kicker mz-upnext-card__kicker">Up next</span>
-              <span className="mz-upnext__name">{p.upNext.title}</span>
-              <span className="mz-upnext-card__meta">{playersLabel(p.upNext)} · {sessionEstimate(p.upNext.estimateMinutes)}{limit ? ` · ${limit}` : ""}</span>
-              {p.mode && (
-                <span className={`mz-badge mz-modebadge mz-modebadge--${p.mode}`} data-testid="up-next-mode">
-                  {p.mode === "official" ? `Official · counts toward the ${p.cupLabel ?? "Cup"}` : p.mode === "casual" ? "Casual · just for fun" : !p.upNext.officialEligible ? "Practice only · no Cup points" : "Practice · no Cup points"}
+      {/* Handoff 7065498313 (D-UI-02, Option B below the circle): one next-game card, its facts as chips (the host's
+          settable ones open one settings sheet), then the night's other activities together. */}
+      {(p.upNext || chipsShown) && (
+        <section className={`mz-stagecard${p.upNext ? "" : " mz-stagecard--bare"}`} aria-label="Up next" data-testid="up-next-card" style={p.upNext ? { ["--mz-accent" as string]: accentColor(p.upNext.id) } : undefined}>
+          {p.upNext && (
+            <div className="mz-stagecard__head">
+              <button type="button" className="mz-stagecard__main" onClick={p.onGameDetails} aria-label={`Up next: ${p.upNext.title}. Show details`}>
+                <GameCover gameId={p.upNext.id} size={112} decorative className="mz-stagecard__cover" />
+                <span className="mz-stagecard__text">
+                  <span className="mz-kicker mz-upnext-card__kicker">Up next</span>
+                  <span className="mz-upnext__name">{p.upNext.title}</span>
+                  <span className="mz-stagecard__meta">{playersLabel(p.upNext)} · {sessionEstimate(p.upNext.estimateMinutes)}{limit ? ` · ${limit}` : ""}</span>
                 </span>
-              )}
-              {!p.mode && !p.upNext.officialEligible && <span className="mz-badge mz-badge--mint">Practice only</span>}
-              {p.content && <span className="mz-badge mz-contentbadge" data-season={p.content.season} data-testid="up-next-content">{p.content.season === "christmas" ? "🎄 " : ""}{SEASON_LABEL[p.content.season]} content</span>}
-              {fit && <span className={`mz-upnext-card__fit mz-upnext-card__fit--${fit.tone}`} data-testid="up-next-fit">{fit.text}</span>}
-            </span>
-          </button>
-          {p.isHost && p.onChangeGame && <button type="button" className="mz-chip-btn mz-upnext-card__change" data-testid="choose-game" aria-haspopup="dialog" onClick={p.onChangeGame}>Change</button>}
+              </button>
+              {p.isHost && p.onChangeGame && <button type="button" className="mz-chip-btn mz-stagecard__change" data-testid="choose-game" aria-haspopup="dialog" onClick={p.onChangeGame}>Change</button>}
+            </div>
+          )}
+          <ul className="mz-factchips" aria-label="About the next game">
+            {p.upNext && p.mode && (
+              <li className={`mz-factchip mz-modebadge mz-modebadge--${p.mode}`} data-testid="up-next-mode">
+                {p.mode === "official" ? `Official · counts toward the ${p.cupLabel ?? "Cup"}` : p.mode === "casual" ? "Casual · just for fun" : !p.upNext.officialEligible ? "Practice only · no Cup points" : "Practice · no Cup points"}
+              </li>
+            )}
+            {p.upNext && !p.mode && !p.upNext.officialEligible && <li className="mz-factchip mz-badge--mint">Practice only</li>}
+            {p.gameSettingsChip && (
+              <FactChip onOpen={canSet && p.gameSettings ? () => setSettingsOpen(true) : undefined} testId={canSet && p.gameSettings ? "lobby-chip-setting" : undefined} action="change">{p.gameSettingsChip}</FactChip>
+            )}
+            {p.content && (
+              <FactChip onOpen={canSet && p.content.onChange ? () => setSettingsOpen(true) : undefined} testId={canSet && p.content.onChange ? "lobby-chip-content" : undefined} action="change">
+                <span className="mz-contentbadge" data-season={p.content.season} data-testid="up-next-content">{p.content.season === "christmas" ? "🎄 " : ""}{SEASON_LABEL[p.content.season]} content</span>
+              </FactChip>
+            )}
+            {fit && <li className={`mz-factchip mz-upnext-card__fit mz-upnext-card__fit--${fit.tone}`} data-testid="up-next-fit">{fit.text}</li>}
+          </ul>
         </section>
       )}
-      {p.content && p.isHost && p.content.onChange && (
-        <ContentSeasonChoice value={p.content.season} onChange={p.content.onChange} busy={p.content.busy} testIdPrefix="lobby"
-          note="What the next game deals. Each phone still picks its own look in Settings." />
+      {settingsOpen && canSet && (
+        <Sheet title="Next game settings" onClose={() => setSettingsOpen(false)} testId="lobby-settings-sheet" kicker={p.upNext?.title}>
+          {p.gameSettings}
+          {p.content?.onChange && (
+            <ContentSeasonChoice value={p.content.season} onChange={p.content.onChange} busy={p.content.busy} testIdPrefix="lobby"
+              note="What the next game deals. Each phone still picks its own look in Settings." />
+          )}
+          <div className="mz-sheet__actions">
+            <Keycap block variant="surface" data-testid="lobby-settings-done" onClick={() => setSettingsOpen(false)}>Done</Keycap>
+          </div>
+        </Sheet>
       )}
-      {p.gameSettings}
-      {p.teams}
-      {p.family}
+      {(p.party || p.teams || p.family) && (
+        <section className="mz-activities" aria-labelledby="mz-activities-title" data-testid="lobby-activities">
+          <h2 className="mz-kicker mz-activities__title" id="mz-activities-title">More for tonight</h2>
+          {p.party}
+          {p.teams}
+          {p.family}
+        </section>
+      )}
       {p.shuffleNote && <p className="mz-foot mz-lobby__shuffle" data-testid="shuffle-result">{p.shuffleNote}</p>}
       {p.lastGame && (
         <section className="mz-lastgame" aria-label="Last game" data-testid="last-game-card">

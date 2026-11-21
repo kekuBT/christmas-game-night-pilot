@@ -328,20 +328,54 @@ export function MchezoJebenaResults({ game, publicGame, players, playerId, title
   const st = (game.state ?? publicGame?.state ?? {}) as JebenaView;
   const nameOf = (id?: string) => players.find((p) => p.id === id)?.displayName ?? "Someone";
   return (
-    <main className="mz-screen mz-jr" aria-label={`${title} results`} data-testid="jr-results">
-      {hero}
-      {next}
-      <GameHeader title={title} objective={jebenaEndLine(st.end, st.standings, nameOf, playerId)} accent={1} />
-      {/* Stage 10.2 (D-S102-02/04): a line for a genuine moment, under the result; nothing when no fact fits. */}
-      {(() => { const m = jebenaMoment(st); return m ? <p className="mz-moment" data-testid="results-moment">{m}</p> : null; })()}
-      {/* Stage 10.4: Save a memory, under the result (What's next and its controls stay above). */}
-      {save}
-      <Standings st={st} nameOf={nameOf} meId={playerId} cups={{ gameId: game.id, surface: "result" }} />
-      <p className="mz-foot" data-testid="jr-howscore">100 points for each player you outlast, plus 10 for every cup still whole. Right answers keep you in the game; they don't add points. {casual ? "Casual game: just for fun." : "Practice game: no Cup points."}</p>
-      <OutcomeSummary gameId="jebena-rush" outcome={game.outcome} official={publicGame?.official ?? game.official} youId={playerId} />
-      <div className="mz-grow" />
-      <Keycap block onClick={onBackToLobby} data-testid="show-back-to-lobby">Back to lobby</Keycap>
+    <main className="mz-screen mz-jr mz-jr-results" aria-label={`${title} results`} data-testid="jr-results">
+      {/* Handoff 7065498313 (D-UI-02, Option B): the result, the podium, how each total was earned, then one dock with
+          the next step. Every number is the server's standings, unchanged (ties and early exits included). */}
+      <div className="mz-jr-results__scroll">
+        {hero}
+        <JebenaPodium st={st} nameOf={nameOf} meId={playerId} />
+        <GameHeader title={title} objective={jebenaEndLine(st.end, st.standings, nameOf, playerId)} accent={1} />
+        {/* Stage 10.2 (D-S102-02/04): a line for a genuine moment, under the result; nothing when no fact fits. */}
+        {(() => { const m = jebenaMoment(st); return m ? <p className="mz-moment" data-testid="results-moment">{m}</p> : null; })()}
+        <Standings st={st} nameOf={nameOf} meId={playerId} cups={{ gameId: game.id, surface: "result" }} />
+        <p className="mz-foot" data-testid="jr-howscore">100 points for each player you outlast, plus 10 for every cup still whole. Right answers keep you in the game; they don't add points. {casual ? "Casual game: just for fun." : "Practice game: no Cup points."}</p>
+        {/* Stage 10.4: Save a memory, under the result it keeps. */}
+        {save}
+        <OutcomeSummary gameId="jebena-rush" outcome={game.outcome} official={publicGame?.official ?? game.official} youId={playerId} />
+      </div>
+      <div className="mz-dock mz-dock--sticky mz-jr-results__dock" data-testid="jr-results-dock">
+        {next ?? <Keycap block onClick={onBackToLobby} data-testid="show-back-to-lobby">Back to lobby</Keycap>}
+      </div>
     </main>
+  );
+}
+
+/**
+ * Handoff 7065498313 (D-UI-02): the top three on a podium (first in the middle). Places and points are the server's
+ * standings as they are: a tie shows the same place twice, an early leaver keeps the place the server gave them.
+ * First names keep the tiles readable on a 320 px phone; the full names are in the explained standings below.
+ */
+function JebenaPodium({ st, nameOf, meId }: { st: JebenaView; nameOf: (id?: string) => string; meId?: string }) {
+  const top = (st.standings ?? []).slice(0, 3);
+  if (top.length < 2) return null;
+  const order = top.length === 3 ? [top[1], top[0], top[2]] : [top[1], top[0]];
+  const ord = (n: number) => (n === 1 ? "1st" : n === 2 ? "2nd" : n === 3 ? "3rd" : `${n}th`);
+  return (
+    <ol className="mz-jr-podium" aria-label="Top three" data-testid="jr-podium">
+      {order.map((r) => {
+        const full = nameOf(r.id);
+        const you = r.id === meId;
+        // Every 1st place is raised (a tie at the top raises both); the place and points are the server's, as given.
+        return (
+          <li key={r.id} className={`mz-jr-podium__step${r.place === 1 ? " mz-jr-podium__step--top" : ""}${you ? " mz-jr-podium__step--you" : ""}`} data-testid={`jr-podium-${r.id}`} data-place={r.place}
+            aria-label={`${ord(r.place)}: ${full}${you ? " (you)" : ""}, ${r.points} points`}>
+            <span className="mz-jr-podium__name" aria-hidden="true">{full}{you ? " (you)" : ""}</span>
+            <b className="mz-jr-podium__pts" aria-hidden="true">{r.points}</b>
+            <span className="mz-jr-podium__place" aria-hidden="true">{ord(r.place)}</span>
+          </li>
+        );
+      })}
+    </ol>
   );
 }
 

@@ -81,7 +81,7 @@ try {
   const hostCtx = await browser.newContext({ viewport: { width: 390, height: 844 } });
   const h = await hostCtx.newPage();
   await h.goto(`${BASE}/`, { waitUntil: "domcontentloaded" });
-  const mathMeta = await h.locator(".mz-gamecard, .mz-hero-card").filter({ hasText: "Math Mayhem" }).first().innerText().catch(() => "");
+  const mathMeta = await h.locator(".mz-gamerow").filter({ hasText: "Math Mayhem" }).first().innerText().catch(() => "");
   check("Home is honest about Math Mayhem: 1–10 players, best with 2+", /1–10 players · best with 2\+/.test(mathMeta), mathMeta.replace(/\s+/g, " ").slice(0, 80));
   await h.getByTestId("home-host").click();
   // Stage 12.1 (D-S121-01): Host asks only for a name; the Family Cup is a later upgrade from the room menu.
