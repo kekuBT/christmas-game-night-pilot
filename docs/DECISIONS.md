@@ -2882,3 +2882,33 @@ The reported symptom: a nearly black **drawer** screen in an iPhone in-app brows
     1. Change the scoring so accepted answers earn points. That is a rules change, and it stays a separate owner decision. This only explains the current rule.
     2. Work the parts out in the browser from places and cups. That repeats the server's rule in a second place, where it could drift. It also can't tell an early leaver from a player knocked out at the same time without more of the state.
     3. Show only the footer's rule. Players would still have to do the sum, and the 120–0 would still read as unexplained.
+
+## Post-beta: compact UI options for owner selection (handoff 7060711859; acknowledged 7060716374; docs/design/compact-options/)
+- **D-UI-01 Two compact UI options are proposed in isolated mockups; Option A is recommended, and the owner selects** (proposal only; the app is unchanged).
+  - **Why:**
+    - Keku reported crowded screens and an oversized host/join area.
+    - On `f263362`, measured at 320 × 568:
+      - the home's fixed host/join dock is 131 px and its featured card 163 px;
+      - the lobby's own setting (cups each) starts at about 1030 px, below the first screen, behind a 183 px dock;
+      - the picker shows 2 whole games;
+      - the Jebena results put the explained standings at 802 px.
+    - The handoff asks for two concrete options before any broad redesign, so the choice is the owner's.
+  - **What:**
+    - Two static mockups (`mockups/option-a.html`, `mockups/option-b.html`) on one shared scale (`mockups/shared.css`):
+      - spacing 4/8/12/16/24 px;
+      - type 13/15/17/20/24 px;
+      - 44 px controls, 48 px primaries;
+      - the app's own colour tokens for both looks;
+      - the existing circle-and-dots mark.
+    - **Option A · Compact list:** rows with 44 px art, the host/join entry at the top (94 px), the settings inside the Up next card, a short dock, and results that lead with the explained standings.
+    - **Option B · Focus and sheets:** a one-line code entry, a stage card with settings as chips and an avatar stack, a tile picker, and a results podium with secondary actions under More….
+    - **The recommendation is A.** It puts the host's main controls on the first screen at 320 px with no extra taps, carries long names and "practice only" in full, and rearranges controls the app already has.
+    - **The capture:**
+      - `capture-before.mjs` captures the current app from one real room.
+      - `render.mjs --content` renders both options with that room's code and result, so before and after show the same content.
+      - The same script checks overflow, 44 px targets, WCAG contrast, keyboard order and focus rings, and fonts.
+    - **Unchanged:** scoring, replay, role permissions and the casual/practice distinctions. Each option repeats the same rule, totals, places, mode labels and practice-only labels.
+  - **Alternatives:**
+    1. Implement Option A directly. That skips the owner's selection, which the handoff requires before any broad redesign.
+    2. Mock up inside the app behind a flag. That touches production code for a proposal, and the mockups would inherit app state and gates the owner doesn't need to review.
+    3. One option with variants. The handoff asks for two distinct options; two let the owner compare density against focus.
