@@ -2931,8 +2931,8 @@ The reported symptom: a nearly black **drawer** screen in an iPhone in-app brows
     - **Jebena Rush results (Option B).**
       - A tighter result card: the casual quip and the winners list are hidden, because the podium names the winners; your own line stays.
       - Then the podium: 2nd, 1st, 3rd. It shows the server's places and points as given; a tie at the top raises every 1st place; full names are clamped to two lines.
-      - Then the explained standings (unchanged), Save a memory (inline, unchanged) and the outcome.
-      - One dock: the host's single main action (Play again, or Next game or Resume when a lineup or break applies) plus More… (a sheet with Pick another game, Take a break, Plan another lineup when complete, and Back to lobby). Guests get who picks next and Back to lobby.
+      - Then the explained standings (unchanged), Save a memory and the outcome. Save a memory's entry point was revised by review 7067254640 (see **Revision** below).
+      - One dock: the host's single main action (Play again, or Next game or Resume when a lineup or break applies) plus More… (a sheet with Save a memory when it can be saved, Pick another game, Take a break, Plan another lineup when complete, and Back to lobby). Guests get who picks next and Back to lobby.
       - Every other game's results keep the What's next panel.
     - **Join.**
       - A refusal ("Room not found for that code") now shows directly under Join the game, and a new refusal is scrolled into view once.
@@ -2957,5 +2957,37 @@ The reported symptom: a nearly black **drawer** screen in an iPhone in-app brows
     1. Put the Cup mode (Official/Practice) behind a chip as well. Rejected: the game mode must stay easy to find, and it would churn about 12 drivers for no gain.
     2. Keep a pinned Join/Host dock on Home. Rejected: the owner selected Option A's in-page entry; a pinned dock took 131 of 568 px.
     3. Move the night's other activities into sheets. Rejected: that hides lineup and teams state behind taps.
-    4. Put Save a memory under More…. Rejected: its inline composer, pending state and focus handling (S10.4) would need rework.
+    4. Put Save a memory under More…. Rejected at first, because its inline composer, pending state and focus handling (S10.4) would need rework. Review 7067254640 asked for it, following the selected mock: done in `7603089` (see **Revision**).
     5. Make a treatment the default now. Rejected: the owner asked to see the side-by-sides and a recommendation first.
+  - **Revision (review 7067254640, `7603089`): the host's Save a memory is in More….**
+    - **Why:** the selected right-column mock places Save a memory in More…. On `414e3d4` the host's More sheet had Pick another game, Take a break and Back to lobby, while the Jebena results still showed the composer's button under the standings. The review asked to move the host's entry into More and keep its eligibility, save confirmation and guest access.
+    - **What:**
+      - **Host, on Jebena Rush results with the dock:** More… lists **Save a memory** first when this game's memory can be saved, and the results have no button of their own for it.
+        - Choosing it closes the sheet and opens the results' own composer in place, under the standings, with focus in the note.
+        - Save moves focus to the confirmation (as before). The entry then reads **Your saved memory** and brings the confirmation back.
+        - Cancel puts focus back on More….
+      - **Guests,** and a results screen without the dock: the composer's own button, unchanged.
+      - **Unchanged for everyone:**
+        - who may save;
+        - the facts;
+        - one request key per draft;
+        - pending approval;
+        - the confirmation.
+      - **A game that can't be saved:** the reason line under the standings is unchanged, and More… has no entry.
+      - **Spectrum and every other game:** unchanged.
+    - **How:**
+      - `SaveMemory` takes an optional launcher: a tap count (only a rise opens it; a count from before a remount never does), where focus goes after Cancel, and its state (for the entry's label).
+      - `WhatsNext` lists the entry in the host's More sheet; the sheet's list is `WhatsNextMoreList`.
+      - `App.tsx` keys the tap count and the composer's state by the finished game, so a replay's results start fresh.
+    - **Alternatives:**
+      1. Open the composer inside the More sheet. Rejected: closing the sheet (Escape, the backdrop, Back) would drop a draft or a save in flight, and the composer's focus and pending handling would need a second home.
+      2. Move it into More for guests too. Rejected: guests' docks have no More…; the review asked to keep guest access as it was.
+      3. Keep a second entry under the standings for the host. Rejected: the mock has one place for it.
+    - **Tests:**
+      - `CompactMix.test.tsx`:
+        - the entry is listed first only when given;
+        - its saved label;
+        - a launched composer has no button of its own;
+        - an unsaveable game still says why.
+      - `check-compact-mix` M: the host's keyboard path at 320 × 568 in both looks; Cancel's return to More…; a guest's inline save. Both saves are checked in the server's Memory Book.
+      - `check-jebena-rush` 10.4 S1 and S2: the host saves the match and the replay through More….

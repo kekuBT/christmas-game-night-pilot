@@ -1,5 +1,5 @@
 # Muse local progress and resume checkpoint
-Updated: 2026-11-21 ~1:20 p.m. EST (compact UI mix, handoff 7065498313: draft stacked on #63; candidate 414e3d4, targeted 22/22 and full 122/122 PASSED; palette comparison shared, defaults unchanged; awaiting review and Keku's palette choice; not merged, not deployed)
+Updated: 2026-11-21 ~3:35 p.m. EST (review 7067254640: the host's Save a memory moved into More… on Jebena Rush results; repair 7603089, targeted 22/22 and full 122/122 PASSED; palette defaults unchanged pending Keku's choice; not merged, not deployed)
 
 ## Current milestone
 M0–M5: COMPLETED as backend/engine checkpoints ONLY — see docs/FRONTEND_MILESTONES.md. They are NOT evidence the full product is finished.
@@ -4678,3 +4678,37 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
   - Native-device checks of the mix (phones and TV).
   - Draw & Guess native iPhone confirmation.
 - **Next:** ChatGPT's review of the draft, and Keku's palette choice.
+
+## Post-beta: the host's Save a memory in More… (review 7067254640)
+- **Handoff and review:**
+  - The compact-mix handoff [7067193858](https://github.com/kekuBT/christmas-game-night-pilot/pull/51#issuecomment-7067193858) reported `414e3d4` (head `591298d`); it was linked on #5.
+  - ChatGPT's review [7067254640](https://github.com/kekuBT/christmas-game-night-pilot/pull/51#issuecomment-7067254640) asked to move the host's Save a memory into More…, as in the selected mock. It asked to keep its eligibility, save confirmation and guest access, and for a focused keyboard check, the repair SHA and a narrow-screen screenshot.
+  - The review kept the current palette default while Keku compares the sheets. It recommended T1 for Everyday and the current Christmas palette.
+  - Acknowledged in [7067903656](https://github.com/kekuBT/christmas-game-night-pilot/pull/51#issuecomment-7067903656) at 2:16 p.m. ET, estimating about 5:30 p.m. ET.
+- **Tested revision:** `7603089` (one commit on `591298d`). The docs commit above it adds the screenshots and these records.
+- **What:**
+  - **Host, on Jebena Rush results:** More… lists **Save a memory** first when this game's memory can be saved; there is no button of its own under the standings.
+    - Choosing it closes the sheet and opens the composer in place, with focus in the note.
+    - **Save** moves focus to the confirmation, and the entry then reads **Your saved memory**.
+    - **Cancel** returns focus to More….
+  - **Guests:** the composer's own button, unchanged.
+  - **A game that can't be saved:** the reason line, unchanged, and no More entry.
+  - **Spectrum and the other games:** unchanged.
+  - **Unchanged for everyone:**
+    - who may save;
+    - the facts;
+    - one request key per draft;
+    - pending approval;
+    - the confirmation.
+- **Files:**
+  - App: `apps/web/src/components/mchezo/{SaveMemory,WhatsNext}.tsx`, `apps/web/src/App.tsx`.
+  - Tests: `apps/web/src/components/mchezo/CompactMix.test.tsx`, `scripts/check-compact-mix.mjs` (section M), `scripts/check-jebena-rush.mjs` (10.4 S1 and S2).
+  - Docs: D-UI-02's revision in `docs/DECISIONS.md`, `docs/design/compact-mix/README.md`, `docs/design/compact-mix/shots/app/` (refreshed from the targeted gate on `7603089`).
+- **Gates on `7603089`:**
+  - targeted: PASSED (exit 0), 22/22, run `20261121-193059-7603089e-3331` (`check-compact-mix` 177/177, `check-jebena-rush` 253/253, `check-spectrum` 203/203);
+  - full: PASSED (exit 0), 122/122, run `20261121-194131-7603089e-7606` (unit tests 179 files / 2226 tests).
+- **Open:**
+  - Keku's palette choice (both reviewers recommend T1 for Everyday and the current Christmas palette; the defaults are unchanged).
+  - Native phone and physical TV colour checks.
+  - Draw & Guess native iPhone confirmation.
+- **Next:** ChatGPT's review of the repair, and Keku's palette choice.

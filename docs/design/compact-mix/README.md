@@ -6,9 +6,12 @@ The owner selected a mix from the compact UI proposal (`docs/design/compact-opti
 - the current seat circle plus Option B's next-game card, chips and sheet in the **Lobby**;
 - Option B's podium **Jebena Rush results**.
 
-They also asked for a colour exploration, compared before any default changes. This folder holds the colour tools and their results, and the app's screenshots. The screenshots come from `check-compact-mix` in the targeted gate on the candidate (`shots/app/`).
+They also asked for a colour exploration, compared before any default changes. This folder holds the colour tools and their results, and the app's screenshots. The app's screenshots (`shots/app/`) come from `check-compact-mix` in the targeted gate on the candidate, `7603089`.
 
-- **Candidate:** `414e3d4` (branch `claude/compact-ui-mix`, stacked on the proposal head `9992014`). It is made of two commits: `7eddbd4`, the mix, and `414e3d4`, a hidden-text class fix (see Checks).
+- **Candidate:** `7603089` (branch `claude/compact-ui-mix`, stacked on the proposal head `9992014`). It is made of three commits:
+  - `7eddbd4`, the mix;
+  - `414e3d4`, a hidden-text class fix (see Checks);
+  - `7603089`, the host's Save a memory in More… (review 7067254640, below).
 - **Draft only:** not for merge or deploy.
 
 ## What changed
@@ -42,9 +45,28 @@ They also asked for a colour exploration, compared before any default changes. T
   - A tie at the top raises every 1st place.
   - Full names are clamped to two lines, so two players who share a first name stay distinct; the standings below give each name whole.
 - **The explained standings,** unchanged: "Outlasted 2 players (200) + 3 whole cups (30) = 230", and "Played: 2 answers · 0 timeouts".
-- **The rest,** unchanged: Save a memory and the outcome line.
+- **The outcome line,** unchanged.
+- **Save a memory** (review 7067254640, following the selected mock):
+  - **Host:** the entry is in **More…**, first in the sheet, whenever this game's memory can be saved. There is no button of its own under the standings.
+    - Choosing it closes the sheet and opens the results' own composer in place, under the standings, with focus in the note.
+    - **Save** moves focus to the confirmation, as before. The entry then reads **Your saved memory** and brings the confirmation back.
+    - **Cancel** puts focus back on More….
+  - **Guests:** unchanged. The composer's own **Save a memory** button stays under the standings.
+  - **Unchanged for everyone:**
+    - who may save;
+    - the facts it saves;
+    - one request key per draft;
+    - the pending approval;
+    - the confirmation.
+  - **A game that can't be saved** still says why under the standings, and More… has no entry for it.
+  - Only the way in moves: the composer is not inside the sheet, so closing the sheet can't drop a draft or a save in flight.
+  - **Screenshots** (320 × 568, `shots/app/`):
+    - `results-320-everyday-more-save-memory.jpg` and `results-320-christmas-more-save-memory.jpg`: More… with focus on Save a memory;
+    - `results-320-everyday-save-memory-open.jpg` and `results-320-christmas-save-memory-open.jpg`: the composer it opens, with focus in the note;
+    - `results-320-everyday-save-memory-saved.jpg`: the host's confirmation;
+    - `results-320-christmas-guest-save-memory-saved.jpg`: a guest's inline save.
 - **One dock:**
-  - **Host:** one main action (Play again, or Next game / Resume when a lineup or a break applies), plus **More…**. More opens a sheet with Pick another game, Take a break, Plan another lineup (when the lineup is complete) and Back to lobby.
+  - **Host:** one main action (Play again, or Next game / Resume when a lineup or a break applies), plus **More…**. More opens a sheet with Save a memory (when this game's memory can be saved), Pick another game, Take a break, Plan another lineup (when the lineup is complete) and Back to lobby.
   - **Guests:** who picks next, and Back to lobby.
 - Every other game's results keep the What's next panel as before.
 
@@ -69,7 +91,7 @@ They also asked for a colour exploration, compared before any default changes. T
 
 ### Side by side
 
-`shots/palettes/palettes-390-everyday.jpg`, `palettes-390-christmas.jpg`, `palettes-320-everyday.jpg` and `palettes-320-christmas.jpg`. These were shot on the full gate's own build of `414e3d4`.
+`shots/palettes/palettes-390-everyday.jpg`, `palettes-390-christmas.jpg`, `palettes-320-everyday.jpg` and `palettes-320-christmas.jpg`. These were shot on the full gate's own build of `414e3d4`. `7603089` doesn't change what they show: the results' rows show the top of the screen, and Save a memory is below the standings.
 
 Each sheet shows:
 
@@ -115,6 +137,43 @@ Each sheet shows:
 
 ## Checks
 
+### On `7603089` (the host's Save a memory in More…, review 7067254640)
+
+- **Targeted gate on `7603089`: PASSED (exit 0)**, run `20261121-193059-7603089e-3331`, 22 of 22 steps. It ran the same 20 drivers:
+
+  | Driver | Result |
+  |---|---|
+  | `check-compact-mix` | 177/177, including 26 checks in the new section M |
+  | `check-jebena-rush` | 253/253; 10.4 S1 and S2 save through More… |
+  | `check-spectrum` | 203/203; its inline Save a memory is unchanged |
+  | `check-mobile-everyday` | 134/134 |
+  | `check-warm-ivory` | 199/199, including W8 (no baseline change) |
+  | `check-lobby-mode` | 88/88 |
+  | `check-one-path` | 78/78 |
+  | `casual`, `jebena-categories`, `themes-seasonal`, `errors`, `stage2`, `lobby-fixes`, `session-flow`, `game-night-flow`, `quick-party`, `host-handover`, `f5`, `solo-shelf`, `official-practice` | passed |
+
+- **Full gate on `7603089`:** **PASSED (exit 0)**, run `20261121-194131-7603089e-7606`, 122 of 122 steps: typecheck (server and web), lint, unit tests (179 files, 2226 tests, including `CompactMix.test.tsx` 13/13), e2e-chromium and the browser drivers (`check-compact-mix` 177/177, `check-jebena-rush` 255/255, `check-spectrum` 203/203). `check-jebena-rush` prints a few timing-dependent progress checks, so its count differs between runs (253 in the targeted run); neither run had a failure.
+- **What section M checks** (320 × 568):
+  - **Host, both looks:**
+    - no Save a memory button under the standings;
+    - More… by keyboard, then Save a memory (with a visible focus ring);
+    - the sheet closes and focus lands in the note, on screen and inside the width;
+    - the composer shows this match's facts, with no text under AA contrast.
+  - **Host, Everyday:**
+    - Cancel by keyboard puts focus back on More…;
+    - More… again opens an empty composer;
+    - Save puts focus on the confirmation;
+    - More… then reads "Your saved memory", which brings the confirmation back.
+  - **Host, Christmas:** Cancel puts focus back on More….
+  - **Guest, Christmas:** no More…; the composer's own button by keyboard; Save puts focus on the confirmation.
+  - **The server's Memory Book:** the host's and the guest's saves, once each, pending, citing this match's finish. The cancelled draft saved nothing.
+- **Focused, before the commit:**
+  - web and root typecheck, and lint on the changed files: clean;
+  - web unit tests: 93/93, `CompactMix.test.tsx` 13/13;
+  - local runs: `check-compact-mix` 177/177 and `check-jebena-rush` ALL PASS.
+
+### On `414e3d4` and `7eddbd4` (first round)
+
 - **Targeted gate on `7eddbd4`: FAILED (exit 1)**, run `20261121-165735-7eddbd4d-6501`; 21 of 22 steps passed.
   - `check-mobile-everyday` read the chips' screen-reader suffix (", change", in `mz-sr-only`) as text clipped inside its box.
   - **Fix (`414e3d4`):** the chips and the results dock's hidden heading use `mz-sr`, the app's other visually hidden class (8 existing uses), which the layout checks already treat as hidden. The accessible names are unchanged.
@@ -153,3 +212,6 @@ MCHEZO_WEB_DIST=<dist> MCHEZO_SCREENSHOT_DIR=<dir> node scripts/check-compact-mi
 - **Jebena results at 320 × 568.** The first screen holds the result card, the podium and the end line. The explained standings are one scroll down. The guest's dock is three lines (status, button, content).
 - **Name length.** The app's own name fields stop at 24 characters. `check-compact-mix` uses 31–32 character names (the server's limit) through the API to test wrapping beyond what the fields allow.
 - **Ties.** A tie at the top is covered by the component test. No live match was forced into a tie, which needs a match-limit finish.
+- **Save a memory in More….**
+  - "Your saved memory" lasts while the page is open. After a reload the entry reads "Save a memory" again, as the inline button did; a second save is a second entry, as before.
+  - The case of a game that can't be saved (no More entry, the reason line kept) is covered by the component test and the app's eligibility check. No live game was voided to show it in a browser.
