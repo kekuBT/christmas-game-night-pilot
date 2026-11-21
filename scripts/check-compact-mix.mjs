@@ -14,6 +14,11 @@
 //      (keyboard: the sheet opens with Pick another game, Take a break and Back to lobby; Escape returns focus);
 //      a guest's dock says who picks next and has Back to lobby; long names wrap inside the podium; no sideways
 //      scroll; no text under AA contrast. Then Play again still starts the next match (the dock's main action).
+//   M  Save a memory (review 7067254640): the host's is in More… (first in the sheet), with no button of its own under
+//      the standings. By keyboard at 320 px in both looks: More… → Save a memory closes the sheet and puts focus in
+//      the note; Cancel puts focus back on More…; Save moves focus to the confirmation, and the entry then reads
+//      "Your saved memory" and brings the confirmation back. A guest still saves inline (its own button). Both
+//      saves are in the server's Memory Book once, pending, citing this match's finish; the cancelled draft isn't.
 //   D  Desktop results (1280) and the TV's final (1920): no sideways scroll; the desktop podium is the server's.
 // Screenshots of every screen go to MCHEZO_SCREENSHOT_DIR when it's set (the gate sets it).
 // Chromium emulation only: no real phones or TVs. Starts ITS OWN server unless given one.
@@ -36,6 +41,8 @@ async function soon(label, fn, timeout = 15000) {
   check(label, false, `not within ${timeout} ms${last ? `: ${String(last.message ?? last).split("\n")[0]}` : ""}`);
   return null;
 }
+/** `soon`, and a PASS line when it holds (the M steps are the evidence). */
+async function sure(label, fn, timeout) { const v = await soon(label, fn, timeout); if (v) check(label, true); return v; }
 
 let srv = null; let DATA = null;
 let BASE = process.argv[2] ?? null;
@@ -319,12 +326,98 @@ try {
       await sleep(500); // the sheet's entrance
       check(`R ${tag} host: More is opaque once open`, await sheetOpaque(h, "next-more-sheet"));
       const inSheet = await h.getByTestId("next-more-sheet").locator("[data-testid]").evaluateAll((ls) => ls.map((l) => l.getAttribute("data-testid")));
-      check(`R ${tag} host: More holds Pick another game, Take a break and Back to lobby (Play again stays in the dock)`, ["next-choose", "next-break", "show-back-to-lobby"].every((x) => inSheet.includes(x)) && !inSheet.includes("next-play-again"), inSheet.join(", "));
+      check(`R ${tag} host: More holds Save a memory (first), Pick another game, Take a break and Back to lobby (Play again stays in the dock)`, inSheet.filter((x) => x !== "next-more-sheet-close")[0] === "next-save-memory" && ["next-choose", "next-break", "show-back-to-lobby"].every((x) => inSheet.includes(x)) && !inSheet.includes("next-play-again"), inSheet.join(", "));
       if (v.w === 320) await shot(h, `results-${v.w}-${look}-more-sheet`);
       await h.keyboard.press("Escape");
       await soon(`R ${tag} host: Escape closes More and focus returns to More…`, async () => (await h.getByTestId("next-more-sheet").count()) === 0 && (await h.evaluate(() => document.activeElement?.getAttribute("data-testid"))) === "next-more");
     }
     await h.context().close(); await g.context().close();
+  }
+
+  // ---------- M. Save a memory: the host's in More…, a guest's inline (review 7067254640) ----------
+  {
+    const finEv = ((await call(`/rooms/${room.roomId}/ledger?watermark=1`, { token: keku.recoveryToken })).body.events ?? []).filter((e) => e.type === "game-finished" && e.gameInstanceId === gid).at(-1);
+    const book = async () => { const b = (await call(`/rooms/${room.roomId}/memory`, { token: keku.recoveryToken })).body; return Array.isArray(b) ? b : []; };
+    const active = (p) => p.evaluate(() => document.activeElement?.getAttribute("data-testid") ?? null);
+    const v = PHONES[0];
+    const NOTES = { cancelled: "A draft the host cancels", host: "Keku kept the jebena", guest: "Amina's first Jebena Rush" };
+    for (const look of LOOKS) {
+      const tag = `${v.w} ${look}`;
+      const h = await seatPage(keku, room.roomId, v, look);
+      await h.getByTestId("jr-podium").waitFor({ timeout: 20000 }); await settle(h);
+      check(`M ${tag} host: no Save a memory button under the standings (it is in More…)`, (await h.getByTestId("save-memory-open").count()) === 0 && (await h.getByTestId("save-memory").count()) === 0);
+      // More… by keyboard, then Save a memory.
+      await h.evaluate(() => document.activeElement?.blur?.());
+      const toMore = await tabTo(h, "next-more", 60);
+      await h.keyboard.press("Enter");
+      await sure(`M ${tag} host: Enter on More… opens the sheet`, async () => h.getByTestId("next-more-sheet").isVisible(), 10000);
+      await sleep(500); // the sheet's entrance
+      const entry = (await h.getByTestId("next-save-memory").innerText().catch(() => "")).trim();
+      const toEntry = await tabTo(h, "next-save-memory", 6);
+      const ringEntry = await focusRing(h);
+      check(`M ${tag} host: the keyboard reaches More… and then Save a memory in the sheet, with a visible ring`, !!toMore && !!toEntry && entry === "Save a memory" && ringOk(ringEntry), `${JSON.stringify(entry)}; ${toEntry?.join(" → ") ?? "∞"}; ${ringText(ringEntry)}`);
+      await shot(h, `results-${v.w}-${look}-more-save-memory`);
+      await h.keyboard.press("Enter");
+      const opened = await sure(`M ${tag} host: Save a memory closes More and opens the composer, focus in the note`, async () => (await h.getByTestId("next-more-sheet").count()) === 0 && (await active(h)) === "save-memory-note", 10000);
+      if (opened) {
+        await sleep(300);
+        const nb = await box(h, "save-memory-note");
+        check(`M ${tag} host: the note is on screen and inside the width; nothing runs off the side`, onScreen(nb, v) && (await sideways(h)) <= 0, `note at ${Math.round(nb?.y)}–${Math.round((nb?.y ?? 0) + (nb?.height ?? 0))} of ${v.h}`);
+        check(`M ${tag} host: the composer shows this match's facts`, (await h.getByTestId("save-memory-facts").locator("li").count()) === standings.length);
+        const bad = await contrastFailures(h);
+        check(`M ${tag} host: no text under AA contrast in the open composer`, bad.length === 0, bad.slice(0, 3).join("; "));
+        await shot(h, `results-${v.w}-${look}-save-memory-open`);
+      }
+      if (look === "everyday") {
+        // Cancel: nothing saved, focus back on More….
+        await h.keyboard.type(NOTES.cancelled);
+        const toCancel = await tabTo(h, "save-memory-cancel", 4);
+        await h.keyboard.press("Enter");
+        await sure(`M ${tag} host: Cancel (by keyboard${toCancel ? "" : ", not reached"}) closes the composer and focus returns to More…`, async () => (await h.getByTestId("save-memory").count()) === 0 && (await active(h)) === "next-more", 10000);
+        // Again, and Save: focus moves to the confirmation.
+        await h.keyboard.press("Enter");
+        await sure(`M ${tag} host: More… opens again from the keyboard`, async () => h.getByTestId("next-more-sheet").isVisible(), 10000);
+        await tabTo(h, "next-save-memory", 6);
+        await h.keyboard.press("Enter");
+        await sure(`M ${tag} host: …Save a memory: the composer, empty, focus in the note`, async () => (await active(h)) === "save-memory-note" && (await h.getByTestId("save-memory-note").inputValue()) === "", 10000);
+        await h.keyboard.type(NOTES.host);
+        await tabTo(h, "save-memory-save", 4);
+        await h.keyboard.press("Enter");
+        const saved = await sure(`M ${tag} host: Save: saved, focus on the confirmation`, async () => /Saved to the Memory Book\. Approve it there/.test(await h.getByTestId("save-memory-saved").innerText().catch(() => "")) && (await active(h)) === "save-memory-saved", 15000);
+        if (saved) await shot(h, `results-${v.w}-${look}-save-memory-saved`);
+        // The entry now says the memory is saved, and brings the confirmation back.
+        await h.getByTestId("next-more").click();
+        await sure(`M ${tag} host: More… now reads "Your saved memory"`, async () => (await h.getByTestId("next-save-memory").innerText().catch(() => "")).trim() === "Your saved memory", 10000);
+        await h.getByTestId("next-save-memory").click();
+        await sure(`M ${tag} host: …which closes More and puts focus on the confirmation`, async () => (await h.getByTestId("next-more-sheet").count()) === 0 && (await active(h)) === "save-memory-saved", 10000);
+      } else {
+        // The other look checks the way in and out: Cancel (by pointer) puts focus back on More….
+        await h.getByTestId("save-memory-cancel").click();
+        await sure(`M ${tag} host: Cancel closes the composer and focus returns to More…`, async () => (await h.getByTestId("save-memory").count()) === 0 && (await active(h)) === "next-more", 10000);
+      }
+      await h.context().close();
+    }
+    // A guest (Christmas, 320): the composer's own button, as before; Save, confirmation focused.
+    {
+      const tag = `${v.w} christmas`;
+      const g = await seatPage(amina, room.roomId, v, "christmas");
+      await g.getByTestId("jr-podium").waitFor({ timeout: 20000 }); await settle(g);
+      check(`M ${tag} guest: no More…; the results keep their own Save a memory button`, (await g.getByTestId("next-more").count()) === 0 && (await g.getByTestId("save-memory-open").isVisible()));
+      await g.evaluate(() => document.activeElement?.blur?.());
+      const toOpen = await tabTo(g, "save-memory-open", 60);
+      await g.keyboard.press("Enter");
+      await sure(`M ${tag} guest: the keyboard${toOpen ? "" : " (not reached)"} opens the composer, focus in the note`, async () => (await active(g)) === "save-memory-note", 10000);
+      await g.keyboard.type(NOTES.guest);
+      await tabTo(g, "save-memory-save", 4);
+      await g.keyboard.press("Enter");
+      await sure(`M ${tag} guest: Save: saved (the host approves it), focus on the confirmation`, async () => /Saved to the Memory Book/.test(await g.getByTestId("save-memory-saved").innerText().catch(() => "")) && (await active(g)) === "save-memory-saved", 15000);
+      check(`M ${tag} guest: nothing runs off the side`, (await sideways(g)) <= 0);
+      await shot(g, `results-${v.w}-christmas-guest-save-memory-saved`);
+      await g.context().close();
+    }
+    const b = await book();
+    const one = (text, by) => { const es = b.filter((x) => x.text === text); return es.length === 1 && es[0].approved === false && es[0].addedBy === by && JSON.stringify(es[0].sourceEventIds) === JSON.stringify([finEv?.eventId]); };
+    check("M the server's Memory Book: the host's and the guest's saves, once each, pending, citing this match's finish; the cancelled draft saved nothing", !!finEv && one(NOTES.host, keku.playerId) && one(NOTES.guest, amina.playerId) && !b.some((x) => x.text === NOTES.cancelled), JSON.stringify(b.map((x) => ({ t: x.text, a: x.approved, by: x.addedBy === keku.playerId ? "host" : x.addedBy === amina.playerId ? "guest" : x.addedBy }))));
   }
 
   // ---------- D. Desktop and TV ----------

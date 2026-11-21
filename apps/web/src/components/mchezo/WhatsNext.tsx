@@ -60,6 +60,11 @@ export interface WhatsNextProps {
   variant?: "panel" | "dock";
   /** Dock: Back to lobby (it joins the host's More sheet; for everyone else it is the dock's button). */
   onBackToLobby?: () => void;
+  /**
+   * Dock, review 7067254640: the host's Save a memory lives in More…; choosing it closes the sheet and opens the
+   * results' own composer (`onOpen`). Given only when this game's memory can be saved. `saved`: it already was.
+   */
+  saveMemory?: { onOpen: () => void; saved: boolean };
 }
 
 export function WhatsNext(p: WhatsNextProps) {
@@ -159,16 +164,30 @@ function WhatsNextDock({ p, state, index, nextItem, nextTitle, host, total }: {
       {p.content && <p className="mz-next__docknote"><ContentSeasonLabel season={p.content} prefix="Next game: " testId="whats-next-content" /></p>}
       {more && p.isHost && (
         <Sheet title="What’s next" onClose={close} testId="next-more-sheet" kicker={p.game.title}>
-          <div className="mz-next__morelist">
-            {canAgain && primary !== "again" && <Keycap block variant="surface" size="md" data-testid="next-play-again" disabled={p.busy} onClick={() => { close(); p.onPlayAgain(); }}>Play again: {p.game.title}</Keycap>}
-            {state === "complete" && p.onPlan && <Keycap block variant="surface" size="md" data-testid="next-plan" disabled={p.busy} onClick={() => { close(); p.onPlan!(); }}>Plan another lineup</Keycap>}
-            {state !== "break" && <Keycap block variant="surface" size="md" data-testid="next-choose" disabled={p.busy} onClick={() => { close(); p.onChoose(); }}>{state === "next" ? "Pick a different game" : "Pick another game"}</Keycap>}
-            {state !== "break" && !p.cup && <Keycap block variant="surface" size="md" data-testid="next-break" disabled={p.busy} onClick={() => { close(); p.onBreakChange(true); }}>Take a break</Keycap>}
-            {p.onBackToLobby && <Keycap block variant="surface" size="md" data-testid="show-back-to-lobby" onClick={() => { close(); p.onBackToLobby!(); }}>Back to lobby</Keycap>}
-          </div>
+          <WhatsNextMoreList p={p} state={state} canAgain={canAgain} primary={primary} close={close} />
         </Sheet>
       )}
     </section>
+  );
+}
+
+/** The host's More… sheet: every choice that isn't the dock's one big key. Each closes the sheet first. */
+export function WhatsNextMoreList({ p, state, canAgain, primary, close }: {
+  p: WhatsNextProps;
+  state: ReturnType<typeof nextState>["state"];
+  canAgain: boolean;
+  primary: "resume" | "next" | "again" | null;
+  close: () => void;
+}) {
+  return (
+    <div className="mz-next__morelist">
+      {p.saveMemory && <Keycap block variant="surface" size="md" data-testid="next-save-memory" onClick={() => { close(); p.saveMemory!.onOpen(); }}>{p.saveMemory.saved ? "Your saved memory" : "Save a memory"}</Keycap>}
+      {canAgain && primary !== "again" && <Keycap block variant="surface" size="md" data-testid="next-play-again" disabled={p.busy} onClick={() => { close(); p.onPlayAgain(); }}>Play again: {p.game.title}</Keycap>}
+      {state === "complete" && p.onPlan && <Keycap block variant="surface" size="md" data-testid="next-plan" disabled={p.busy} onClick={() => { close(); p.onPlan!(); }}>Plan another lineup</Keycap>}
+      {state !== "break" && <Keycap block variant="surface" size="md" data-testid="next-choose" disabled={p.busy} onClick={() => { close(); p.onChoose(); }}>{state === "next" ? "Pick a different game" : "Pick another game"}</Keycap>}
+      {state !== "break" && !p.cup && <Keycap block variant="surface" size="md" data-testid="next-break" disabled={p.busy} onClick={() => { close(); p.onBreakChange(true); }}>Take a break</Keycap>}
+      {p.onBackToLobby && <Keycap block variant="surface" size="md" data-testid="show-back-to-lobby" onClick={() => { close(); p.onBackToLobby!(); }}>Back to lobby</Keycap>}
+    </div>
   );
 }
 

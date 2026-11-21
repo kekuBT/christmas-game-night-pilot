@@ -903,8 +903,12 @@ try {
       await A.getByTestId("save-memory-note").fill("Not this one");
       await A.getByTestId("save-memory-cancel").click();
       // Keku (the host, Everyday, 390 px) saves; it waits for approval, which he gives in the Memory Book.
+      // Review 7067254640 (D-UI-02): the host's Save a memory is in More…, not under the standings.
       const NOTE = "Keku kept the jebena warm all night";
-      await K.getByTestId("save-memory-open").click();
+      check("10.4 S1 Keku's results have no Save a memory button of their own (it's in More…)", (await K.getByTestId("save-memory-open").count()) === 0);
+      await K.getByTestId("next-more").click();
+      await K.getByTestId("next-save-memory").click();
+      await soon("10.4 S1 More… → Save a memory: More closes, the composer opens", async () => (await K.getByTestId("next-more-sheet").count()) === 0 && K.getByTestId("save-memory-note").isVisible(), 10000);
       await K.getByTestId("save-memory-note").fill(NOTE);
       await K.getByTestId("save-memory-save").click();
       await soon("10.4 S1 Keku's save: saved, to be approved in the Memory Book", async () => /Saved to the Memory Book\. Approve it there/.test(await K.getByTestId("save-memory-saved").innerText().catch(() => "")), 15000);
@@ -976,8 +980,11 @@ try {
       check("R1 the entry is one entry, in this room only", !!added && (await call(`/rooms/${ROOM}/memory`, { token: seat.K.token })).body.filter((x) => x.text === text).length === 1);
       await memCtx.close();
       // 10.4 S2 (Jebena): the replay's result screen saves the replay, never the match before it.
-      await soon("10.4 S2 Keku's replay result offers Save a memory", async () => K.getByTestId("save-memory-open").isVisible(), 15000);
-      await K.getByTestId("save-memory-open").click();
+      // The replay's results are a new result screen: More… offers Save a memory again (not "Your saved memory").
+      await soon("10.4 S2 Keku's replay result offers More…", async () => K.getByTestId("next-more").isVisible(), 15000);
+      await K.getByTestId("next-more").click();
+      await soon("10.4 S2 …with Save a memory, for the replay", async () => (await K.getByTestId("next-save-memory").innerText().catch(() => "")).trim() === "Save a memory", 10000);
+      await K.getByTestId("next-save-memory").click();
       await K.getByTestId("save-memory-note").fill("The replay nobody stayed for");
       await K.getByTestId("save-memory-save").click();
       await soon("10.4 S2 saved", async () => (await K.getByTestId("save-memory-saved").count()) === 1, 15000);

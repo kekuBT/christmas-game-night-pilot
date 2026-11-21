@@ -6,7 +6,8 @@
 import { describe, expect, it } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
 import { MchezoJebenaResults } from "./MchezoJebena.js";
-import { WhatsNext, type WhatsNextProps } from "./WhatsNext.js";
+import { WhatsNext, WhatsNextMoreList, type WhatsNextProps } from "./WhatsNext.js";
+import { SaveMemory } from "./SaveMemory.js";
 import type { JebenaStanding } from "../../ui/mchezo/lib/jebena.js";
 import type { PlayerGame, PublicGame, PublicPlayer } from "../../types.js";
 
@@ -110,5 +111,36 @@ describe("D-UI-02: What's next as the results dock", () => {
     expect(html).not.toContain('data-variant="dock"');
     expect(ids(html)).toContain("next-play-again");
     expect(ids(html)).toContain("next-choose");
+  });
+});
+
+// Review 7067254640: on Jebena Rush results the host's Save a memory is in More…, guests keep the composer's own button.
+describe("D-UI-02: the host's Save a memory is in More…", () => {
+  const more = (p: WhatsNextProps) => ids(renderToStaticMarkup(<WhatsNextMoreList p={p} state="free" canAgain primary="again" close={() => {}} />));
+  const FACTS = { saveable: true, lines: ["Jebena Rush: Keku won, 230 points"] };
+  const save = (o: { openFrom?: { request: number; onClosed: () => void }; facts?: typeof FACTS & { why?: string } } = {}) =>
+    renderToStaticMarkup(<SaveMemory facts={o.facts ?? FACTS} send={async () => ({ status: 200, body: {} })} newKey={() => "k1"} canApprove onOpenBook={() => {}} {...(o.openFrom ? { openFrom: o.openFrom } : {})} />);
+
+  it("More… lists Save a memory first, only when the app passes it (a saveable game, for the host)", () => {
+    expect(more({ ...NEXT, saveMemory: { onOpen: () => {}, saved: false } })).toEqual(["next-save-memory", "next-choose", "next-break", "show-back-to-lobby"]);
+    expect(more(NEXT)).toEqual(["next-choose", "next-break", "show-back-to-lobby"]);
+  });
+
+  it("once this game's memory is saved, the entry says so (it brings back the confirmation)", () => {
+    const html = renderToStaticMarkup(<WhatsNextMoreList p={{ ...NEXT, saveMemory: { onOpen: () => {}, saved: true } }} state="free" canAgain primary="again" close={() => {}} />);
+    expect(html).toMatch(/data-testid="next-save-memory"[^>]*>Your saved memory</);
+  });
+
+  it("opened from More…: no button of its own while closed; the guest's composer keeps its button", () => {
+    expect(save({ openFrom: { request: 0, onClosed: () => {} } })).toBe("");
+    expect(ids(save())).toEqual(["save-memory", "save-memory-open"]);
+  });
+
+  it("a game that can't be saved still says why, whoever opens it (and the app passes no More… entry)", () => {
+    const facts = { saveable: false, why: "This game was voided, so there is no result to save.", lines: [] };
+    for (const html of [save({ facts }), save({ facts, openFrom: { request: 0, onClosed: () => {} } })]) {
+      expect(html).toContain("This game was voided, so there is no result to save.");
+      expect(html).not.toContain("save-memory-open");
+    }
   });
 });
