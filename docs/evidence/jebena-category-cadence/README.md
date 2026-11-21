@@ -120,3 +120,6 @@
 
 ## Follow-up: the last-play line after a change (review 7058749487)
 The review found that, right after a change, the last-play line did not say which category the answer was named in. The repair (D-JR-02), its negative control, the gates on `72a4b8a` and the screenshots are in [`last-play-context/`](last-play-context/README.md).
+
+## Follow-up: the briefing follows the match's rules version (review 7058937812)
+The review found that a briefing saved under rules version 1 advertised the 5-to-8 rule after recovery. The repair (D-JR-03), the actual version 1 save and its probe, the negative control and the gates on `ffff889` are in [`briefing-rules/`](briefing-rules/README.md).

@@ -1,0 +1,9 @@
+
+PASSED (exit 0) | targeted | run 20261121-071952-ffff8898-3037
+  8 passed, 0 failed, 0 timed out, 0 infrastructure, 0 invalid, 0 cancelled, 0 not run
+  timing   wall 2m 23s · step time 5m 50s (sum) · 3 workers, 82% busy · 2.45× the same steps run one after another
+           predicted 1–6m (about 2m 03s, low-confidence) → actual 2m 23s (+16%)
+           longest  check-jebena-rush 2m 17s, check-briefing 1m 35s, check-tv-spectator 53s · the longest step is 96% of the wall time
+           machine  CPU mean 29%, peak 87% · memory available ≥ 13770 MB · load peak 3.34
+           retries  none (the gate never retries a step)
+  report <scratch>/gate-jrv-targeted/20261121-071952-ffff8898-3037/report.json

@@ -2850,3 +2850,16 @@ The reported symptom: a nearly black **drawer** screen in an iPhone in-app brows
     1. Add the category to every line, also within a category. It is longer every turn, for a case that only follows a change.
     2. Hide the last-play line for the first turn after a change. The answer that ended the streak would go unmentioned.
     3. Name the category on the client from its own copy of the banks. The client would need the category list, and old or unknown ids would need a second fallback; the server already has the public names.
+- **D-JR-03 A briefing describes the rules frozen in its match** (review 7058937812).
+  - **Why:** a Jebena Rush match saved under rules version 1 keeps version 1 when it is recovered (no streak changes). Its briefing still showed today's 5-to-8 sentence on the phone and the TV, because the briefing copy was one fixed table per game and the briefing projection carried no version.
+  - **What:**
+    - **The module hook:** modules may expose `rulesVersion(state)`, the version frozen at creation. Jebena Rush does.
+    - **The projection:** a briefing gives that number (`rulesVersion`) to every audience. It is a public rule, like a game's settings; nothing else of the state joins it.
+    - **The copy:** `briefingRules` takes the version. Version 1 gets the steps those matches were briefed with. Version 2, a missing version and an unknown one get today's rules.
+    - **Both surfaces:** the phone and TV briefings pass the match's version.
+    - **Unchanged:** gameplay, scoring, clocks, the cadence and the last-play line.
+    - **The secrecy test** (D3 S5) allows exactly the `rulesVersion` key name, and checks its value against the match.
+  - **Alternatives:**
+    1. Send a cadence flag (`streakChanges: true`) instead of the version. It is narrower now, but each later rules change would need another flag; the version already exists in the state.
+    2. Migrate version 1 matches to version 2 on recovery. That changes the rules of a match in progress, against D-JR-01.
+    3. Keep one copy that covers both ("a new category may start after a run of right answers"). It is vague for new matches and still wrong for old ones.

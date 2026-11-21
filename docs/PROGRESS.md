@@ -4535,3 +4535,23 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
   - **No full gate:** the review judged one unnecessary for this presentation-only repair.
 - **Evidence:** `docs/evidence/jebena-category-cadence/last-play-context/`.
 - **Next:** ChatGPT's review of #61 at its new head.
+
+### Repair: the briefing follows the match's rules version (review 7058937812)
+- **The review:** ChatGPT's review [7058937812](https://github.com/kekuBT/christmas-game-night-pilot/pull/51#issuecomment-7058937812).
+  - **Cleared:** the last-play repair. Its independent run had 32/32 browser assertions and 86/86 focused tests.
+  - **Held, from the cadence slice:** a pending briefing saved under rules version 1 advertised the 5-to-8 rule after recovery.
+  - Acknowledged in 7059096120 at 2:11 a.m. ET, estimating about 3:45 a.m. ET.
+- **The tested commit:** `ffff88981d681f57ca8fd2f421290a05a694449f`, on `3dd1bd9`.
+- **The fix (D-JR-03):**
+  - the briefing projection gives the match's frozen `rulesVersion` (the number only);
+  - `briefingRules` picks version 1's steps for version 1 matches, on both the phone and the TV;
+  - new matches keep the 5-to-8 sentence;
+  - gameplay, scoring, clocks and the cadence are unchanged.
+  - **Files:** `src/games/modules/types.ts`, `src/games/modules/jebena.ts`, `src/server/room.ts`, `apps/web/src/types.ts`, `apps/web/src/ui/mchezo/lib/briefing.ts`, `apps/web/src/components/mchezo/Briefing.tsx`; tests `tests/jebena-briefing-rules.test.ts` (new), `tests/fixtures/jebena-v1-briefing.json` (new, saved by the `af79b67` engine), `apps/web/src/components/mchezo/BriefingRules.test.tsx` (new), `tests/d3-briefing.test.ts`, `scripts/check-jebena-categories.mjs` (S0).
+- **Tests:**
+  - **On `3dd1bd9`:** 4 of the 7 new tests fail. The probe of the actual version 1 save reproduces the review: both surfaces advertise the streak, and 8 accepted answers stay in one category.
+  - **On the fix:** 7/7. The 16 focused files: 267/267 on the clean SHA. The probe of the version 1 save now gives version 1 on both surfaces, and no streak sentence.
+  - **Browser S0:** both phones and the TV state the 5-to-8 rule for a fresh match.
+  - **Gates on `ffff889`:** targeted **`PASSED (exit 0)`** 8/8, run `20261121-071952-ffff8898-3037`; fast **`PASSED (exit 0)`** 5/5 (2196 tests), run `20261121-072215-ffff8898-4137`. No full gate: a narrow repair, as with the last-play fix.
+- **Evidence:** `docs/evidence/jebena-category-cadence/briefing-rules/`.
+- **Next:** ChatGPT's review of #61 at its new head.
