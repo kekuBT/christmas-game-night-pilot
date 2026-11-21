@@ -124,6 +124,11 @@ describe("D3 S5: nothing secret is disclosed during the briefing (every game × 
       // Stage 12.8 (D-S128-01): a team game's teams (names and who's on which) are announced before play, so they're
       // public from its start. Only the teams: every other string in the game's state stays a secret below.
       if (g.teams) strings(g.teams, baseline);
+      // Review 7058937812: a match's frozen rules version is a public rule, like its settings: the briefing gives it so
+      // a match recovered from an older save is briefed with its own rules. Only that key name is allowed (the version
+      // is a number); every other string in the state stays a secret below.
+      const frozenVersion = (g.extra as { rulesVersion?: unknown } | undefined)?.rulesVersion;
+      if (typeof frozenVersion === "number") baseline.add("rulesVersion");
       // Every string the server holds for this game that wasn't already public.
       const secrets = [...strings({ extra: g.extra, questions: g.questions }, new Set())]
         .filter((s) => s.length >= 4 && !baseline.has(s) && !ids.includes(s) && s !== desc.id && s !== desc.title && !/^[a-z]+(-[a-z]+)*$/.test(s));
@@ -143,6 +148,7 @@ describe("D3 S5: nothing secret is disclosed during the briefing (every game × 
           expect(e["deadlineAt"], `${who} deadlineAt`).toBeUndefined();
           expect(e["phaseDeadlineAt"], `${who} phaseDeadlineAt`).toBeUndefined();
           if ("myAnswers" in e) expect(e["myAnswers"], `${who} myAnswers`).toEqual({});
+          if ("rulesVersion" in e) expect(e["rulesVersion"], `${who} rulesVersion`).toBe(frozenVersion);
         }
         // Anything in this view that wasn't public before Start must not equal a
         // secret or contain one as a whole word. (A raw substring search of the

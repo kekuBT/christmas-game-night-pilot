@@ -1,0 +1,32 @@
+$ node scripts/check-jebena-categories.mjs http://localhost:36475
+# timeout 600s | worker w2 | server http://localhost:36475 (data <scratch>/gate-jr-targeted2/20261121-052712-c041146e-27483/server-data/w2)
+
+[+5.1s] PASS setup: the server plays rules version 2 (D-JR-01) — 2
+[+5.3s] PASS S3 mid-streak (answer 1 in this category): both phones say just "Category"
+[+5.4s] PASS S4 the rejected try keeps the turn and the category
+[+5.4s] PASS S3 mid-streak (answer 2 in this category): both phones say just "Category"
+[+5.7s] PASS S4 the reload changes nothing: the same category and round, and no new! on her phone
+[+5.7s] PASS S3 mid-streak (answer 3 in this category): both phones say just "Category"
+[+5.9s] PASS S3 mid-streak (answer 4 in this category): both phones say just "Category"
+[+6.0s] PASS S2 change 1 comes from a streak of accepted answers (not a timeout) — {"seq":7,"turn":6,"kind":"category","categoryId":"jr-fruits","reason":"streak","at":1795238844029}
+[+6.0s] PASS S2 change 1 after 5 accepted answers: within 5 to 8 — 5
+[+6.0s] PASS S3 change 1: both phones say "Category · new!" for the turn it starts — {"k":"Category · new!","a":"Category · new!"}
+[+6.3s] PASS S3 mid-streak (answer 1 in this category): both phones say just "Category"
+[+6.4s] PASS S3 mid-streak (answer 2 in this category): both phones say just "Category"
+[+6.5s] PASS S3 mid-streak (answer 3 in this category): both phones say just "Category"
+[+6.6s] PASS S3 mid-streak (answer 4 in this category): both phones say just "Category"
+[+6.7s] PASS S3 mid-streak (answer 5 in this category): both phones say just "Category"
+[+6.8s] PASS S3 mid-streak (answer 6 in this category): both phones say just "Category"
+[+6.9s] PASS S3 mid-streak (answer 7 in this category): both phones say just "Category"
+[+7.0s] PASS S2 change 2 comes from a streak of accepted answers (not a timeout) — {"seq":16,"turn":14,"kind":"category","categoryId":"jr-animals","reason":"streak","at":1795238844990}
+[+7.0s] PASS S2 change 2 after 8 accepted answers: within 5 to 8 — 8
+[+7.0s] PASS S3 change 2: both phones say "Category · new!" for the turn it starts — {"k":"Category · new!","a":"Category · new!"}
+[+7.1s] PASS S2 sustained correct play changes the category, and again after the next streak — changes 2, gaps [5,8], first jr-africa
+[+7.1s] PASS S4 both the rejected try and the reload happened mid-streak
+[+7.2s] PASS no turn ran out (every change was a streak's, every player kept every cup) — [5,5]
+[+7.2s] PASS at 320 px Amina's phone has no sideways scroll
+[+7.2s] 
+[+7.2s] JEBENA CATEGORIES ALL PASSED
+[+7.2s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":3,"pages":3,"peakOpenPages":3}
+
+# PASS (exit 0) in 7.2s | cpu 2.3s, peak memory 265 MB

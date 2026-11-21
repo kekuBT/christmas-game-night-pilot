@@ -1,0 +1,10 @@
+
+FAILED (exit 1) | targeted | run 20261121-052354-d75c7f95-25779
+  7 passed, 1 failed, 0 timed out, 0 infrastructure, 0 invalid, 0 cancelled, 0 not run
+  FAIL      check-jebena-categories (w2) [functional]: FAIL S2 sustained correct play changes the category, and again after the next streak — changes 1, gaps [8], first jr-vegetables
+  timing   wall 2m 22s · step time 5m 46s (sum) · 3 workers, 81% busy · 2.44× the same steps run one after another
+           predicted 1–6m (about 2m 03s, low-confidence) → actual 2m 22s (+15%)
+           longest  check-jebena-rush 2m 17s, check-briefing 1m 35s, check-tv-spectator 53s · the longest step is 96% of the wall time
+           machine  CPU mean 27%, peak 86% · memory available ≥ 13788 MB · load peak 2.07
+           retries  none (the gate never retries a step)
+  report <scratch>/gate-jr-targeted/20261121-052354-d75c7f95-25779/report.json

@@ -1,0 +1,99 @@
+
+ RUN  v2.1.9 <scratch>/wtjrc-base
+
+ ❯ apps/web/src/components/mchezo/BriefingRules.test.tsx (3 tests | 1 failed) 40ms
+   × review 7058937812: the rendered briefing follows the match's rules version > version 1 (a match saved before D-JR-01): neither the phone nor the TV promises the streak change 28ms
+     → phone: expected ' Practice · no Cup points Jebena Rush…' to contain 'Each answer counts once. Time runs ou…'
+ ❯ tests/jebena-briefing-rules.test.ts (4 tests | 3 failed) 30ms
+   × review 7058937812: the briefing describes the rules frozen in its match > an actual version 1 briefing (saved by af79b67), recovered: phone and TV are told version 1's rules; the match plays version 1 16ms
+     → phoneGames: expected undefined to be 1 // Object.is equality
+   × review 7058937812: the briefing describes the rules frozen in its match > a fresh match is version 2: phone and TV are told the 5-to-8 rule; only the version number joins the briefing 5ms
+     → phoneGames: expected undefined to be 2 // Object.is equality
+   × review 7058937812: the briefing describes the rules frozen in its match > the shared copy: version 1 drops only the streak sentence; version 2, a missing version and an unknown one get today's rules 5ms
+     → expected [] to deeply equal [ [ …(2) ] ]
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/jebena-briefing-rules.test.ts > review 7058937812: the briefing describes the rules frozen in its match > an actual version 1 briefing (saved by af79b67), recovered: phone and TV are told version 1's rules; the match plays version 1
+AssertionError: phoneGames: expected undefined to be 1 // Object.is equality
+
+- Expected: 
+1
+
++ Received: 
+undefined
+
+ ❯ tests/jebena-briefing-rules.test.ts:80:42
+     78|       for (const [name, entry] of Object.entries(v)) {
+     79|         expect(entry.status, name).toBe("briefing");
+     80|         expect(entry.rulesVersion, name).toBe(1);
+       |                                          ^
+     81|         const steps = stepsFor(entry);
+     82|         expect(steps, name).not.toContain("5 to 8");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  tests/jebena-briefing-rules.test.ts > review 7058937812: the briefing describes the rules frozen in its match > a fresh match is version 2: phone and TV are told the 5-to-8 rule; only the version number joins the briefing
+AssertionError: phoneGames: expected undefined to be 2 // Object.is equality
+
+- Expected: 
+2
+
++ Received: 
+undefined
+
+ ❯ tests/jebena-briefing-rules.test.ts:116:42
+    114|     for (const pid of [host, guest]) {
+    115|       for (const [name, entry] of Object.entries(surfaces(engine, g.id…
+    116|         expect(entry.rulesVersion, name).toBe(2);
+       |                                          ^
+    117|         expect(stepsFor(entry), name).toContain(STREAK_SENTENCE);
+    118|         expectNoGameState(entry, s);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  tests/jebena-briefing-rules.test.ts > review 7058937812: the briefing describes the rules frozen in its match > the shared copy: version 1 drops only the streak sentence; version 2, a missing version and an unknown one get today's rules
+AssertionError: expected [] to deeply equal [ [ …(2) ] ]
+
+- Expected
++ Received
+
+- Array [
+-   Array [
+-     "Each answer counts once. Time runs out: one of your cups breaks, and a new category starts.",
+-     "Each answer counts once. After a run of 5 to 8 right answers, a new category starts. Time runs out: one of your cups breaks, and a new category starts too.",
+-   ],
+- ]
++ Array []
+
+ ❯ tests/jebena-briefing-rules.test.ts:142:23
+    140|     expect(v1.steps).toHaveLength(today.steps.length);
+    141|     const differing = v1.steps.map((x, i) => [x, today.steps[i]] as co…
+    142|     expect(differing).toEqual([[V1_SENTENCE, today.steps.find((x) => x…
+       |                       ^
+    143|     expect(briefingRules("jebena-rush", "", 2)).toEqual(today);
+    144|     expect(briefingRules("jebena-rush", "", 99)).toEqual(today);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+ FAIL  apps/web/src/components/mchezo/BriefingRules.test.tsx > review 7058937812: the rendered briefing follows the match's rules version > version 1 (a match saved before D-JR-01): neither the phone nor the TV promises the streak change
+AssertionError: phone: expected ' Practice · no Cup points Jebena Rush…' to contain 'Each answer counts once. Time runs ou…'
+
+Expected: "Each answer counts once. Time runs out: one of your cups breaks, and a new category starts."
+Received: " Practice · no Cup points Jebena Rush How to play Name it. Pass it. Beat the steam. Hold the jebena? Name something in the category before the steam boils over: 10 seconds a turn. A right answer passes the jebena to the next player. A wrong one costs only time: try again. Each answer counts once. After a run of 5 to 8 right answers, a new category starts. Time runs out: one of your cups breaks, and a new category starts too. When all your cups are broken, you're out. The last player with a whole cup keeps the jebena. The clock never stops for anyone: if your phone drops off, your turns still run out, and coming back gives no time or cups back. This game: everyone starts with 5 cups. Nobody’s clock is running yet. It starts at the same moment for everyone, once everyone is ready. Ready · 0 of 2 K Keku Not ready yet A Amina (you) Not ready yet I’m ready Read the rules, then tap when you’re ready. "
+
+ ❯ apps/web/src/components/mchezo/BriefingRules.test.tsx:47:30
+     45|   it("version 1 (a match saved before D-JR-01): neither the phone nor …
+     46|     for (const [surface, shown] of [["phone", phone(briefingGame(1))],…
+     47|       expect(shown, surface).toContain(V1);
+       |                              ^
+     48|       expect(shown, surface).not.toContain("5 to 8");
+     49|       expect(shown, surface).toContain("everyone starts with 5 cups");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
+
+ Test Files  2 failed (2)
+      Tests  4 failed | 3 passed (7)
+   Start at  07:17:53
+   Duration  1.79s (transform 2.26s, setup 0ms, collect 2.77s, tests 70ms, environment 1ms, prepare 119ms)
+

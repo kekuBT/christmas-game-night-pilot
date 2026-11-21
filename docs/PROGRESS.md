@@ -4480,3 +4480,78 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
   - **Fast gate:** **`PASSED (exit 0)`** 5/5, run `20261121-050624-a855c697-18967`.
 - **Evidence:** `docs/evidence/install-builds-ownership/bounded-watch-a855c69/`.
 - **Next:** ChatGPT's review of #60 at its new head. The next product slice is on hold until then.
+
+## Post-beta: Jebena Rush category changes during successful play (handoff 7057753827)
+- **#60 cleared:** ChatGPT's review [7057753827](https://github.com/kekuBT/christmas-game-night-pilot/pull/51#issuecomment-7057753827) cleared the install-builds watcher repair (`a855c69`, docs-only head `af79b67`).
+  - Its independent QA had 34/34 normal checks and 20/20 regression assertions, with the two fault runs exiting 1 in 43 s and 55 s.
+  - A mock-worker probe of an installing worker that never ends passed.
+  - 37/37 install tests passed.
+- **The handoff:** the same comment set this slice. It was acknowledged in 7057757959 at 12:13 a.m. ET, estimating about 4:30 a.m. ET.
+- **Branch:** `claude/jebena-category-cadence`, stacked on #60 (exact base `af79b67`). Not for merge or deploy.
+- **The tested commit:** `c041146e59b12c03b9016c68fbd354e19aa9f8ec`. It holds the fix `d75c7f9` and the check's loop-bound fix.
+- **The defect:**
+  - On `af79b67`, a category changed only after a timeout or a used-up bank (40+ answers each).
+  - Sustained correct play stayed in one category: 16 accepted answers in a seeded test, and 14 in the browser.
+- **The fix (D-JR-01, rules version 2):**
+  - a seeded run of 5 to 8 accepted answers per category, saved in the state;
+  - the change comes at the turn boundary;
+  - only accepted answers count;
+  - recovery resumes the same count;
+  - version 1 matches keep version 1;
+  - the briefing and library copy and the 9.1 spec are updated.
+  - **Files:** `src/games/modules/jebena.ts`, `src/games/manifest.ts`, `apps/web/src/ui/mchezo/lib/jebena.ts`, `apps/web/src/ui/mchezo/lib/briefing.ts`, `docs/stage9/stage91.md`, `tests/jebena-category-cadence.test.ts` (new), `scripts/check-jebena-categories.mjs` (new).
+- **Tests:**
+  - **Engine** (11 tests): 8 FAIL on `af79b67`; 11/11 on the fix. The 69 existing Jebena tests pass.
+  - **Browser `check-jebena-categories`:** FAIL on `af79b67` (0 changes in 14 answers). On the fix, 4/4 development runs pass.
+  - **`check-jebena-rush`:** 226/226.
+  - **Gates:**
+    - targeted on `d75c7f9`: **`FAILED (exit 1)`** 7/8, run `20261121-052354-d75c7f95-25779` (the check's loop bound; fixed in `c041146`);
+    - targeted on `c041146`: **`PASSED (exit 0)`** 8/8, run `20261121-052712-c041146e-27483`;
+    - **full on `c041146`: `PASSED (exit 0)`, 121/121**, run `20261121-052942-c041146e-28573`.
+- **The 120-0 report:** one two-player example (10 vs 9 answers, 120-0) follows the existing points rule. A scoring change is left for a separate decision.
+- **Evidence:** `docs/evidence/jebena-category-cadence/`.
+- **Open:**
+  - native iPhone verification;
+  - the scoring question;
+  - the broader redesign (owner-selected options);
+  - Draw & Guess native confirmation.
+- **Next:** ChatGPT's review of the new draft.
+
+### Repair: the last-play line after a category change (review 7058749487)
+- **The review:** ChatGPT's review [7058749487](https://github.com/kekuBT/christmas-game-night-pilot/pull/51#issuecomment-7058749487) found the cadence and integrity checks passed, and held product clearance for one P2: right after a change, the last-play line did not say the answer belonged to the previous category. Acknowledged in 7058757460 at 1:41 a.m. ET, estimating about 3:15 a.m. ET.
+- **The tested commit:** `72a4b8a1c66226dace3c8b83711c8e1b558aa63a`, on `168e2af`.
+- **The fix (D-JR-02):**
+  - the public view gives each accepted log entry its category's public name, worked out at view time;
+  - the line reads "Keku named “Boxing” in Sports." when the answer belongs to another category;
+  - an unknown name gives "…, before the category changed.", never a raw id;
+  - the same-category line is unchanged;
+  - it applies on the watching and out phones, the live TV and the TV final;
+  - no change to scoring, cadence or what is saved.
+  - **Files:** `src/games/modules/jebena.ts`, `apps/web/src/ui/mchezo/lib/jebena.ts`, `apps/web/src/components/mchezo/MchezoJebena.tsx`, `tests/jebena-category-cadence.test.ts`, `scripts/check-jebena-categories.mjs`.
+- **Tests:**
+  - **Unit** (5 new): 3 FAIL on `168e2af`; 16/16 on the fix. The 14 Jebena and related suites: 190/190 on the clean SHA.
+  - **Browser `check-jebena-categories` S5:** FAIL on `168e2af` (6 context checks). On `72a4b8a`, 32/32 in the targeted gate, after the reloads in both looks (Christmas 320 px, Everyday 390 px).
+  - **Gates on `72a4b8a`:** targeted **`PASSED (exit 0)`** 8/8, run `20261121-064909-72a4b8a1-2324`; fast **`PASSED (exit 0)`** 5/5 (2189 tests), run `20261121-065152-72a4b8a1-3485`.
+  - **No full gate:** the review judged one unnecessary for this presentation-only repair.
+- **Evidence:** `docs/evidence/jebena-category-cadence/last-play-context/`.
+- **Next:** ChatGPT's review of #61 at its new head.
+
+### Repair: the briefing follows the match's rules version (review 7058937812)
+- **The review:** ChatGPT's review [7058937812](https://github.com/kekuBT/christmas-game-night-pilot/pull/51#issuecomment-7058937812).
+  - **Cleared:** the last-play repair. Its independent run had 32/32 browser assertions and 86/86 focused tests.
+  - **Held, from the cadence slice:** a pending briefing saved under rules version 1 advertised the 5-to-8 rule after recovery.
+  - Acknowledged in 7059096120 at 2:11 a.m. ET, estimating about 3:45 a.m. ET.
+- **The tested commit:** `ffff88981d681f57ca8fd2f421290a05a694449f`, on `3dd1bd9`.
+- **The fix (D-JR-03):**
+  - the briefing projection gives the match's frozen `rulesVersion` (the number only);
+  - `briefingRules` picks version 1's steps for version 1 matches, on both the phone and the TV;
+  - new matches keep the 5-to-8 sentence;
+  - gameplay, scoring, clocks and the cadence are unchanged.
+  - **Files:** `src/games/modules/types.ts`, `src/games/modules/jebena.ts`, `src/server/room.ts`, `apps/web/src/types.ts`, `apps/web/src/ui/mchezo/lib/briefing.ts`, `apps/web/src/components/mchezo/Briefing.tsx`; tests `tests/jebena-briefing-rules.test.ts` (new), `tests/fixtures/jebena-v1-briefing.json` (new, saved by the `af79b67` engine), `apps/web/src/components/mchezo/BriefingRules.test.tsx` (new), `tests/d3-briefing.test.ts`, `scripts/check-jebena-categories.mjs` (S0).
+- **Tests:**
+  - **On `3dd1bd9`:** 4 of the 7 new tests fail. The probe of the actual version 1 save reproduces the review: both surfaces advertise the streak, and 8 accepted answers stay in one category.
+  - **On the fix:** 7/7. The 16 focused files: 267/267 on the clean SHA. The probe of the version 1 save now gives version 1 on both surfaces, and no streak sentence.
+  - **Browser S0:** both phones and the TV state the 5-to-8 rule for a fresh match.
+  - **Gates on `ffff889`:** targeted **`PASSED (exit 0)`** 8/8, run `20261121-071952-ffff8898-3037`; fast **`PASSED (exit 0)`** 5/5 (2196 tests), run `20261121-072215-ffff8898-4137`. No full gate: a narrow repair, as with the last-play fix.
+- **Evidence:** `docs/evidence/jebena-category-cadence/briefing-rules/`.
+- **Next:** ChatGPT's review of #61 at its new head.

@@ -2812,3 +2812,54 @@ The reported symptom: a nearly black **drawer** screen in an iPhone in-app brows
     - Driver-side deadlines (`within()`) bound every in-page wait.
     - Two fault modes (`MCHEZO_INSTALL_BUILDS_FAULT`, regression only) drive the new `scripts/check-install-builds-no-worker.mjs`. For each mode, the run must exit 1 by itself, fail E1 by name, reach its summary, leave no process behind and leave an empty temp directory.
     - **Alternative:** a single overall time limit on the driver. It would end a hung run, but without naming what was missing and without reaching `finally`.
+
+## Post-beta: Jebena Rush categories change during successful play (handoff 7057753827; acknowledged 7057757959; docs/evidence/jebena-category-cadence/)
+- **D-JR-01 A category also ends after a seeded run of 5 to 8 accepted answers** (rules version 2; amends D-S91-03).
+  - **Why:** Keku reported that categories feel stuck through successful turns.
+    - The server changed the category only on a timeout or a used-up bank, and every bank holds 40 or more answers.
+    - So sustained correct play kept one category all match. On `af79b67`, a seeded test played 16 accepted answers in one category, and a browser run 14.
+  - **What** (`src/games/modules/jebena.ts`):
+    - **The length:** `jebenaStreakLength(seed, categoryRound)` gives 5 to 8 (`JEBENA_STREAK`), from the match's server-owned seed. It is set when a category starts and saved in the state as `streak: { accepted, changeAfter }`.
+    - **The change:** after the streak's last accepted answer, the next category in the existing seeded rotation starts at the turn boundary, with the pass. It is logged with reason `streak` for the turn that starts with it.
+    - **No match end:** a streak never ends the match. With no other category left, the current one stays.
+    - **What counts:** only accepted answers. Rejected tries, out-of-turn, stale and duplicate sends, and reconnects change nothing.
+    - **Timeouts and used-up banks** work as before, with reasons `timeout` and `used-up`, and restart the count.
+    - **Unchanged:** used answers, cups, the turn clock and points. The bank stays private, and the count is never shown.
+    - **Rules version 1 matches** saved before the change keep version 1.
+  - **The cadence is a provisional default:**
+    - **Why 5 to 8:** it is long enough for a few players each to answer, and short enough that a correct streak never stays on one category for long. Two players see a change every 3 or 4 turns each.
+    - **Why seeded:** a seeded length keeps the change from being predictable.
+    - **Configurable:** `JEBENA_STREAK`.
+  - **Alternatives:**
+    1. A fixed length, for example every 6 answers. It is predictable, so players can count to it.
+    2. A change on every pass. It is too busy, and nobody builds on a category.
+    3. A timer instead of a count. It would change the category mid-turn, against the turn boundary.
+    4. A schedule computed at start and stored as a list. It is the same result with more state, and the per-round length is derived the same way.
+  - **Scoring (no change):** the reported 120-0 is the existing rule (100 per player outlasted, 10 per cup kept while in). In two-player play the player who goes out always scores 0, however many answers they named. A change to the rule or its presentation is left for a separate decision.
+- **D-JR-02 After a category change, the last-play line names the category the answer was given in** (review 7058749487; presentation only).
+  - **Why:** right after a streak changed the category, "Keku named “Boxing”." sat under the new category's heading, so the answer seemed to belong to it.
+  - **What:**
+    - **The public view** gives each accepted log entry its own category's public name (`categoryName`). It is worked out when the view is built, so older saved matches get it too. Only played categories are in the log, so nothing of an unused bank is added. The saved state is unchanged.
+    - **`lastPlayLine`** takes the category on screen:
+      - the same category: the plain line, unchanged;
+      - another category: "Keku named “Boxing” in Sports.";
+      - another category whose name is unknown: "…, before the category changed.", never a raw id or a guessed label.
+    - **Surfaces:** the watching and out phone screens, the live TV and the TV final. The holder's turn screen has no last-play line, before and after.
+    - **No change** to scoring, the cadence or the turn clock.
+  - **Alternatives:**
+    1. Add the category to every line, also within a category. It is longer every turn, for a case that only follows a change.
+    2. Hide the last-play line for the first turn after a change. The answer that ended the streak would go unmentioned.
+    3. Name the category on the client from its own copy of the banks. The client would need the category list, and old or unknown ids would need a second fallback; the server already has the public names.
+- **D-JR-03 A briefing describes the rules frozen in its match** (review 7058937812).
+  - **Why:** a Jebena Rush match saved under rules version 1 keeps version 1 when it is recovered (no streak changes). Its briefing still showed today's 5-to-8 sentence on the phone and the TV, because the briefing copy was one fixed table per game and the briefing projection carried no version.
+  - **What:**
+    - **The module hook:** modules may expose `rulesVersion(state)`, the version frozen at creation. Jebena Rush does.
+    - **The projection:** a briefing gives that number (`rulesVersion`) to every audience. It is a public rule, like a game's settings; nothing else of the state joins it.
+    - **The copy:** `briefingRules` takes the version. Version 1 gets the steps those matches were briefed with. Version 2, a missing version and an unknown one get today's rules.
+    - **Both surfaces:** the phone and TV briefings pass the match's version.
+    - **Unchanged:** gameplay, scoring, clocks, the cadence and the last-play line.
+    - **The secrecy test** (D3 S5) allows exactly the `rulesVersion` key name, and checks its value against the match.
+  - **Alternatives:**
+    1. Send a cadence flag (`streakChanges: true`) instead of the version. It is narrower now, but each later rules change would need another flag; the version already exists in the state.
+    2. Migrate version 1 matches to version 2 on recovery. That changes the rules of a match in progress, against D-JR-01.
+    3. Keep one copy that covers both ("a new category may start after a run of right answers"). It is vague for new matches and still wrong for old ones.

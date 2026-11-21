@@ -1,0 +1,73 @@
+
+ RUN  v2.1.9 <scratch>/wtjrc-base
+
+ ❯ tests/jebena-category-cadence.test.ts (16 tests | 3 failed) 130ms
+   × review 7058749487: after a change, the last-play line says which category the answer was named in > the transition: the answer is qualified with its own category; the current one is left to the heading 9ms
+     → expected 'Keku named “Boxing”.' to be 'Keku named “Boxing” in Sports.' // Object.is equality
+   × review 7058749487: after a change, the last-play line says which category the answer was named in > legacy or missing context: no raw id and no guessed name 1ms
+     → expected 'Keku named “Boxing”.' to be 'Keku named “Boxing”, before the categ…' // Object.is equality
+   × review 7058749487: after a change, the last-play line says which category the answer was named in > in the room engine: after a streak's change, every view's last accepted entry names its own (previous) category; older saved logs get names too; only played categories appear 5ms
+     → expected { seq: 8, turn: 7, …(7) } to match object { categoryId: 'jr-animals', …(1) }
+(8 matching properties omitted from actual)
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/jebena-category-cadence.test.ts > review 7058749487: after a change, the last-play line says which category the answer was named in > the transition: the answer is qualified with its own category; the current one is left to the heading
+AssertionError: expected 'Keku named “Boxing”.' to be 'Keku named “Boxing” in Sports.' // Object.is equality
+
+Expected: "Keku named “Boxing” in Sports."
+Received: "Keku named “Boxing”."
+
+ ❯ tests/jebena-category-cadence.test.ts:294:80
+    292|   const toAnimals: JebenaLogEntry = { seq: 6, turn: 6, kind: "category…
+    293|   it("the transition: the answer is qualified with its own category; t…
+    294|     expect(lastPlayLine([sports, toAnimals], nameOf, undefined, "jr-an…
+       |                                                                                ^
+    295|     expect(lastPlayLine([sports, toAnimals], nameOf, "k", "jr-animals"…
+    296|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  tests/jebena-category-cadence.test.ts > review 7058749487: after a change, the last-play line says which category the answer was named in > legacy or missing context: no raw id and no guessed name
+AssertionError: expected 'Keku named “Boxing”.' to be 'Keku named “Boxing”, before the categ…' // Object.is equality
+
+Expected: "Keku named “Boxing”, before the category changed."
+Received: "Keku named “Boxing”."
+
+ ❯ tests/jebena-category-cadence.test.ts:305:18
+    303|     const noName: JebenaLogEntry = { ...sports, categoryName: undefine…
+    304|     const line = lastPlayLine([noName, toAnimals], nameOf, undefined, …
+    305|     expect(line).toBe("Keku named “Boxing”, before the category change…
+       |                  ^
+    306|     expect(line).not.toContain("jr-");
+    307|     const noCategory: JebenaLogEntry = { seq: 1, turn: 1, kind: "accep…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  tests/jebena-category-cadence.test.ts > review 7058749487: after a change, the last-play line says which category the answer was named in > in the room engine: after a streak's change, every view's last accepted entry names its own (previous) category; older saved logs get names too; only played categories appear
+AssertionError: expected { seq: 8, turn: 7, …(7) } to match object { categoryId: 'jr-animals', …(1) }
+(8 matching properties omitted from actual)
+
+- Expected
++ Received
+
+  Object {
+    "categoryId": "jr-animals",
+-   "categoryName": "Animals",
+  }
+
+ ❯ tests/jebena-category-cadence.test.ts:337:28
+    335|     for (const v of views) {
+    336|       const lastAccepted = v.log.filter((e) => e.kind === "accepted").…
+    337|       expect(lastAccepted).toMatchObject({ categoryId: first, category…
+       |                            ^
+    338|       expect(lastPlayLine(v.log, (id) => (id === ids[0] ? "Keku" : "Am…
+    339|       const played = new Set(v.log.filter((e) => e.kind === "category"…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+ Test Files  1 failed (1)
+      Tests  3 failed | 13 passed (16)
+   Start at  06:48:35
+   Duration  1.26s (transform 610ms, setup 0ms, collect 808ms, tests 130ms, environment 0ms, prepare 51ms)
+

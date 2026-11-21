@@ -1,0 +1,38 @@
+PASS setup: the server plays rules version 2 (D-JR-01) — 2
+PASS S3 mid-streak (answer 1 in this category): both phones say just "Category"
+PASS S4 the rejected try keeps the turn and the category
+PASS S3 mid-streak (answer 2 in this category): both phones say just "Category"
+PASS S4 the reload changes nothing: the same category and round, and no new! on her phone
+PASS S3 mid-streak (answer 3 in this category): both phones say just "Category"
+PASS S3 mid-streak (answer 4 in this category): both phones say just "Category"
+PASS S3 mid-streak (answer 5 in this category): both phones say just "Category"
+PASS S3 mid-streak (answer 6 in this category): both phones say just "Category"
+PASS S2 change 1 comes from a streak of accepted answers (not a timeout) — {"seq":9,"turn":8,"kind":"category","categoryId":"jr-africa","reason":"streak","at":1795243723815}
+PASS S2 change 1 after 7 accepted answers: within 5 to 8 — 7
+PASS S3 change 1: both phones say "Category · new!" for the turn it starts — {"k":"Category · new!","a":"Category · new!"}
+FAIL S5 change 1: Amina's phone and the TV say the last answer was named in Animals — not within 4000 ms
+  seen: {"phone":"You named “Cow”.","tv":"Amina named “Cow”.","holderHasLine":false}
+FAIL S5 change 1: Amina's phone shows the line again after the reload — not within 4000 ms
+FAIL S5 change 1: after Amina's phone reloads in christmas at 320 px, it still says “You named “Cow” in Animals.” with no sideways scroll — {"theme":"christmas","line":null,"noScroll":true}
+PASS S5 the first answer in the new category: the plain line on Keku's phone and the TV (no category named) — {"phone":"You named “Algeria”.","tv":"Keku named “Algeria”.","holderHasLine":false}
+PASS S3 mid-streak (answer 1 in this category): both phones say just "Category"
+PASS S3 mid-streak (answer 2 in this category): both phones say just "Category"
+PASS S3 mid-streak (answer 3 in this category): both phones say just "Category"
+PASS S3 mid-streak (answer 4 in this category): both phones say just "Category"
+PASS S3 mid-streak (answer 5 in this category): both phones say just "Category"
+PASS S3 mid-streak (answer 6 in this category): both phones say just "Category"
+PASS S2 change 2 comes from a streak of accepted answers (not a timeout) — {"seq":17,"turn":15,"kind":"category","categoryId":"jr-vegetables","reason":"streak","at":1795243732608}
+PASS S2 change 2 after 7 accepted answers: within 5 to 8 — 7
+PASS S3 change 2: both phones say "Category · new!" for the turn it starts — {"k":"Category · new!","a":"Category · new!"}
+FAIL S5 change 2: Keku's phone and the TV say the last answer was named in Countries in Africa — not within 4000 ms
+  seen: {"phone":"You named “Cabo Verde”.","tv":"Keku named “Cabo Verde”.","holderHasLine":false}
+FAIL S5 change 2: Keku's phone shows the line again after the reload — not within 4000 ms
+FAIL S5 change 2: after Keku's phone reloads in everyday at 390 px, it still says “You named “Cabo Verde” in Countries in Africa.” with no sideways scroll — {"theme":"everyday","line":null,"noScroll":true}
+PASS S5 the first answer in the new category: the plain line on Amina's phone and the TV (no category named) — {"phone":"You named “Asparagus”.","tv":"Amina named “Asparagus”.","holderHasLine":false}
+PASS S2 sustained correct play changes the category, and again after the next streak — changes 2, gaps [7,7], first jr-animals
+PASS S4 both the rejected try and the reload happened mid-streak
+PASS no turn ran out (every change was a streak's, every player kept every cup) — [5,5]
+PASS Keku's phone (390 px now) has no sideways scroll
+PASS Amina's phone (320 px now) has no sideways scroll
+
+JEBENA CATEGORIES FAILED: 6 failed

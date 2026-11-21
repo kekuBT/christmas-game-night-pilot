@@ -1,0 +1,26 @@
+PASS setup: the server plays rules version 2 (D-JR-01) — 2
+PASS S3 mid-streak (answer 1 in this category): both phones say just "Category"
+PASS S4 the rejected try keeps the turn and the category
+PASS S3 mid-streak (answer 2 in this category): both phones say just "Category"
+PASS S4 the reload changes nothing: the same category and round, and no new! on her phone
+PASS S3 mid-streak (answer 3 in this category): both phones say just "Category"
+PASS S3 mid-streak (answer 4 in this category): both phones say just "Category"
+PASS S3 mid-streak (answer 5 in this category): both phones say just "Category"
+PASS S2 change 1 comes from a streak of accepted answers (not a timeout) — {"seq":8,"turn":7,"kind":"category","categoryId":"jr-animals","reason":"streak","at":1795238805108}
+PASS S2 change 1 after 6 accepted answers: within 5 to 8 — 6
+PASS S3 change 1: both phones say "Category · new!" for the turn it starts — {"k":"Category · new!","a":"Category · new!"}
+PASS S3 mid-streak (answer 1 in this category): both phones say just "Category"
+PASS S3 mid-streak (answer 2 in this category): both phones say just "Category"
+PASS S3 mid-streak (answer 3 in this category): both phones say just "Category"
+PASS S3 mid-streak (answer 4 in this category): both phones say just "Category"
+PASS S3 mid-streak (answer 5 in this category): both phones say just "Category"
+PASS S3 mid-streak (answer 6 in this category): both phones say just "Category"
+PASS S2 change 2 comes from a streak of accepted answers (not a timeout) — {"seq":16,"turn":14,"kind":"category","categoryId":"jr-fruits","reason":"streak","at":1795238805566}
+PASS S2 change 2 after 7 accepted answers: within 5 to 8 — 7
+PASS S3 change 2: both phones say "Category · new!" for the turn it starts — {"k":"Category · new!","a":"Category · new!"}
+PASS S2 sustained correct play changes the category, and again after the next streak — changes 2, gaps [6,7], first jr-sports
+PASS S4 both the rejected try and the reload happened mid-streak
+PASS no turn ran out (every change was a streak's, every player kept every cup) — [5,5]
+PASS at 320 px Amina's phone has no sideways scroll
+
+JEBENA CATEGORIES ALL PASSED

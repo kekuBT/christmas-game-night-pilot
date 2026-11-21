@@ -1,0 +1,42 @@
+$ node scripts/check-jebena-categories.mjs http://localhost:36119
+# timeout 600s | worker w2 | server http://localhost:36119 (data <scratch>/gate-jrv-targeted/20261121-071952-ffff8898-3037/server-data/w2)
+
+[+4.9s] PASS S0 Keku's phone: the briefing (rules version 2) says "After a run of 5 to 8 right answers, a new category starts." — Hold the jebena? Name something in the category before the steam boils over: 10 seconds a turn.A right answer passes the jebena to the next player. A wrong one costs only time: try again.Each answer c
+[+4.9s] PASS S0 Amina's phone: the briefing (rules version 2) says "After a run of 5 to 8 right answers, a new category starts." — Hold the jebena? Name something in the category before the steam boils over: 10 seconds a turn.A right answer passes the jebena to the next player. A wrong one costs only time: try again.Each answer c
+[+4.9s] PASS S0 the TV: the briefing (rules version 2) says "After a run of 5 to 8 right answers, a new category starts." — Hold the jebena? Name something in the category before the steam boils over: 10 seconds a turn.A right answer passes the jebena to the next player. A wrong one costs only time: try again.Each answer c
+[+5.4s] PASS setup: the server plays rules version 2 (D-JR-01) — 2
+[+5.6s] PASS S3 mid-streak (answer 1 in this category): both phones say just "Category"
+[+5.8s] PASS S4 the rejected try keeps the turn and the category
+[+5.8s] PASS S3 mid-streak (answer 2 in this category): both phones say just "Category"
+[+6.1s] PASS S4 the reload changes nothing: the same category and round, and no new! on her phone
+[+6.1s] PASS S3 mid-streak (answer 3 in this category): both phones say just "Category"
+[+6.3s] PASS S3 mid-streak (answer 4 in this category): both phones say just "Category"
+[+6.4s] PASS S3 mid-streak (answer 5 in this category): both phones say just "Category"
+[+6.5s] PASS S3 mid-streak (answer 6 in this category): both phones say just "Category"
+[+6.7s] PASS S2 change 1 comes from a streak of accepted answers (not a timeout) — {"seq":9,"turn":8,"kind":"category","categoryId":"jr-animals","reason":"streak","at":1795245604639}
+[+6.7s] PASS S2 change 1 after 7 accepted answers: within 5 to 8 — 7
+[+6.7s] PASS S3 change 1: both phones say "Category · new!" for the turn it starts — {"k":"Category · new!","a":"Category · new!"}
+[+6.7s] PASS S5 change 1: Amina's phone and the TV say the last answer was named in Jobs (now Animals); the holder's turn screen has no last-play line — {"phone":"You named “Dentist” in Jobs.","tv":"Amina named “Dentist” in Jobs.","holderHasLine":false}
+[+7.1s] PASS S5 change 1: after Amina's phone reloads in christmas at 320 px, it still says “You named “Dentist” in Jobs.” with no sideways scroll — {"theme":"christmas","line":"You named “Dentist” in Jobs.","noScroll":true}
+[+7.6s] PASS S5 the first answer in the new category: the plain line on Keku's phone and the TV (no category named) — {"phone":"You named “Badger”.","tv":"Keku named “Badger”.","holderHasLine":false}
+[+7.6s] PASS S3 mid-streak (answer 1 in this category): both phones say just "Category"
+[+7.7s] PASS S3 mid-streak (answer 2 in this category): both phones say just "Category"
+[+7.9s] PASS S3 mid-streak (answer 3 in this category): both phones say just "Category"
+[+8.0s] PASS S3 mid-streak (answer 4 in this category): both phones say just "Category"
+[+8.2s] PASS S3 mid-streak (answer 5 in this category): both phones say just "Category"
+[+8.3s] PASS S2 change 2 comes from a streak of accepted answers (not a timeout) — {"seq":16,"turn":14,"kind":"category","categoryId":"jr-fruits","reason":"streak","at":1795245606261}
+[+8.3s] PASS S2 change 2 after 6 accepted answers: within 5 to 8 — 6
+[+8.3s] PASS S3 change 2: both phones say "Category · new!" for the turn it starts — {"k":"Category · new!","a":"Category · new!"}
+[+8.3s] PASS S5 change 2: Amina's phone and the TV say the last answer was named in Animals (now Fruits); the holder's turn screen has no last-play line — {"phone":"You named “Cheetah” in Animals.","tv":"Amina named “Cheetah” in Animals.","holderHasLine":false}
+[+8.5s] PASS S5 change 2: after Amina's phone reloads in everyday at 390 px, it still says “You named “Cheetah” in Animals.” with no sideways scroll — {"theme":"everyday","line":"You named “Cheetah” in Animals.","noScroll":true}
+[+9.0s] PASS S5 the first answer in the new category: the plain line on Keku's phone and the TV (no category named) — {"phone":"You named “Apple”.","tv":"Keku named “Apple”.","holderHasLine":false}
+[+9.2s] PASS S2 sustained correct play changes the category, and again after the next streak — changes 2, gaps [7,6], first jr-jobs
+[+9.2s] PASS S4 both the rejected try and the reload happened mid-streak
+[+9.2s] PASS no turn ran out (every change was a streak's, every player kept every cup) — [5,5]
+[+9.2s] PASS Keku's phone (390 px now) has no sideways scroll
+[+9.2s] PASS Amina's phone (390 px now) has no sideways scroll
+[+9.2s] 
+[+9.2s] JEBENA CATEGORIES ALL PASSED
+[+9.2s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":3,"pages":3,"peakOpenPages":3}
+
+# PASS (exit 0) in 9.2s | cpu 2.7s, peak memory 272 MB

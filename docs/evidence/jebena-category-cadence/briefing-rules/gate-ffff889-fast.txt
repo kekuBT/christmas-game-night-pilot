@@ -1,0 +1,10 @@
+
+PASSED (exit 0) | fast | run 20261121-072215-ffff8898-4137
+  5 passed, 0 failed, 0 timed out, 0 infrastructure, 0 invalid, 0 cancelled, 0 not run
+  timing   wall 1m 14s · step time 1m 55s (sum) · 3 workers, 52% busy · 1.55× the same steps run one after another
+           predicted 21–28s (about 24s, measured) → actual 1m 14s (+208%)
+           longest  unit-tests 1m 01s, lint 21s, typecheck-server 13s · the longest step is 83% of the wall time
+           machine  CPU mean 75%, peak 99% · memory available ≥ 13817 MB · load peak 4.73
+           contention ×2.389 (median step time vs its sequential median)
+           retries  none (the gate never retries a step)
+  report <scratch>/gate-jrv-fast/20261121-072215-ffff8898-4137/report.json

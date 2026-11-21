@@ -1,0 +1,208 @@
+{
+ "id": "room-mwq2ni9w-882626",
+ "joinCode": "BB3N55",
+ "name": "JR v1 briefing",
+ "hostId": "player-1",
+ "cohosts": [],
+ "championshipDay": 1,
+ "kind": "casual",
+ "competitionFormat": "combined-75-25",
+ "cup": {
+  "schemaVersion": 1,
+  "cupId": "cup-mwq2ni9x-bfxkfh",
+  "createdAt": 1795245221445,
+  "format": "combined-75-25",
+  "qualificationPolicy": {
+   "kind": "meaningful-participation",
+   "version": 1,
+   "minShare": 0.5,
+   "minActions": 2,
+   "minGames": 1
+  },
+  "origin": "created",
+  "categorySprint": {
+   "matcher": 2,
+   "sizePolicy": 1,
+   "answerRules": 2
+  },
+  "timing": {
+   "version": 2,
+   "readMinMs": 20000,
+   "stallMs": 300000,
+   "warnMs": 60000
+  }
+ },
+ "contentUsage": {},
+ "contentSeq": 0,
+ "contentSeason": "everyday",
+ "party": null,
+ "partyRevision": 0,
+ "session": {
+  "onBreak": false,
+  "revision": 1,
+  "ops": []
+ },
+ "players": [
+  {
+   "id": "player-1",
+   "displayName": "Keku",
+   "avatar": "🎄",
+   "isHost": true,
+   "isCohost": false,
+   "connected": true,
+   "recoveryTokenHash": "e72f103518f07353a68d015bf607535c258e5ed526ff7aed53f5090ddcd3df60",
+   "joinedAt": 1800000000000,
+   "disconnectedAt": null,
+   "credentialVersion": 0,
+   "recoveryCodeHash": null
+  },
+  {
+   "id": "player-2",
+   "displayName": "Amina",
+   "avatar": "🎄",
+   "isHost": false,
+   "isCohost": false,
+   "connected": true,
+   "recoveryTokenHash": "92181b87862c7515e9d3120e33f68f6675ff2632b21cfef01c877619fc781738",
+   "joinedAt": 1800000000000,
+   "disconnectedAt": null,
+   "credentialVersion": 0,
+   "recoveryCodeHash": null
+  }
+ ],
+ "spectators": [],
+ "games": [
+  {
+   "id": "game-1",
+   "gameId": "jebena-rush",
+   "official": false,
+   "settings": {
+    "hearts": 5
+   },
+   "status": "briefing",
+   "players": [
+    "player-1",
+    "player-2"
+   ],
+   "answers": {},
+   "answerTimes": {},
+   "rawScores": {
+    "player-1": 0,
+    "player-2": 0
+   },
+   "startedAt": 1800000000000,
+   "briefing": {
+    "createdAt": 1800000000000,
+    "startNowAt": 1800000020000,
+    "warnAt": 1800000240000,
+    "expiresAt": 1800000300000,
+    "ready": {},
+    "warned": false
+   },
+   "season": "everyday",
+   "lifecycleVersion": 1,
+   "day": 1,
+   "seed": 2069879211,
+   "extra": {
+    "rulesVersion": 1,
+    "bankVersion": "jr-bank-1",
+    "seed": 2069879211,
+    "startHearts": 5,
+    "order": [
+     "player-2",
+     "player-1"
+    ],
+    "per": {
+     "player-2": {
+      "hearts": 5,
+      "outOrder": null,
+      "answers": 0,
+      "timeouts": 0,
+      "tries": 0
+     },
+     "player-1": {
+      "hearts": 5,
+      "outOrder": null,
+      "answers": 0,
+      "timeouts": 0,
+      "tries": 0
+     }
+    },
+    "rotation": [
+     "jr-jobs",
+     "jr-animals",
+     "jr-vegetables",
+     "jr-africa",
+     "jr-sports",
+     "jr-fruits"
+    ],
+    "rotationAt": 0,
+    "category": "jr-jobs",
+    "categoryRound": 1,
+    "used": {},
+    "turn": {
+     "n": 1,
+     "player": "player-2",
+     "attempts": 0
+    },
+    "outCount": 0,
+    "log": [
+     {
+      "seq": 1,
+      "turn": 1,
+      "kind": "category",
+      "categoryId": "jr-jobs",
+      "at": 0
+     }
+    ],
+    "attempts": {},
+    "end": null
+   }
+  }
+ ],
+ "ledger": [
+  {
+   "eventId": "evt-1",
+   "seq": 1,
+   "type": "player-joined",
+   "createdAt": 1800000000000,
+   "playerId": "player-1"
+  },
+  {
+   "eventId": "evt-2",
+   "seq": 2,
+   "type": "host-claimed",
+   "createdAt": 1800000000000,
+   "playerId": "player-1"
+  },
+  {
+   "eventId": "evt-3",
+   "seq": 3,
+   "type": "player-joined",
+   "createdAt": 1800000000000,
+   "playerId": "player-2"
+  },
+  {
+   "eventId": "evt-4",
+   "seq": 4,
+   "type": "game-briefing-started",
+   "createdAt": 1800000000000,
+   "gameInstanceId": "game-1",
+   "actor": "player-1",
+   "detail": {
+    "gameId": "jebena-rush",
+    "official": false,
+    "roster": [
+     "player-1",
+     "player-2"
+    ],
+    "season": "everyday"
+   }
+  }
+ ],
+ "seq": 4,
+ "seenIntents": [],
+ "nextPlayer": 3,
+ "nextSpectator": 1,
+ "nextGame": 2
+}

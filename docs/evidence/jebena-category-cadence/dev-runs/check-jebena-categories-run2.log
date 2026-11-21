@@ -1,0 +1,28 @@
+PASS setup: the server plays rules version 2 (D-JR-01) — 2
+PASS S3 mid-streak (answer 1 in this category): both phones say just "Category"
+PASS S4 the rejected try keeps the turn and the category
+PASS S3 mid-streak (answer 2 in this category): both phones say just "Category"
+PASS S4 the reload changes nothing: the same category and round, and no new! on her phone
+PASS S3 mid-streak (answer 3 in this category): both phones say just "Category"
+PASS S3 mid-streak (answer 4 in this category): both phones say just "Category"
+PASS S3 mid-streak (answer 5 in this category): both phones say just "Category"
+PASS S3 mid-streak (answer 6 in this category): both phones say just "Category"
+PASS S3 mid-streak (answer 7 in this category): both phones say just "Category"
+PASS S2 change 1 comes from a streak of accepted answers (not a timeout) — {"seq":10,"turn":9,"kind":"category","categoryId":"jr-sports","reason":"streak","at":1795238812355}
+PASS S2 change 1 after 8 accepted answers: within 5 to 8 — 8
+PASS S3 change 1: both phones say "Category · new!" for the turn it starts — {"k":"Category · new!","a":"Category · new!"}
+PASS S3 mid-streak (answer 1 in this category): both phones say just "Category"
+PASS S3 mid-streak (answer 2 in this category): both phones say just "Category"
+PASS S3 mid-streak (answer 3 in this category): both phones say just "Category"
+PASS S3 mid-streak (answer 4 in this category): both phones say just "Category"
+PASS S3 mid-streak (answer 5 in this category): both phones say just "Category"
+PASS S3 mid-streak (answer 6 in this category): both phones say just "Category"
+PASS S2 change 2 comes from a streak of accepted answers (not a timeout) — {"seq":18,"turn":16,"kind":"category","categoryId":"jr-jobs","reason":"streak","at":1795238812747}
+PASS S2 change 2 after 7 accepted answers: within 5 to 8 — 7
+PASS S3 change 2: both phones say "Category · new!" for the turn it starts — {"k":"Category · new!","a":"Category · new!"}
+PASS S2 sustained correct play changes the category, and again after the next streak — changes 2, gaps [8,7], first jr-fruits
+PASS S4 both the rejected try and the reload happened mid-streak
+PASS no turn ran out (every change was a streak's, every player kept every cup) — [5,5]
+PASS at 320 px Amina's phone has no sideways scroll
+
+JEBENA CATEGORIES ALL PASSED

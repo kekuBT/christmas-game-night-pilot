@@ -1,0 +1,20 @@
+
+ RUN  v2.1.9 <scratch>/wtfs
+
+ ✓ tests/jebena-category-cadence.test.ts > D-JR-01: a streak of accepted answers changes the category > sustained correct play: the category changes within 8 accepted answers, at the turn boundary, and again after the next streak
+ ✓ tests/jebena-category-cadence.test.ts > D-JR-01: a streak of accepted answers changes the category > bounded and seeded: every streak lasts 5 to 8 accepted answers; the same seed gives the same schedule, others differ
+ ✓ tests/jebena-category-cadence.test.ts > D-JR-01: a streak of accepted answers changes the category > only accepted answers count: rejected tries, a used answer, a stale or out-of-turn send change neither the category nor the count
+ ✓ tests/jebena-category-cadence.test.ts > D-JR-01: a streak of accepted answers changes the category > a timeout still changes the category (and costs a cup); the streak starts again from zero in the new one
+ ✓ tests/jebena-category-cadence.test.ts > D-JR-01: a streak of accepted answers changes the category > a used-up bank changes the category with no penalty (reason used-up); a streak never ends the match, even when no other category has answers left
+ ✓ tests/jebena-category-cadence.test.ts > D-JR-01: a streak of accepted answers changes the category > a match saved under rules version 1 keeps version 1 (no streak changes) after the upgrade
+ ✓ tests/jebena-category-cadence.test.ts > D-JR-01 in the room engine: recovery and every viewer agree > restart mid-streak: the restored room has the same category and count, and changes at the same answer as one that never stopped
+ ✓ tests/jebena-category-cadence.test.ts > D-JR-01 in the room engine: recovery and every viewer agree > a duplicate send (same client event) and a reconnect's refetch change nothing; every player and the TV show the same category, before and after a change
+ ✓ tests/jebena-category-cadence.test.ts > D-JR-01 in the room engine: recovery and every viewer agree > the turn clock is unchanged: the turn after a streak's change gets the same full turn as after any other accepted answer
+ ✓ tests/jebena-category-cadence.test.ts > D-JR-01 in the room engine: recovery and every viewer agree > privacy: no view carries the schedule's bank or unused answers (only played facts, plus the streak count is never shown)
+ ✓ tests/jebena-category-cadence.test.ts > the reported 120-0, under the existing points (100 per player outlasted, 10 per cup kept while in) > two players, 5 cups: nearly even play, and the final score is 120-0
+
+ Test Files  1 passed (1)
+      Tests  11 passed (11)
+   Start at  05:29:54
+   Duration  2.07s (transform 1.04s, setup 0ms, collect 1.32s, tests 148ms, environment 0ms, prepare 96ms)
+

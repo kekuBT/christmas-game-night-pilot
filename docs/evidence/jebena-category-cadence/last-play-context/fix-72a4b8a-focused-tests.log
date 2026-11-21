@@ -1,0 +1,214 @@
+
+ RUN  v2.1.9 <scratch>/wtfs
+
+ ✓ tests/jebena-category-cadence.test.ts > D-JR-01: a streak of accepted answers changes the category > sustained correct play: the category changes within 8 accepted answers, at the turn boundary, and again after the next streak
+ ✓ tests/jebena-category-cadence.test.ts > D-JR-01: a streak of accepted answers changes the category > bounded and seeded: every streak lasts 5 to 8 accepted answers; the same seed gives the same schedule, others differ
+ ✓ tests/jebena-category-cadence.test.ts > D-JR-01: a streak of accepted answers changes the category > only accepted answers count: rejected tries, a used answer, a stale or out-of-turn send change neither the category nor the count
+ ✓ tests/jebena-category-cadence.test.ts > D-JR-01: a streak of accepted answers changes the category > a timeout still changes the category (and costs a cup); the streak starts again from zero in the new one
+ ✓ tests/jebena-category-cadence.test.ts > D-JR-01: a streak of accepted answers changes the category > a used-up bank changes the category with no penalty (reason used-up); a streak never ends the match, even when no other category has answers left
+ ✓ tests/jebena-category-cadence.test.ts > D-JR-01: a streak of accepted answers changes the category > a match saved under rules version 1 keeps version 1 (no streak changes) after the upgrade
+ ✓ tests/jebena-category-cadence.test.ts > D-JR-01 in the room engine: recovery and every viewer agree > restart mid-streak: the restored room has the same category and count, and changes at the same answer as one that never stopped
+ ✓ tests/jebena-category-cadence.test.ts > D-JR-01 in the room engine: recovery and every viewer agree > a duplicate send (same client event) and a reconnect's refetch change nothing; every player and the TV show the same category, before and after a change
+ ✓ tests/jebena-category-cadence.test.ts > D-JR-01 in the room engine: recovery and every viewer agree > the turn clock is unchanged: the turn after a streak's change gets the same full turn as after any other accepted answer
+ ✓ tests/jebena-category-cadence.test.ts > D-JR-01 in the room engine: recovery and every viewer agree > privacy: no view carries the schedule's bank or unused answers (only played facts, plus the streak count is never shown)
+ ✓ tests/jebena-category-cadence.test.ts > the reported 120-0, under the existing points (100 per player outlasted, 10 per cup kept while in) > two players, 5 cups: nearly even play, and the final score is 120-0
+ ✓ tests/jebena-category-cadence.test.ts > review 7058749487: after a change, the last-play line says which category the answer was named in > the transition: the answer is qualified with its own category; the current one is left to the heading
+ ✓ tests/jebena-category-cadence.test.ts > review 7058749487: after a change, the last-play line says which category the answer was named in > the same category: the ordinary, concise line
+ ✓ tests/jebena-category-cadence.test.ts > review 7058749487: after a change, the last-play line says which category the answer was named in > legacy or missing context: no raw id and no guessed name
+ ✓ tests/jebena-category-cadence.test.ts > review 7058749487: after a change, the last-play line says which category the answer was named in > other plays are unchanged by the category argument
+ ✓ tests/jebena-category-cadence.test.ts > review 7058749487: after a change, the last-play line says which category the answer was named in > in the room engine: after a streak's change, every view's last accepted entry names its own (previous) category; older saved logs get names too; only played categories appear
+ ✓ tests/stage91-jebena.test.ts > Jebena Rush bank (§7) > six year-round categories, at least 40 canonical answers each, every id unique across the bank
+ ✓ tests/stage91-jebena.test.ts > Jebena Rush bank (§7) > the bank report: no form claimed by two answers, no not-accepted word that is also accepted, no duplicate ids
+ ✓ tests/stage91-jebena.test.ts > Jebena Rush bank (§7) > Countries in Africa is the 54-member closed set, Congo stays a deliberate near-miss
+ ✓ tests/stage91-jebena.test.ts > Jebena Rush matching (§7) > exact answers, whatever the case, spacing, accents, punctuation or a leading article
+ ✓ tests/stage91-jebena.test.ts > Jebena Rush matching (§7) > aliases and plurals use up the SAME canonical answer
+ ✓ tests/stage91-jebena.test.ts > Jebena Rush matching (§7) > a typo is accepted only when unambiguous: 6+ letters, one answer within one edit, no rival within two
+ ✓ tests/stage91-jebena.test.ts > Jebena Rush matching (§7) > near pairs and short words are AMBIGUOUS, never silently another answer
+ ✓ tests/stage91-jebena.test.ts > Jebena Rush matching (§7) > anything else is 'not in this bank' (never 'wrong'); empty input is empty
+ ✓ tests/stage91-jebena.test.ts > Jebena Rush matching: the ambiguity layer (review 6808081378, 1) > exact names and aliases come first, whatever else is near
+ ✓ tests/stage91-jebena.test.ts > Jebena Rush matching: the ambiguity layer (review 6808081378, 1) > an alias of ANOTHER answer is a rival: a typo between them is ambiguous
+ ✓ tests/stage91-jebena.test.ts > Jebena Rush matching: the ambiguity layer (review 6808081378, 1) > aliases of the SAME answer are never rivals: a typo near several of them is still that answer
+ ✓ tests/stage91-jebena.test.ts > Jebena Rush matching: the ambiguity layer (review 6808081378, 1) > a plural whose readings map to DIFFERENT answers is ambiguous, never the first one found
+ ✓ tests/stage91-jebena.test.ts > Jebena Rush matching: the ambiguity layer (review 6808081378, 1) > a plural that reads as both an answer and a not-accepted word is ambiguous; a not-accepted word alone stays its near miss
+ ✓ tests/stage91-jebena.test.ts > Jebena Rush matching: the ambiguity layer (review 6808081378, 1) > named near misses are decided before any fuzzy matching
+ ✓ tests/stage91-jebena.test.ts > Jebena Rush matching: the ambiguity layer (review 6808081378, 1) > short words: never a typo; one edit from an answer is ambiguous
+ ✓ tests/stage91-jebena.test.ts > Jebena Rush matching: the ambiguity layer (review 6808081378, 1) > a used answer is used whichever way it is typed: name, alias, plural or typo
+ ✓ tests/stage91-jebena.test.ts > Jebena Rush matching: the ambiguity layer (review 6808081378, 1) > the feedback never names a hidden answer: an ambiguous or not-in-bank try carries no suggestion
+ ✓ tests/stage91-jebena.test.ts > Jebena Rush settings (§6, D-S91-07) > hearts are 3, 5 or 7, default 5; anything else is refused; other games take no settings
+ ✓ tests/stage91-jebena.test.ts > Jebena Rush settings (§6, D-S91-07) > the policy's turn phase is the shown turn plus the network grace; a 12-minute match limit; practice-only
+ ✓ tests/stage91-jebena.test.ts > Jebena Rush module: the rules (§3) > init: a seeded seat order and category rotation, hearts from settings, the first seat holds the jebena
+ ✓ tests/stage91-jebena.test.ts > Jebena Rush module: the rules (§3) > an accepted answer passes the jebena to the next seat and uses that answer up (an alias counts as the same)
+ ✓ tests/stage91-jebena.test.ts > Jebena Rush module: the rules (§3) > a rejection keeps the turn and deadline, and says why: used, not in this bank, ambiguous, near-miss, empty
+ ✓ tests/stage91-jebena.test.ts > Jebena Rush module: the rules (§3) > refusals change nothing: not in the game, out, stale turn, not your turn, bad payload, too long, too many attempts
+ ✓ tests/stage91-jebena.test.ts > Jebena Rush module: the rules (§3) > a duplicated or replayed send for a turn that has moved on is stale: no second pass
+ ✓ tests/stage91-jebena.test.ts > Jebena Rush module: the rules (§3) > a timeout costs exactly one heart, starts a new category and passes; no hearts left is out
+ ✓ tests/stage91-jebena.test.ts > Jebena Rush module: the rules (§3) > the last player with hearts keeps the jebena: the match ends, no phase is left, places and points follow
+ ✓ tests/stage91-jebena.test.ts > Jebena Rush module: the rules (§3) > at the match limit, players still in rank by hearts (equal hearts share a place), above everyone out
+ ✓ tests/stage91-jebena.test.ts > Jebena Rush module: the rules (§3) > a used-up category moves on with no penalty; every category used up ends the match
+ ✓ tests/stage91-jebena.test.ts > Jebena Rush module: the rules (§3) > sitting out: out from now; on your own turn the jebena passes; one player left ends the match
+ ✓ tests/stage91-jebena.test.ts > Jebena Rush module: the rules (§3) > privacy: views carry played facts only, never the bank; a player's own attempt is theirs alone
+ ✓ tests/stage91-jebena.test.ts > Jebena Rush module: the rules (§3) > persists as JSON and carries on
+ ✓ tests/stage91-jebena.test.ts > Jebena Rush in the room engine (§4–§6) > casual rooms only, practice only; hearts are a validated start setting recorded with the game
+ ✓ tests/stage91-jebena.test.ts > Jebena Rush in the room engine (§4–§6) > lobby hearts (§8): host or cohost only, casual only, revision-checked, shown to everyone, bound at Start, persisted
+ ✓ tests/stage91-jebena.test.ts > Jebena Rush in the room engine (§4–§6) > the turn clock is the room's phase clock: 10.5 s after play starts; a timeout is processed once, on time, with nobody acting
+ ✓ tests/stage91-jebena.test.ts > Jebena Rush in the room engine (§4–§6) > an accepted answer restarts the clock for the next player; a rejected one keeps the deadline
+ ✓ tests/stage91-jebena.test.ts > Jebena Rush in the room engine (§4–§6) > boundary race: an answer arriving after the deadline finds the turn timed out (stale), resolved once
+ ✓ tests/stage91-jebena.test.ts > Jebena Rush in the room engine (§4–§6) > spoofing and duplicates: another seat can't answer for the holder; a resend with the same client id replays its first answer
+ ✓ tests/stage91-jebena.test.ts > Jebena Rush in the room engine (§4–§6) > late joiners watch: not in the roster, their answers are refused, the match goes on
+ ✓ tests/stage91-jebena.test.ts > Jebena Rush in the room engine (§4–§6) > the whole loop: timeouts until one player is left, results with places, Play again keeps the hearts
+ ✓ tests/stage91-jebena.test.ts > Jebena Rush in the room engine (§4–§6) > the match limit ends it with places, never running forever
+ ✓ tests/stage91-jebena.test.ts > Jebena Rush in the room engine (§4–§6) > restart recovery mid-turn: the absolute deadline still applies, nothing is reset or replayed
+ ✓ tests/stage91-jebena.test.ts > Jebena Rush in the room engine (§4–§6) > the cutoff is inclusive, the same for a request and the clock: 1 ms before and AT the deadline an answer counts; 1 ms after, the turn is over
+ ✓ tests/stage91-jebena.test.ts > Jebena Rush in the room engine (§4–§6) > a turn that runs out at the same instant as the match limit: the limit wins, nobody loses a heart
+ ✓ tests/stage91-jebena.test.ts > Jebena Rush in the room engine (§4–§6) > restart after an outage: catch-up runs each timeout at its own instant, bounded and idempotent; the same as a server that never stopped
+ ✓ tests/stage91-jebena.test.ts > Jebena Rush in the room engine (§4–§6) > sitting out from the engine: on your turn the jebena passes with a fresh turn; out shows no hearts and earns no heart points; the last one left ends it with no deadline pending
+ ✓ tests/stage91-jebena.test.ts > Jebena Rush in the room engine (§4–§6) > projections: no bank, no unused answer, no token, no other player's attempt; two rooms never mix
+ ✓ tests/stage91-jebena.test.ts > Jebena Rush in the catalogue (§3) > the manifest is valid and casual/practice; Quick Party never adds it, and existing lineups are unchanged
+ ✓ tests/stage104-save-memory.test.ts > Stage 10.4: Save a memory from a result screen (over HTTP) > binds to the game on screen: an old result saved after a newer match finished still cites the old one (the replay race)
+ ✓ tests/stage104-save-memory.test.ts > Stage 10.4: Save a memory from a result screen (over HTTP) > one save, once: the same key and request again (one after another, or at the same time) returns the same entry
+ ✓ tests/stage104-save-memory.test.ts > Stage 10.4: Save a memory from a result screen (over HTTP) > a different request under the same key is refused with the original entry, never overwriting it
+ ✓ tests/stage104-save-memory.test.ts > Stage 10.4: Save a memory from a result screen (over HTTP) > keys are each member's own: the same key from two members makes two entries; one never touches the other's
+stdout | tests/stage104-save-memory.test.ts > Stage 10.4: Save a memory from a result screen (over HTTP) > a retry after a restart is still recognized (keys are kept with the book)
+[restore] 1 room(s) restored, 0 not loaded (data: <tmp>
+
+ ✓ tests/stage104-save-memory.test.ts > Stage 10.4: Save a memory from a result screen (over HTTP) > a retry after a restart is still recognized (keys are kept with the book)
+ ✓ tests/stage102-memory-freshness.test.ts > memoryLink: judged by the loaded ledger's watermark (S102-R1) > the reviewer's case: current (watermark 35) with the newest event hidden is not 'syncing'; the old rule waited forever
+ ✓ tests/stage102-memory-freshness.test.ts > memoryLink: judged by the loaded ledger's watermark (S102-R1) > a team game (Spectrum) as the last finished game: 'unavailable', said plainly, never 'syncing'
+ ✓ tests/stage102-memory-freshness.test.ts > memoryLink: judged by the loaded ledger's watermark (S102-R1) > a genuinely stale ledger (a game finished after it was read) is 'syncing': it never cites the game before
+ ✓ tests/stage102-memory-freshness.test.ts > memoryLink: judged by the loaded ledger's watermark (S102-R1) > before the first load it is 'loading'; with no finished game, 'none'
+ ✓ tests/stage102-memory-freshness.test.ts > memoryLink: judged by the loaded ledger's watermark (S102-R1) > a watermark ahead of the projection (the projection lags) is current
+ ✓ tests/stage102-memory-freshness.test.ts > newerLedger: an older response never replaces a newer one > accepts the first, a newer or an equal watermark; refuses an older one and malformed data
+ ✓ tests/stage102-memory-freshness.test.ts > newerLedger: an older response never replaces a newer one > overlapping loads arriving out of order: the screen keeps the newer context
+ ✓ tests/stage91-jebena-sockets.test.ts > Jebena Rush over real sockets, 2 players > a whole match: hearts from the lobby, one holder at a time, timeouts on the server clock, outs, the last one keeps the jebena
+ ✓ tests/stage104-save-memory.test.ts > Stage 10.4: Save a memory from a result screen (over HTTP) > refusals, each with a code, and nothing added
+ ✓ tests/stage104-save-memory.test.ts > Stage 10.4: Save a memory from a result screen (over HTTP) > forged facts, approval or authorship in a save are ignored; approval stays host or cohost only
+ ✓ tests/stage104-save-memory.test.ts > Stage 10.4: Save a memory from a result screen (over HTTP) > other rooms: a foreign token is refused, and another room's game id is unknown here
+ ✓ tests/stage91-jebena-sockets.test.ts > Jebena Rush over real sockets, 4 players > a whole match: hearts from the lobby, one holder at a time, timeouts on the server clock, outs, the last one keeps the jebena
+ ✓ tests/stage102-memory-freshness.test.ts > over HTTP: GET /rooms/:id/ledger?watermark=1 > after another player saves a recovery code (private to them), the host's ledger is current and cites the finished game
+ ✓ tests/stage104-save-memory.test.ts > Stage 10.4: Save a memory from a result screen (over HTTP) > saving changes no score, outcome or ledger event, and advances nothing
+ ✓ tests/stage104-save-memory.test.ts > saveMemoryFacts: what the composer shows, and whether it may save > Spectrum, completed or genuinely early: the shared team line; early says so
+ ✓ tests/stage104-save-memory.test.ts > saveMemoryFacts: what the composer shows, and whether it may save > unavailable, said plainly: a room-ended Spectrum match, a voided game, an unfinished one, a game without the action
+ ✓ tests/stage104-save-memory.test.ts > saveMemoryFacts: what the composer shows, and whether it may save > Jebena: the final points by name, highest first (the server keeps the same scores)
+ ✓ tests/stage102-memory-freshness.test.ts > over HTTP: GET /rooms/:id/ledger?watermark=1 > after another player sits out a game (private to them), the host's ledger is current and still cites the last finished game
+ ✓ tests/stage102-memory-freshness.test.ts > over HTTP: GET /rooms/:id/ledger?watermark=1 > a supported game ended by the last player sitting out (the sit-out logged after the finish): current, and it cites that game
+ ✓ tests/stage102-memory-freshness.test.ts > over HTTP: GET /rooms/:id/ledger?watermark=1 > without the opt-in, the ledger is still the plain array every existing consumer reads
+ ✓ tests/stage102-memory-freshness.test.ts > over HTTP: GET /rooms/:id/ledger?watermark=1 > the watermark needs a session, like the ledger, and a token from another room is refused
+ ✓ tests/stage102-memory-freshness.test.ts > over HTTP: the reviewer's Spectrum case (casual room, the guest leaves in round 1) > the host's ledger is current with the guest's sit-out hidden: ready (Stage 10.3), never 'syncing'; it saves
+ ✓ tests/stage101-cups.test.ts > cups: whole ones first, broken ones after, each in its slot; the number in words > 3, 5 and 7 cups, from full to none
+ ✓ tests/stage101-cups.test.ts > cups: whole ones first, broken ones after, each in its slot; the number in words > never more cups than started, never fewer than none
+ ✓ tests/stage101-cups.test.ts > cups: whole ones first, broken ones after, each in its slot; the number in words > accessible words: remaining, and a clear zero
+ ✓ tests/stage101-cups.test.ts > a cup breaks only on an authoritative decrement, once (D-S101-03) > a first view (a reload) breaks nothing; the same count again breaks nothing
+ ✓ tests/stage101-cups.test.ts > a cup breaks only on an authoritative decrement, once (D-S101-03) > one lost life breaks exactly the newly lost slot, and only once
+ ✓ tests/stage101-cups.test.ts > a cup breaks only on an authoritative decrement, once (D-S101-03) > the last cup: 1 → 0 breaks slot 0
+ ✓ tests/stage101-cups.test.ts > a cup breaks only on an authoritative decrement, once (D-S101-03) > Play again is a new game id: fresh whole cups, nothing breaks
+ ✓ tests/stage101-cups.test.ts > a cup breaks only on an authoritative decrement, once (D-S101-03) > each place cups are drawn keeps its own memory (the HUD and the seat list both break)
+ ✓ tests/stage101-cups.test.ts > a cup breaks only on an authoritative decrement, once (D-S101-03) > only a live loss animates: a resync after a gap, or no recorded loss, shows the broken cup still
+ ✓ tests/stage101-cups.test.ts > a cup breaks only on an authoritative decrement, once (D-S101-03) > the seat's latest loss comes from its latest timeout in the public log; leaving is not a loss
+ ✓ tests/stage101-cups.test.ts > review 6822605156 (S101-R2): cup memory belongs to one room and to unbroken continuity (D-S101-09) > the reviewer's repro: a loss first seen on a resync inside the time window does not break
+ ✓ tests/stage101-cups.test.ts > review 6822605156 (S101-R2): cup memory belongs to one room and to unbroken continuity (D-S101-09) > another room (same tab) forgets everything: colliding game and seat ids never compare
+ ✓ tests/stage101-cups.test.ts > review 6822605156 (S101-R2): cup memory belongs to one room and to unbroken continuity (D-S101-09) > setting the same scope again keeps the memory and its continuity
+ ✓ tests/stage101-cups.test.ts > review 6822605156 (S101-R2): cup memory belongs to one room and to unbroken continuity (D-S101-09) > every row must re-record after a rebaseline: an old-epoch count is never a baseline
+ ✓ tests/stage101-cups.test.ts > review 6822605156 (S101-R2): cup memory belongs to one room and to unbroken continuity (D-S101-09) > Play again (a new game id) and the results continue the same rules: a new game starts whole, never broken
+ ✓ tests/stage101-cups.test.ts > the rules, and what costs a cup, are unchanged (D-S101-01) > 3/5/7, default 5; a timeout breaks exactly one cup; a wrong try breaks none
+ ✓ tests/stage101-cups.test.ts > the rules, and what costs a cup, are unchanged (D-S101-01) > scoring is as before: 100 per player outlasted, 10 per whole cup
+ ✓ tests/stage101-cups.test.ts > the words: cups everywhere hearts were > the last play: a cup broke, the last cup broke, out
+ ✓ tests/stage101-cups.test.ts > the words: cups everywhere hearts were > the briefing, the refusal when out, the library and the registry tutorial
+ ✓ tests/stage101-cups.test.ts > truthful results: 'You missed this one' needs evidence of absence (D-S101-06) > a survival winner with no accepted answer but some tries is a winner, never 'missed'
+ ✓ tests/stage101-cups.test.ts > truthful results: 'You missed this one' needs evidence of absence (D-S101-06) > a survival winner who never typed at all (the others' clocks ran out first) is still not 'missed'
+ ✓ tests/stage101-cups.test.ts > truthful results: 'You missed this one' needs evidence of absence (D-S101-06) > a shared first place is not 'missed' either
+ ✓ tests/stage101-cups.test.ts > truthful results: 'You missed this one' needs evidence of absence (D-S101-06) > someone who tried but placed lower is told their place or their zero, not 'missed'
+ ✓ tests/stage101-cups.test.ts > truthful results: 'You missed this one' needs evidence of absence (D-S101-06) > someone truly absent (no action at all, not first) is still 'missed'
+ ✓ tests/stage101-cups.test.ts > truthful results: 'You missed this one' needs evidence of absence (D-S101-06) > a game that doesn't report actions keeps the old rule (nothing completed and nothing else known)
+ ✓ tests/stage101-cups.test.ts > truthful results: 'You missed this one' needs evidence of absence (D-S101-06) > sitting out is unchanged: whole game, or part of it
+ ✓ tests/stage101-cups.test.ts > truthful results: 'You missed this one' needs evidence of absence (D-S101-06) > ranking and scores are untouched
+ ✓ tests/stage102-moments.test.ts > Jebena Rush: a line for a sole winner (D-S102-02) > J1: one cup left, with an opponent knocked out
+ ✓ tests/stage102-moments.test.ts > Jebena Rush: a line for a sole winner (D-S102-02) > J2: every starting cup still whole, at 3, 5 and 7 cups
+ ✓ tests/stage102-moments.test.ts > Jebena Rush: a line for a sole winner (D-S102-02) > an ordinary win (cups lost, more than one left) gets no line
+ ✓ tests/stage102-moments.test.ts > Jebena Rush: a line for a sole winner (D-S102-02) > a shared first place gets no line
+ ✓ tests/stage102-moments.test.ts > Jebena Rush: a line for a sole winner (D-S102-02) > a game the room ended (match limit, abort: end null) gets no line, even with the facts
+ ✓ tests/stage102-moments.test.ts > Jebena Rush: a line for a sole winner (D-S102-02) > a win only by others leaving gets no line (never a comment on absence)
+ ✓ tests/stage102-moments.test.ts > Jebena Rush: a line for a sole winner (D-S102-02) > cups ran out of categories (banks-exhausted): a sole winner still gets a line only with a knockout
+ ✓ tests/stage102-moments.test.ts > Jebena Rush: a line for a sole winner (D-S102-02) > missing or broken data gets no line
+ ✓ tests/stage102-moments.test.ts > Jebena Rush: a line for a sole winner (D-S102-02) > is deterministic: the order of the rows and repeated calls don't change it; nobody is named
+ ✓ tests/stage102-moments.test.ts > Spectrum: team lines for a completed match (D-S102-03) > S1: 40 out of 40 (every round scored)
+ ✓ tests/stage102-moments.test.ts > Spectrum: team lines for a completed match (D-S102-03) > S1 comes before S2: four exact rounds read as the perfect match
+ ✓ tests/stage102-moments.test.ts > Spectrum: team lines for a completed match (D-S102-03) > S2: one, two and three exact rounds, named by round
+ ✓ tests/stage102-moments.test.ts > Spectrum: team lines for a completed match (D-S102-03) > rounds out of order still read in order (deterministic)
+ ✓ tests/stage102-moments.test.ts > Spectrum: team lines for a completed match (D-S102-03) > an ordinary team score gets no line
+ ✓ tests/stage102-moments.test.ts > Spectrum: team lines for a completed match (D-S102-03) > an early ending (too few players) gets no line, even with an exact round
+ ✓ tests/stage102-moments.test.ts > Spectrum: team lines for a completed match (D-S102-03) > a room ending, fewer revealed rounds than planned, no clue or no guesses: no line
+ ✓ tests/stage102-moments.test.ts > Spectrum: team lines for a completed match (D-S102-03) > missing data gets no line
+ ✓ tests/stage102-moments.test.ts > Spectrum: team lines for a completed match (D-S102-03) > team words only: no name, winner, place, Cup or anyone's own guess
+ ✓ tests/stage102-moments.test.ts > the real modules' finished views (scores unchanged) > Jebena, timeouts only: the second holder survives on one cup with no answer: J1, the zero-answer winner, on every view
+ ✓ tests/stage102-moments.test.ts > the real modules' finished views (scores unchanged) > Jebena, the first holder answers every turn and keeps all 3 cups: J2
+ ✓ tests/stage102-moments.test.ts > the real modules' finished views (scores unchanged) > Jebena, the only other player leaves: the keeper won by absence, so no line
+ ✓ tests/stage102-moments.test.ts > the real modules' finished views (scores unchanged) > Spectrum, every guess on the target: 40 of 40, S1 on every view
+ ✓ tests/stage102-moments.test.ts > the real modules' finished views (scores unchanged) > Spectrum, round 2 exactly on target, the rest 30 off: S2 names round 2
+ ✓ tests/stage102-moments.test.ts > the real modules' finished views (scores unchanged) > Spectrum, round 1 exactly on target, then two players leave: an early ending, no line
+ ✓ tests/stage91-jebena-sockets.test.ts > Jebena Rush over real sockets, 10 players > a whole match: hearts from the lobby, one holder at a time, timeouts on the server clock, outs, the last one keeps the jebena 618ms
+ ✓ tests/stage91-jebena-sockets.test.ts > Jebena Rush over real sockets: disconnects and the deadline boundary > a holder whose socket drops loses the heart on time; reconnecting shows the current turn and resubmits nothing
+ ✓ tests/stage91-jebena-sockets.test.ts > Jebena Rush over real sockets: disconnects and the deadline boundary > an answer at the deadline instant counts; one a millisecond later finds the turn over, decided once
+ ✓ tests/stage91-jebena-sockets.test.ts > Jebena Rush over real sockets: a continuous clock (review 6808081378, 3) > everyone disconnected: nobody is out for being away, the turns still run out on time, and the match ends; back online, everyone sees the result
+ ✓ tests/stage123-cup-party.test.ts > partyModesError: a lineup's modes for the room it's in > casual: never Official; Cup: Official only for a game that can count, a group of two or more, and no casual-only game
+ ✓ tests/stage91-jebena-endings.test.ts > Jebena Rush endings, each on its own > normal elimination: the last one with hearts keeps the jebena; places follow the order of going out
+ ✓ tests/stage91-jebena-endings.test.ts > Jebena Rush endings, each on its own > the match limit with survivors tied on hearts: one shared first place, equal points, nobody 'kept the jebena', seat order breaks nothing
+ ✓ tests/stage91-jebena-endings.test.ts > Jebena Rush endings, each on its own > the match limit with one leader: 'came first', never 'kept the jebena'
+ ✓ tests/stage91-jebena-endings.test.ts > Jebena Rush endings, each on its own > every answer used up: the match ends; nobody 'kept the jebena'
+ ✓ tests/stage91-jebena-endings.test.ts > Jebena Rush endings, each on its own > voluntary exit: a leaver is out from that moment, with no heart points; the last one left keeps the jebena
+ ✓ tests/stage91-jebena-endings.test.ts > Jebena Rush words > verdicts are plain and never name a hidden answer
+ ✓ tests/stage91-jebena-endings.test.ts > Jebena Rush words > the countdown: the deadline less the grace, whole seconds rounded up, never more than the turn; urgency by share
+ ✓ tests/stage91-jebena-sockets.test.ts > Jebena Rush over real sockets: a continuous clock (review 6808081378, 3) > one player connected: the others' turns run out on time while the connected one plays; the connected one keeps the jebena
+stdout | tests/stage91-jebena-sockets.test.ts > Jebena Rush over real sockets: a continuous clock (review 6808081378, 3) > a real server restart mid-match after a prolonged outage: the turns that ran out meanwhile are processed at their own instants; nothing is reset or replayed
+[restore] 1 room(s) restored, 0 not loaded (data: <tmp>
+
+stdout | tests/stage123-cup-party.test.ts > a Family Cup's Quick Party (HTTP) > saves a lineup with Official and Practice games; everyone sees each game's mode; a restart keeps it
+[restore] 1 room(s) restored, 0 not loaded (data: <tmp>
+
+ ✓ tests/stage91-jebena-sockets.test.ts > Jebena Rush over real sockets: a continuous clock (review 6808081378, 3) > a real server restart mid-match after a prolonged outage: the turns that ran out meanwhile are processed at their own instants; nothing is reset or replayed
+ ✓ tests/stage123-cup-party.test.ts > a Family Cup's Quick Party (HTTP) > saves a lineup with Official and Practice games; everyone sees each game's mode; a restart keeps it
+ ✓ tests/stage123-cup-party.test.ts > a Family Cup's Quick Party (HTTP) > an Official item starts an official game that counts; a Practice item a practice game; a press for the other mode starts nothing
+ ✓ tests/stage123-cup-party.test.ts > a Family Cup's Quick Party (HTTP) > over HTTP a casual room's lineup start is never official (400); a Cup's is when its item is
+stdout | tests/stage123-cup-party.test.ts > a Family Cup's Quick Party (HTTP) > repeat-safe: the same press returns the same game; after a cancelled briefing it starts nothing (ATTEMPT_ENDED)
+[restore] 1 room(s) restored, 0 not loaded (data: <tmp>
+
+ ✓ tests/stage123-cup-party.test.ts > a Family Cup's Quick Party (HTTP) > repeat-safe: the same press returns the same game; after a cancelled briefing it starts nothing (ATTEMPT_ENDED)
+ ✓ tests/stage123-cup-party.test.ts > a Family Cup's Quick Party (HTTP) > Cup rules still apply: an Official item with one player here is refused (OFFICIAL_NEEDS_TWO) and nothing is marked
+stderr | tests/stage123-cup-party.test.ts > a lineup across Make it a Family Cup and back (D-S123-04) > a saved Cup lineup whose modes are no longer valid is dropped on restore, never half-loaded
+[party] room room-mwq1x8h7-20692: saved lineup dropped (Impostor is for 4–10 players, not 2.)
+
+ ✓ tests/stage123-cup-party.test.ts > a lineup across Make it a Family Cup and back (D-S123-04) > games still to play become Official where they can count; played ones stay; the undo makes them all casual again
+ ✓ tests/stage123-cup-party.test.ts > a lineup across Make it a Family Cup and back (D-S123-04) > a lineup planned for one stays Practice after the upgrade (an official game needs two)
+ ✓ tests/stage123-cup-party.test.ts > a lineup across Make it a Family Cup and back (D-S123-04) > a saved Cup lineup whose modes are no longer valid is dropped on restore, never half-loaded
+ ✓ tests/m3.test.ts > M3 registry > all 24 games are implemented (the 11 originals + Stage 5's Majority Rules, Pattern Pulse and Draw & Guess + Stage 9.1's Jebena Rush + Stage 9.3's Spectrum + Stage 12.5's Family Questions + Stage 12.8's Team Huddle + Stage 12.9's Relay + Stage 12.10's Split Clues + Stage 12.11's Team Draw + Stage 12.12's Territory + Stage 12.13's Tug of War + Stage 12.14's Know Your Rivals)
+ ✓ tests/m3.test.ts > Trivia / Who Said / Geography / Year > trivia: correct answers score, wrong score 0, game finishes
+ ✓ tests/m3.test.ts > Trivia / Who Said / Geography / Year > year: exact scores 100, 5 years off scores 50
+ ✓ tests/m3.test.ts > Trivia / Who Said / Geography / Year > geography: the content covers all six modes, and a game's questions use valid modes
+ ✓ tests/m3.test.ts > Connections / Sprint / Charades > connections: correct groups solve, mistakes capped, score with bonus
+ ✓ tests/m3.test.ts > Connections / Sprint / Charades > sprint: valid unique answers score more than shared answers
+ ✓ tests/m3.test.ts > Connections / Sprint / Charades > charades: actor prompt private, team scores assigned, game finishes after 4 turns
+ ✓ tests/stage92-jebena-terminal.test.ts > Jebena Rush: nothing private outlives the match, on every terminal path > the last one standing after a timeout
+ ✓ tests/stage92-jebena-terminal.test.ts > Jebena Rush: nothing private outlives the match, on every terminal path > the last one standing when the holder leaves
+ ✓ tests/stage92-jebena-terminal.test.ts > Jebena Rush: nothing private outlives the match, on every terminal path > the last one standing when the other player leaves (the holder's try is still open)
+ ✓ tests/stage92-jebena-terminal.test.ts > Jebena Rush: nothing private outlives the match, on every terminal path > every bank used up by an accepted answer
+ ✓ tests/stage92-jebena-terminal.test.ts > Jebena Rush: nothing private outlives the match, on every terminal path > every bank used up when a timeout looks for the next category
+ ✓ tests/stage92-jebena-terminal.test.ts > Jebena Rush: nothing private outlives the match, on every terminal path > a one-player start ends at once, with nothing kept
+ ✓ tests/stage92-jebena-terminal.test.ts > Jebena Rush: nothing private outlives the match, on every terminal path > the room's match limit: onFinish drops the try the holder made just before it
+ ✓ tests/stage101-break-log.test.ts > break-log cursors (S101-R3) > the old lifetime check rejects the reviewer's ordering: her earlier, legitimate breaks look like a replay
+ ✓ tests/stage101-break-log.test.ts > break-log cursors (S101-R3) > a prior own break on the HUD and the seat list doesn't fail the reconnect check
+ ✓ tests/stage101-break-log.test.ts > break-log cursors (S101-R3) > a newly replayed break of her seat still fails, on her own row or the seat list
+ ✓ tests/stage101-break-log.test.ts > break-log cursors (S101-R3) > a replayed break of an earlier slot after the cursor still fails (any slot of her seat counts)
+ ✓ tests/stage101-break-log.test.ts > break-log cursors (S101-R3) > other seats' live breaks after the cursor don't count against her
+ ✓ tests/stage101-break-log.test.ts > break-log cursors (S101-R3) > taking a cursor never erases the history the end-of-match checks need
+ ✓ tests/stage101-break-log.test.ts > break-log cursors (S101-R3) > cursors are event numbers, not positions: an empty log starts at 0, and order on the page is kept
+ ✓ tests/stage91-bank-privacy.test.ts > Jebena Rush bank privacy: nothing in the web app imports the bank > the web app's import graph never reaches the bank, the matcher, the module or the module registry
+ ✓ tests/stage102-deadline.test.ts > soonUntil: an observation against an absolute deadline > a probe that never settles (the reviewer's 30-second locator) fails at the deadline, not after it 405ms
+ ✓ tests/stage102-deadline.test.ts > soonUntil: an observation against an absolute deadline > an observation that only comes after the window is a FAIL, never a late pass 703ms
+ ✓ tests/stage102-deadline.test.ts > soonUntil: an observation against an absolute deadline > an observation inside the window passes once and returns its value
+ ✓ tests/stage102-deadline.test.ts > soonUntil: an observation against an absolute deadline > a probe that keeps throwing is a FAIL that names its error
+ ✓ tests/stage102-deadline.test.ts > soonUntil: an observation against an absolute deadline > a deadline already past runs no probe and fails
+
+ Test Files  14 passed (14)
+      Tests  190 passed (190)
+   Start at  06:53:12
+   Duration  5.20s (transform 1.12s, setup 0ms, collect 3.26s, tests 5.56s, environment 3ms, prepare 770ms)
+

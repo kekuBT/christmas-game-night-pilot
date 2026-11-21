@@ -1,0 +1,149 @@
+
+ RUN  v2.1.9 <scratch>/wtfs
+
+ ❯ tests/jebena-category-cadence.test.ts (11 tests | 8 failed) 45ms
+   × D-JR-01: a streak of accepted answers changes the category > sustained correct play: the category changes within 8 accepted answers, at the turn boundary, and again after the next streak 13ms
+     → categories played: jr-vegetables: expected 1 to be greater than or equal to 2
+   × D-JR-01: a streak of accepted answers changes the category > bounded and seeded: every streak lasts 5 to 8 accepted answers; the same seed gives the same schedule, others differ 3ms
+     → expected undefined to deeply equal { min: 5, max: 8 }
+   × D-JR-01: a streak of accepted answers changes the category > only accepted answers count: rejected tries, a used answer, a stale or out-of-turn send change neither the category nor the count 1ms
+     → Cannot read properties of undefined (reading 'changeAfter')
+   × D-JR-01: a streak of accepted answers changes the category > a timeout still changes the category (and costs a cup); the streak starts again from zero in the new one 1ms
+     → Cannot read properties of undefined (reading 'accepted')
+   × D-JR-01: a streak of accepted answers changes the category > a used-up bank changes the category with no penalty (reason used-up); a streak never ends the match, even when no other category has answers left 7ms
+     → expected { seq: 3, turn: 2, …(3) } to match object { reason: 'used-up' }
+(5 matching properties omitted from actual)
+   × D-JR-01 in the room engine: recovery and every viewer agree > restart mid-streak: the restored room has the same category and count, and changes at the same answer as one that never stopped 6ms
+     → Cannot read properties of undefined (reading 'changeAfter')
+   × D-JR-01 in the room engine: recovery and every viewer agree > a duplicate send (same client event) and a reconnect's refetch change nothing; every player and the TV show the same category, before and after a change 2ms
+     → Cannot read properties of undefined (reading 'changeAfter')
+   × D-JR-01 in the room engine: recovery and every viewer agree > the turn clock is unchanged: the turn after a streak's change gets the same full turn as after any other accepted answer 1ms
+     → Cannot read properties of undefined (reading 'changeAfter')
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 8 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/jebena-category-cadence.test.ts > D-JR-01: a streak of accepted answers changes the category > sustained correct play: the category changes within 8 accepted answers, at the turn boundary, and again after the next streak
+AssertionError: categories played: jr-vegetables: expected 1 to be greater than or equal to 2
+ ❯ tests/jebena-category-cadence.test.ts:44:74
+     42|     }
+     43|     const distinct = [...new Set(seen.map((x) => x.category))];
+     44|     expect(distinct.length, `categories played: ${distinct.join(", ")}…
+       |                                                                          ^
+     45|     expect(seen.slice(0, 4).every((x) => x.category === first), "the f…
+     46|     const changes = categoryEntries(s).filter((e) => e.reason === "str…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/8]⎯
+
+ FAIL  tests/jebena-category-cadence.test.ts > D-JR-01: a streak of accepted answers changes the category > bounded and seeded: every streak lasts 5 to 8 accepted answers; the same seed gives the same schedule, others differ
+AssertionError: expected undefined to deeply equal { min: 5, max: 8 }
+
+- Expected: 
+Object {
+  "max": 8,
+  "min": 5,
+}
+
++ Received: 
+undefined
+
+ ❯ tests/jebena-category-cadence.test.ts:53:34
+     51| 
+     52|   it("bounded and seeded: every streak lasts 5 to 8 accepted answers; …
+     53|     expect(jebena.JEBENA_STREAK).toEqual({ min: 5, max: 8 });
+       |                                  ^
+     54|     expect(jebena.JEBENA_RULES_VERSION).toBe(2);
+     55|     const lengths = new Set<number>();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/8]⎯
+
+ FAIL  tests/jebena-category-cadence.test.ts > D-JR-01: a streak of accepted answers changes the category > only accepted answers count: rejected tries, a used answer, a stale or out-of-turn send change neither the category nor the count
+TypeError: Cannot read properties of undefined (reading 'changeAfter')
+ ❯ tests/jebena-category-cadence.test.ts:90:27
+     88|   it("only accepted answers count: rejected tries, a used answer, a st…
+     89|     const s = newGame(7);
+     90|     const len = s.streak!.changeAfter;
+       |                           ^
+     91|     for (let i = 0; i < len - 1; i++) {
+     92|       const holder = s.turn!.player;
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/8]⎯
+
+ FAIL  tests/jebena-category-cadence.test.ts > D-JR-01: a streak of accepted answers changes the category > a timeout still changes the category (and costs a cup); the streak starts again from zero in the new one
+TypeError: Cannot read properties of undefined (reading 'accepted')
+ ❯ tests/jebena-category-cadence.test.ts:113:22
+    111|     const s = newGame(31);
+    112|     acceptOne(s); acceptOne(s);
+    113|     expect(s.streak!.accepted).toBe(2);
+       |                      ^
+    114|     const who = s.turn!.player;
+    115|     const cat0 = s.category;
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/8]⎯
+
+ FAIL  tests/jebena-category-cadence.test.ts > D-JR-01: a streak of accepted answers changes the category > a used-up bank changes the category with no penalty (reason used-up); a streak never ends the match, even when no other category has answers left
+AssertionError: expected { seq: 3, turn: 2, …(3) } to match object { reason: 'used-up' }
+(5 matching properties omitted from actual)
+
+- Expected
++ Received
+
+  Object {
+-   "reason": "used-up",
++   "at": 1,
++   "categoryId": "jr-vegetables",
++   "kind": "category",
++   "seq": 3,
++   "turn": 2,
+  }
+
+ ❯ tests/jebena-category-cadence.test.ts:130:45
+    128|     s.used[s.category] = c.answers.slice(0, c.answers.length - 1).map(…
+    129|     acceptOne(s);
+    130|     expect(categoryEntries(s).slice(-1)[0]).toMatchObject({ reason: "u…
+       |                                             ^
+    131|     expect(s.streak!.accepted).toBe(0);
+    132|     // Every other category used up: the streak's change has nowhere t…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/8]⎯
+
+ FAIL  tests/jebena-category-cadence.test.ts > D-JR-01 in the room engine: recovery and every viewer agree > restart mid-streak: the restored room has the same category and count, and changes at the same answer as one that never stopped
+TypeError: Cannot read properties of undefined (reading 'changeAfter')
+ ❯ tests/jebena-category-cadence.test.ts:188:37
+    186|     const env = setup();
+    187|     const { gid } = start(env);
+    188|     const len = st(env.engine, gid).streak!.changeAfter;
+       |                                     ^
+    189|     for (let i = 0; i < len - 2; i++) expect(play(env, env.engine, gid…
+    190|     const snap = JSON.parse(JSON.stringify(env.engine.toJSON()));
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/8]⎯
+
+ FAIL  tests/jebena-category-cadence.test.ts > D-JR-01 in the room engine: recovery and every viewer agree > a duplicate send (same client event) and a reconnect's refetch change nothing; every player and the TV show the same category, before and after a change
+TypeError: Cannot read properties of undefined (reading 'changeAfter')
+ ❯ tests/jebena-category-cadence.test.ts:210:37
+    208|     const env = setup(4);
+    209|     const { gid } = start(env);
+    210|     const len = st(env.engine, gid).streak!.changeAfter;
+       |                                     ^
+    211|     for (let i = 0; i < len; i++) {
+    212|       const before = st(env.engine, gid).category;
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/8]⎯
+
+ FAIL  tests/jebena-category-cadence.test.ts > D-JR-01 in the room engine: recovery and every viewer agree > the turn clock is unchanged: the turn after a streak's change gets the same full turn as after any other accepted answer
+TypeError: Cannot read properties of undefined (reading 'changeAfter')
+ ❯ tests/jebena-category-cadence.test.ts:235:37
+    233|     const env = setup(2);
+    234|     const { gid, game } = start(env);
+    235|     const len = st(env.engine, gid).streak!.changeAfter;
+       |                                     ^
+    236|     const gaps: { round: number; gap: number }[] = [];
+    237|     for (let i = 0; i < len + 1; i++) {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/8]⎯
+
+ Test Files  1 failed (1)
+      Tests  8 failed | 3 passed (11)
+   Start at  05:17:51
+   Duration  1.05s (transform 524ms, setup 0ms, collect 684ms, tests 45ms, environment 0ms, prepare 50ms)
+

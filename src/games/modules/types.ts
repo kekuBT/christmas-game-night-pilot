@@ -108,6 +108,12 @@ export interface GameModule<S = unknown> {
   /** Stage 12.10 (D-S1210-01): the content ids this game deals (puzzles, words), so the room's later games can avoid them. */
   contentIds?(s: S): string[];
   /**
+   * Review 7058937812: the rules version frozen in this match's state when it was created. The briefing projects it
+   * (the number only), so a match recovered from an older save is briefed with the rules it will play. Absent: the
+   * game has one rules version.
+   */
+  rulesVersion?(s: S): number;
+  /**
    * Stage 12.11 (D-S1211-01): games that deal from the same pack share one no-repeat history (Draw & Guess and Team
    * Draw: "draw-prompts"). Absent: the game's own id.
    */
