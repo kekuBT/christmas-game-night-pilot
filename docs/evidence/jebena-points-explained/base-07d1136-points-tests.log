@@ -1,0 +1,413 @@
+base 07d113651662e0078cb3317e8cdcf045089006d8, with the new tests from the fix copied in (untracked)
+
+ RUN  v2.1.9 <scratch>/wtjrp-base
+
+ ❯ apps/web/src/components/mchezo/JebenaPoints.test.tsx (7 tests | 7 failed) 54ms
+   × handoff 7059278886: phone and TV results explain each total > phone: the 120–0, row by row, with answers as a separate participation stat 23ms
+     → expected [ { id: 'k', pts: '120', …(2) }, …(1) ] to deeply equal [ { id: 'k', pts: '120', …(2) }, …(1) ]
+   × handoff 7059278886: phone and TV results explain each total > phone: a tie (two still in, the same cups) and an early exit (left first) 4ms
+     → expected [ [ 'k', '130', null ], …(2) ] to deeply equal [ [ 'k', '130', …(1) ], …(2) ]
+   × handoff 7059278886: phone and TV results explain each total > phone: an older server's standings (no parts): the total and the played line, no breakdown 5ms
+     → expected [ [ '120', null, '' ], …(1) ] to deeply equal [ [ '120', null, …(1) ], …(1) ]
+   × handoff 7059278886: phone and TV results explain each total > tv: the 120–0, row by row, with answers as a separate participation stat 5ms
+     → expected [ { id: 'k', pts: '120', …(2) }, …(1) ] to deeply equal [ { id: 'k', pts: '120', …(2) }, …(1) ]
+   × handoff 7059278886: phone and TV results explain each total > tv: a tie (two still in, the same cups) and an early exit (left first) 4ms
+     → expected [ [ 'k', '130', null ], …(2) ] to deeply equal [ [ 'k', '130', …(1) ], …(2) ]
+   × handoff 7059278886: phone and TV results explain each total > tv: an older server's standings (no parts): the total and the played line, no breakdown 5ms
+     → expected [ [ '120', null, '' ], …(1) ] to deeply equal [ [ '120', null, …(1) ], …(1) ]
+   × handoff 7059278886: phone and TV results explain each total > phone: the footer explains the rule, says answers add no points, and keeps the casual label 8ms
+     → expected '100 points for each player you outlas…' to be '100 points for each player you outlas…' // Object.is equality
+ ❯ tests/jebena-points-explained.test.ts (10 tests | 10 failed) 47ms
+   × handoff 7059278886: the standings say how each total was earned > the verified two-player 120–0: 100 for outlasting one player + 20 for two whole cups; the loser named 9 answers and scores 0 16ms
+     → expected [ { id: 'b', place: 1, …(6) }, …(1) ] to deeply equal [ { id: 'b', place: 1, …(7) }, …(1) ]
+   × handoff 7059278886: the standings say how each total was earned > a tie: two players still in with the same cups share first place, with the same parts and the same total 3ms
+     → expected { id: 'b', place: 1, hearts: 3, …(5) } to match object { hearts: 3, out: false, …(2) }
+(5 matching properties omitted from actual)
+   × handoff 7059278886: the standings say how each total was earned > an early exit: a player who leaves first outlasts nobody; those who stay count them as outlasted 1ms
+     → expected { id: 'b', place: 3, hearts: +0, …(5) } to match object { satOut: true, out: true, …(3) }
+(4 matching properties omitted from actual)
+   × handoff 7059278886: the standings say how each total was earned > the parts always make the total: 120 seeded matches with random play, 2 to 6 players, 3/5/7 cups, at every step 2ms
+     → p2: expected 50 to be NaN // Object.is equality
+   × handoff 7059278886: in a real room, every projection carries the parts, and the room's scores are unchanged > the 120–0 played through a room: the TV's and both players' standings explain 120 and 0; rawScores equal the totals 11ms
+     → tv: expected [ …(2) ] to deeply equal [ [ 'player-1', 1, 2, 120, 10 ], …(1) ]
+   × handoff 7059278886: in a real room, every projection carries the parts, and the room's scores are unchanged > a tie at the room's match limit: two still in with 3 cups each share first place, 130 each, explained to the TV and every seat 4ms
+     → tv: expected { id: 'player-2', place: 1, …(6) } to match object { place: 1, out: false, …(3) }
+(4 matching properties omitted from actual)
+   × handoff 7059278886: in a real room, every projection carries the parts, and the room's scores are unchanged > an early exit through the room: the one who leaves first scores 0 and the rest count them as outlasted 3ms
+     → tv: expected { id: 'player-1', place: 3, …(6) } to match object { satOut: true, outlasted: +0, …(1) }
+(6 matching properties omitted from actual)
+   × handoff 7059278886: the results copy > uses the rule's own numbers 3ms
+     → expected undefined to deeply equal { perOutlasted: 100, perCup: 10 }
+   × handoff 7059278886: the results copy > singular and plural; a winner who kept every cup; answers stay out of the points line 1ms
+     → pointsBreakdown is not a function
+   × handoff 7059278886: the results copy > an older server's standings (no parts) or parts that don't make the total: no explanation, only the total 0ms
+     → pointsBreakdown is not a function
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 17 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/jebena-points-explained.test.ts > handoff 7059278886: the standings say how each total was earned > the verified two-player 120–0: 100 for outlasting one player + 20 for two whole cups; the loser named 9 answers and scores 0
+AssertionError: expected [ { id: 'b', place: 1, …(6) }, …(1) ] to deeply equal [ { id: 'b', place: 1, …(7) }, …(1) ]
+
+- Expected
++ Received
+
+  Array [
+    Object {
+      "answers": 10,
+      "hearts": 2,
+      "id": "b",
+      "out": false,
+-     "outlasted": 1,
+      "place": 1,
+      "points": 120,
+      "satOut": false,
+      "timeouts": 3,
+    },
+    Object {
+      "answers": 9,
+      "hearts": 0,
+      "id": "a",
+      "out": true,
+-     "outlasted": 0,
+      "place": 2,
+      "points": 0,
+      "satOut": false,
+      "timeouts": 5,
+    },
+  ]
+
+ ❯ tests/jebena-points-explained.test.ts:59:18
+     57|     }
+     58|     const rows = jebenaStandings(s);
+     59|     expect(rows).toEqual([
+       |                  ^
+     60|       { id: winner, place: 1, hearts: 2, out: false, satOut: false, an…
+     61|       { id: loser, place: 2, hearts: 0, out: true, satOut: false, answ…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/17]⎯
+
+ FAIL  tests/jebena-points-explained.test.ts > handoff 7059278886: the standings say how each total was earned > a tie: two players still in with the same cups share first place, with the same parts and the same total
+AssertionError: expected { id: 'b', place: 1, hearts: 3, …(5) } to match object { hearts: 3, out: false, …(2) }
+(5 matching properties omitted from actual)
+
+- Expected
++ Received
+
+  Object {
+    "hearts": 3,
+    "out": false,
+-   "outlasted": 1,
+    "points": 130,
+  }
+
+ ❯ tests/jebena-points-explained.test.ts:87:17
+     85|     expect(top.map((r) => r.id).sort()).toEqual([first, second].sort()…
+     86|     for (const r of top) {
+     87|       expect(r).toMatchObject({ hearts: 3, out: false, outlasted: 1, p…
+       |                 ^
+     88|       expect(pointsBreakdown(r)).toBe("Outlasted 1 player (100) + 3 wh…
+     89|     }
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/17]⎯
+
+ FAIL  tests/jebena-points-explained.test.ts > handoff 7059278886: the standings say how each total was earned > an early exit: a player who leaves first outlasts nobody; those who stay count them as outlasted
+AssertionError: expected { id: 'b', place: 3, hearts: +0, …(5) } to match object { satOut: true, out: true, …(3) }
+(4 matching properties omitted from actual)
+
+- Expected
++ Received
+
+  Object {
+    "hearts": 0,
+    "out": true,
+-   "outlasted": 0,
+    "points": 0,
+    "satOut": true,
+  }
+
+ ❯ tests/jebena-points-explained.test.ts:106:26
+    104|     const rows = jebenaStandings(s);
+    105|     const byId = Object.fromEntries(rows.map((r) => [r.id, r]));
+    106|     expect(byId[leaver]).toMatchObject({ satOut: true, out: true, outl…
+       |                          ^
+    107|     expect(pointsBreakdown(byId[leaver]!)).toBe("Outlasted nobody (0) …
+    108|     expect(byId[mid]).toMatchObject({ out: true, outlasted: 1, hearts:…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/17]⎯
+
+ FAIL  tests/jebena-points-explained.test.ts > handoff 7059278886: the standings say how each total was earned > the parts always make the total: 120 seeded matches with random play, 2 to 6 players, 3/5/7 cups, at every step
+AssertionError: p2: expected 50 to be NaN // Object.is equality
+
+- Expected
++ Received
+
+- NaN
++ 50
+
+ ❯ expectPartsMakeTotals tests/jebena-points-explained.test.ts:35:28
+     33|   const pts = jebenaPoints(s);
+     34|   for (const r of jebenaStandings(s)) {
+     35|     expect(r.points, r.id).toBe(r.outlasted * JEBENA_POINTS.perOutlast…
+       |                            ^
+     36|     expect(r.points, r.id).toBe(pts[r.id]);
+     37|     expect(pointsBreakdown(r), r.id).not.toBeNull();
+ ❯ tests/jebena-points-explained.test.ts:128:38
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/17]⎯
+
+ FAIL  tests/jebena-points-explained.test.ts > handoff 7059278886: in a real room, every projection carries the parts, and the room's scores are unchanged > the 120–0 played through a room: the TV's and both players' standings explain 120 and 0; rawScores equal the totals
+AssertionError: tv: expected [ …(2) ] to deeply equal [ [ 'player-1', 1, 2, 120, 10 ], …(1) ]
+
+- Expected
++ Received
+
+  Array [
+    Array [
+      "player-1",
+-     1,
++     undefined,
+      2,
+      120,
+      10,
+    ],
+    Array [
+      "player-2",
+-     0,
++     undefined,
+      0,
+      0,
+      9,
+    ],
+  ]
+
+ ❯ tests/jebena-points-explained.test.ts:168:88
+    166|     ];
+    167|     for (const [who, rows] of views) {
+    168|       expect(rows.map((r) => [r.id, r.outlasted, r.hearts, r.points, r…
+       |                                                                                        ^
+    169|       expect(rows.map((r) => pointsBreakdown(r)), who).toEqual(["Outla…
+    170|       for (const r of rows) expect(r.points, who).toBe(game.rawScores[…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/17]⎯
+
+ FAIL  tests/jebena-points-explained.test.ts > handoff 7059278886: in a real room, every projection carries the parts, and the room's scores are unchanged > a tie at the room's match limit: two still in with 3 cups each share first place, 130 each, explained to the TV and every seat
+AssertionError: tv: expected { id: 'player-2', place: 1, …(6) } to match object { place: 1, out: false, …(3) }
+(4 matching properties omitted from actual)
+
+- Expected
++ Received
+
+  Object {
+    "hearts": 3,
+    "out": false,
+-   "outlasted": 1,
+    "place": 1,
+    "points": 130,
+  }
+
+ ❯ tests/jebena-points-explained.test.ts:213:31
+    211|       const byId = Object.fromEntries(rows.map((r) => [r.id, r]));
+    212|       for (const id of [a, b]) {
+    213|         expect(byId[id], who).toMatchObject({ place: 1, out: false, he…
+       |                               ^
+    214|         expect(pointsBreakdown(byId[id]!), who).toBe("Outlasted 1 play…
+    215|       }
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/17]⎯
+
+ FAIL  tests/jebena-points-explained.test.ts > handoff 7059278886: in a real room, every projection carries the parts, and the room's scores are unchanged > an early exit through the room: the one who leaves first scores 0 and the rest count them as outlasted
+AssertionError: tv: expected { id: 'player-1', place: 3, …(6) } to match object { satOut: true, outlasted: +0, …(1) }
+(6 matching properties omitted from actual)
+
+- Expected
++ Received
+
+  Object {
+-   "outlasted": 0,
+    "points": 0,
+    "satOut": true,
+  }
+
+ ❯ tests/jebena-points-explained.test.ts:232:33
+    230|     for (const [who, rows] of views()) {
+    231|       const byId = Object.fromEntries(rows.map((r) => [r.id, r]));
+    232|       expect(byId[leaver], who).toMatchObject({ satOut: true, outlaste…
+       |                                 ^
+    233|       expect(rows.map((r) => [r.id, pointsBreakdown(r)]), who).toEqual…
+    234|         [keeper, "Outlasted 2 players (200) + 3 whole cups (30) = 230"…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/17]⎯
+
+ FAIL  tests/jebena-points-explained.test.ts > handoff 7059278886: the results copy > uses the rule's own numbers
+AssertionError: expected undefined to deeply equal { perOutlasted: 100, perCup: 10 }
+
+- Expected: 
+Object {
+  "perCup": 10,
+  "perOutlasted": 100,
+}
+
++ Received: 
+undefined
+
+ ❯ tests/jebena-points-explained.test.ts:246:32
+    244|   const row = (over: Partial<JebenaStanding>): JebenaStanding => ({ id…
+    245|   it("uses the rule's own numbers", () => {
+    246|     expect(JEBENA_POINT_PARTS).toEqual({ perOutlasted: JEBENA_POINTS.p…
+       |                                ^
+    247|   });
+    248|   it("singular and plural; a winner who kept every cup; answers stay o…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/17]⎯
+
+ FAIL  tests/jebena-points-explained.test.ts > handoff 7059278886: the results copy > singular and plural; a winner who kept every cup; answers stay out of the points line
+TypeError: pointsBreakdown is not a function
+ ❯ tests/jebena-points-explained.test.ts:249:12
+    247|   });
+    248|   it("singular and plural; a winner who kept every cup; answers stay o…
+    249|     expect(pointsBreakdown(row({ outlasted: 3, hearts: 1, points: 310 …
+       |            ^
+    250|     expect(pointsBreakdown(row({ outlasted: 0, hearts: 5, points: 50 }…
+    251|     expect(pointsBreakdown(row({ outlasted: 1, hearts: 2, points: 120,…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/17]⎯
+
+ FAIL  tests/jebena-points-explained.test.ts > handoff 7059278886: the results copy > an older server's standings (no parts) or parts that don't make the total: no explanation, only the total
+TypeError: pointsBreakdown is not a function
+ ❯ tests/jebena-points-explained.test.ts:256:12
+    254|   });
+    255|   it("an older server's standings (no parts) or parts that don't make …
+    256|     expect(pointsBreakdown(row({ hearts: 2, points: 120 }))).toBeNull(…
+       |            ^
+    257|     expect(pointsBreakdown(row({ outlasted: 1, hearts: 2, points: 130 …
+    258|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/17]⎯
+
+ FAIL  apps/web/src/components/mchezo/JebenaPoints.test.tsx > handoff 7059278886: phone and TV results explain each total > phone: the 120–0, row by row, with answers as a separate participation stat
+ FAIL  apps/web/src/components/mchezo/JebenaPoints.test.tsx > handoff 7059278886: phone and TV results explain each total > tv: the 120–0, row by row, with answers as a separate participation stat
+AssertionError: expected [ { id: 'k', pts: '120', …(2) }, …(1) ] to deeply equal [ { id: 'k', pts: '120', …(2) }, …(1) ]
+
+- Expected
++ Received
+
+  Array [
+    Object {
+      "id": "k",
+-     "played": "Played: 10 answers · 3 timeouts",
++     "played": "",
+      "pts": "120",
+-     "why": "Outlasted 1 player (100) + 2 whole cups (20) = 120",
++     "why": null,
+    },
+    Object {
+      "id": "a",
+-     "played": "Played: 9 answers · 5 timeouts",
++     "played": "",
+      "pts": "0",
+-     "why": "Outlasted nobody (0) + no whole cups (0) = 0",
++     "why": null,
+    },
+  ]
+
+ ❯ apps/web/src/components/mchezo/JebenaPoints.test.tsx:53:26
+     51|     it(`${surface}: the 120–0, row by row, with answers as a separate …
+     52|       const html = render(ONE_TWENTY_ZERO);
+     53|       expect(rows(html)).toEqual([
+       |                          ^
+     54|         { id: "k", pts: "120", why: "Outlasted 1 player (100) + 2 whol…
+     55|         { id: "a", pts: "0", why: "Outlasted nobody (0) + no whole cup…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[11/17]⎯
+
+ FAIL  apps/web/src/components/mchezo/JebenaPoints.test.tsx > handoff 7059278886: phone and TV results explain each total > phone: a tie (two still in, the same cups) and an early exit (left first)
+ FAIL  apps/web/src/components/mchezo/JebenaPoints.test.tsx > handoff 7059278886: phone and TV results explain each total > tv: a tie (two still in, the same cups) and an early exit (left first)
+AssertionError: expected [ [ 'k', '130', null ], …(2) ] to deeply equal [ [ 'k', '130', …(1) ], …(2) ]
+
+- Expected
++ Received
+
+  Array [
+    Array [
+      "k",
+      "130",
+-     "Outlasted 1 player (100) + 3 whole cups (30) = 130",
++     null,
+    ],
+    Array [
+      "a",
+      "130",
+-     "Outlasted 1 player (100) + 3 whole cups (30) = 130",
++     null,
+    ],
+    Array [
+      "b",
+      "0",
+-     "Outlasted nobody (0) + no whole cups (0) = 0",
++     null,
+    ],
+  ]
+
+ ❯ apps/web/src/components/mchezo/JebenaPoints.test.tsx:66:50
+     64|       ], 3);
+     65|       const r = rows(html);
+     66|       expect(r.map((x) => [x.id, x.pts, x.why])).toEqual([
+       |                                                  ^
+     67|         ["k", "130", "Outlasted 1 player (100) + 3 whole cups (30) = 1…
+     68|         ["a", "130", "Outlasted 1 player (100) + 3 whole cups (30) = 1…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[12/17]⎯
+
+ FAIL  apps/web/src/components/mchezo/JebenaPoints.test.tsx > handoff 7059278886: phone and TV results explain each total > phone: an older server's standings (no parts): the total and the played line, no breakdown
+ FAIL  apps/web/src/components/mchezo/JebenaPoints.test.tsx > handoff 7059278886: phone and TV results explain each total > tv: an older server's standings (no parts): the total and the played line, no breakdown
+AssertionError: expected [ [ '120', null, '' ], …(1) ] to deeply equal [ [ '120', null, …(1) ], …(1) ]
+
+- Expected
++ Received
+
+  Array [
+    Array [
+      "120",
+      null,
+-     "Played: 10 answers · 3 timeouts",
++     "",
+    ],
+    Array [
+      "0",
+      null,
+-     "Played: 9 answers · 5 timeouts",
++     "",
+    ],
+  ]
+
+ ❯ apps/web/src/components/mchezo/JebenaPoints.test.tsx:76:54
+     74|     it(`${surface}: an older server's standings (no parts): the total …
+     75|       const r = rows(render(ONE_TWENTY_ZERO.map((row) => { const older…
+     76|       expect(r.map((x) => [x.pts, x.why, x.played])).toEqual([["120", …
+       |                                                      ^
+     77|     });
+     78|   }
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[13/17]⎯
+
+ FAIL  apps/web/src/components/mchezo/JebenaPoints.test.tsx > handoff 7059278886: phone and TV results explain each total > phone: the footer explains the rule, says answers add no points, and keeps the casual label
+AssertionError: expected '100 points for each player you outlas…' to be '100 points for each player you outlas…' // Object.is equality
+
+Expected: "100 points for each player you outlast, plus 10 for every cup still whole. Right answers keep you in the game; they don't add points. Practice game: no Cup points."
+Received: "100 points for each player you outlast, plus 10 for every cup still whole. Practice game: no Cup points."
+
+ ❯ apps/web/src/components/mchezo/JebenaPoints.test.tsx:82:18
+     80|   it("phone: the footer explains the rule, says answers add no points,…
+     81|     const foot = text(/<p class="mz-foot" data-testid="jr-howscore">([…
+     82|     expect(foot).toBe("100 points for each player you outlast, plus 10…
+       |                  ^
+     83|   });
+     84| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[14/17]⎯
+
+ Test Files  2 failed (2)
+      Tests  17 failed (17)
+   Start at  08:09:47
+   Duration  1.19s (transform 1.06s, setup 0ms, collect 1.59s, tests 101ms, environment 0ms, prepare 100ms)
+

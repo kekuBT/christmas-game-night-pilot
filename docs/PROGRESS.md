@@ -4555,3 +4555,38 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
   - **Gates on `ffff889`:** targeted **`PASSED (exit 0)`** 8/8, run `20261121-071952-ffff8898-3037`; fast **`PASSED (exit 0)`** 5/5 (2196 tests), run `20261121-072215-ffff8898-4137`. No full gate: a narrow repair, as with the last-play fix.
 - **Evidence:** `docs/evidence/jebena-category-cadence/briefing-rules/`.
 - **Next:** ChatGPT's review of #61 at its new head.
+
+## Post-beta: Jebena Rush results explain each total (handoff 7059278886)
+- **#61 cleared:** ChatGPT's review [7059278886](https://github.com/kekuBT/christmas-game-night-pilot/pull/51#issuecomment-7059278886) cleared #61 at `07d1136`.
+  - Covered: the cadence, the last-play line and the briefing's rules version.
+  - Its independent QA restored a version 1 briefing on a 320×568 phone and the TV. It had 36/36 browser assertions and 182/182 focused tests.
+- **The handoff:** the same comment set this slice. It was acknowledged in 7059284532 at 2:28 a.m. ET, estimating about 5:45 a.m. ET.
+- **Branch:** `claude/jebena-points-explained`, stacked on #61 (exact base `07d1136`). Not for merge or deploy.
+- **The tested commit:** `2c9394db709849679652e40efd00cca36638d031`. It holds:
+  - `2a7754e`: the change;
+  - `3ea3bb0`: the driver's room Q, the browser 120–0;
+  - `c30d95e`: the driver's non-waiting reads and the TV review check;
+  - `2c9394d`: the room tie and early-exit tests.
+- **The change (D-JR-04, presentation only):**
+  - the server's standings give `outlasted`, from the helper the total uses;
+  - every results row shows "Outlasted 1 player (100) + 2 whole cups (20) = 120", then "Played: 9 answers · 5 timeouts" apart;
+  - this applies on the phone, the TV final and the TV review;
+  - a row with missing or mismatched parts shows only the total;
+  - the footer says right answers add no points;
+  - the rule, totals, places, `rawScores`, replay and casual/practice wording are unchanged.
+  - **Files:** `src/games/modules/jebena.ts`, `apps/web/src/ui/mchezo/lib/jebena.ts`, `apps/web/src/components/mchezo/MchezoJebena.tsx`, `apps/web/src/ui/mchezo/styles/stage91.css`; tests `tests/jebena-points-explained.test.ts` (new), `apps/web/src/components/mchezo/JebenaPoints.test.tsx` (new); driver `scripts/check-jebena-rush.mjs` (P, Q).
+- **Tests:**
+  - **On `07d1136`:** all 17 new tests fail. The three room tests (the 120–0, a tie at the room's match limit, an early exit) pass their `rawScores` checks and fail only at the parts. The browser driver fails exactly its 16 P and Q checks (231 pass).
+  - **On the fix:** 17/17. The 19 focused files: 227/227 on the clean SHA.
+  - **Browser:** the verified 120–0, played turn by turn, on two phones and a TV; the main room's three phones, TV final and review; an early exit on two phones.
+  - **Gates on `2c9394d`:** targeted **`PASSED (exit 0)`** 9/9, run `20261121-081017-2c9394db-19670`; **full `PASSED (exit 0)`, 121/121** (2213 unit tests), run `20261121-081758-2c9394db-21096`.
+  - **Earlier runs, each for its own revision only:**
+    - `2a7754e`: an INFRASTRUCTURE ERROR (browser path unset), then targeted **`PASSED (exit 0)`** 9/9, run `20261121-074500-2a7754e0-13666`;
+    - `c30d95e`: targeted, stopped by me to add the room tests (no verdict).
+- **Evidence:** `docs/evidence/jebena-points-explained/`.
+- **Open:**
+  - native iPhone verification;
+  - any scoring change (a separate owner decision);
+  - the broader redesign (owner-selected options);
+  - Draw & Guess native confirmation.
+- **Next:** ChatGPT's review of the new draft.

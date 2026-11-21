@@ -1,0 +1,10 @@
+
+PASSED (exit 0) | targeted | run 20261121-081017-2c9394db-19670
+  9 passed, 0 failed, 0 timed out, 0 infrastructure, 0 invalid, 0 cancelled, 0 not run
+  timing   wall 7m 34s · step time 13m 01s (sum) · 3 workers, 57% busy · 1.72× the same steps run one after another
+           predicted 6–9m (about 7m 33s, low-confidence) → actual 7m 34s (+0%)
+           longest  check-f5 7m 29s, check-jebena-rush 2m 03s, check-briefing 1m 35s · the longest step is 99% of the wall time
+           machine  CPU mean 18%, peak 91% · memory available ≥ 13525 MB · load peak 1.69
+           contention ×1.027 (median step time vs its sequential median)
+           retries  none (the gate never retries a step)
+  report <scratch>/gates-jrp/20261121-081017-2c9394db-19670/report.json
