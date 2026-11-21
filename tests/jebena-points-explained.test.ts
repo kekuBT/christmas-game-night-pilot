@@ -5,8 +5,9 @@
  * The rule, the totals and the places are unchanged (a scoring change is a separate owner decision).
  *
  * Covered: the verified two-player 120–0 (module and a real room, with every projection and the room's scores);
- * a tie; an early exit (a player who leaves); the parts always making the total, over many seeded matches; and the
- * results copy, including an older server's standings without the parts.
+ * a tie (module, and a real room ended by its match limit); an early exit (module, and a real room's abstain); the
+ * parts always making the total, over many seeded matches; and the results copy, including an older server's
+ * standings without the parts.
  */
 import { randomUUID } from "node:crypto";
 import { describe, expect, it } from "vitest";
@@ -69,13 +70,17 @@ describe("handoff 7059278886: the standings say how each total was earned", () =
   it("a tie: two players still in with the same cups share first place, with the same parts and the same total", () => {
     const s = newGame(7, ["a", "b", "c"], 3);
     const [first, second, third] = s.order as [string, string, string];
-    // The third player's turns all run out (3 cups); the other two always answer. Then the match is cut (a limit).
+    // The third player's turns all run out (3 cups); the other two always answer. Then the room's match limit ends it:
+    // the module's onFinish, with its own end still null (the room-level test below ends one through a real room).
     let now = 1;
     while (!s.per[third]!.outOrder) {
       now += 1000;
       if (s.turn!.player === third) timeout(s, now); else accept(s, now);
     }
+    jebenaModule.onFinish!(s, ctx(now + 1000, s.order) as never);
+    expect(s.end).toBeNull();
     const rows = jebenaStandings(s);
+    expect(jebenaModule.scores(s, s.order)).toEqual(Object.fromEntries(rows.map((r) => [r.id, r.points])));
     const top = rows.filter((r) => r.place === 1);
     expect(top.map((r) => r.id).sort()).toEqual([first, second].sort());
     for (const r of top) {
@@ -162,6 +167,74 @@ describe("handoff 7059278886: in a real room, every projection carries the parts
     for (const [who, rows] of views) {
       expect(rows.map((r) => [r.id, r.outlasted, r.hearts, r.points, r.answers]), who).toEqual([[winner, 1, 2, 120, 10], [loser, 0, 0, 0, 9]]);
       expect(rows.map((r) => pointsBreakdown(r)), who).toEqual(["Outlasted 1 player (100) + 2 whole cups (20) = 120", "Outlasted nobody (0) + no whole cups (0) = 0"]);
+      for (const r of rows) expect(r.points, who).toBe(game.rawScores[r.id]);
+    }
+  });
+
+  /** A three-seat room playing Jebena Rush with 3 cups, its clock in the test's hands. */
+  function room3() {
+    const engine = new RoomEngine("JR points", { kind: "casual", timing: 2 });
+    const clock = { t: T0 };
+    engine.clock = () => clock.t;
+    const ids = [engine.join("Keku", { asHost: true }).player.id, engine.join("Amina").player.id, engine.join("Baraka").player.id];
+    const send = (pid: string, gid: string, action: string, payload: Json = {}) =>
+      engine.submitIntent({ kind: "intent", schemaVersion: 1, clientEventId: randomUUID(), roomId: engine.id, gameInstanceId: gid, action, payload }, pid);
+    engine.setLobbySettings(ids[0]!, "jebena-rush", { hearts: 3 }, engine.session.revision);
+    const g = engine.startGame(ids[0]!, "jebena-rush", { official: false, settings: { hearts: 3 } });
+    for (const p of ids) expect(send(p, g.id, "briefing-ready", { ready: true }).accepted).toBe(true);
+    const game = engine.games.get(g.id)!;
+    const st = () => game.extra as JebenaState;
+    const answer = () => { const s = st(); clock.t += 100; expect(send(s.turn!.player, g.id, "jebena-answer", { turn: s.turn!.n, text: unusedName(s) }).accepted).toBe(true); };
+    const runOut = () => { clock.t = Math.max(clock.t, game.phaseDeadlineAt!) + JEBENA_GRACE_MS + 1; engine.tick(clock.t); };
+    /** Every audience's standings (the TV and each seat), each row checked against the room's own score. */
+    const views = (): [string, JebenaStanding[]][] => [
+      ["tv", (engine.project("tv") as { games: { id: string; state: { standings: JebenaStanding[] } }[] }).games.find((x) => x.id === g.id)!.state.standings],
+      ...ids.map((pid) => [pid, (engine.project("player", pid) as { myGames: { id: string; state: { standings: JebenaStanding[] } }[] }).myGames.find((x) => x.id === g.id)!.state.standings] as [string, JebenaStanding[]]),
+    ];
+    return { engine, clock, ids, send, g, game, st, answer, runOut, views };
+  }
+
+  it("a tie at the room's match limit: two still in with 3 cups each share first place, 130 each, explained to the TV and every seat", () => {
+    const { engine, clock, game, st, answer, runOut, views } = room3();
+    const [a, b, third] = st().order as [string, string, string];
+    // The third in the seat order lets every turn run out (3 cups: out); the other two always answer.
+    while (st().per[third]!.outOrder === null) { if (st().turn!.player === third) runOut(); else answer(); }
+    expect(game.status).toBe("playing");
+    game.deadlineAt = clock.t + 50; // test seam (as in stage92-jebena-terminal): the room's match limit falls inside this turn
+    clock.t = game.deadlineAt + 1;
+    engine.tick(clock.t);
+    expect(game.status).toBe("finished");
+    expect(game.outcome?.reason).toBe("deadline");
+    expect(st().end).toBeNull(); // the room's limit ended it, not the module
+    expect(game.rawScores).toEqual({ [a]: 130, [b]: 130, [third]: 0 });
+    for (const [who, rows] of views()) {
+      const byId = Object.fromEntries(rows.map((r) => [r.id, r]));
+      for (const id of [a, b]) {
+        expect(byId[id], who).toMatchObject({ place: 1, out: false, hearts: 3, outlasted: 1, points: 130 });
+        expect(pointsBreakdown(byId[id]!), who).toBe("Outlasted 1 player (100) + 3 whole cups (30) = 130");
+      }
+      expect(byId[third], who).toMatchObject({ place: 3, out: true, timeouts: 3, outlasted: 0, points: 0 });
+      expect(pointsBreakdown(byId[third]!), who).toBe("Outlasted nobody (0) + no whole cups (0) = 0");
+      for (const r of rows) expect(r.points, who).toBe(game.rawScores[r.id]);
+    }
+  });
+
+  it("an early exit through the room: the one who leaves first scores 0 and the rest count them as outlasted", () => {
+    const { g, game, st, send, answer, runOut, views } = room3();
+    const [keeper, mid, leaver] = st().order as [string, string, string];
+    expect(send(leaver, g.id, "abstain").accepted).toBe(true);
+    // Then the middle seat's turns run out until they are out too; the first one keeps the jebena.
+    while (game.status === "playing") { if (st().turn!.player === mid) runOut(); else answer(); }
+    expect(st().end).toBe("last-standing");
+    expect(game.rawScores).toEqual({ [keeper]: 230, [mid]: 100, [leaver]: 0 });
+    for (const [who, rows] of views()) {
+      const byId = Object.fromEntries(rows.map((r) => [r.id, r]));
+      expect(byId[leaver], who).toMatchObject({ satOut: true, outlasted: 0, points: 0 });
+      expect(rows.map((r) => [r.id, pointsBreakdown(r)]), who).toEqual([
+        [keeper, "Outlasted 2 players (200) + 3 whole cups (30) = 230"],
+        [mid, "Outlasted 1 player (100) + no whole cups (0) = 100"],
+        [leaver, "Outlasted nobody (0) + no whole cups (0) = 0"],
+      ]);
       for (const r of rows) expect(r.points, who).toBe(game.rawScores[r.id]);
     }
   });
