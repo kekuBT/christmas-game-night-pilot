@@ -98,7 +98,7 @@ export interface RoomLobbyProps {
  */
 function FactChip({ children, onOpen, testId, action }: { children: ReactNode; onOpen?: () => void; testId?: string; action?: string }) {
   return onOpen
-    ? <li><button type="button" className="mz-factchip mz-factchip--btn" data-testid={testId} aria-haspopup="dialog" onClick={onOpen}>{children}{action && <span className="mz-sr-only">, {action}</span>}<span className="mz-factchip__edit" aria-hidden="true">›</span></button></li>
+    ? <li><button type="button" className="mz-factchip mz-factchip--btn" data-testid={testId} aria-haspopup="dialog" onClick={onOpen}>{children}{action && <span className="mz-sr">, {action}</span>}<span className="mz-factchip__edit" aria-hidden="true">›</span></button></li>
     : <li className="mz-factchip" data-testid={testId}>{children}</li>;
 }
 

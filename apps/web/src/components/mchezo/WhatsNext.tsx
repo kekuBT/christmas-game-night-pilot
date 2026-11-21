@@ -144,7 +144,7 @@ function WhatsNextDock({ p, state, index, nextItem, nextTitle, host, total }: {
   const close = () => setMore(false);
   return (
     <section className="mz-next mz-next--dock" aria-labelledby="mz-next-title" data-testid="whats-next" data-state={state} data-variant="dock">
-      <h2 className="mz-sr-only" id="mz-next-title">What’s next</h2>
+      <h2 className="mz-sr" id="mz-next-title">What’s next</h2>
       {status && <p className="mz-next__status" data-testid="next-status">{status}</p>}
       {p.isHost && p.ask}
       {p.isHost && p.error && <p className="err mz-next__error" role="alert" data-testid="next-error">{p.error}</p>}
