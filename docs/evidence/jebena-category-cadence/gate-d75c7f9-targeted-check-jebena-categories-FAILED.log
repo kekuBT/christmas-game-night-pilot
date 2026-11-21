@@ -1,0 +1,30 @@
+$ node scripts/check-jebena-categories.mjs http://localhost:38029
+# timeout 600s | worker w2 | server http://localhost:38029 (data <scratch>/gate-jr-targeted/20261121-052354-d75c7f95-25779/server-data/w2)
+
+[+5.2s] PASS setup: the server plays rules version 2 (D-JR-01) — 2
+[+5.4s] PASS S3 mid-streak (answer 1 in this category): both phones say just "Category"
+[+5.5s] PASS S4 the rejected try keeps the turn and the category
+[+5.6s] PASS S3 mid-streak (answer 2 in this category): both phones say just "Category"
+[+5.8s] PASS S4 the reload changes nothing: the same category and round, and no new! on her phone
+[+5.8s] PASS S3 mid-streak (answer 3 in this category): both phones say just "Category"
+[+6.1s] PASS S3 mid-streak (answer 4 in this category): both phones say just "Category"
+[+6.2s] PASS S3 mid-streak (answer 5 in this category): both phones say just "Category"
+[+6.3s] PASS S3 mid-streak (answer 6 in this category): both phones say just "Category"
+[+6.3s] PASS S3 mid-streak (answer 7 in this category): both phones say just "Category"
+[+6.4s] PASS S2 change 1 comes from a streak of accepted answers (not a timeout) — {"seq":10,"turn":9,"kind":"category","categoryId":"jr-animals","reason":"streak","at":1795238646489}
+[+6.4s] PASS S2 change 1 after 8 accepted answers: within 5 to 8 — 8
+[+6.4s] PASS S3 change 1: both phones say "Category · new!" for the turn it starts — {"k":"Category · new!","a":"Category · new!"}
+[+6.7s] PASS S3 mid-streak (answer 1 in this category): both phones say just "Category"
+[+6.8s] PASS S3 mid-streak (answer 2 in this category): both phones say just "Category"
+[+6.9s] PASS S3 mid-streak (answer 3 in this category): both phones say just "Category"
+[+7.0s] PASS S3 mid-streak (answer 4 in this category): both phones say just "Category"
+[+7.1s] PASS S3 mid-streak (answer 5 in this category): both phones say just "Category"
+[+7.4s] FAIL S2 sustained correct play changes the category, and again after the next streak — changes 1, gaps [8], first jr-vegetables
+[+7.4s] PASS S4 both the rejected try and the reload happened mid-streak
+[+7.4s] PASS no turn ran out (every change was a streak's, every player kept every cup) — [5,5]
+[+7.4s] PASS at 320 px Amina's phone has no sideways scroll
+[+7.5s] 
+[+7.5s] JEBENA CATEGORIES FAILED: 1 failed
+[+7.5s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":3,"pages":3,"peakOpenPages":3}
+
+# FAIL (exit 1) in 7.5s | cpu 2.3s, peak memory 271 MB

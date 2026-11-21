@@ -4480,3 +4480,39 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
   - **Fast gate:** **`PASSED (exit 0)`** 5/5, run `20261121-050624-a855c697-18967`.
 - **Evidence:** `docs/evidence/install-builds-ownership/bounded-watch-a855c69/`.
 - **Next:** ChatGPT's review of #60 at its new head. The next product slice is on hold until then.
+
+## Post-beta: Jebena Rush category changes during successful play (handoff 7057753827)
+- **#60 cleared:** ChatGPT's review [7057753827](https://github.com/kekuBT/christmas-game-night-pilot/pull/51#issuecomment-7057753827) cleared the install-builds watcher repair (`a855c69`, docs-only head `af79b67`).
+  - Its independent QA had 34/34 normal checks and 20/20 regression assertions, with the two fault runs exiting 1 in 43 s and 55 s.
+  - A mock-worker probe of an installing worker that never ends passed.
+  - 37/37 install tests passed.
+- **The handoff:** the same comment set this slice. It was acknowledged in 7057757959 at 12:13 a.m. ET, estimating about 4:30 a.m. ET.
+- **Branch:** `claude/jebena-category-cadence`, stacked on #60 (exact base `af79b67`). Not for merge or deploy.
+- **The tested commit:** `c041146e59b12c03b9016c68fbd354e19aa9f8ec`. It holds the fix `d75c7f9` and the check's loop-bound fix.
+- **The defect:**
+  - On `af79b67`, a category changed only after a timeout or a used-up bank (40+ answers each).
+  - Sustained correct play stayed in one category: 16 accepted answers in a seeded test, and 14 in the browser.
+- **The fix (D-JR-01, rules version 2):**
+  - a seeded run of 5 to 8 accepted answers per category, saved in the state;
+  - the change comes at the turn boundary;
+  - only accepted answers count;
+  - recovery resumes the same count;
+  - version 1 matches keep version 1;
+  - the briefing and library copy and the 9.1 spec are updated.
+  - **Files:** `src/games/modules/jebena.ts`, `src/games/manifest.ts`, `apps/web/src/ui/mchezo/lib/jebena.ts`, `apps/web/src/ui/mchezo/lib/briefing.ts`, `docs/stage9/stage91.md`, `tests/jebena-category-cadence.test.ts` (new), `scripts/check-jebena-categories.mjs` (new).
+- **Tests:**
+  - **Engine** (11 tests): 8 FAIL on `af79b67`; 11/11 on the fix. The 69 existing Jebena tests pass.
+  - **Browser `check-jebena-categories`:** FAIL on `af79b67` (0 changes in 14 answers). On the fix, 4/4 development runs pass.
+  - **`check-jebena-rush`:** 226/226.
+  - **Gates:**
+    - targeted on `d75c7f9`: **`FAILED (exit 1)`** 7/8, run `20261121-052354-d75c7f95-25779` (the check's loop bound; fixed in `c041146`);
+    - targeted on `c041146`: **`PASSED (exit 0)`** 8/8, run `20261121-052712-c041146e-27483`;
+    - **full on `c041146`: `PASSED (exit 0)`, 121/121**, run `20261121-052942-c041146e-28573`.
+- **The 120-0 report:** one two-player example (10 vs 9 answers, 120-0) follows the existing points rule. A scoring change is left for a separate decision.
+- **Evidence:** `docs/evidence/jebena-category-cadence/`.
+- **Open:**
+  - native iPhone verification;
+  - the scoring question;
+  - the broader redesign (owner-selected options);
+  - Draw & Guess native confirmation.
+- **Next:** ChatGPT's review of the new draft.

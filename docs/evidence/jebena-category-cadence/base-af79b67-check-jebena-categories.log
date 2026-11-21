@@ -1,0 +1,26 @@
+FAIL setup: the server plays rules version 2 (D-JR-01) — 1
+PASS S3 mid-streak (answer 1 in this category): both phones say just "Category"
+PASS S4 the rejected try keeps the turn and the category
+PASS S3 mid-streak (answer 2 in this category): both phones say just "Category"
+PASS S4 the reload changes nothing: the same category and round, and no new! on her phone
+PASS S3 mid-streak (answer 3 in this category): both phones say just "Category"
+PASS S3 mid-streak (answer 4 in this category): both phones say just "Category"
+PASS S3 mid-streak (answer 5 in this category): both phones say just "Category"
+PASS S3 mid-streak (answer 6 in this category): both phones say just "Category"
+PASS S3 mid-streak (answer 7 in this category): both phones say just "Category"
+PASS S3 mid-streak (answer 8 in this category): both phones say just "Category"
+PASS S3 mid-streak (answer 9 in this category): both phones say just "Category"
+PASS S3 mid-streak (answer 10 in this category): both phones say just "Category"
+PASS S3 mid-streak (answer 11 in this category): both phones say just "Category"
+PASS S3 mid-streak (answer 12 in this category): both phones say just "Category"
+PASS S3 mid-streak (answer 13 in this category): both phones say just "Category"
+FAIL S2 sustained correct play changes the category, and again after the next streak — changes 0, gaps [], first jr-fruits
+PASS S4 both the rejected try and the reload happened mid-streak
+PASS no turn ran out (every change was a streak's, every player kept every cup) — [5,5]
+PASS at 320 px Amina's phone has no sideways scroll
+
+JEBENA CATEGORIES FAILED: 2 failed
+
+real	0m7.787s
+user	0m4.071s
+sys	0m0.795s

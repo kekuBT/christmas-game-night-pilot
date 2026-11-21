@@ -2812,3 +2812,27 @@ The reported symptom: a nearly black **drawer** screen in an iPhone in-app brows
     - Driver-side deadlines (`within()`) bound every in-page wait.
     - Two fault modes (`MCHEZO_INSTALL_BUILDS_FAULT`, regression only) drive the new `scripts/check-install-builds-no-worker.mjs`. For each mode, the run must exit 1 by itself, fail E1 by name, reach its summary, leave no process behind and leave an empty temp directory.
     - **Alternative:** a single overall time limit on the driver. It would end a hung run, but without naming what was missing and without reaching `finally`.
+
+## Post-beta: Jebena Rush categories change during successful play (handoff 7057753827; acknowledged 7057757959; docs/evidence/jebena-category-cadence/)
+- **D-JR-01 A category also ends after a seeded run of 5 to 8 accepted answers** (rules version 2; amends D-S91-03).
+  - **Why:** Keku reported that categories feel stuck through successful turns.
+    - The server changed the category only on a timeout or a used-up bank, and every bank holds 40 or more answers.
+    - So sustained correct play kept one category all match. On `af79b67`, a seeded test played 16 accepted answers in one category, and a browser run 14.
+  - **What** (`src/games/modules/jebena.ts`):
+    - **The length:** `jebenaStreakLength(seed, categoryRound)` gives 5 to 8 (`JEBENA_STREAK`), from the match's server-owned seed. It is set when a category starts and saved in the state as `streak: { accepted, changeAfter }`.
+    - **The change:** after the streak's last accepted answer, the next category in the existing seeded rotation starts at the turn boundary, with the pass. It is logged with reason `streak` for the turn that starts with it.
+    - **No match end:** a streak never ends the match. With no other category left, the current one stays.
+    - **What counts:** only accepted answers. Rejected tries, out-of-turn, stale and duplicate sends, and reconnects change nothing.
+    - **Timeouts and used-up banks** work as before, with reasons `timeout` and `used-up`, and restart the count.
+    - **Unchanged:** used answers, cups, the turn clock and points. The bank stays private, and the count is never shown.
+    - **Rules version 1 matches** saved before the change keep version 1.
+  - **The cadence is a provisional default:**
+    - **Why 5 to 8:** it is long enough for a few players each to answer, and short enough that a correct streak never stays on one category for long. Two players see a change every 3 or 4 turns each.
+    - **Why seeded:** a seeded length keeps the change from being predictable.
+    - **Configurable:** `JEBENA_STREAK`.
+  - **Alternatives:**
+    1. A fixed length, for example every 6 answers. It is predictable, so players can count to it.
+    2. A change on every pass. It is too busy, and nobody builds on a category.
+    3. A timer instead of a count. It would change the category mid-turn, against the turn boundary.
+    4. A schedule computed at start and stored as a list. It is the same result with more state, and the per-round length is derived the same way.
+  - **Scoring (no change):** the reported 120-0 is the existing rule (100 per player outlasted, 10 per cup kept while in). In two-player play the player who goes out always scores 0, however many answers they named. A change to the rule or its presentation is left for a separate decision.
