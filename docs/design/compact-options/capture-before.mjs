@@ -53,7 +53,7 @@ async function measure(p, name, testids) {
   metrics[name] = await p.evaluate((ids) => {
     const vh = window.innerHeight;
     const scroller = document.querySelector("[data-testid$='-scroll']") ?? document.scrollingElement;
-    const out = { viewport: [window.innerWidth, vh], scrollHeight: Math.max(scroller?.scrollHeight ?? 0, document.documentElement.scrollHeight), sideScroll: document.documentElement.scrollWidth > window.innerWidth + 1, parts: {} };
+    const out = { viewport: [window.innerWidth, vh], scrollY: Math.round(Math.max(window.scrollY, scroller?.scrollTop ?? 0)), scrollHeight: Math.max(scroller?.scrollHeight ?? 0, document.documentElement.scrollHeight), sideScroll: document.documentElement.scrollWidth > window.innerWidth + 1, parts: {} };
     for (const id of ids) {
       const e = document.querySelector(`[data-testid="${id}"]`);
       if (!e) continue;
@@ -62,6 +62,11 @@ async function measure(p, name, testids) {
     }
     return out;
   }, testids);
+}
+/** Back to the top of the page (and of the app's own scroll area, where it has one). */
+async function toTop(p) {
+  await p.evaluate(() => { for (const e of [document.scrollingElement, ...document.querySelectorAll("[data-testid$='-scroll']")]) if (e) e.scrollTop = 0; window.scrollTo(0, 0); });
+  await settle(p);
 }
 async function openSeat(seat, roomId, width, height, look, opts) {
   const ctx = await ctxFor(width, height, look, opts);
@@ -99,6 +104,8 @@ try {
       await p.getByTestId("choose-game").click(); await p.getByTestId("select-game-jebena-rush").click();
       await p.getByTestId("lobby-hearts-3").click().catch(() => {}); await settle(p);
     }
+    // Tapping the cups control scrolls the page; every lobby is shot and measured from the top.
+    await toTop(p);
     const name = `lobby-${v.w}-${look}`; await shot(p, name); await measure(p, name, ["lobby-dock", "lobby-status", "lobby-hearts", "choose-game"]);
     await p.getByTestId("choose-game").click(); await p.getByTestId("select-game-jebena-rush").waitFor(); await settle(p);
     await shot(p, `picker-${v.w}-${look}`); await measure(p, `picker-${v.w}-${look}`, ["choose-sheet"]);
