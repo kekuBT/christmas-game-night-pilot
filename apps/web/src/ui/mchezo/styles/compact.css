@@ -1,0 +1,111 @@
+/*
+ * Handoff 7065498313 (D-UI-02): the owner-selected compact mix (proposal #63, docs/design/compact-options/).
+ *   Home: Option A, "Compact list".  Lobby: the seat circle, then Option B's next-game card, chips and activities.
+ *   Jebena Rush results: Option B's podium and explained standings, Play again prominent, the rest under More.
+ * One small scale, from the proposal: spacing 4/8/12/16/24 px; type 13/15/17/20; controls at least 44 px, primaries 48.
+ * Colours come from the existing tokens (both looks); the only literal is the light look's existing soft card shadow.
+ */
+
+/* ---------- Home (Option A) ---------- */
+.mz-screen.mz-home--compact > .mz-home__scroll { padding-bottom: max(16px, env(safe-area-inset-bottom)); }
+.mz-home__bar { min-height: 56px; padding-top: 8px; }
+.mz-home__entry { display: flex; flex-direction: column; gap: 4px; margin-top: 16px; }
+.mz-home__entrykeys { display: flex; gap: 12px; }
+.mz-home__entrykeys .mz-key { flex: 1 1 0; min-width: 0; white-space: normal; text-align: center; }
+.mz-home__solo { align-self: center; min-height: 44px; text-decoration: none; color: var(--mz-text-muted); }
+.mz-home__solo b { color: var(--mz-text); text-decoration: underline; text-underline-offset: 3px; }
+.mz-home--compact .mz-home__section { margin-top: 20px; gap: 8px; }
+.mz-home--compact .mz-rejoin { margin-top: 12px; }
+
+/* A game as one row: 48 px cover, title, facts. Rows sit in one rounded list, separated by hairlines. */
+.mz-gamelist { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; border-radius: 16px; overflow: hidden; background: var(--mz-surface-1); }
+.mz-gamelist > li + li { border-top: 1px solid color-mix(in srgb, var(--mz-line) 45%, transparent); }
+.mz-gamerow { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 64px; padding: 8px 12px; border: 0; border-radius: 16px; background: var(--mz-surface-1); color: var(--mz-text); text-align: left; font: inherit; cursor: pointer; }
+.mz-gamelist .mz-gamerow { border-radius: 0; }
+.mz-gamerow:focus-visible { outline-offset: -3px; }
+.mz-gamerow__art { width: 48px; height: 48px; flex: none; border-radius: 12px; }
+.mz-gamerow__text { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1 1 auto; }
+.mz-gamerow__title { font: 700 16px/1.25 var(--mz-font-body); overflow-wrap: anywhere; }
+.mz-gamerow__meta { font: 500 13.5px/1.35 var(--mz-font-body); color: var(--mz-text-muted); }
+.mz-gamerow__chev { flex: none; color: var(--mz-text-muted); font-size: 20px; line-height: 1; }
+.mz-gamerow:active .mz-gamerow__art { transform: scale(.96); }
+[data-mz-motion="reduced"] .mz-gamerow:active .mz-gamerow__art { transform: none; }
+@media (min-width: 720px) {
+  .mz-gamelist { display: grid; grid-template-columns: 1fr 1fr; column-gap: 1px; background: color-mix(in srgb, var(--mz-line) 45%, transparent); }
+  .mz-gamelist > li + li { border-top: 0; }
+  .mz-gamelist > li { border-top: 1px solid color-mix(in srgb, var(--mz-line) 45%, transparent); }
+  .mz-gamelist > li:nth-child(-n+2) { border-top: 0; }
+}
+
+/* ---------- Lobby: the circle stays; below it, Option B's next-game card, chips and activities ---------- */
+.mz-stagecard { margin-top: 12px; display: flex; flex-direction: column; gap: 12px; padding: 12px; border-radius: 20px; background: var(--mz-surface-1); }
+.mz-stagecard--bare { padding-top: 12px; }
+.mz-stagecard__head { display: flex; align-items: center; gap: 12px; }
+.mz-stagecard__main { flex: 1; min-width: 0; display: flex; align-items: center; gap: 12px; padding: 0; border: 0; background: none; color: var(--mz-text); text-align: left; cursor: pointer; font-family: var(--mz-font-body); border-radius: 14px; }
+.mz-stagecard__cover { width: 64px; flex: none; border-radius: 14px; }
+.mz-stagecard__text { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.mz-stagecard .mz-upnext__name { font: 700 clamp(16px, 4.8vw, 19px)/1.15 var(--mz-font-display); letter-spacing: -0.02em; overflow-wrap: anywhere; text-wrap: balance; }
+.mz-stagecard__meta { font: 600 13px/1.3 var(--mz-font-body); color: var(--mz-text-muted); }
+.mz-stagecard__change { flex: none; }
+[data-mz-tone="light"] .mz-stagecard { box-shadow: 0 0 0 1px color-mix(in srgb, var(--mz-line) 35%, transparent), 0 1px 3px rgba(43, 33, 28, .07); }
+
+/* Facts about the next game. Read-only ones are quiet; the host's settable ones are buttons (44 px) with a chevron. */
+.mz-factchips { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
+.mz-factchips > li { display: flex; max-width: 100%; }
+.mz-factchip { display: inline-flex; align-items: center; gap: 6px; min-height: 32px; max-width: 100%; padding: 4px 12px; border-radius: 16px; background: var(--mz-surface-2); color: var(--mz-text); font: 700 13px/1.25 var(--mz-font-body); white-space: normal; overflow-wrap: anywhere; }
+.mz-factchip.mz-modebadge { align-self: auto; }
+.mz-factchip--btn { min-height: 44px; border: 1.5px solid var(--mz-line); cursor: pointer; text-align: left; }
+.mz-factchip__edit { color: var(--mz-text-muted); font-size: 16px; line-height: 1; }
+.mz-factchip .mz-contentbadge { background: none; box-shadow: none; margin: 0; padding: 0; min-height: 0; }
+.mz-factchip .mz-jr-cupslabel { display: inline-flex; align-items: center; gap: 6px; }
+.mz-factchip.mz-upnext-card__fit { display: inline-flex; margin: 0; background: none; padding-left: 4px; padding-right: 4px; }
+.mz-factchip:has(.mz-contentbadge[data-season="christmas"]) { box-shadow: inset 0 0 0 1.5px var(--mz-highlight); }
+
+/* The night's other activities, together and lighter than the next game. */
+.mz-activities { margin-top: 16px; display: flex; flex-direction: column; gap: 8px; }
+.mz-activities:not(:has(> :not(.mz-activities__title))) { display: none; }
+.mz-activities__title { margin: 0; }
+.mz-activities > .mz-lobby__break { margin: 0; }
+.mz-activities :is(.mz-party, .mz-teams-card, .mz-fq-card) { margin: 0; padding: 12px 14px; border-radius: 16px; gap: 6px; }
+.mz-activities :is(.mz-party__lede, .mz-teams-card__lede, .mz-fq-card__lede) { font-size: 14px; line-height: 1.4; margin: 0; }
+
+/* ---------- Jebena Rush results (Option B): podium, explained standings, one dock ---------- */
+.mz-screen.mz-jr-results { overflow: hidden; gap: 0; padding-bottom: 0; }
+.mz-screen.mz-jr-results > .mz-jr-results__scroll { flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; display: flex; flex-direction: column; gap: 12px; margin: 0 calc(-1 * clamp(14px, 4.6vw, 20px)); padding: 0 clamp(14px, 4.6vw, 20px) 16px; }
+.mz-jr-results__scroll > * { flex-shrink: 0; }
+.mz-screen.mz-jr-results > .mz-dock--sticky { position: static; flex: none; margin-top: 0; box-shadow: none; border-top: 1px solid var(--mz-line); }
+.mz-jr-results .mz-rhero__winners { display: none; } /* the podium names them */
+.mz-jr-results .mz-jr-standings { padding: 0; }
+
+.mz-jr-podium { list-style: none; margin: 0; padding: 0; display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 8px; align-items: end; }
+.mz-jr-podium__step { display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 0; padding: 12px 6px; border-radius: 16px; background: var(--mz-surface-1); text-align: center; }
+.mz-jr-podium__step--top { padding: 20px 6px 16px; box-shadow: inset 0 0 0 2px var(--mz-highlight); }
+.mz-jr-podium__step--you:not(.mz-jr-podium__step--top) { box-shadow: inset 0 0 0 2px var(--mz-line); }
+/* The full name (two players can share a first name), at most two lines; the standings below give it whole. */
+.mz-jr-podium__name { max-width: 100%; font: 700 14px/1.2 var(--mz-font-body); overflow-wrap: anywhere; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; overflow: hidden; }
+.mz-jr-podium__pts { font: 700 22px/1.1 var(--mz-font-display); }
+.mz-jr-podium__step--top .mz-jr-podium__pts { font-size: 26px; }
+.mz-jr-podium__place { font: 700 12px/1.2 var(--mz-font-body); color: var(--mz-text-muted); }
+[data-mz-tone="light"] .mz-jr-podium__step:not(.mz-jr-podium__step--top) { box-shadow: 0 0 0 1px color-mix(in srgb, var(--mz-line) 35%, transparent), 0 1px 3px rgba(43, 33, 28, .07); }
+
+/* What's next as a dock: the next step, More…, and the next game's content. */
+.mz-next--dock { display: flex; flex-direction: column; gap: 8px; margin: 0; padding: 0; background: none; border: 0; }
+.mz-next__status { margin: 0; font: 600 14px/1.35 var(--mz-font-body); color: var(--mz-text); }
+.mz-next__dockrow { display: flex; gap: 10px; align-items: stretch; }
+.mz-next__dockrow > .mz-key { flex: 1 1 auto; min-width: 0; }
+.mz-next__dockrow > [data-testid="next-more"] { flex: 0 0 auto; }
+.mz-next__docknote { margin: 0; text-align: center; font: 600 13px/1.3 var(--mz-font-body); color: var(--mz-text-muted); }
+.mz-next__morelist { display: flex; flex-direction: column; gap: 8px; }
+/* The result card, tighter here: the podium and the explained standings carry the detail. The quip is the casual
+   line the footer also says; your own line (including "You missed this one") stays. */
+.mz-jr-results .mz-rhero { margin: 0; padding: 12px; border-radius: 20px; }
+.mz-jr-results .mz-rhero__cover { width: 44px; border-radius: 12px; }
+.mz-jr-results .mz-rhero__title { font-size: clamp(18px, 5.4vw, 22px); }
+.mz-jr-results .mz-rhero__quip { display: none; }
+.mz-jr-results .mz-rhero__you { margin-top: 10px; padding: 8px 12px; }
+.mz-jr-results .mz-gh { margin: 0; }
+.mz-jr-results .mz-moment { margin: 0; }
+
+/* Lobby dock: the same lines, a little tighter. */
+.mz-screen.mz-lobby > .mz-dock--sticky { gap: 6px; padding-top: 12px; }
+.mz-screen.mz-lobby > .mz-dock--sticky .mz-dock__note { font-size: 13px; }

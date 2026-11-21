@@ -3,9 +3,10 @@
 // the host and for guests), at 375/390/430/768/1440 and with Safari's
 // toolbar shown or hidden (the visible height changes; the app uses 100dvh).
 //
-// Home: at every scroll position the games scroll above the Join/Host dock,
-// never under it; every card's title and "players · minutes" line can be
-// read; both actions stay on screen.
+// Home (D-UI-02, the compact list; Join and Host are in the page, no longer a
+// pinned dock): both actions and the first game are on the first screen; at
+// every scroll position every row's title and "players · minutes" line can be
+// read; nothing runs off the side; the lowest row scrolls into view.
 // Lobby (host): Start says what it will start and in which mode; the mode
 // line is on screen without scrolling; "Change" brings the mode choice into
 // view. The default (Official) is unchanged.
@@ -58,38 +59,43 @@ const VIEWS = [
 ];
 
 /**
- * Home, at this scroll position: does the dock overlap the scrolling area,
- * is any card's title or facts line hidden by it, and does every card whose
- * picture is showing also show its title and facts in full?
+ * Home, at this scroll position (D-UI-02, the compact list: Join and Host sit in the page above the games, nothing is
+ * pinned over the list). Does every row whose picture is showing also show its title and facts in full, does the
+ * scrolling area end inside the screen, and does anything run off the side?
  */
 const homeState = (page) => page.evaluate(() => {
   const scroller = document.querySelector('[data-testid="home-scroll"]');
-  const dock = document.querySelector('[data-testid="home-dock"]').getBoundingClientRect();
   const area = scroller.getBoundingClientRect();
-  const covered = [];
   const unreadable = [];
-  for (const card of scroller.querySelectorAll(".mz-gamecard, .mz-hero-card")) {
-    const c = card.getBoundingClientRect();
-    if (c.right <= 0 || c.left >= innerWidth) continue; // off to the side in a sideways shelf
-    const texts = [...card.querySelectorAll(".mz-gamecard__title, .mz-gamecard__meta, .mz-hero-card__title, .mz-hero-card__meta")];
-    for (const t of texts) {
-      const r = t.getBoundingClientRect();
-      const top = Math.max(r.top, area.top), bottom = Math.min(r.bottom, area.bottom); // the part the scroller shows
-      if (bottom > top && bottom > dock.top + 1 && top < dock.bottom - 1) covered.push((t.textContent ?? "").trim().slice(0, 24));
-    }
-    const art = card.querySelector(".mz-gamecard__art, .mz-cover");
-    const a = art?.getBoundingClientRect();
-    const artShowing = a && a.top < area.bottom - 1 && a.bottom > area.top + 1;
-    const cardTopShown = c.top >= area.top - 0.5;
-    if (artShowing && cardTopShown) {
+  for (const row of scroller.querySelectorAll(".mz-gamerow")) {
+    const c = row.getBoundingClientRect();
+    const texts = [...row.querySelectorAll(".mz-gamerow__title, .mz-gamerow__meta")];
+    const art = row.querySelector(".mz-gamerow__art")?.getBoundingClientRect();
+    const artShowing = art && art.top < area.bottom - 1 && art.bottom > area.top + 1;
+    if (artShowing && c.top >= area.top - 0.5 && c.bottom <= area.bottom + 0.5) {
       for (const t of texts) {
         const r = t.getBoundingClientRect();
-        if (r.top < area.top - 0.5 || r.bottom > area.bottom + 0.5) unreadable.push((t.textContent ?? "").trim().slice(0, 24));
+        if (r.top < area.top - 0.5 || r.bottom > area.bottom + 0.5 || r.right > c.right + 0.5) unreadable.push((t.textContent ?? "").trim().slice(0, 24));
       }
     }
   }
-  const btns = ["home-join", "home-host"].map((id) => { const b = document.querySelector(`[data-testid="${id}"]`).getBoundingClientRect(); return b.top >= 0 && b.bottom <= innerHeight + 0.5; });
-  return { overlap: Math.max(0, Math.round(area.bottom - dock.top)), covered, unreadable, buttons: btns.every(Boolean), dockH: Math.round(dock.height), scrollMax: scroller.scrollHeight - scroller.clientHeight };
+  return { unreadable, clipped: Math.max(0, Math.round(area.bottom - innerHeight)), sideways: document.documentElement.scrollWidth - innerWidth, scrollMax: scroller.scrollHeight - scroller.clientHeight };
+});
+/** Home at the top: Join and Host in full, their sizes, the first game in full, and every row's height. */
+const homeTop = (page) => page.evaluate(() => {
+  const r = (id) => document.querySelector(`[data-testid="${id}"]`)?.getBoundingClientRect();
+  const onScreen = (b) => !!b && b.top >= 0 && b.bottom <= innerHeight + 0.5 && b.left >= 0 && b.right <= innerWidth + 0.5;
+  const join = r("home-join"), host = r("home-host");
+  const first = document.querySelector(".mz-gamerow");
+  const firstText = first ? [...first.querySelectorAll(".mz-gamerow__title, .mz-gamerow__meta")].map((e) => e.getBoundingClientRect()) : [];
+  const rows = [...document.querySelectorAll(".mz-gamerow")].map((e) => e.getBoundingClientRect().height);
+  return {
+    buttons: onScreen(join) && onScreen(host),
+    keyH: Math.round(Math.min(join?.height ?? 0, host?.height ?? 0)),
+    firstGame: firstText.length === 2 && firstText.every(onScreen),
+    firstTitle: first?.querySelector(".mz-gamerow__title")?.textContent ?? "",
+    rows: rows.length, minRow: Math.round(Math.min(...rows)),
+  };
 });
 
 const browser = await launchChromium();
@@ -101,31 +107,31 @@ try {
     await page.goto(`${BASE}/`, { waitUntil: "domcontentloaded" });
     await page.getByTestId("home-scroll").waitFor({ timeout: 15000 });
     await sleep(300);
-    let overlap = 0;
-    const covered = new Set();
+    const top = await homeTop(page);
+    check(`Home ${v.w}×${v.h}: Join and Host are on the first screen, in full`, top.buttons);
+    check(`Home ${v.w}×${v.h}: Join and Host are at least 48 px tall; every game row at least 44 px`, top.keyH >= 48 && top.rows >= 8 && top.minRow >= 44, `keys ${top.keyH}px; ${top.rows} rows, lowest ${top.minRow}px`);
+    if (v.h >= 600) check(`Home ${v.w}×${v.h}: a game (title and players · minutes) shows on the first screen too`, top.firstGame, top.firstTitle);
     const unreadable = new Set();
-    let buttons = true;
+    let clipped = 0, sideways = 0;
     const first = await homeState(page);
     for (let y = 0; y <= first.scrollMax + 24; y += 24) { // every 24 px: every intermediate position
       await page.getByTestId("home-scroll").evaluate((el, top) => { el.scrollTop = top; }, Math.min(y, first.scrollMax));
       const s = await homeState(page);
-      overlap = Math.max(overlap, s.overlap);
-      s.covered.forEach((x) => covered.add(x));
       s.unreadable.forEach((x) => unreadable.add(`${x}@${y}`));
-      buttons &&= s.buttons;
+      clipped = Math.max(clipped, s.clipped);
+      sideways = Math.max(sideways, s.sideways);
     }
-    check(`Home ${v.w}×${v.h}: the dock never overlaps the games, at any scroll position`, overlap === 0 && covered.size === 0, `overlap ${overlap}px; ${[...covered].join(", ")}`);
-    check(`Home ${v.w}×${v.h}: any card whose picture shows also shows its title and players · minutes in full`, unreadable.size === 0, [...unreadable].slice(0, 6).join(", "));
-    check(`Home ${v.w}×${v.h}: Join and Host stay on screen`, buttons, `dock ${first.dockH}px`);
-    // Every card's details can be scrolled into the readable area.
+    check(`Home ${v.w}×${v.h}: nothing is pinned over the games; the list ends inside the screen, nothing runs off the side`, clipped === 0 && sideways <= 0, `clipped ${clipped}px, sideways ${sideways}px`);
+    check(`Home ${v.w}×${v.h}: any row whose picture shows also shows its title and players · minutes in full`, unreadable.size === 0, [...unreadable].slice(0, 6).join(", "));
+    // Every row's details can be scrolled into the readable area.
     const reachable = await page.evaluate(() => {
       const scroller = document.querySelector('[data-testid="home-scroll"]');
       scroller.scrollTop = scroller.scrollHeight;
       const area = scroller.getBoundingClientRect();
-      const last = [...scroller.querySelectorAll(".mz-gamecard__meta")].map((e) => e.getBoundingClientRect()).reduce((a, r) => Math.max(a, r.bottom), 0);
+      const last = [...scroller.querySelectorAll(".mz-gamerow__meta")].map((e) => e.getBoundingClientRect()).reduce((a, r) => Math.max(a, r.bottom), 0);
       return last <= area.bottom + 0.5;
     });
-    check(`Home ${v.w}×${v.h}: the lowest card's details scroll fully into view above the dock`, reachable);
+    check(`Home ${v.w}×${v.h}: the lowest row's details scroll fully into view`, reachable);
     if ([375, 390, 1440].includes(v.w) && (v.h === 667 || v.h === 844 || v.h === 900)) {
       await page.getByTestId("home-scroll").evaluate((el) => { el.scrollTop = Math.round((el.scrollHeight - el.clientHeight) * 0.4); });
       await sleep(150);

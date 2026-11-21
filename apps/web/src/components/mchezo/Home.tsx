@@ -8,7 +8,7 @@
  * (manifests + the server's lifecycle policy); the Rejoin card appears only
  * for a seat this browser really holds.
  */
-import { useId, type ReactNode } from "react";
+import { useEffect, useId, useRef, type ReactNode } from "react";
 import { CodeInput, GameCover, Keycap, Sheet, Wordmark, accentColor, playersLabel, sessionEstimate, timeLimitLabel, type CatalogGame } from "../../ui/mchezo/index.js";
 import { CalmNotices, InstallCard } from "./InstallUi.js";
 
@@ -24,17 +24,19 @@ function SettingsIcon() {
   return <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.2" fill="none" stroke="currentColor" strokeWidth="2.2" /><path d="M12 2.8v3M12 18.2v3M2.8 12h3M18.2 12h3M5.5 5.5l2.1 2.1M16.4 16.4l2.1 2.1M5.5 18.5l2.1-2.1M16.4 7.6l2.1-2.1" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" /></svg>;
 }
 
-/** A game as a tappable card: title, one line of facts, cover. */
-export function GameCard({ game, onOpen, badge, size = "md", testId }: { game: CatalogGame; onOpen: (id: string) => void; badge?: ReactNode; size?: "md" | "sm"; testId?: string }) {
+/**
+ * Handoff 7065498313 (D-UI-02): a game as one compact row (Option A, "Compact list"): small cover, title, facts.
+ * The same facts and the same test id as the card it replaces, so nothing a player could read is lost.
+ */
+export function GameRow({ game, onOpen, testId, kicker }: { game: CatalogGame; onOpen: (id: string) => void; testId?: string; kicker?: string }) {
   return (
-    <button type="button" className={`mz-gamecard mz-gamecard--${size}`} data-testid={testId ?? `game-card-${game.id}`} onClick={() => onOpen(game.id)} aria-label={`${game.title}: ${playersLabel(game)}, ${sessionEstimate(game.estimateMinutes)}${game.officialEligible ? "" : ", practice only"}`}>
-      {/* S3-HOME-01: name and facts first, so a card coming into view shows them before its picture. */}
-      <span className="mz-gamecard__title">{game.title}</span>
-      <span className="mz-gamecard__meta">{playersLabel(game)} · {sessionEstimate(game.estimateMinutes)}{game.officialEligible ? "" : " · practice only"}</span>
-      <span className="mz-gamecard__art">
-        <GameCover gameId={game.id} decorative />
-        {badge && <span className="mz-gamecard__badge">{badge}</span>}
+    <button type="button" className="mz-gamerow" data-testid={testId ?? `game-card-${game.id}`} onClick={() => onOpen(game.id)} style={{ ["--mz-accent" as string]: accentColor(game.id) }} aria-label={`${kicker ? `${kicker}: ` : ""}${game.title}: ${playersLabel(game)}, ${sessionEstimate(game.estimateMinutes)}${game.officialEligible ? "" : ", practice only"}`}>
+      <GameCover gameId={game.id} size={96} decorative className="mz-gamerow__art" />
+      <span className="mz-gamerow__text">
+        <span className="mz-gamerow__title">{game.title}</span>
+        <span className="mz-gamerow__meta" data-testid={testId ? `${testId}-meta` : undefined}>{playersLabel(game)} · {sessionEstimate(game.estimateMinutes)}{game.officialEligible ? "" : " · practice only"}</span>
       </span>
+      <span className="mz-gamerow__chev" aria-hidden="true">›</span>
     </button>
   );
 }
@@ -58,14 +60,24 @@ export function HomeScreen(p: {
 }) {
   const party = p.catalog.filter((g) => g.id !== p.featured?.id);
   return (
-    <main className="mz-screen mz-screen--wide mz-screen--docked mz-home" aria-label="Mchezo home" data-testid="home">
-      {/* S3-HOME-01: the games scroll ABOVE the Join/Host dock, never under it. */}
+    <main className="mz-screen mz-screen--wide mz-home mz-home--compact" aria-label="Mchezo home" data-testid="home">
+      {/* Handoff 7065498313 (D-UI-02, Option A): one scrolling page. Join and Host lead it, right under the header,
+          instead of a fixed dock at the bottom; the games follow as compact rows, so they stay in view on a small phone. */}
       <div className="mz-home__scroll" data-testid="home-scroll">
-      <header className="mz-appbar">
-        <Wordmark size={22} />
+      <header className="mz-appbar mz-home__bar">
+        <Wordmark size={24} />
         <button type="button" className="mz-iconbtn" aria-label="Settings for this phone" data-testid="home-settings" onClick={p.onSettings}><SettingsIcon /></button>
       </header>
       <CalmNotices />
+      {/* Stage 12.1 (D-S121-01): one path. Two ways in for the room: Join (an invited guest, the most common arrival)
+          and Host. Play solo is one tap too, as a quieter link: it isn't a peer of hosting a game night. */}
+      <nav className="mz-home__entry" aria-label="Start playing" data-testid="home-dock">
+        <div className="mz-home__entrykeys">
+          <Keycap block data-testid="home-join" onClick={p.onJoin}>Join a room</Keycap>
+          <Keycap block variant="surface" data-testid="home-host" onClick={p.onHost}>Host a game</Keycap>
+        </div>
+        <button type="button" className="mz-linkbtn mz-home__solo" data-testid="home-solo" onClick={p.onSolo}>Just you? <b>Play solo</b></button>
+      </nav>
       {p.rejoin && (
         <section className="mz-rejoin" aria-label="Your room" data-testid="home-rejoin">
           <div className="mz-rejoin__text">
@@ -79,14 +91,8 @@ export function HomeScreen(p: {
       {p.featured && (
         <section className="mz-home__section" aria-labelledby="mz-featured">
           <span className="mz-kicker" id="mz-featured">Featured today</span>
-          <button type="button" className="mz-hero-card" data-testid="home-featured" onClick={() => p.onOpenGame(p.featured!.id)} style={{ ["--mz-accent" as string]: accentColor(p.featured.id) }} aria-label={`${p.featured.title}: ${p.featured.description}${p.featured.officialEligible ? "" : " Practice only."}`}>
-            <GameCover gameId={p.featured.id} ratio={16 / 9} size={180} decorative />
-            <span className="mz-hero-card__text">
-              <span className="mz-hero-card__title">{p.featured.title}</span>
-              {/* Stage 5.1 (3D): a Practice-only game says so here too, as on its shelf card. */}
-              <span className="mz-hero-card__meta" data-testid="home-featured-meta">{playersLabel(p.featured)} · {sessionEstimate(p.featured.estimateMinutes)}{p.featured.officialEligible ? "" : " · practice only"}</span>
-            </span>
-          </button>
+          {/* Stage 5.1 (3D): a Practice-only game says so here too, as on its row in the list. */}
+          <GameRow game={p.featured} onOpen={p.onOpenGame} testId="home-featured" kicker="Featured today" />
         </section>
       )}
       <section className="mz-home__section" aria-labelledby="mz-party">
@@ -94,9 +100,9 @@ export function HomeScreen(p: {
           <span className="mz-kicker" id="mz-party">Party games</span>
           <button type="button" className="mz-linkbtn mz-home__all" data-testid="home-all-games" onClick={p.onLibrary}>All {p.catalog.length} games ›</button>
         </div>
-        <div className="mz-shelf" role="list">
-          {party.map((g) => <div role="listitem" key={g.id}><GameCard game={g} onOpen={p.onOpenGame} /></div>)}
-        </div>
+        <ul className="mz-gamelist" aria-labelledby="mz-party">
+          {party.map((g) => <li key={g.id}><GameRow game={g} onOpen={p.onOpenGame} /></li>)}
+        </ul>
       </section>
       {/* Stage 8.3: low emphasis, below the games; hidden when installed or after Not now. */}
       <InstallCard />
@@ -104,13 +110,6 @@ export function HomeScreen(p: {
       <button type="button" className="mz-linkbtn" data-testid="mz-lost-place" onClick={p.onLostSeat}>Lost your place? Recover your seat</button>
       {p.status}
       </div>
-      {/* Stage 12.1 (D-S121-01): one path. Two ways in for the room: Join (an invited guest, the most common arrival)
-          and Host. Play solo is still one tap, but as a quieter link: it isn't a peer of hosting a game night. */}
-      <nav className="mz-dock mz-dock--home mz-dock--onepath" aria-label="Start playing" data-testid="home-dock">
-        <Keycap block data-testid="home-join" onClick={p.onJoin}>Join a room</Keycap>
-        <Keycap block variant="surface" data-testid="home-host" onClick={p.onHost}>Host a game</Keycap>
-        <button type="button" className="mz-linkbtn mz-dock__solo" data-testid="home-solo" onClick={p.onSolo}>Just you? <b>Play solo</b></button>
-      </nav>
     </main>
   );
 }
@@ -134,6 +133,16 @@ export function JoinScreen(p: {
 }) {
   const nameId = useId();
   const ok = p.code.length === 6 && p.name.trim().length > 0;
+  // Handoff 7065498313 (D-UI-02): a refusal (a code that isn't a room) shows right under Join the game, and a new one
+  // is scrolled into view once, so a small phone sees it without hunting below the fold. Not again on every render.
+  const statusRef = useRef<HTMLDivElement>(null);
+  const shownAlert = useRef("");
+  useEffect(() => {
+    const alert = statusRef.current?.querySelector<HTMLElement>('[role="alert"]');
+    const text = alert?.textContent ?? "";
+    if (alert && text !== shownAlert.current) alert.scrollIntoView({ block: "nearest" });
+    shownAlert.current = text;
+  });
   return (
     <main className="mz-screen mz-entry" aria-label="Join a game" data-testid="join-screen">
       <header className="mz-appbar"><BackButton onBack={p.onBack} /><Wordmark size={20} /><span className="mz-appbar__spacer" /></header>
@@ -154,10 +163,11 @@ export function JoinScreen(p: {
         <Keycap type="submit" block disabled={!ok}>Join the game</Keycap>
         {!ok && <p className="mz-foot mz-entry__reason" data-testid="join-reason">{p.code.length !== 6 ? "Enter the 6-character room code." : "Type your name to join."}</p>}
       </form>
+      <div ref={statusRef}>{p.status}</div>
       <button type="button" className="mz-chip-btn mz-entry__watch" data-testid="watch-spectator" disabled={p.code.length !== 6} onClick={p.onSpectate}>Watch as spectator — no seat needed</button>
       <button type="button" className="mz-linkbtn" data-testid="mz-lost-place" onClick={p.onLostSeat}>Lost your place? Recover your seat</button>
       </>}
-      {p.status}
+      {p.blocked && p.status}
     </main>
   );
 }

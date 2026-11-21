@@ -138,11 +138,16 @@ const momentOn = (page, want, who) => want === null
 /** The line on a TV's final view: exactly `want`, or none. */
 const tvMomentOn = (page, want, who) => soon(`10.2 ${who}: ${want === null ? "no moment line" : `“${want}”`}`, async () => (await page.getByTestId("tv-jr-final").isVisible().catch(() => false))
   && (want === null ? (await page.getByTestId("tv-results-moment").count()) === 0 : (await page.getByTestId("tv-results-moment").innerText().catch(() => "")) === want), 20000);
-/** Under the result: below the result hero and the What's next panel, so its controls stay where they were. */
+/**
+ * Under the result: below the result hero and the What's next panel, so its controls stay where they were. On the
+ * compact results (D-UI-02) What's next is the bottom dock, outside the scrolling result, and the line sits in the
+ * result above it.
+ */
 async function underResult(page) {
   const box = (id) => page.getByTestId(id).first().boundingBox().catch(() => null);
   const [m, hero, next] = [await box("results-moment"), await box("results-hero"), await box("whats-next")];
-  return !!m && !!hero && m.y >= hero.y + hero.height - 1 && (!next || m.y >= next.y + next.height - 1);
+  const docked = (await page.getByTestId("whats-next").first().getAttribute("data-variant").catch(() => null)) === "dock";
+  return !!m && !!hero && m.y >= hero.y + hero.height - 1 && (!next || (docked ? m.y + m.height <= next.y + 1 || m.y >= next.y + next.height - 1 : m.y >= next.y + next.height - 1));
 }
 
 /**
@@ -386,11 +391,17 @@ try {
   await pick.waitFor({ timeout: 10000 });
   check("A the picker lists Jebena Rush as practice-only", /practice only/i.test(await pick.innerText()), (await pick.innerText()).replace(/\s+/g, " ").slice(0, 120));
   await pick.click();
+  // D-UI-02: the cups are a chip on the next-game card (host: a button that opens the settings sheet; guests: a label).
+  await soon("A the host's cups chip says 5 cups each", async () => /5 cups each/.test(await K.getByTestId("lobby-chip-setting").innerText()));
+  check("A guests' cups chip is a label, not a button", (await A.getByTestId("lobby-chip-setting").count()) === 0 && (await B.getByTestId("lobby-chip-setting").count()) === 0);
+  await K.getByTestId("lobby-chip-setting").click();
   await soon("A the host sees the cups choice (3, 5 or 7 cups), 5 preselected", async () => (await K.getByTestId("lobby-hearts").getAttribute("data-hearts")) === "5" && /3 cups/.test(await K.getByTestId("lobby-hearts").innerText()) && /7 cups/.test(await K.getByTestId("lobby-hearts").innerText()));
   await soon("A guests see 5 cups each", async () => (await A.getByTestId("lobby-hearts-guest").getAttribute("data-hearts")) === "5" && (await B.getByTestId("lobby-hearts-guest").getAttribute("data-hearts")) === "5");
   await K.getByTestId("lobby-hearts-3").click();
   await soon("A the host chose 3 cups", async () => (await K.getByTestId("lobby-hearts").getAttribute("data-hearts")) === "3" && /starts with 3 cups/.test(await K.getByTestId("lobby-hearts-note").innerText()));
-  await soon("A guests see the host's choice: 3 cups each, drawn as three whole cups", async () => (await A.getByTestId("lobby-hearts-guest").getAttribute("data-hearts")) === "3" && /starts with 3 cups/.test(await A.getByTestId("lobby-hearts-guest").innerText()) && (await cupsIn(A.getByTestId("lobby-hearts-guest"))).whole === 3);
+  await K.getByTestId("lobby-settings-done").click();
+  await soon("A the host's chip says 3 cups each once the sheet closes", async () => (await K.getByTestId("lobby-settings-sheet").count()) === 0 && (await K.getByTestId("lobby-hearts-chip").getAttribute("data-hearts")) === "3" && /3 cups each/.test(await K.getByTestId("lobby-chip-setting").innerText()));
+  await soon("A guests see the host's choice: 3 cups each, drawn as three whole cups", async () => (await A.getByTestId("lobby-hearts-guest").getAttribute("data-hearts")) === "3" && /3 cups each/.test(await A.getByTestId("lobby-hearts-guest").innerText()) && (await cupsIn(A.getByTestId("lobby-hearts-guest"))).whole === 3);
   check("A no hearts anywhere in the lobby (host and guest)", noHearts(await K.locator("body").innerText()) && noHearts(await A.locator("body").innerText()));
   const guestSet = await api(A, "POST", "/rooms/:room/game-settings", { gameId: "jebena-rush", settings: { hearts: 7 }, baseRevision: (await playerView(A)).p.session?.revision ?? 0 });
   check("A a guest can't change the cups (403)", guestSet.status === 403, JSON.stringify(guestSet));
@@ -975,6 +986,8 @@ try {
     }
   }
   for (const [who, p] of [["Keku", K], ["Amina", A], ["Baraka", B]]) {
+    // D-UI-02: the host's Back to lobby is under More… (Play again is the host's one big button); guests' is in the dock.
+    if (await p.getByTestId("next-more").isVisible().catch(() => false)) await p.getByTestId("next-more").click();
     const backBtn = p.getByTestId("show-back-to-lobby");
     await backBtn.waitFor({ timeout: 15000 }).catch(() => {});
     if (await backBtn.isVisible().catch(() => false)) await backBtn.click();

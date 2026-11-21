@@ -1780,7 +1780,8 @@ export function App() {
   const onBreak = proj?.roomKind === "casual" && !!proj?.session?.onBreak;
   const roomLatest = (proj?.games ?? []).at(-1);
   /** The "What's next" panel under a finished casual game's results (casual rooms only). */
-  const nextPanel = (g: PlayerGame): ReactNode => {
+  // Handoff 7065498313 (D-UI-02): Jebena Rush results show What's next as their dock (`dock`), with Back to lobby in it.
+  const nextPanel = (g: PlayerGame, dock?: { onBackToLobby: () => void }): ReactNode => {
     if (!partyRoom) return undefined;
     const party = proj?.party;
     // Stage 12.3: a Family Cup's results keep their own shape unless the Cup is running a lineup.
@@ -1820,6 +1821,7 @@ export function App() {
         error={err || undefined}
         onNext={(index, gameId) => { if (party) void startGame(gameId, lineupOfficial(index), { kind: "next", revision: party.revision, index }); }}
         onPlayAgain={() => void startGame(g.gameId, false, { kind: "rematch", source: g.id })}
+        {...(dock ? { variant: "dock" as const, onBackToLobby: dock.onBackToLobby } : {})}
         {...(proj?.roomKind === "casual" && proj.contentSeason ? { content: proj.contentSeason } : {})}
         onBreakChange={(on) => void changeBreak(on)}
         onPlan={() => { dismissResults(g.id); setPartyReplan(undefined); openSheet("party"); }}
@@ -2094,11 +2096,13 @@ export function App() {
           firstTime={!roomGames.some((g) => g.status === "finished")}
           content={proj?.roomKind === "casual" ? { season: proj.contentSeason ?? "everyday", ...(isHostish ? { onChange: (s: SessionSeason) => void changeContent(s), busy: contentBusy } : {}) } : undefined}
           // Stage 9.1 (§8): Jebena Rush's lives (cups, Stage 10.1): the host or a cohost chooses; everyone sees the choice.
-          gameSettings={proj?.roomKind === "casual" && upNext?.id === "jebena-rush" ? (() => {
+          // Handoff 7065498313 (D-UI-02): the host changes it in the lobby's settings sheet; everyone sees it as a chip.
+          gameSettings={proj?.roomKind === "casual" && upNext?.id === "jebena-rush" && isHostish
+            ? <JebenaHeartsChoice value={proj.lobbySettings?.["jebena-rush"]?.hearts ?? 5} onChange={(h) => void changeHearts(h)} busy={settingsBusy} />
+            : undefined}
+          gameSettingsChip={proj?.roomKind === "casual" && upNext?.id === "jebena-rush" ? (() => {
             const hearts = proj.lobbySettings?.["jebena-rush"]?.hearts ?? 5;
-            return isHostish
-              ? <JebenaHeartsChoice value={hearts} onChange={(h) => void changeHearts(h)} busy={settingsBusy} />
-              : <p className="mz-foot mz-lobby__hearts"><JebenaCupsLabel hearts={hearts} testId="lobby-hearts-guest" text={`Everyone starts with ${hearts} cups.`} /></p>;
+            return <JebenaCupsLabel hearts={hearts} testId={isHostish ? "lobby-hearts-chip" : "lobby-hearts-guest"} text={`${hearts} cups each`} />;
           })() : undefined}
           code={proj?.joinCode ?? "…"}
           sessionLabel={proj?.name ?? "Mchezo"}
@@ -2266,7 +2270,7 @@ export function App() {
   if (view === "lobby" && showPhase === "results" && jebenaFinished && latestFinished) {
     return (
       <MchezoProvider theme={theme} {...resultsMotion}>
-        <MchezoJebenaResults game={latestFinished} publicGame={publicFinished} players={players} playerId={playerId ?? ""} title={games.find((x) => x.id === latestFinished.gameId)?.title ?? "Jebena Rush"} onBackToLobby={() => dismissResults(latestFinished.id)} hero={resultsHero(latestFinished, publicFinished)} next={nextPanel(latestFinished)} save={saveMemoryFor(latestFinished, publicFinished)} />
+        <MchezoJebenaResults game={latestFinished} publicGame={publicFinished} players={players} playerId={playerId ?? ""} title={games.find((x) => x.id === latestFinished.gameId)?.title ?? "Jebena Rush"} onBackToLobby={() => dismissResults(latestFinished.id)} hero={resultsHero(latestFinished, publicFinished)} next={nextPanel(latestFinished, { onBackToLobby: () => dismissResults(latestFinished.id) })} save={saveMemoryFor(latestFinished, publicFinished)} />
       </MchezoProvider>
     );
   }

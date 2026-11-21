@@ -84,8 +84,8 @@ try {
   const host = await hostCtx.newPage();
   await host.goto(`${BASE}/`, { waitUntil: "domcontentloaded" });
   await host.getByTestId("home-host").waitFor({ timeout: 15000 });
-  const dock = await host.locator(".mz-dock--home").innerText();
-  check("A Home: two dock buttons, Join and Host, and a quieter Play solo link", (await host.getByTestId("home-join").isVisible()) && (await host.getByTestId("home-host").isVisible()) && /Just you\?\s*Play solo/.test(await host.getByTestId("home-solo").innerText()), JSON.stringify(dock));
+  const dock = await host.getByTestId("home-dock").innerText(); // D-UI-02: the entry block in the page (was a pinned dock)
+  check("A Home: two entry buttons, Join and Host, and a quieter Play solo link", (await host.getByTestId("home-join").isVisible()) && (await host.getByTestId("home-host").isVisible()) && /Just you\?\s*Play solo/.test(await host.getByTestId("home-solo").innerText()), JSON.stringify(dock));
   await shot(host, "after-home-390");
   await host.getByTestId("home-host").click();
   await host.getByPlaceholder("e.g. Auntie June").fill("Keku");

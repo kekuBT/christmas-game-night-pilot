@@ -22,6 +22,10 @@
 //      Stage 12.5 added a 17th game: its cards (home, library) and the lobby's Family Questions card are listed by test-id
 //      prefix, under the same rule (every element reuses a base style). Cover gradients are compared without React's
 //      generated id number, which a new cover shifts.
+//      D-UI-02 (handoff 7065498313, the owner-selected compact mix): the home, lobby, lobby-guest and menu (the menu
+//      over the lobby) screens were re-recorded from the compact-mix build: an intended Everyday layout change (game
+//      rows, the in-page Join/Host, the next-game card and its chips), with no colour token changed. Only those keys
+//      were replaced; every other screen keeps its d4dc408 record, so W8 still holds them to the base build.
 // Screenshots of both looks (320/390/1280 and the TV) go to MCHEZO_SCREENSHOT_DIR when it's set.
 // Starts ITS OWN server. Chromium emulation only: no real phones or TVs. Usage: node scripts/check-warm-ivory.mjs
 import { spawn } from "node:child_process";
