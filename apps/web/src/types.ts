@@ -72,6 +72,8 @@ export interface PublicGame extends LifecycleFields {
   season?: SessionSeason;
   /** Stage 9.1: the settings this game was started with (Jebena Rush: lives each, shown as cups; the key keeps its name, D-S101-02). */
   settings?: { hearts?: number };
+  /** Review 7058937812 (briefing only): the rules version frozen in this match, so its briefing describes the rules it will play. */
+  rulesVersion?: number;
   timedOut: boolean;
   day?: number;
   players: string[];

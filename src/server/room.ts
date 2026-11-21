@@ -2912,6 +2912,9 @@ export class RoomEngine {
       ...(g.season ? { season: g.season } : {}),
       // Stage 9.1: a game's start settings (Jebena Rush's hearts) are public rules, not secrets.
       ...(g.settings ? { settings: g.settings } : {}),
+      // Review 7058937812: the rules version frozen in this match (the number only: no seed, bank or count), so a
+      // briefing recovered from an older save describes the rules the match will play.
+      ...this.briefingRulesVersion(g),
       // Stage 12.8: a team game's teams are announced before play (public: the names on every screen anyway).
       ...(g.teams ? { teams: g.teams } : {}),
       timedOut: false,
@@ -2924,6 +2927,12 @@ export class RoomEngine {
       // T3/P3: who is ready is public; presence rides in the players list.
       briefing: { createdAt: b.createdAt, startNowAt: b.startNowAt, warnAt: b.warnAt, expiresAt: b.expiresAt, ready: g.players.filter((id) => b.ready[id] !== undefined), warned: b.warned },
     };
+  }
+
+  /** Review 7058937812: `{ rulesVersion }` for a module that freezes one in its state, else nothing. Only the number leaves the state. */
+  private briefingRulesVersion(g: GameInstance): { rulesVersion?: number } {
+    const v = g.extra === undefined ? undefined : moduleFor(g.gameId)?.rulesVersion?.(g.extra);
+    return typeof v === "number" && Number.isInteger(v) ? { rulesVersion: v } : {};
   }
 
   /** The latest briefing that ended without play in the last 10 minutes: which game, and why (no item ids, no answers). */

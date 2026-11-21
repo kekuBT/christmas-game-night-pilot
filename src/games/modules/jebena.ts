@@ -254,6 +254,8 @@ function publicView(s: JebenaState, scale = 1) {
 export const jebenaModule: GameModule<JebenaState> = {
   id: "jebena-rush",
   actions: ["jebena-answer"],
+  // Review 7058937812: version 1 (saved before D-JR-01) has no streak changes; its briefing must not promise them.
+  rulesVersion: (s) => s.rulesVersion,
   init({ players, seed, settings }) {
     const hearts = settings?.hearts !== undefined && (JEBENA_HEART_CHOICES as readonly number[]).includes(settings.hearts) ? settings.hearts : JEBENA_DEFAULT_HEARTS;
     const rng = moduleRng(seed);

@@ -400,6 +400,23 @@ const RULES: Record<string, { objective: string; steps: string[] }> = {
   },
 };
 
-export function briefingRules(gameId: string, tutorial: string): { objective: string; steps: string[] } {
-  return RULES[gameId] ?? { objective: tutorial, steps: [] };
+/**
+ * Review 7058937812: rules that differ by the version frozen in a match. A match saved under an older version keeps
+ * its rules on recovery, so its briefing must describe those, not today's. A version not listed here gets RULES.
+ */
+const OLDER_RULES: Record<string, Record<number, { objective: string; steps: string[] }>> = {
+  "jebena-rush": {
+    // Rules version 1 (before D-JR-01): a category changes only when time runs out (or its answers run out), never
+    // after a run of right answers. The copy those matches were briefed with.
+    1: {
+      ...RULES["jebena-rush"]!,
+      steps: RULES["jebena-rush"]!.steps.map((s) => (s.startsWith("Each answer counts once.") ? "Each answer counts once. Time runs out: one of your cups breaks, and a new category starts." : s)),
+    },
+  },
+};
+
+/** The "How to play" copy for a game; `rulesVersion` is the version frozen in the match being briefed, when it has one. */
+export function briefingRules(gameId: string, tutorial: string, rulesVersion?: number): { objective: string; steps: string[] } {
+  const older = rulesVersion === undefined ? undefined : OLDER_RULES[gameId]?.[rulesVersion];
+  return older ?? RULES[gameId] ?? { objective: tutorial, steps: [] };
 }

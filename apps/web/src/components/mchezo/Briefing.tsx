@@ -67,8 +67,8 @@ interface CommonProps {
   players: PublicPlayer[];
 }
 
-function Rules({ gameId, registry, tv, hearts }: { gameId: string; registry?: RegistryGame; tv?: boolean; /** Stage 9.1: Jebena Rush's lives (cups since Stage 10.1), bound at Start. */ hearts?: number }) {
-  const rules = briefingRules(gameId, registry?.tutorial ?? "");
+function Rules({ gameId, registry, tv, hearts, rulesVersion }: { gameId: string; registry?: RegistryGame; tv?: boolean; /** Stage 9.1: Jebena Rush's lives (cups since Stage 10.1), bound at Start. */ hearts?: number; /** Review 7058937812: the rules version frozen in this match. */ rulesVersion?: number }) {
+  const rules = briefingRules(gameId, registry?.tutorial ?? "", rulesVersion);
   const timing = timingLines(registry?.lifecycle, gameId);
   return (
     <section className={`mz-card mz-brief__rules${tv ? " mz-brief__rules--tv" : ""}`} aria-labelledby="mz-brief-rules">
@@ -239,7 +239,7 @@ export function BriefingScreen(props: CommonProps & {
       </div>
       <h1 className="mz-h1">{title}</h1>
       {clock.warning && <Warning cancelInMs={clock.cancelInMs} />}
-      <Rules gameId={game.gameId} registry={registry} hearts={game.settings?.hearts} />
+      <Rules gameId={game.gameId} registry={registry} hearts={game.settings?.hearts} rulesVersion={game.rulesVersion} />
       <Teams game={game} players={players} meId={meId} />
       <People people={people} allPlayers={players} />
       {participant ? (
@@ -332,7 +332,7 @@ export function BriefingTv(props: CommonProps & { joinCode?: string; onBack: () 
       )}
       {clock.warning && <Warning cancelInMs={clock.cancelInMs} />}
       <div className="mz-brief__tvgrid">
-        <Rules gameId={game.gameId} registry={registry} tv hearts={game.settings?.hearts} />
+        <Rules gameId={game.gameId} registry={registry} tv hearts={game.settings?.hearts} rulesVersion={game.rulesVersion} />
         <People people={people} allPlayers={players} tv />
         <Teams game={game} players={players} tv />
       </div>

@@ -12,6 +12,10 @@
 //   S3 at a change both phones say "Category · new!" for the turn it starts;
 //   S4 a rejected try mid-streak and a phone reload mid-streak change nothing:
 //      the same category, no "new!", and the streak still ends within bounds.
+//   S0 (review 7058937812) a fresh match is rules version 2: before play, the
+//      briefing on both phones and on the TV says a run of 5 to 8 right answers
+//      changes the category (a recovered version 1 match is covered by
+//      tests/jebena-briefing-rules.test.ts and BriefingRules.test.tsx).
 //   S5 (review 7058749487) right after each change, the watching phone (the one
 //      that just answered: "You named …") and the TV say which category the last
 //      answer was named in ("… named “X” in Sports."), also after that phone
@@ -112,6 +116,15 @@ try {
   await K.getByTestId("choose-game").click();
   await K.getByTestId("select-game-jebena-rush").click();
   await K.locator('[data-testid="lobby-dock"] button.mz-key--block').first().click();
+  // S0: the briefing states the rules frozen in this (version 2) match, on both phones and the TV.
+  const STREAK_RULE = "After a run of 5 to 8 right answers, a new category starts.";
+  for (const [who, pg, id] of [["Keku's phone", K, "briefing"], ["Amina's phone", A, "briefing"], ["the TV", TV, "tv-briefing"]]) {
+    const steps = await soon(`S0 ${who} shows the briefing's rules`, async () => {
+      const loc = pg.getByTestId(id).locator(".mz-brief__steps");
+      return (await loc.count()) ? ((await loc.textContent()) ?? "") : null;
+    }, 15000);
+    if (steps !== null) check(`S0 ${who}: the briefing (rules version 2) says "${STREAK_RULE}"`, steps.includes(STREAK_RULE), steps.slice(0, 200));
+  }
   await passBriefing([K, A]);
   const pageOf = { [await seatOf(K)]: K, [await seatOf(A)]: A };
   let g = await soon("setup: Jebena Rush is playing", async () => { const x = await view(K); return x?.status === "playing" && x.state?.turn ? x : null; }, 20000);
