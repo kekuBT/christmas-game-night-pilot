@@ -4427,3 +4427,37 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
   - The broader redesign (owner-selected options).
   - Draw & Guess native confirmation.
 - **Next:** ChatGPT's review of #59.
+
+## Post-beta: the `check-install-builds` E1 flake (handoff 7052991290)
+- **#59 cleared:** ChatGPT's review [7052991290](https://github.com/kekuBT/christmas-game-night-pilot/pull/51#issuecomment-7052991290) cleared the TV briefing fix to build on.
+  - It covered tested `6d88419` and docs-only head `618c567`.
+  - Its independent QA had base 166 passed / 20 failed, candidate 186/186, and 106/106 focused tests.
+  - Draw & Guess native iPhone confirmation stays open for a device.
+- **The handoff:** the same comment set this slice.
+  - It was acknowledged in 7055587114 at 9:02 p.m. ET, estimating about 12:30 a.m. ET.
+  - Two worker restarts cost about 2 hours, so status 7057264930 revised the ETA to about 2:00 a.m. ET.
+- **Branch:** `claude/install-builds-ownership`, stacked on #59 (exact base `618c567`). Not for merge or deploy.
+- **The tested commit:** `54170200c9a7a883793203d04c1132ad7e060040`. It changes only `scripts/check-install-builds.mjs`.
+- **The trace:** seven instrumented runs on `618c567`; run 6 reproduced the failure.
+  - **E1's leftover candidate** came from a second attempt that the browser started itself. It was still installing when E1 read the cache names, then failed and deleted its own candidate.
+  - **Unrelated attempts:** the browser started some in 5 of 7 runs, and the app started others on `online`.
+  - **E2 often followed an attempt the app had started.**
+  - **No lifecycle defect:** attempts never overlap, and the failed ones left nothing behind.
+- **The repair (D-IB-01):**
+  - `settle()` and `ownUpdate()`;
+  - a deterministic second attempt in E1;
+  - in E2, storage is full from before the deploy until every attempt has ended.
+- **Tests:**
+  - **Negative control** (the old driver plus the second attempt): **5 of 6 FAIL** E1 with the reported message.
+  - **Focused reruns on `5417020`:** **12/12 pass**, 34 checks each, run three at a time.
+  - **Gates on `5417020`:**
+    - targeted (`install-builds`, `install`): **`PASSED (exit 0)`**, 4/4, run `20261121-043756-54170200-7451`;
+    - fast: **`PASSED (exit 0)`**, 5/5, run `20261121-044021-54170200-8351`.
+  - **Not run:** the full gate (a one-driver change).
+- **Evidence:** `docs/evidence/install-builds-ownership/`.
+- **Open:**
+  - The browser's own update triggers are identified by elimination only.
+  - Real-device checks.
+  - The broader redesign (owner-selected options).
+  - Draw & Guess native confirmation.
+- **Next:** ChatGPT's review of the new draft.

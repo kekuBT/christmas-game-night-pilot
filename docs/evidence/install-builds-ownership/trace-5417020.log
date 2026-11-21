@@ -1,0 +1,158 @@
+  (four real builds in 16 s: A 654a7428e2c621a4, W e53a77ceedc1f749, P 0bc1aabb9282dd93)
+PASS B setup: build A names its version in its page and its worker
+PASS B setup: build A2 names its version in its page and its worker
+PASS B setup: build W names its version in its page and its worker
+PASS B setup: build P names its version in its page and its worker
+PASS B the same source built twice gives the same version, the same worker byte for byte, the same page and the same files
+PASS B a worker-only change (sw.ts) is a new version and a new worker
+PASS B a worker-policy change (swPolicy.ts, a dependency of the worker only) is a new version too
+PASS B neither change touches the app: the same files, byte for byte, and the same page apart from its build marker
+PASS E setup: A's worker is active and controls the page
+PASS E setup: A's live cache holds every file it precaches (14 entries)
+PASS E1 W deployed with a listed file missing: W's install runs and fails — {"own":"redundant","others":["redundant"],"calm":true}
+PASS E1 another tab asks for an update the moment W's install ends: a second attempt, not the driver's, starts and fails too — {"second":"started","others":["redundant"]}
+PASS E1 A's live cache is exactly as it was: every entry, the same bytes, the same order
+PASS E1 no candidate is left, nothing else is touched — ["mchezo-shell-654a7428e2c621a4","not-mchezo"]
+PASS E1 the round in the other tab plays on (a guess answered, the same page)
+PASS E1 offline, A's shell is whole: A's page, scripts, styles and assets, saying it can't reach Mchezo — {"notice":true,"build":"654a7428e2c621a4","files":2,"foreign":[]}
+PASS E2 W with storage full (Chromium's quota override): W's install runs and fails — {"own":"redundant","others":["redundant"],"calm":true}
+PASS E2 A's live cache is exactly as it was
+PASS E2 no candidate is left — ["mchezo-shell-654a7428e2c621a4","not-mchezo"]
+PASS E2 the round plays on
+PASS E3 W complete: it installs and waits; A stays in charge — {"own":"installed","others":[],"calm":true}
+PASS E3 while W waits, A's live cache is untouched, and W's files are only in W's own candidate
+PASS E3 the round plays on while W waits
+PASS E3 every A page closed and one reopened: W is activated and controls it
+PASS E3 scoped cleanup: W's live cache and someone else's remain; A's cache and every candidate are gone — ["mchezo-shell-e53a77ceedc1f749","not-mchezo"]
+PASS E3 W's live cache holds every file it precaches, and nothing of A's that W doesn't list
+PASS E3 offline, W's shell is whole — {"notice":true,"build":"e53a77ceedc1f749","files":2,"foreign":[]}
+PASS E4 P (a policy change) deployed with a listed file missing: its install fails; W's cache exactly as it was; no candidate left — {"own":"redundant","others":["redundant"],"calm":true}
+PASS E4 P complete: it installs and waits; W's cache untouched — {"own":"installed","others":[],"calm":true}
+PASS E4 P activates; only P's live cache and someone else's remain — ["mchezo-shell-0bc1aabb9282dd93","not-mchezo"]
+PASS E5 a worker with P's version but different bytes, a listed file missing: its install fails; P's cache exactly as it was; no candidate left — {"own":"redundant","others":["redundant"],"calm":true}
+PASS E5 complete, it installs and waits without touching P's live cache (only its own candidate) — {"own":"installed","others":[],"calm":true}
+PASS E5 on activation: one complete live cache, no candidate left — ["mchezo-shell-0bc1aabb9282dd93","not-mchezo"]
+PASS E5 offline, the shell is whole — {"notice":true,"build":"0bc1aabb9282dd93","files":2,"foreign":[]}
+
+All build-update checks passed
+
+=== TRACE (ms since the browser context was created) ===
++    42  page1                navigated /
++   135  page1                navigated /
++   404  page1                navigated /
++   461  page1                navigated /
++   482  driver               check PASS: E setup: A's worker is active and controls the page
++   488  browser (DevTools)   attempt/version 0: activated
++   548  page2                navigated /solo
++   660  page2                navigated /solo
++  1102  page2                navigated /solo/word-connections
++  2241  driver               check PASS: E setup: A's live cache holds every file it precaches (14 en
++  2242  driver               ownUpdate: settle (before)
++  3254  driver               ownUpdate: prepare (deploy)
++  3263  driver               ownUpdate: the driver asks for its update
++  3265  page1                reg.update() called by the driver (page.evaluate)
++  3270  browser (DevTools)   attempt/version 1: new
++  3277  browser (DevTools)   attempt/version 1: installing
++  3371  browser (DevTools)   attempt/version 1: redundant
++  3372  page2                reg.update() called by the driver (page.evaluate)
++  3376  browser (DevTools)   attempt/version 2: new
++  3378  driver               ownUpdate: own attempt ended redundant; settle (after)
++  3383  browser (DevTools)   attempt/version 2: installing
++  3475  browser (DevTools)   attempt/version 2: redundant
++  4474  driver               ownUpdate: settled
++  4480  driver               check PASS: E1 W deployed with a listed file missing: W's install runs a
++  4480  driver               check PASS: E1 another tab asks for an update the moment W's install end
++  4501  driver               check PASS: E1 A's live cache is exactly as it was: every entry, the sam
++  4504  driver               check PASS: E1 no candidate is left, nothing else is touched
++  4681  driver               check PASS: E1 the round in the other tab plays on (a guess answered, th
++  4701  browser (DevTools)   attempt/version 3: new
++  4704  page1                navigated /
++  4711  browser (DevTools)   attempt/version 3: installing
++  4771  page1                navigated /
++  4837  page1                online event
++  4837  page1                reg.update() called by the app (registerSw)
++  4838  page2                online event
++  4838  page2                reg.update() called by the app (registerSw)
++  4842  driver               check PASS: E1 offline, A's shell is whole: A's page, scripts, styles an
++  4843  driver               ownUpdate: settle (before)
++  4849  browser (DevTools)   attempt/version 3: redundant
++  4853  browser (DevTools)   attempt/version 4: new
++  4860  browser (DevTools)   attempt/version 4: installing
++  4970  browser (DevTools)   attempt/version 4: redundant
++  5978  driver               ownUpdate: prepare (deploy)
++  5985  driver               ownUpdate: the driver asks for its update
++  5986  page1                reg.update() called by the driver (page.evaluate)
++  5990  browser (DevTools)   attempt/version 5: new
++  5996  browser (DevTools)   attempt/version 5: installing
++  6011  browser (DevTools)   attempt/version 5: redundant
++  6047  driver               ownUpdate: own attempt ended redundant; settle (after)
++  6379  browser (DevTools)   attempt/version 6: new
++  6385  browser (DevTools)   attempt/version 6: installing
++  6402  browser (DevTools)   attempt/version 6: redundant
++  7403  driver               ownUpdate: settled
++  7408  driver               check PASS: E2 W with storage full (Chromium's quota override): W's inst
++  7427  driver               check PASS: E2 A's live cache is exactly as it was
++  7430  driver               check PASS: E2 no candidate is left
++  7613  driver               check PASS: E2 the round plays on
++  7613  driver               ownUpdate: settle (before)
++  8628  driver               ownUpdate: prepare (deploy)
++  8628  driver               ownUpdate: the driver asks for its update
++  8629  page1                reg.update() called by the driver (page.evaluate)
++  8634  browser (DevTools)   attempt/version 7: new
++  8640  browser (DevTools)   attempt/version 7: installing
++  8738  browser (DevTools)   attempt/version 7: installed
++  8743  driver               ownUpdate: own attempt ended installed; settle (after)
++  9757  driver               ownUpdate: settled
++  9761  driver               check PASS: E3 W complete: it installs and waits; A stays in charge
++  9778  driver               check PASS: E3 while W waits, A's live cache is untouched, and W's files
++  9944  driver               check PASS: E3 the round plays on while W waits
++ 11008  page3                navigated /
++ 11101  page3                navigated /
++ 11153  driver               check PASS: E3 every A page closed and one reopened: W is activated and 
++ 11176  driver               check PASS: E3 scoped cleanup: W's live cache and someone else's remain;
++ 11176  driver               check PASS: E3 W's live cache holds every file it precaches, and nothing
++ 11190  page3                navigated /
++ 11243  page3                navigated /
++ 11281  page3                online event
++ 11282  page3                reg.update() called by the app (registerSw)
++ 11286  driver               check PASS: E3 offline, W's shell is whole
++ 11286  driver               ownUpdate: settle (before)
++ 12298  driver               ownUpdate: prepare (deploy)
++ 12301  driver               ownUpdate: the driver asks for its update
++ 12303  page3                reg.update() called by the driver (page.evaluate)
++ 12415  driver               ownUpdate: own attempt ended redundant; settle (after)
++ 13929  driver               ownUpdate: settled
++ 13950  driver               check PASS: E4 P (a policy change) deployed with a listed file missing: 
++ 13950  driver               ownUpdate: settle (before)
++ 14961  driver               ownUpdate: prepare (deploy)
++ 14964  driver               ownUpdate: the driver asks for its update
++ 14965  page3                reg.update() called by the driver (page.evaluate)
++ 15128  driver               ownUpdate: own attempt ended installed; settle (after)
++ 16141  driver               ownUpdate: settled
++ 16161  driver               check PASS: E4 P complete: it installs and waits; W's cache untouched
++ 17202  page4                navigated /
++ 17292  page4                navigated /
++ 17362  driver               check PASS: E4 P activates; only P's live cache and someone else's remai
++ 17362  driver               ownUpdate: settle (before)
++ 18373  driver               ownUpdate: prepare (deploy)
++ 18377  driver               ownUpdate: the driver asks for its update
++ 18379  page4                reg.update() called by the driver (page.evaluate)
++ 18492  driver               ownUpdate: own attempt ended redundant; settle (after)
++ 20027  driver               ownUpdate: settled
++ 20046  driver               check PASS: E5 a worker with P's version but different bytes, a listed f
++ 20046  driver               ownUpdate: settle (before)
++ 21057  driver               ownUpdate: prepare (deploy)
++ 21060  driver               ownUpdate: the driver asks for its update
++ 21061  page4                reg.update() called by the driver (page.evaluate)
++ 21173  driver               ownUpdate: own attempt ended installed; settle (after)
++ 22187  driver               ownUpdate: settled
++ 22207  driver               check PASS: E5 complete, it installs and waits without touching P's live
++ 23252  page5                navigated /
++ 23340  page5                navigated /
++ 23416  driver               check PASS: E5 on activation: one complete live cache, no candidate left
++ 23434  page5                navigated /
++ 23490  page5                navigated /
++ 23740  page5                online event
++ 23741  page5                reg.update() called by the app (registerSw)
++ 23747  driver               check PASS: E5 offline, the shell is whole
+exit 0

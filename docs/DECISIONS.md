@@ -2781,3 +2781,28 @@ The reported symptom: a nearly black **drawer** screen in an iPhone in-app brows
     - **The result:** on `5d5eead` it FAILS 20 checks (every grid card at 320 px, in both games, views and looks). On the fix it passes 186/186.
   - **Not changed (out of scope):** the teams card keeps the TV's large team text (24 px), so a long one-word name wraps mid-word on a phone. It fits; a phone-specific type scale belongs to the broader redesign.
   - **Alternative:** a media query that switches the grid to one column below a breakpoint. The capped minimum does the same at any width with no breakpoint to keep in step, and it leaves wider layouts untouched.
+
+## Post-beta: whose install attempt, in `check-install-builds` (handoff 7052991290; acknowledged 7055587114; docs/evidence/install-builds-ownership/)
+- **D-IB-01 The driver follows the install attempt it starts and waits for every other one** (a test repair; no runtime change).
+  - **What the trace found** (seven instrumented runs on `618c567`, one reproducing E1's failure):
+    - Install attempts the driver does not start are routine.
+      - **The browser starts some itself** (no page called `update()`): at the reload in the driver's offline step, shortly after another attempt ends, or right after a deploy.
+      - **The app starts others:** its `online` re-check calls `reg.update()` from the open pages.
+    - **Attempts run one after another, never at once.**
+    - **E1's leftover candidate** belonged to a browser-started attempt that was still installing when the driver read the cache names. It then failed and deleted its own candidate.
+    - **In E2,** the driver often followed an attempt the app had started, and the storage-full override was lifted while more attempts could follow.
+    - **No failed attempt left a candidate behind,** so the trace points to no production lifecycle defect.
+  - **What** (`scripts/check-install-builds.mjs` only):
+    - `settle()` waits until no attempt is in flight and none has started for 1 s.
+    - `ownUpdate()` settles, deploys, follows the new worker its own update starts (never one already in flight), then settles again. It reports the end state of every other attempt.
+    - **E1** adds a deterministic second attempt from the other tab, right after W's failed install. It must start and fail, and then no candidate may be left.
+    - **E2** applies the storage-full override before the deploy and keeps it until every attempt has ended.
+    - **E3 to E5** use `ownUpdate()`.
+    - All earlier assertions are kept. "No candidate is left" now covers every attempt, not only the driver's.
+  - **The evidence:**
+    - **Negative control** (the old driver plus only the second attempt): 5 of 6 runs fail with the reported E1 message.
+    - **The repaired driver:** 12/12 passes, three at a time, on the tested SHA.
+  - **Alternatives:**
+    - Matching candidate names to attempts, through the creation time in each name. This is fragile, and it would still leave E2 observing other attempts.
+    - Turning off the app's `online` re-check or the browser's update checks in the test. That would test less than the product does.
+    - Retrying the check. The gate never retries, and a retry would hide the cause.
