@@ -15,7 +15,10 @@
 //      E1 A in charge, a solo round in play in another tab. W is deployed with
 //         a listed file missing: W's install fails; A's live cache is exactly
 //         as it was (every entry, same bytes, same order), no candidate is
-//         left, the round plays on, and offline the shell is A's, whole.
+//         left, the round plays on, and offline the shell is A's, whole. The
+//         other tab asks for an update the moment W's install ends, as the
+//         browser or the app may: that second attempt fails too and leaves no
+//         candidate either.
 //      E2 W again, now with storage full (Chromium's quota override): the same.
 //      E3 W complete: it installs and waits; A's cache is untouched while it
 //         waits; with every A page closed, W activates: its live cache holds
@@ -27,6 +30,15 @@
 //         version but different bytes. A failed install keeps P's cache
 //         exactly; a successful one doesn't touch it while it waits, and on
 //         activation leaves one complete live cache and no candidate.
+// Whose install attempt (D-IB-01): the driver is not the only one that starts
+// them. The browser checks for an update when a page navigates (the reloads
+// in offlineShell), and the app re-checks on every `online` event, from every
+// open page (registerSw.ts). Attempts run one after another, never at once.
+// So each attempt of the driver's own (ownUpdate) first waits until none is in
+// flight and none has started for a moment, then follows the worker its
+// update starts (a new one, not one already in flight), then waits again until
+// every attempt set off meanwhile has finished. What it reads next is settled,
+// and the cache checks cover every attempt: its own and the others.
 // Usage: node scripts/check-install-builds.mjs [gateBaseUrl]   (the gate passes one; it isn't needed)
 import { execFileSync, spawn } from "node:child_process";
 import { cpSync, existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, symlinkSync, unlinkSync, writeFileSync } from "node:fs";
@@ -37,9 +49,25 @@ import { launchChromium } from "./lib/driver-env.mjs";
 const ROOT = process.cwd();
 const GATE_DIST = process.env.MCHEZO_WEB_DIST ?? null;
 const SHOTS = process.env.MCHEZO_SCREENSHOT_DIR ?? null;
+// Fault modes, only for scripts/check-install-builds-no-worker.mjs (review 7057502077); the gate never sets them.
+//   e1-no-new-worker  E1 deploys the build already in charge again, so the driver's own update starts no attempt.
+//   e1-watch-too-late the second tab's watch is armed only after the driver's attempt has ended, so it misses it.
+// Either way the run must fail E1 by name, end, and clean up.
+const FAULTS = ["e1-no-new-worker", "e1-watch-too-late"];
+const FAULT = process.env.MCHEZO_INSTALL_BUILDS_FAULT ?? null;
+if (FAULT !== null && !FAULTS.includes(FAULT)) { console.error(`MCHEZO_INSTALL_BUILDS_FAULT must be one of: ${FAULTS.join(", ")}`); process.exit(2); }
+if (FAULT) console.log(`FAULT MODE ${FAULT}: ${FAULT === "e1-no-new-worker" ? "E1 deploys the build already in charge, so no new worker appears" : "the second tab's watch starts after the driver's attempt has ended"} (this run is expected to FAIL E1)`);
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 let failures = 0;
 function check(name, ok, detail = "") { console.log(`${ok ? "PASS" : "FAIL"} ${name}${detail ? ` — ${detail}` : ""}`); if (!ok) failures++; }
+/** A wait in a page that must end: `p` (an evaluate), or after `ms` either `fallback` or, without one, a named error (which ends the run in its catch and finally). */
+function within(ms, what, p, fallback) {
+  let timer;
+  const late = new Promise((resolve, reject) => {
+    timer = setTimeout(() => (fallback !== undefined ? resolve(fallback) : reject(new Error(`${what}: no answer within ${Math.round(ms / 1000)} s`))), ms);
+  });
+  return Promise.race([p, late]).finally(() => clearTimeout(timer));
+}
 async function soon(fn, timeout = 15000, every = 200) {
   const end = Date.now() + timeout; let last;
   while (Date.now() < end) { try { const v = await fn(); if (v) return v; } catch (e) { last = e; } await sleep(every); }
@@ -134,16 +162,119 @@ const workerBuild = (page, which) => page.evaluate(async (w) => {
   return await new Promise((res) => { const ch = new MessageChannel(); const t = setTimeout(() => res(null), 3000); ch.port1.onmessage = (e) => { clearTimeout(t); res(e.data?.version ?? null); }; sw.postMessage({ type: "mchezo-version" }, [ch.port2]); });
 }, which);
 const visible = async (page, testId) => (await page.getByTestId(testId).count()) > 0 && (await page.getByTestId(testId).first().isVisible());
-/** Ask for an update; return what became of the new worker ("redundant": its install failed; "installed": it waits). */
-const tryUpdate = (page) => page.evaluate(async () => {
+/** Watch this page's registration for install attempts (a new installing worker, whoever started it) and their states. Once per page load. */
+const watchAttempts = (page) => page.evaluate(async () => {
+  if (window.__mzAttempts) return;
   const reg = await navigator.serviceWorker.getRegistration();
-  await reg.update().catch(() => {});
-  const w = reg.installing;
-  if (!w) return "no new worker";
-  const end = Date.now() + 20000;
-  while (!["redundant", "installed", "activating", "activated"].includes(w.state) && Date.now() < end) await new Promise((r) => setTimeout(r, 100));
-  return w.state;
+  const attempts = [];
+  const workers = [];
+  const track = (w) => {
+    if (!w || workers.includes(w)) return;
+    workers.push(w);
+    const a = { state: w.state };
+    attempts.push(a);
+    w.addEventListener("statechange", () => { a.state = w.state; });
+  };
+  Object.assign(window, { __mzAttempts: attempts, __mzWorkers: workers, __mzTrack: track });
+  track(reg?.installing);
+  reg?.addEventListener("updatefound", () => track(reg.installing));
 });
+const QUIET_MS = 1000;
+const OWN_DEADLINE_MS = 20000;
+/** Wait until no install attempt is in flight and none has started for QUIET_MS (false if that doesn't happen within `timeout`). */
+async function settle(page, timeout = 30000) {
+  await within(10000, "watching install attempts", watchAttempts(page));
+  return within(timeout + 5000, "waiting for install attempts to settle", page.evaluate(async ({ quiet, timeout }) => {
+    const reg = await navigator.serviceWorker.getRegistration();
+    const end = Date.now() + timeout;
+    let calmSince = Date.now();
+    let seen = window.__mzAttempts.length;
+    while (Date.now() < end) {
+      if (reg?.installing || window.__mzAttempts.length !== seen) { calmSince = Date.now(); seen = window.__mzAttempts.length; }
+      else if (Date.now() - calmSince >= quiet) return true;
+      await new Promise((r) => setTimeout(r, 20));
+    }
+    return false;
+  }, { quiet: QUIET_MS, timeout }));
+}
+/**
+ * The driver's own update attempt (D-IB-01): settle, `prepare()` (a deploy), ask for an update, follow the worker that
+ * update starts to its end ("redundant": its install failed; "installed": it waits), then settle again.
+ * Returns { own, others, calm }: `others` are the end states of the other attempts that started meanwhile.
+ */
+async function ownUpdate(page, prepare = async () => {}) {
+  const calmBefore = await settle(page);
+  await prepare();
+  const r = await within(OWN_DEADLINE_MS + 10000, "the driver's own update attempt", page.evaluate(async (deadlineMs) => {
+    const reg = await navigator.serviceWorker.getRegistration();
+    const from = window.__mzAttempts.length;
+    const known = [...window.__mzWorkers];
+    await Promise.race([reg.update().catch(() => {}), new Promise((res) => setTimeout(res, deadlineMs))]);
+    const w = reg.installing;
+    if (!w) return { own: "no new worker", from, mine: -1 };
+    if (known.includes(w)) return { own: "joined an attempt already in flight", from, mine: -1 };
+    window.__mzTrack(w);
+    const mine = window.__mzWorkers.indexOf(w);
+    const end = Date.now() + deadlineMs;
+    while (!["redundant", "installed", "activating", "activated"].includes(w.state) && Date.now() < end) await new Promise((res) => setTimeout(res, 50));
+    return { own: w.state, from, mine };
+  }, OWN_DEADLINE_MS));
+  const calmAfter = await settle(page);
+  const others = await within(10000, "reading the other attempts", page.evaluate(({ from, mine }) => window.__mzAttempts.map((a, i) => ({ i, state: a.state })).filter((a) => a.i >= from && a.i !== mine).map((a) => a.state), r));
+  return { own: r.own, others, calm: calmBefore && calmAfter };
+}
+/**
+ * Another tab asks for an update the moment the next install attempt ends, as the browser or the app may: a second
+ * attempt, not the driver's. Bounded (review 7057502077): the first attempt must appear and end, and the second must
+ * start, within SECOND_DEADLINE_MS; every listener is removed on completion, timeout or cancel; the outcome is always
+ * one named string in window.__mzSecond. window.__mzSecondCancel(why) ends it at once.
+ */
+const SECOND_DEADLINE_MS = 15000;
+const armSecondAttempt = (tab) => within(10000, "arming the second attempt", tab.evaluate((deadlineMs) => {
+  let cancelled = null;
+  let wake = () => {};
+  window.__mzSecondCancel = (why) => { if (cancelled === null) { cancelled = why; wake(); } };
+  window.__mzSecond = (async () => {
+    const reg = await navigator.serviceWorker.getRegistration();
+    if (!reg) return "no registration in the second tab";
+    const end = Date.now() + deadlineMs;
+    const ended = (w) => ["redundant", "installed", "activating", "activated"].includes(w.state);
+    let first = null;
+    const off = [];
+    try {
+      // The first attempt: it appears (installing now, or updatefound later) and ends, or the deadline or a cancel comes first.
+      const outcome = await new Promise((resolve) => {
+        wake = () => resolve(`cancelled: ${cancelled}`);
+        if (cancelled !== null) { wake(); return; } // cancelled before this watch began
+        const timer = setTimeout(() => resolve(first ? `the first attempt did not end within ${deadlineMs / 1000} s` : `no first attempt appeared within ${deadlineMs / 1000} s`), deadlineMs);
+        off.push(() => clearTimeout(timer));
+        const follow = (w) => {
+          if (first || !w) return;
+          first = w;
+          if (ended(w)) { resolve("ended"); return; }
+          const onState = () => { if (ended(w)) resolve("ended"); };
+          w.addEventListener("statechange", onState);
+          off.push(() => w.removeEventListener("statechange", onState));
+        };
+        const onFound = () => follow(reg.installing);
+        reg.addEventListener("updatefound", onFound);
+        off.push(() => reg.removeEventListener("updatefound", onFound));
+        follow(reg.installing);
+      });
+      if (outcome !== "ended") return outcome;
+    } finally {
+      for (const f of off) f();
+      wake = () => {};
+    }
+    // Until the browser has finished that job, an update joins it and starts nothing: ask again, briefly, within the same deadline.
+    while (Date.now() < end && cancelled === null) {
+      await Promise.race([reg.update().catch(() => {}), new Promise((res) => setTimeout(res, Math.max(0, end - Date.now())))]);
+      if (reg.installing && reg.installing !== first) return "started";
+      await new Promise((res) => setTimeout(res, 50));
+    }
+    return cancelled !== null ? `cancelled: ${cancelled}` : `no second attempt started within ${deadlineMs / 1000} s`;
+  })();
+}, SECOND_DEADLINE_MS));
 /** Open the app on a fresh page and wait until `version`'s worker is activated and controls it. */
 async function openControlled(ctx, base, version) {
   const p = await ctx.newPage();
@@ -233,10 +364,21 @@ try {
   check(`E setup: A's live cache holds every file it precaches (${a0?.length ?? 0} entries)`, !!a0 && a0.length >= 10);
   const okNames = (names, v) => JSON.stringify(names) === JSON.stringify([live(v), "not-mchezo"].sort());
 
-  // E1: W, a listed file missing.
-  deploy(LIVE_DIR, W, { missing: "/icons/icon-512.png" });
-  const e1 = await tryUpdate(home);
-  check("E1 W deployed with a listed file missing: W's install runs and fails", e1 === "redundant" && (await workerBuild(home, "active")) === A.version, e1);
+  // E1: W, a listed file missing. The round's tab asks for an update right after W's install ends: a second attempt.
+  const e1 = await ownUpdate(home, async () => {
+    if (FAULT === "e1-no-new-worker") deploy(LIVE_DIR, A); // the build in charge again: no new worker
+    else deploy(LIVE_DIR, W, { missing: "/icons/icon-512.png" });
+    if (FAULT !== "e1-watch-too-late") await armSecondAttempt(round);
+  });
+  if (FAULT === "e1-watch-too-late") {
+    deploy(LIVE_DIR, A); // the build in charge again, so no later attempt can come either: only the watch's deadline ends it
+    await armSecondAttempt(round); // it missed the attempt it was meant to follow
+  }
+  // No attempt of the driver's own: nothing will start the second tab's, so end its watch now (it is bounded anyway).
+  if (!["redundant", "installed"].includes(e1.own)) await within(5000, "cancelling the second attempt", round.evaluate((why) => window.__mzSecondCancel?.(why), `the driver's own update gave "${e1.own}"`), null);
+  const second = await within(SECOND_DEADLINE_MS + 5000, "the second tab's watch", round.evaluate(() => window.__mzSecond), `the second tab did not answer within ${(SECOND_DEADLINE_MS + 5000) / 1000} s`);
+  check("E1 W deployed with a listed file missing: W's install runs and fails", e1.own === "redundant" && e1.calm && (await workerBuild(home, "active")) === A.version, JSON.stringify(e1));
+  check("E1 another tab asks for an update the moment W's install ends: a second attempt, not the driver's, starts and fails too", second === "started" && e1.others.length >= 1 && e1.others.every((x) => x === "redundant"), JSON.stringify({ second, others: e1.others }));
   check("E1 A's live cache is exactly as it was: every entry, the same bytes, the same order", JSON.stringify(await digests(home, live(A.version))) === JSON.stringify(a0));
   check("E1 no candidate is left, nothing else is touched", okNames(await cacheNames(home), A.version), JSON.stringify(await cacheNames(home)));
   check("E1 the round in the other tab plays on (a guess answered, the same page)", (await guessAnswered(round)) && (await round.evaluate(() => window.__mzMarker)) === "the-same-page");
@@ -244,20 +386,22 @@ try {
   check("E1 offline, A's shell is whole: A's page, scripts, styles and assets, saying it can't reach Mchezo", s1.ok, s1.detail);
 
   // E2: W complete, storage full.
-  deploy(LIVE_DIR, W);
+  // Storage is full before W is deployed and until every attempt has ended, so no attempt of W runs with room to spare.
   const cdp = await ctx.newCDPSession(home);
-  const { usage } = await home.evaluate(() => navigator.storage.estimate());
-  await cdp.send("Storage.overrideQuotaForOrigin", { origin: base, quotaSize: Math.round(usage) + 200_000 });
-  const e2 = await tryUpdate(home);
+  const e2 = await ownUpdate(home, async () => {
+    const { usage } = await home.evaluate(() => navigator.storage.estimate());
+    await cdp.send("Storage.overrideQuotaForOrigin", { origin: base, quotaSize: Math.round(usage) + 200_000 });
+    deploy(LIVE_DIR, W);
+  });
   await cdp.send("Storage.overrideQuotaForOrigin", { origin: base }).catch(() => {});
-  check("E2 W with storage full (Chromium's quota override): W's install runs and fails", e2 === "redundant" && (await workerBuild(home, "active")) === A.version, e2);
+  check("E2 W with storage full (Chromium's quota override): W's install runs and fails", e2.own === "redundant" && e2.calm && e2.others.every((x) => x === "redundant") && (await workerBuild(home, "active")) === A.version, JSON.stringify(e2));
   check("E2 A's live cache is exactly as it was", JSON.stringify(await digests(home, live(A.version))) === JSON.stringify(a0));
   check("E2 no candidate is left", okNames(await cacheNames(home), A.version), JSON.stringify(await cacheNames(home)));
   check("E2 the round plays on", (await guessAnswered(round)) && (await round.evaluate(() => window.__mzMarker)) === "the-same-page");
 
   // E3: W complete: waits, then activates.
-  const e3 = await tryUpdate(home);
-  check("E3 W complete: it installs and waits; A stays in charge", e3 === "installed" && (await workerBuild(home, "waiting")) === W.version && (await workerBuild(home, "active")) === A.version, e3);
+  const e3 = await ownUpdate(home);
+  check("E3 W complete: it installs and waits; A stays in charge", e3.own === "installed" && e3.calm && (await workerBuild(home, "waiting")) === W.version && (await workerBuild(home, "active")) === A.version, JSON.stringify(e3));
   check("E3 while W waits, A's live cache is untouched, and W's files are only in W's own candidate", JSON.stringify(await digests(home, live(A.version))) === JSON.stringify(a0) && (await cacheNames(home)).some((n) => n.startsWith(stagePrefix(W.version))));
   check("E3 the round plays on while W waits", (await guessAnswered(round)) && (await round.evaluate(() => window.__mzMarker)) === "the-same-page");
   await home.close(); await round.close();
@@ -271,12 +415,10 @@ try {
   check("E3 offline, W's shell is whole", s3.ok, s3.detail);
 
   // E4: P after W.
-  deploy(LIVE_DIR, P, { missing: "/manifest.webmanifest" });
-  const e4a = await tryUpdate(home);
-  check("E4 P (a policy change) deployed with a listed file missing: its install fails; W's cache exactly as it was; no candidate left", e4a === "redundant" && JSON.stringify(await digests(home, live(W.version))) === JSON.stringify(w0) && okNames(await cacheNames(home), W.version), e4a);
-  deploy(LIVE_DIR, P);
-  const e4b = await tryUpdate(home);
-  check("E4 P complete: it installs and waits; W's cache untouched", e4b === "installed" && (await workerBuild(home, "waiting")) === P.version && JSON.stringify(await digests(home, live(W.version))) === JSON.stringify(w0), e4b);
+  const e4a = await ownUpdate(home, async () => deploy(LIVE_DIR, P, { missing: "/manifest.webmanifest" }));
+  check("E4 P (a policy change) deployed with a listed file missing: its install fails; W's cache exactly as it was; no candidate left", e4a.own === "redundant" && e4a.calm && e4a.others.every((x) => x === "redundant") && JSON.stringify(await digests(home, live(W.version))) === JSON.stringify(w0) && okNames(await cacheNames(home), W.version), JSON.stringify(e4a));
+  const e4b = await ownUpdate(home, async () => deploy(LIVE_DIR, P));
+  check("E4 P complete: it installs and waits; W's cache untouched", e4b.own === "installed" && e4b.calm && (await workerBuild(home, "waiting")) === P.version && JSON.stringify(await digests(home, live(W.version))) === JSON.stringify(w0), JSON.stringify(e4b));
   await home.close();
   ({ p: home, ok } = await openControlled(ctx, base, P.version));
   const p0 = await digests(home, live(P.version));
@@ -284,12 +426,10 @@ try {
 
   // E5: defensive, the same version with different bytes.
   const sameVersion = `${P.sw}\n/* the same build, different bytes */\n`;
-  deploy(LIVE_DIR, P, { missing: "/icons/icon-192.png", sw: sameVersion });
-  const e5a = await tryUpdate(home);
-  check("E5 a worker with P's version but different bytes, a listed file missing: its install fails; P's cache exactly as it was; no candidate left", e5a === "redundant" && JSON.stringify(await digests(home, live(P.version))) === JSON.stringify(p0) && okNames(await cacheNames(home), P.version), e5a);
-  deploy(LIVE_DIR, P, { sw: sameVersion });
-  const e5b = await tryUpdate(home);
-  check("E5 complete, it installs and waits without touching P's live cache (only its own candidate)", e5b === "installed" && JSON.stringify(await digests(home, live(P.version))) === JSON.stringify(p0) && (await cacheNames(home)).some((n) => n.startsWith(stagePrefix(P.version))), e5b);
+  const e5a = await ownUpdate(home, async () => deploy(LIVE_DIR, P, { missing: "/icons/icon-192.png", sw: sameVersion }));
+  check("E5 a worker with P's version but different bytes, a listed file missing: its install fails; P's cache exactly as it was; no candidate left", e5a.own === "redundant" && e5a.calm && e5a.others.every((x) => x === "redundant") && JSON.stringify(await digests(home, live(P.version))) === JSON.stringify(p0) && okNames(await cacheNames(home), P.version), JSON.stringify(e5a));
+  const e5b = await ownUpdate(home, async () => deploy(LIVE_DIR, P, { sw: sameVersion }));
+  check("E5 complete, it installs and waits without touching P's live cache (only its own candidate)", e5b.own === "installed" && e5b.calm && JSON.stringify(await digests(home, live(P.version))) === JSON.stringify(p0) && (await cacheNames(home)).some((n) => n.startsWith(stagePrefix(P.version))), JSON.stringify(e5b));
   await home.close();
   const fresh = await ctx.newPage();
   await fresh.goto(`${base}/`, { waitUntil: "load" });

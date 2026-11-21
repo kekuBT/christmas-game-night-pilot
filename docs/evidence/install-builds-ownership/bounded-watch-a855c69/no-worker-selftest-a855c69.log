@@ -1,0 +1,27 @@
+PASS [e1-no-new-worker] the driver ran in that fault mode
+PASS [e1-no-new-worker] the driver ended by itself within 240 s — 43 s
+PASS [e1-no-new-worker] it exited with status 1 (a failing run, not a pass and not a signal) — {"code":1,"signal":null}
+PASS [e1-no-new-worker] E1's own attempt is reported as expected — FAIL E1 W deployed with a listed file missing: W's install runs and fails — {"own":"no new worker","others":[],"calm":true}
+PASS [e1-no-new-worker] E1's second-attempt check FAILS by name: the driver's own update started no attempt, and it cancelled the watch — FAIL E1 another tab asks for an update the moment W's install ends: a second attempt, not the driver's, starts and fails too — {"second":"cancelled: the driver's own update gave \"no new worker\"","others":[]}
+PASS [e1-no-new-worker] no unexpected error and no wait without an end (nothing reached the driver's catch)
+PASS [e1-no-new-worker] the run reached its end (its summary line is printed)
+PASS [e1-no-new-worker] nothing of its process group is left (driver and server stopped)
+PASS [e1-no-new-worker] no process still uses its private temp directory (the browser is closed) — []
+PASS [e1-no-new-worker] its private temp directory is empty (builds, live folder, server data and browser profile removed) — []
+PASS [e1-watch-too-late] the driver ran in that fault mode
+PASS [e1-watch-too-late] the driver ended by itself within 240 s — 58 s
+PASS [e1-watch-too-late] it exited with status 1 (a failing run, not a pass and not a signal) — {"code":1,"signal":null}
+PASS [e1-watch-too-late] E1's own attempt is reported as expected — PASS E1 W deployed with a listed file missing: W's install runs and fails — {"own":"redundant","others":[],"calm":true}
+PASS [e1-watch-too-late] E1's second-attempt check FAILS by name: the late watch ended at its own deadline — FAIL E1 another tab asks for an update the moment W's install ends: a second attempt, not the driver's, starts and fails too — {"second":"no first attempt appeared within 15 s","others":[]}
+PASS [e1-watch-too-late] no unexpected error and no wait without an end (nothing reached the driver's catch)
+PASS [e1-watch-too-late] the run reached its end (its summary line is printed)
+PASS [e1-watch-too-late] nothing of its process group is left (driver and server stopped)
+PASS [e1-watch-too-late] no process still uses its private temp directory (the browser is closed) — []
+PASS [e1-watch-too-late] its private temp directory is empty (builds, live folder, server data and browser profile removed) — []
+
+All no-worker checks passed
+
+real	1m43.519s
+user	0m58.301s
+sys	0m6.011s
+exit 0

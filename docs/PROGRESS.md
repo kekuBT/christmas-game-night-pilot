@@ -4427,3 +4427,56 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
   - The broader redesign (owner-selected options).
   - Draw & Guess native confirmation.
 - **Next:** ChatGPT's review of #59.
+
+## Post-beta: the `check-install-builds` E1 flake (handoff 7052991290)
+- **#59 cleared:** ChatGPT's review [7052991290](https://github.com/kekuBT/christmas-game-night-pilot/pull/51#issuecomment-7052991290) cleared the TV briefing fix to build on.
+  - It covered tested `6d88419` and docs-only head `618c567`.
+  - Its independent QA had base 166 passed / 20 failed, candidate 186/186, and 106/106 focused tests.
+  - Draw & Guess native iPhone confirmation stays open for a device.
+- **The handoff:** the same comment set this slice.
+  - It was acknowledged in 7055587114 at 9:02 p.m. ET, estimating about 12:30 a.m. ET.
+  - Two worker restarts cost about 2 hours, so status 7057264930 revised the ETA to about 2:00 a.m. ET.
+- **Branch:** `claude/install-builds-ownership`, stacked on #59 (exact base `618c567`). Not for merge or deploy.
+- **The tested commit:** `54170200c9a7a883793203d04c1132ad7e060040`. It changes only `scripts/check-install-builds.mjs`.
+- **The trace:** seven instrumented runs on `618c567`; run 6 reproduced the failure.
+  - **E1's leftover candidate** came from a second attempt that the browser started itself. It was still installing when E1 read the cache names, then failed and deleted its own candidate.
+  - **Unrelated attempts:** the browser started some in 5 of 7 runs, and the app started others on `online`.
+  - **E2 often followed an attempt the app had started.**
+  - **No lifecycle defect:** attempts never overlap, and the failed ones left nothing behind.
+- **The repair (D-IB-01):**
+  - `settle()` and `ownUpdate()`;
+  - a deterministic second attempt in E1;
+  - in E2, storage is full from before the deploy until every attempt has ended.
+- **Tests:**
+  - **Negative control** (the old driver plus the second attempt): **5 of 6 FAIL** E1 with the reported message.
+  - **Focused reruns on `5417020`:** **12/12 pass**, 34 checks each, run three at a time.
+  - **Gates on `5417020`:**
+    - targeted (`install-builds`, `install`): **`PASSED (exit 0)`**, 4/4, run `20261121-043756-54170200-7451`;
+    - fast: **`PASSED (exit 0)`**, 5/5, run `20261121-044021-54170200-8351`.
+  - **Not run:** the full gate (a one-driver change).
+- **Evidence:** `docs/evidence/install-builds-ownership/`.
+- **Open:**
+  - The browser's own update triggers are identified by elimination only.
+  - Real-device checks.
+  - The broader redesign (owner-selected options).
+  - Draw & Guess native confirmation.
+- **Next:** ChatGPT's review of the new draft.
+
+## Post-beta: bounding E1's second-tab watch (review 7057502077)
+- **The review:** ChatGPT's QA on #60 ([7057502077](https://github.com/kekuBT/christmas-game-night-pilot/pull/51#issuecomment-7057502077)) confirmed the ownership trace and gave 34/34 on its independent run.
+  - **It found:** E1's second-tab watch had no deadline, so with no new worker the run hung.
+  - **It asked to hold the next product slice** until the driver reports missing-worker failures cleanly.
+  - **Acknowledged** in 7057509921 at 11:50 p.m. ET, estimating about 1:30 a.m. ET.
+- **The tested commit:** `a855c6979cae76eb257987be395537a2501ee11b` on #60. It is driver-only: `scripts/check-install-builds.mjs`, plus the new `scripts/check-install-builds-no-worker.mjs`.
+- **The negative control** (`5417020` with no new worker in E1): **still running after 151 s**, with its temp directories left behind.
+- **The repair:**
+  - a bounded, cancellable watch with listener cleanup and named outcomes;
+  - driver-side deadlines on in-page waits;
+  - fault modes `e1-no-new-worker` and `e1-watch-too-late`.
+- **Tests on `a855c69`:**
+  - **The self-test:** 20/20.
+  - **The normal path:** 6/6 runs pass, 34/34 checks each.
+  - **Targeted gate** (`install-builds`, `install-builds-no-worker`, `install`): **`PASSED (exit 0)`** 5/5, run `20261121-050401-a855c697-17553`.
+  - **Fast gate:** **`PASSED (exit 0)`** 5/5, run `20261121-050624-a855c697-18967`.
+- **Evidence:** `docs/evidence/install-builds-ownership/bounded-watch-a855c69/`.
+- **Next:** ChatGPT's review of #60 at its new head. The next product slice is on hold until then.

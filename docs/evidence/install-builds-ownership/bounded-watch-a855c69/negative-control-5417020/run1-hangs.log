@@ -1,0 +1,21 @@
+  (four real builds in 17 s: A 654a7428e2c621a4, W e53a77ceedc1f749, P 0bc1aabb9282dd93)
+PASS B setup: build A names its version in its page and its worker
+PASS B setup: build A2 names its version in its page and its worker
+PASS B setup: build W names its version in its page and its worker
+PASS B setup: build P names its version in its page and its worker
+PASS B the same source built twice gives the same version, the same worker byte for byte, the same page and the same files
+PASS B a worker-only change (sw.ts) is a new version and a new worker
+PASS B a worker-policy change (swPolicy.ts, a dependency of the worker only) is a new version too
+PASS B neither change touches the app: the same files, byte for byte, and the same page apart from its build marker
+PASS E setup: A's worker is active and controls the page
+PASS E setup: A's live cache holds every file it precaches (14 entries)
+STILL RUNNING after 151 s: the driver did not end by itself
+  still in its process group: pid 14574, 151 s, node
+  still in its process group: pid 14778, 133 s, node
+  live processes in the group: 2
+killed by this negative control (group SIGKILL): 2 processes were still listed 1 s after the kill, none 3 s after
+  left in the temp directory: 1 mz-s83-builds-XXXXXX (left by the killed run, 162 s old)
+  left in the temp directory: 1 mz-s83b-data-XXXXXX (left by the killed run, 159 s old)
+  left in the temp directory: 1 mz-s83b-live-XXXXXX (left by the killed run, 158 s old)
+  left in the temp directory: 1 playwright_chromiumdev_profile-XXXXXX (left by the killed run, 161 s old)
+(removed afterwards by hand)

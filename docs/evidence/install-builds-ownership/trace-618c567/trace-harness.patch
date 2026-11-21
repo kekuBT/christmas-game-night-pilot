@@ -1,0 +1,86 @@
+--- base-driver.mjs	2026-11-21 04:21:29.287931032 +0000
++++ trace-install-builds.mjs	2026-11-21 04:21:29.339089811 +0000
+@@ -39,7 +39,12 @@
+ const SHOTS = process.env.MCHEZO_SCREENSHOT_DIR ?? null;
+ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+ let failures = 0;
+-function check(name, ok, detail = "") { console.log(`${ok ? "PASS" : "FAIL"} ${name}${detail ? ` — ${detail}` : ""}`); if (!ok) failures++; }
++function check(name, ok, detail = "") { checkTraced(name, ok, detail); console.log(`${ok ? "PASS" : "FAIL"} ${name}${detail ? ` — ${detail}` : ""}`); if (!ok) failures++; }
++// ---------- TRACE (scratch instrumentation; not the committed driver) ----------
++const TRACE = []; let T0 = Date.now();
++const tr = (src, kind, extra = {}) => TRACE.push({ t: Date.now(), src, kind, ...extra });
++const mark = (label) => tr("driver", label);
++function checkTraced(name, ok, detail) { mark(`check ${ok ? "PASS" : "FAIL"}: ${name.slice(0, 70)}`); }
+ async function soon(fn, timeout = 15000, every = 200) {
+   const end = Date.now() + timeout; let last;
+   while (Date.now() < end) { try { const v = await fn(); if (v) return v; } catch (e) { last = e; } await sleep(every); }
+@@ -106,7 +111,8 @@
+   rmSync(s.dataDir, { recursive: true, force: true });
+ }
+ /** Put one build in place on the server (a deploy), optionally with a listed file missing (a partial deploy) or a changed worker. */
+-function deploy(live, b, { missing = null, sw = null } = {}) {
++function deploy(live, b, opts = {}) { mark(`deploy ${b.label ?? "?"}${opts.missing ? " missing " + opts.missing : ""}${opts.sw ? " (changed sw bytes)" : ""}`); deploy0(live, b, opts); mark("deploy done"); }
++function deploy0(live, b, { missing = null, sw = null } = {}) {
+   for (const f of readdirSync(live)) rmSync(join(live, f), { recursive: true, force: true });
+   cpSync(b.dir, live, { recursive: true });
+   if (missing) unlinkSync(join(live, missing.slice(1)));
+@@ -114,7 +120,7 @@
+ }
+ const live = (v) => `mchezo-shell-${v}`;
+ const stagePrefix = (v) => `mchezo-stage-${v}-`;
+-const cacheNames = (page) => page.evaluate(async () => (await caches.keys()).sort());
++const cacheNames = async (page) => { const n = await page.evaluate(async () => (await caches.keys()).sort()); mark(`cacheNames read: ${JSON.stringify(n.filter((x) => x.startsWith("mchezo-stage-")))}`); return n; };
+ /** One cache's entries, in order, each with a digest of its bytes (null if there is no such cache). Creates nothing. */
+ const digests = (page, name) => page.evaluate(async (n) => {
+   if (!(await caches.has(n))) return null;
+@@ -135,7 +141,8 @@
+ }, which);
+ const visible = async (page, testId) => (await page.getByTestId(testId).count()) > 0 && (await page.getByTestId(testId).first().isVisible());
+ /** Ask for an update; return what became of the new worker ("redundant": its install failed; "installed": it waits). */
+-const tryUpdate = (page) => page.evaluate(async () => {
++const tryUpdate = async (page) => { mark("tryUpdate start"); const r = await tryUpdate0(page); mark(`tryUpdate end: ${r}`); return r; };
++const tryUpdate0 = (page) => page.evaluate(async () => {
+   const reg = await navigator.serviceWorker.getRegistration();
+   await reg.update().catch(() => {});
+   const w = reg.installing;
+@@ -220,8 +227,27 @@
+   own = await ownServer(LIVE_DIR);
+   const base = own.base;
+   const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
++  T0 = Date.now(); mark("context created");
++  await ctx.addInitScript(() => {
++    const log = (kind, extra = {}) => { try { console.debug("MZTRACE " + JSON.stringify({ t: Date.now(), kind, ...extra })); } catch { /* */ } };
++    const P = ServiceWorkerRegistration.prototype; const u0 = P.update;
++    P.update = function (...a) { const st = (new Error().stack || "").split("\n").slice(2, 4).map((l) => l.trim().replace(/https?:\/\/localhost:\d+/g, "")).join(" < "); log("reg.update() called", { caller: /__playwright|evaluat/i.test(st) ? "driver (page.evaluate)" : st.includes("/assets/") ? "app (registerSw)" : st }); return u0.apply(this, a); };
++    const C = ServiceWorkerContainer.prototype; const r0 = C.register;
++    C.register = function (...a) { log("navigator.serviceWorker.register() called"); return r0.apply(this, a); };
++    addEventListener("online", () => log("online event"));
++    addEventListener("offline", () => log("offline event"));
++    document.addEventListener("visibilitychange", () => log(`visibilitychange ${document.visibilityState}`));
++  });
++  let pageNo = 0;
++  const hook = (p) => { const label = `page${++pageNo}`; p.on("console", (m) => { const x = m.text(); if (x.startsWith("MZTRACE ")) { const d = JSON.parse(x.slice(8)); TRACE.push({ ...d, src: `${label} ${new URL(p.url() || "http://x/").pathname}` }); } else if (x.startsWith("MZCACHE ")) { const d = JSON.parse(x.slice(8)); TRACE.push({ ...d, src: "cache-watch" }); } }); p.on("framenavigated", (f) => { if (f === p.mainFrame()) tr(label, `navigated ${new URL(f.url()).pathname}`); }); };
++  ctx.on("page", hook);
+   let { p: home, ok } = await openControlled(ctx, base, A.version);
+   check("E setup: A's worker is active and controls the page", ok);
++  const swc = await ctx.newCDPSession(home);
++  const seen = new Map();
++  swc.on("ServiceWorker.workerVersionUpdated", ({ versions }) => { for (const v of versions) { const k = `${v.versionId}`; const st = `${v.status}/${v.runningStatus}`; if (seen.get(k) !== st) { seen.set(k, st); tr("browser (DevTools ServiceWorker)", `version ${v.versionId}: ${st}`); } } });
++  await swc.send("ServiceWorker.enable");
++  await home.evaluate(() => { let last = ""; setInterval(async () => { const n = (await caches.keys()).filter((x) => x.startsWith("mchezo-stage-")).sort(); const s = JSON.stringify(n); if (s !== last) { last = s; console.debug("MZCACHE " + JSON.stringify({ t: Date.now(), kind: `stage caches now ${s}` })); } }, 25); });
+   await home.evaluate(async () => { const c = await caches.open("not-mchezo"); await c.put("/not-mchezo.txt", new Response("keep me")); });
+   const round = await ctx.newPage();
+   await round.goto(`${base}/solo`, { waitUntil: "load" });
+@@ -310,4 +336,12 @@
+ }
+ 
+ console.log(failures ? `\n${failures} build-update check(s) FAILED` : "\nAll build-update checks passed");
++const fromNonce = (n) => { const m = /mchezo-stage-[0-9a-f]+-([0-9a-z]+)-/.exec(n); return m ? parseInt(m[1], 36) : null; };
++console.log("\n=== TRACE (ms since the browser context was created) ===");
++for (const e of TRACE.sort((a, b) => a.t - b.t)) {
++  let extra = e.caller ? `  [caller: ${e.caller}]` : "";
++  const names = /stage caches now (\[.*\])/.exec(e.kind);
++  if (names) extra += "  " + JSON.parse(names[1]).map((n) => `(${n.split("-").slice(2, 4).join("-")} created at +${fromNonce(n) - T0} ms)`).join(" ");
++  console.log(`+${String(e.t - T0).padStart(6)}  ${e.src.padEnd(34)} ${e.kind}${extra}`);
++}
+ process.exit(failures ? 1 : 0);

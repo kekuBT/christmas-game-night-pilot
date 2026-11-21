@@ -1,0 +1,63 @@
+--- fixed-driver.mjs	2026-11-21 04:36:54.297456531 +0000
++++ trace-fixed-driver.mjs	2026-11-21 04:36:54.310983580 +0000
+@@ -51,7 +51,9 @@
+ const SHOTS = process.env.MCHEZO_SCREENSHOT_DIR ?? null;
+ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+ let failures = 0;
+-function check(name, ok, detail = "") { console.log(`${ok ? "PASS" : "FAIL"} ${name}${detail ? ` — ${detail}` : ""}`); if (!ok) failures++; }
++function check(name, ok, detail = "") { tr("driver", `check ${ok ? "PASS" : "FAIL"}: ${name.slice(0, 60)}`); console.log(`${ok ? "PASS" : "FAIL"} ${name}${detail ? ` — ${detail}` : ""}`); if (!ok) failures++; }
++const TRACE = []; let T0 = Date.now();
++const tr = (src, kind) => TRACE.push({ t: Date.now(), src, kind });
+ async function soon(fn, timeout = 15000, every = 200) {
+   const end = Date.now() + timeout; let last;
+   while (Date.now() < end) { try { const v = await fn(); if (v) return v; } catch (e) { last = e; } await sleep(every); }
+@@ -186,8 +188,11 @@
+  * Returns { own, others, calm }: `others` are the end states of the other attempts that started meanwhile.
+  */
+ async function ownUpdate(page, prepare = async () => {}) {
++  tr("driver", "ownUpdate: settle (before)");
+   const calmBefore = await settle(page);
++  tr("driver", "ownUpdate: prepare (deploy)");
+   await prepare();
++  tr("driver", "ownUpdate: the driver asks for its update");
+   const r = await page.evaluate(async () => {
+     const reg = await navigator.serviceWorker.getRegistration();
+     const from = window.__mzAttempts.length;
+@@ -202,7 +207,9 @@
+     while (!["redundant", "installed", "activating", "activated"].includes(w.state) && Date.now() < end) await new Promise((res) => setTimeout(res, 50));
+     return { own: w.state, from, mine };
+   });
++  tr("driver", `ownUpdate: own attempt ended ${r.own}; settle (after)`);
+   const calmAfter = await settle(page);
++  tr("driver", "ownUpdate: settled");
+   const others = await page.evaluate(({ from, mine }) => window.__mzAttempts.map((a, i) => ({ i, state: a.state })).filter((a) => a.i >= from && a.i !== mine).map((a) => a.state), r);
+   return { own: r.own, others, calm: calmBefore && calmAfter };
+ }
+@@ -297,8 +304,20 @@
+   own = await ownServer(LIVE_DIR);
+   const base = own.base;
+   const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
++  T0 = Date.now();
++  await ctx.addInitScript(() => {
++    const log = (kind, extra = {}) => { try { console.debug("MZTRACE " + JSON.stringify({ t: Date.now(), kind, ...extra })); } catch { /* */ } };
++    const P = ServiceWorkerRegistration.prototype; const u0 = P.update;
++    P.update = function (...a) { const st = (new Error().stack || "").split("\n").slice(2, 4).join(" < "); log(`reg.update() called by ${/__playwright|evaluat/i.test(st) ? "the driver (page.evaluate)" : st.includes("/assets/") ? "the app (registerSw)" : "?"}`); return u0.apply(this, a); };
++    addEventListener("online", () => log("online event"));
++  });
++  let pageNo = 0;
++  ctx.on("page", (p) => { const label = `page${++pageNo}`; p.on("console", (m) => { const x = m.text(); if (x.startsWith("MZTRACE ")) { const d = JSON.parse(x.slice(8)); TRACE.push({ t: d.t, src: label, kind: d.kind }); } }); p.on("framenavigated", (f) => { if (f === p.mainFrame()) tr(label, `navigated ${new URL(f.url()).pathname}`); }); });
+   let { p: home, ok } = await openControlled(ctx, base, A.version);
+   check("E setup: A's worker is active and controls the page", ok);
++  const swc = await ctx.newCDPSession(home); const seen = new Map();
++  swc.on("ServiceWorker.workerVersionUpdated", ({ versions }) => { for (const v of versions) { const st = `${v.status}`; if (seen.get(v.versionId) !== st) { seen.set(v.versionId, st); tr("browser (DevTools)", `attempt/version ${v.versionId}: ${st}`); } } });
++  await swc.send("ServiceWorker.enable");
+   await home.evaluate(async () => { const c = await caches.open("not-mchezo"); await c.put("/not-mchezo.txt", new Response("keep me")); });
+   const round = await ctx.newPage();
+   await round.goto(`${base}/solo`, { waitUntil: "load" });
+@@ -386,4 +405,6 @@
+ }
+ 
+ console.log(failures ? `\n${failures} build-update check(s) FAILED` : "\nAll build-update checks passed");
++console.log("\n=== TRACE (ms since the browser context was created) ===");
++for (const e of TRACE.sort((a, b) => a.t - b.t)) if (!/check PASS: B/.test(e.kind)) console.log(`+${String(e.t - T0).padStart(6)}  ${e.src.padEnd(20)} ${e.kind}`);
+ process.exit(failures ? 1 : 0);

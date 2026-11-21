@@ -1,0 +1,41 @@
+Install attempts (DevTools service-worker versions) in each trace, by who asked for them.
+Rule: the attempt is the browser's own when no page called update() since the previous attempt began.
+  Those rows are certain.
+  Otherwise the callers in that interval are listed. A call made while another attempt is in flight can join that attempt or be queued for the next, so a listed caller is a candidate, not proof.
+Produced by classify.py from the trace-run*.log files in this folder.
+
+== trace-run1.log
+  attempt v1 created +2751 | during: deploy W missing /icons/icon-512.png     | asked by: driver (page1) | redundant at +2874
+  attempt v2 created +3231 | during: deploy W missing /icons/icon-512.png     | asked by: the browser: no page called update() since the previous attempt began | redundant at +3379
+  attempt v3 created +3645 | during: deploy W                                 | asked by: app (page1), app (page2) | redundant at +3664
+  attempt v4 created +3950 | during: deploy W                                 | asked by: driver (page1) | installed at +4067
+== trace-run2.log
+  attempt v1 created +3533 | during: deploy W missing /icons/icon-512.png     | asked by: driver (page1) | redundant at +3632
+  attempt v2 created +3976 | during: deploy W missing /icons/icon-512.png     | asked by: the browser: no page called update() since the previous attempt began | redundant at +4234
+  attempt v3 created +4241 | during: deploy W                                 | asked by: app (page1), app (page2), driver (page1) | redundant at +4262
+  attempt v4 created +4668 | during: deploy W                                 | asked by: driver (page1) | installed at +4837
+== trace-run3.log
+  attempt v1 created +3303 | during: deploy W missing /icons/icon-512.png     | asked by: the browser: no page called update() since the previous attempt began | redundant at +3424
+  attempt v2 created +4111 | during: deploy W missing /icons/icon-512.png     | asked by: driver (page1) | redundant at +4517
+  attempt v3 created +4523 | during: deploy W                                 | asked by: app (page2), driver (page1) | redundant at +4549
+  attempt v4 created +5026 | during: deploy W                                 | asked by: driver (page1) | installed at +5160
+== trace-run4.log
+  attempt v1 created +2102 | during: deploy W missing /icons/icon-512.png     | asked by: driver (page1) | redundant at +2205
+  attempt v2 created +2675 | during: deploy W missing /icons/icon-512.png     | asked by: the browser: no page called update() since the previous attempt began | redundant at +2803
+  attempt v3 created +2928 | during: deploy W                                 | asked by: app (page2) | redundant at +2952
+  attempt v4 created +3305 | during: deploy W                                 | asked by: driver (page1) | installed at +3425
+== trace-run5.log
+  attempt v1 created +2555 | during: deploy W missing /icons/icon-512.png     | asked by: driver (page1) | redundant at +2666
+  attempt v2 created +3316 | during: deploy W                                 | asked by: app (page2) | redundant at +3340
+  attempt v3 created +3750 | during: deploy W                                 | asked by: driver (page1) | installed at +3874
+== trace-run6-E1-FAIL.log
+  attempt v1 created +2414 | during: deploy W missing /icons/icon-512.png     | asked by: driver (page1) | redundant at +2527
+  attempt v2 created +2600 | during: deploy W missing /icons/icon-512.png     | asked by: the browser: no page called update() since the previous attempt began | redundant at +2719
+  attempt v3 created +3020 | during: deploy W missing /icons/icon-512.png     | asked by: the browser: no page called update() since the previous attempt began | redundant at +3155
+  attempt v4 created +3204 | during: deploy W missing /icons/icon-512.png     | asked by: app (page2) | redundant at +3435
+  attempt v5 created +3437 | during: deploy W                                 | asked by: driver (page1) | redundant at +3466
+  attempt v6 created +3805 | during: deploy W                                 | asked by: driver (page1) | installed at +3952
+== trace-run7.log
+  attempt v1 created +3131 | during: deploy W missing /icons/icon-512.png     | asked by: driver (page1) | redundant at +3236
+  attempt v2 created +3886 | during: deploy W                                 | asked by: app (page2) | redundant at +3920
+  attempt v3 created +4302 | during: deploy W                                 | asked by: driver (page1) | installed at +4409

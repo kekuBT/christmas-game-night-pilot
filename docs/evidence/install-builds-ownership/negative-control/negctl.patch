@@ -1,0 +1,32 @@
+--- base-driver.mjs	2026-11-21 04:21:29.287931032 +0000
++++ negctl-old-driver-plus-second-attempt.mjs	2026-11-21 04:30:17.645513919 +0000
+@@ -144,6 +144,21 @@
+   while (!["redundant", "installed", "activating", "activated"].includes(w.state) && Date.now() < end) await new Promise((r) => setTimeout(r, 100));
+   return w.state;
+ });
++/** Another tab asks for an update the moment the next install attempt ends, as the browser or the app may: a second attempt, not the driver's. */
++const armSecondAttempt = (tab) => tab.evaluate(() => {
++  window.__mzSecond = (async () => {
++    const reg = await navigator.serviceWorker.getRegistration();
++    const w = reg.installing ?? await new Promise((res) => reg.addEventListener("updatefound", () => res(reg.installing), { once: true }));
++    await new Promise((res) => { const done = () => ["redundant", "installed"].includes(w.state); if (done()) res(); else w.addEventListener("statechange", () => { if (done()) res(); }); });
++    // Until the browser has finished that job, an update joins it and starts nothing: ask again, briefly.
++    for (let i = 0; i < 40; i++) {
++      await reg.update().catch(() => {});
++      if (reg.installing && reg.installing !== w) return "started";
++      await new Promise((res) => setTimeout(res, 50));
++    }
++    return "never started";
++  })();
++});
+ /** Open the app on a fresh page and wait until `version`'s worker is activated and controls it. */
+ async function openControlled(ctx, base, version) {
+   const p = await ctx.newPage();
+@@ -235,6 +250,7 @@
+ 
+   // E1: W, a listed file missing.
+   deploy(LIVE_DIR, W, { missing: "/icons/icon-512.png" });
++  await armSecondAttempt(round); // NEGATIVE CONTROL: the same second attempt as the repaired E1, with the old driver's reads
+   const e1 = await tryUpdate(home);
+   check("E1 W deployed with a listed file missing: W's install runs and fails", e1 === "redundant" && (await workerBuild(home, "active")) === A.version, e1);
+   check("E1 A's live cache is exactly as it was: every entry, the same bytes, the same order", JSON.stringify(await digests(home, live(A.version))) === JSON.stringify(a0));

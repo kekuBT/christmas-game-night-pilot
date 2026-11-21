@@ -1,0 +1,27 @@
+$ node scripts/check-install-builds-no-worker.mjs http://localhost:40323
+# timeout 600s | worker w3 | server http://localhost:40323 (data <scratch>/gate-ibr-targeted/20261121-050401-a855c697-17553/server-data/w3)
+
+[+46.9s] PASS [e1-no-new-worker] the driver ran in that fault mode
+[+46.9s] PASS [e1-no-new-worker] the driver ended by itself within 240 s — 46 s
+[+46.9s] PASS [e1-no-new-worker] it exited with status 1 (a failing run, not a pass and not a signal) — {"code":1,"signal":null}
+[+46.9s] PASS [e1-no-new-worker] E1's own attempt is reported as expected — FAIL E1 W deployed with a listed file missing: W's install runs and fails — {"own":"no new worker","others":[],"calm":true}
+[+46.9s] PASS [e1-no-new-worker] E1's second-attempt check FAILS by name: the driver's own update started no attempt, and it cancelled the watch — FAIL E1 another tab asks for an update the moment W's install ends: a second attempt, not the driver's, starts and fails too — {"second":"cancelled: the driver's own update gave \"no new worker\"","others":[]}
+[+46.9s] PASS [e1-no-new-worker] no unexpected error and no wait without an end (nothing reached the driver's catch)
+[+46.9s] PASS [e1-no-new-worker] the run reached its end (its summary line is printed)
+[+46.9s] PASS [e1-no-new-worker] nothing of its process group is left (driver and server stopped)
+[+46.9s] PASS [e1-no-new-worker] no process still uses its private temp directory (the browser is closed) — []
+[+46.9s] PASS [e1-no-new-worker] its private temp directory is empty (builds, live folder, server data and browser profile removed) — []
+[+106.8s] PASS [e1-watch-too-late] the driver ran in that fault mode
+[+106.8s] PASS [e1-watch-too-late] the driver ended by itself within 240 s — 59 s
+[+106.8s] PASS [e1-watch-too-late] it exited with status 1 (a failing run, not a pass and not a signal) — {"code":1,"signal":null}
+[+106.8s] PASS [e1-watch-too-late] E1's own attempt is reported as expected — PASS E1 W deployed with a listed file missing: W's install runs and fails — {"own":"redundant","others":[],"calm":true}
+[+106.8s] PASS [e1-watch-too-late] E1's second-attempt check FAILS by name: the late watch ended at its own deadline — FAIL E1 another tab asks for an update the moment W's install ends: a second attempt, not the driver's, starts and fails too — {"second":"no first attempt appeared within 15 s","others":[]}
+[+106.8s] PASS [e1-watch-too-late] no unexpected error and no wait without an end (nothing reached the driver's catch)
+[+106.8s] PASS [e1-watch-too-late] the run reached its end (its summary line is printed)
+[+106.8s] PASS [e1-watch-too-late] nothing of its process group is left (driver and server stopped)
+[+106.8s] PASS [e1-watch-too-late] no process still uses its private temp directory (the browser is closed) — []
+[+106.8s] PASS [e1-watch-too-late] its private temp directory is empty (builds, live folder, server data and browser profile removed) — []
+[+106.8s] 
+[+106.8s] All no-worker checks passed
+
+# PASS (exit 0) in 106.9s | cpu 65.6s, peak memory 774 MB

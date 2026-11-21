@@ -1,0 +1,44 @@
+$ node scripts/check-install-builds.mjs http://localhost:46059
+# timeout 600s | worker w2 | server http://localhost:46059 (data <scratch>/gate-ibr-targeted/20261121-050401-a855c697-17553/server-data/w2)
+
+[+21.1s]   (four real builds in 21 s: A 654a7428e2c621a4, W e53a77ceedc1f749, P 0bc1aabb9282dd93)
+[+21.1s] PASS B setup: build A names its version in its page and its worker
+[+21.1s] PASS B setup: build A2 names its version in its page and its worker
+[+21.1s] PASS B setup: build W names its version in its page and its worker
+[+21.1s] PASS B setup: build P names its version in its page and its worker
+[+21.1s] PASS B the same source built twice gives the same version, the same worker byte for byte, the same page and the same files
+[+21.1s] PASS B and the same as the build under test (built separately, elsewhere) — 654a7428e2c621a4 vs 654a7428e2c621a4
+[+21.1s] PASS B a worker-only change (sw.ts) is a new version and a new worker
+[+21.1s] PASS B a worker-policy change (swPolicy.ts, a dependency of the worker only) is a new version too
+[+21.1s] PASS B neither change touches the app: the same files, byte for byte, and the same page apart from its build marker
+[+22.4s] PASS E setup: A's worker is active and controls the page
+[+23.7s] PASS E setup: A's live cache holds every file it precaches (14 entries)
+[+26.0s] PASS E1 W deployed with a listed file missing: W's install runs and fails — {"own":"redundant","others":["redundant"],"calm":true}
+[+26.0s] PASS E1 another tab asks for an update the moment W's install ends: a second attempt, not the driver's, starts and fails too — {"second":"started","others":["redundant"]}
+[+26.0s] PASS E1 A's live cache is exactly as it was: every entry, the same bytes, the same order
+[+26.0s] PASS E1 no candidate is left, nothing else is touched — ["mchezo-shell-654a7428e2c621a4","not-mchezo"]
+[+26.2s] PASS E1 the round in the other tab plays on (a guess answered, the same page)
+[+27.5s] PASS E1 offline, A's shell is whole: A's page, scripts, styles and assets, saying it can't reach Mchezo — {"notice":true,"build":"654a7428e2c621a4","files":2,"foreign":[]}
+[+30.1s] PASS E2 W with storage full (Chromium's quota override): W's install runs and fails — {"own":"redundant","others":[],"calm":true}
+[+30.1s] PASS E2 A's live cache is exactly as it was
+[+30.1s] PASS E2 no candidate is left — ["mchezo-shell-654a7428e2c621a4","not-mchezo"]
+[+30.3s] PASS E2 the round plays on
+[+32.5s] PASS E3 W complete: it installs and waits; A stays in charge — {"own":"installed","others":[],"calm":true}
+[+32.5s] PASS E3 while W waits, A's live cache is untouched, and W's files are only in W's own candidate
+[+32.7s] PASS E3 the round plays on while W waits
+[+33.9s] PASS E3 every A page closed and one reopened: W is activated and controls it
+[+33.9s] PASS E3 scoped cleanup: W's live cache and someone else's remain; A's cache and every candidate are gone — ["mchezo-shell-e53a77ceedc1f749","not-mchezo"]
+[+33.9s] PASS E3 W's live cache holds every file it precaches, and nothing of A's that W doesn't list
+[+35.2s] PASS E3 offline, W's shell is whole — {"notice":true,"build":"e53a77ceedc1f749","files":2,"foreign":[]}
+[+37.4s] PASS E4 P (a policy change) deployed with a listed file missing: its install fails; W's cache exactly as it was; no candidate left — {"own":"redundant","others":[],"calm":true}
+[+39.6s] PASS E4 P complete: it installs and waits; W's cache untouched — {"own":"installed","others":[],"calm":true}
+[+40.9s] PASS E4 P activates; only P's live cache and someone else's remain — ["mchezo-shell-0bc1aabb9282dd93","not-mchezo"]
+[+43.5s] PASS E5 a worker with P's version but different bytes, a listed file missing: its install fails; P's cache exactly as it was; no candidate left — {"own":"redundant","others":["redundant"],"calm":true}
+[+45.7s] PASS E5 complete, it installs and waits without touching P's live cache (only its own candidate) — {"own":"installed","others":[],"calm":true}
+[+47.0s] PASS E5 on activation: one complete live cache, no candidate left — ["mchezo-shell-0bc1aabb9282dd93","not-mchezo"]
+[+48.1s] PASS E5 offline, the shell is whole — {"notice":true,"build":"0bc1aabb9282dd93","files":2,"foreign":[]}
+[+48.4s] 
+[+48.4s] All build-update checks passed
+[+48.4s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":1,"pages":5,"peakOpenPages":2}
+
+# PASS (exit 0) in 48.5s | cpu 31.6s, peak memory 658 MB

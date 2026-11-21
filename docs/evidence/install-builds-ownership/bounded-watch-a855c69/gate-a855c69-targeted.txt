@@ -1,0 +1,9 @@
+
+PASSED (exit 0) | targeted | run 20261121-050401-a855c697-17553
+  5 passed, 0 failed, 0 timed out, 0 infrastructure, 0 invalid, 0 cancelled, 0 not run
+  timing   wall 2m 22s · step time 4m 57s (sum) · 3 workers, 70% busy · 2.09× the same steps run one after another
+           predicted 0–4m (about 1m 06s, low-confidence) → actual 2m 22s (+115%)
+           longest  check-install 2m 17s, check-install-builds-no-worker 1m 47s, check-install-builds 49s · the longest step is 96% of the wall time
+           machine  CPU mean 32%, peak 90% · memory available ≥ 13864 MB · load peak 3.33
+           retries  none (the gate never retries a step)
+  report <scratch>/gate-ibr-targeted/20261121-050401-a855c697-17553/report.json

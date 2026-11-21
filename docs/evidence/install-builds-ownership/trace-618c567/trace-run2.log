@@ -1,0 +1,191 @@
+  (four real builds in 29 s: A 654a7428e2c621a4, W e53a77ceedc1f749, P 0bc1aabb9282dd93)
+PASS B setup: build A names its version in its page and its worker
+PASS B setup: build A2 names its version in its page and its worker
+PASS B setup: build W names its version in its page and its worker
+PASS B setup: build P names its version in its page and its worker
+PASS B the same source built twice gives the same version, the same worker byte for byte, the same page and the same files
+PASS B a worker-only change (sw.ts) is a new version and a new worker
+PASS B a worker-policy change (swPolicy.ts, a dependency of the worker only) is a new version too
+PASS B neither change touches the app: the same files, byte for byte, and the same page apart from its build marker
+PASS E setup: A's worker is active and controls the page
+PASS E setup: A's live cache holds every file it precaches (14 entries)
+PASS E1 W deployed with a listed file missing: W's install runs and fails — redundant
+PASS E1 A's live cache is exactly as it was: every entry, the same bytes, the same order
+PASS E1 no candidate is left, nothing else is touched — ["mchezo-shell-654a7428e2c621a4","not-mchezo"]
+PASS E1 the round in the other tab plays on (a guess answered, the same page)
+PASS E1 offline, A's shell is whole: A's page, scripts, styles and assets, saying it can't reach Mchezo — {"notice":true,"build":"654a7428e2c621a4","files":2,"foreign":[]}
+PASS E2 W with storage full (Chromium's quota override): W's install runs and fails — redundant
+PASS E2 A's live cache is exactly as it was
+PASS E2 no candidate is left — ["mchezo-shell-654a7428e2c621a4","not-mchezo"]
+PASS E2 the round plays on
+PASS E3 W complete: it installs and waits; A stays in charge — installed
+PASS E3 while W waits, A's live cache is untouched, and W's files are only in W's own candidate
+PASS E3 the round plays on while W waits
+PASS E3 every A page closed and one reopened: W is activated and controls it
+PASS E3 scoped cleanup: W's live cache and someone else's remain; A's cache and every candidate are gone — ["mchezo-shell-e53a77ceedc1f749","not-mchezo"]
+PASS E3 W's live cache holds every file it precaches, and nothing of A's that W doesn't list
+PASS E3 offline, W's shell is whole — {"notice":true,"build":"e53a77ceedc1f749","files":2,"foreign":[]}
+PASS E4 P (a policy change) deployed with a listed file missing: its install fails; W's cache exactly as it was; no candidate left — redundant
+PASS E4 P complete: it installs and waits; W's cache untouched — installed
+PASS E4 P activates; only P's live cache and someone else's remain — ["mchezo-shell-0bc1aabb9282dd93","not-mchezo"]
+PASS E5 a worker with P's version but different bytes, a listed file missing: its install fails; P's cache exactly as it was; no candidate left — redundant
+PASS E5 complete, it installs and waits without touching P's live cache (only its own candidate) — installed
+PASS E5 on activation: one complete live cache, no candidate left — ["mchezo-shell-0bc1aabb9282dd93","not-mchezo"]
+PASS E5 offline, the shell is whole — {"notice":true,"build":"0bc1aabb9282dd93","files":2,"foreign":[]}
+
+All build-update checks passed
+
+=== TRACE (ms since the browser context was created) ===
++  -873  driver                             check PASS: B setup: build A names its version in its page and its worker
++  -873  driver                             check PASS: B setup: build A2 names its version in its page and its worker
++  -873  driver                             check PASS: B setup: build W names its version in its page and its worker
++  -873  driver                             check PASS: B setup: build P names its version in its page and its worker
++  -871  driver                             check PASS: B the same source built twice gives the same version, the same worker 
++  -871  driver                             check PASS: B a worker-only change (sw.ts) is a new version and a new worker
++  -871  driver                             check PASS: B a worker-policy change (swPolicy.ts, a dependency of the worker only
++  -868  driver                             check PASS: B neither change touches the app: the same files, byte for byte, and t
++  -807  driver                             deploy A
++  -803  driver                             deploy done
++     0  driver                             context created
++    75  page1                              navigated /
++   310  page1                              navigated /
++   367  page1 /                            navigator.serviceWorker.register() called
++   764  page1                              navigated /
++   822  page1                              navigated /
++   842  driver                             check PASS: E setup: A's worker is active and controls the page
++   847  browser (DevTools ServiceWorker)   version 0: activated/running
++   849  page1 /                            navigator.serviceWorker.register() called
++   873  cache-watch                        stage caches now []  
++   904  page2                              navigated /solo
++   994  page2                              navigated /solo
++  1080  page2 /solo                        navigator.serviceWorker.register() called
++  1462  page2                              navigated /solo/word-connections
++  3076  driver                             check PASS: E setup: A's live cache holds every file it precaches (14 entries)
++  3076  driver                             deploy W missing /icons/icon-512.png
++  3525  driver                             deploy done
++  3525  driver                             tryUpdate start
++  3527  page1 /                            reg.update() called  [caller: driver (page.evaluate)]
++  3533  browser (DevTools ServiceWorker)   version 1: new/stopped
++  3533  browser (DevTools ServiceWorker)   version 1: new/starting
++  3539  browser (DevTools ServiceWorker)   version 1: installing/starting
++  3539  browser (DevTools ServiceWorker)   version 1: installing/running
++  3548  cache-watch                        stage caches now ["mchezo-stage-e53a77ceedc1f749-mwpwlru7-rdybpckf"]  (e53a77ceedc1f749-mwpwlru7 created at +3540 ms)
++  3632  browser (DevTools ServiceWorker)   version 1: redundant/running
++  3640  driver                             tryUpdate end: redundant
++  3642  driver                             check PASS: E1 W deployed with a listed file missing: W's install runs and fails
++  3648  cache-watch                        stage caches now []  
++  3661  driver                             check PASS: E1 A's live cache is exactly as it was: every entry, the same bytes, t
++  3662  driver                             cacheNames read: []
++  3663  driver                             cacheNames read: []
++  3663  driver                             check PASS: E1 no candidate is left, nothing else is touched
++  3952  driver                             check PASS: E1 the round in the other tab plays on (a guess answered, the same pag
++  3953  page1 /                            offline event
++  3955  page2 /solo/word-connections       offline event
++  3976  browser (DevTools ServiceWorker)   version 2: new/stopped
++  3976  browser (DevTools ServiceWorker)   version 2: new/starting
++  3978  page1                              navigated /
++  3983  page1 /                            offline event
++  3988  browser (DevTools ServiceWorker)   version 2: installing/starting
++  3988  browser (DevTools ServiceWorker)   version 2: installing/running
++  4113  page1                              navigated /
++  4142  page1 /                            navigator.serviceWorker.register() called
++  4166  page1 /                            online event
++  4166  page2 /solo/word-connections       online event
++  4166  page2 /solo/word-connections       reg.update() called  [caller: app (registerSw)]
++  4167  page1 /                            reg.update() called  [caller: app (registerSw)]
++  4196  driver                             check PASS: E1 offline, A's shell is whole: A's page, scripts, styles and assets, 
++  4196  driver                             deploy W
++  4198  driver                             deploy done
++  4206  driver                             tryUpdate start
++  4207  page1 /                            reg.update() called  [caller: driver (page.evaluate)]
++  4234  browser (DevTools ServiceWorker)   version 2: redundant/running
++  4241  browser (DevTools ServiceWorker)   version 3: new/stopped
++  4241  browser (DevTools ServiceWorker)   version 3: new/starting
++  4245  browser (DevTools ServiceWorker)   version 3: installing/starting
++  4245  browser (DevTools ServiceWorker)   version 3: installing/running
++  4262  browser (DevTools ServiceWorker)   version 3: redundant/running
++  4346  driver                             tryUpdate end: redundant
++  4348  driver                             check PASS: E2 W with storage full (Chromium's quota override): W's install runs a
++  4473  driver                             check PASS: E2 A's live cache is exactly as it was
++  4477  driver                             cacheNames read: []
++  4482  driver                             cacheNames read: []
++  4482  driver                             check PASS: E2 no candidate is left
++  4658  driver                             check PASS: E2 the round plays on
++  4658  driver                             tryUpdate start
++  4662  page1 /                            reg.update() called  [caller: driver (page.evaluate)]
++  4668  browser (DevTools ServiceWorker)   version 4: new/stopped
++  4668  browser (DevTools ServiceWorker)   version 4: new/starting
++  4678  browser (DevTools ServiceWorker)   version 4: installing/starting
++  4678  browser (DevTools ServiceWorker)   version 4: installing/running
++  4837  browser (DevTools ServiceWorker)   version 4: installed/running
++  4879  driver                             tryUpdate end: installed
++  4884  driver                             check PASS: E3 W complete: it installs and waits; A stays in charge
++  4911  driver                             cacheNames read: ["mchezo-stage-e53a77ceedc1f749-mwpwlspu-it8xh8v4"]
++  4911  driver                             check PASS: E3 while W waits, A's live cache is untouched, and W's files are only 
++  5308  driver                             check PASS: E3 the round plays on while W waits
++  5311  page1 /                            visibilitychange hidden
++  5316  page2 /solo/word-connections       visibilitychange hidden
++  6372  page3                              navigated /
++  6477  page3                              navigated /
++  6532  page3 /                            navigator.serviceWorker.register() called
++  6545  driver                             check PASS: E3 every A page closed and one reopened: W is activated and controls i
++  6568  driver                             cacheNames read: []
++  6574  driver                             cacheNames read: []
++  6574  driver                             check PASS: E3 scoped cleanup: W's live cache and someone else's remain; A's cache
++  6575  driver                             check PASS: E3 W's live cache holds every file it precaches, and nothing of A's th
++  6576  page3 /                            offline event
++  6593  page3                              navigated /
++  6653  page3                              navigated /
++  6681  page3 /                            navigator.serviceWorker.register() called
++  6699  page3 /                            online event
++  6700  page3 /                            reg.update() called  [caller: app (registerSw)]
++  6709  driver                             check PASS: E3 offline, W's shell is whole
++  6709  driver                             deploy P missing /manifest.webmanifest
++  6712  driver                             deploy done
++  6712  driver                             tryUpdate start
++  6713  page3 /                            reg.update() called  [caller: driver (page.evaluate)]
++  6926  driver                             tryUpdate end: redundant
++  6946  driver                             cacheNames read: []
++  6946  driver                             check PASS: E4 P (a policy change) deployed with a listed file missing: its instal
++  6946  driver                             deploy P
++  6949  driver                             deploy done
++  6949  driver                             tryUpdate start
++  6950  page3 /                            reg.update() called  [caller: driver (page.evaluate)]
++  7167  driver                             tryUpdate end: installed
++  7197  driver                             check PASS: E4 P complete: it installs and waits; W's cache untouched
++  7198  page3 /                            visibilitychange hidden
++  8245  page4                              navigated /
++  8361  page4                              navigated /
++  8422  page4 /                            navigator.serviceWorker.register() called
++  8452  driver                             cacheNames read: []
++  8456  driver                             cacheNames read: []
++  8456  driver                             check PASS: E4 P activates; only P's live cache and someone else's remain
++  8456  driver                             deploy P missing /icons/icon-192.png (changed sw bytes)
++  8459  driver                             deploy done
++  8459  driver                             tryUpdate start
++  8460  page4 /                            reg.update() called  [caller: driver (page.evaluate)]
++  8675  driver                             tryUpdate end: redundant
++  8700  driver                             cacheNames read: []
++  8700  driver                             check PASS: E5 a worker with P's version but different bytes, a listed file missin
++  8700  driver                             deploy P (changed sw bytes)
++  8703  driver                             deploy done
++  8703  driver                             tryUpdate start
++  8704  page4 /                            reg.update() called  [caller: driver (page.evaluate)]
++  8919  driver                             tryUpdate end: installed
++  8935  driver                             cacheNames read: ["mchezo-stage-0bc1aabb9282dd93-mwpwlvu5-uabg0tbu"]
++  8935  driver                             check PASS: E5 complete, it installs and waits without touching P's live cache (on
++  8936  page4 /                            visibilitychange hidden
++  9980  page5                              navigated /
++ 10083  page5                              navigated /
++ 10144  page5 /                            navigator.serviceWorker.register() called
++ 10172  driver                             cacheNames read: []
++ 10175  driver                             cacheNames read: []
++ 10175  driver                             check PASS: E5 on activation: one complete live cache, no candidate left
++ 10176  page5 /                            offline event
++ 10206  page5                              navigated /
++ 10269  page5                              navigated /
++ 10297  page5 /                            navigator.serviceWorker.register() called
++ 10309  page5 /                            online event
++ 10309  page5 /                            reg.update() called  [caller: app (registerSw)]
++ 10313  driver                             check PASS: E5 offline, the shell is whole
+exit 0

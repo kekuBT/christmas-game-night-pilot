@@ -1,0 +1,9 @@
+
+PASSED (exit 0) | targeted | run 20261121-043756-54170200-7451
+  4 passed, 0 failed, 0 timed out, 0 infrastructure, 0 invalid, 0 cancelled, 0 not run
+  timing   wall 2m 19s · step time 3m 01s (sum) · 3 workers, 43% busy · 1.30× the same steps run one after another
+           predicted 0–4m (about 1m 01s, low-confidence) → actual 2m 19s (+128%)
+           longest  check-install 2m 12s, check-install-builds 45s, build-web 4s · the longest step is 95% of the wall time
+           machine  CPU mean 17%, peak 75% · memory available ≥ 14501 MB · load peak 1.65
+           retries  none (the gate never retries a step)
+  report <scratch>/gate-ib-targeted/20261121-043756-54170200-7451/report.json
