@@ -1,5 +1,5 @@
 // Handoff 7060711859: render the two compact UI options and check them. Static mockups only; the app is untouched.
-//   node docs/design/compact-options/render.mjs [outDir] [--only=a|b]   (from the repository root)
+//   node docs/design/compact-options/render.mjs [outDir] [--only=a|b] [--content=<capture metrics.json>]   (from the repository root)
 //   [MCHEZO_CHROMIUM_PATH=<chrome-headless-shell>]
 // For each option, screen, width and look (and the long-name and help variants) it checks:
 //   - no sideways scroll on phones (320 and 390 px);
@@ -7,7 +7,7 @@
 //   - text contrast against its real background: 4.5:1, or 3:1 for large text (WCAG 2.2 AA);
 //   - keyboard: Tab visits the controls in the intended order (data-tab) and each shows a visible focus ring.
 // Writes <outDir>/option-{a,b}/<screen>-<width>-<look>[-<variant>].jpg and <outDir>/checks.json. Exit 1 on a failure.
-import { mkdirSync, writeFileSync } from "node:fs";
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join as joinPath, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { launchChromium } from "../../../scripts/lib/driver-env.mjs";
@@ -16,6 +16,14 @@ const HERE = dirname(fileURLToPath(import.meta.url));
 const OUT = resolve(process.argv.slice(2).find((a) => !a.startsWith("--")) ?? joinPath(HERE, "shots"));
 const only = (process.argv.find((a) => a.startsWith("--only=")) ?? "").slice(7);
 const OPTIONS = ["a", "b"].filter((o) => !only || o === only);
+// --content=<metrics.json from capture-before.mjs>: render with the room code and places that match produced.
+const contentArg = (process.argv.find((a) => a.startsWith("--content=")) ?? "").slice(10);
+let CONTENT = "";
+if (contentArg) {
+  const m = JSON.parse(readFileSync(resolve(contentArg), "utf8"));
+  const byPlace = Object.fromEntries(m.standings.map((r) => [r.place, r]));
+  CONTENT = `&code=${m.roomCode}&p2=${byPlace[2].name}&p3=${byPlace[3].name}&ka=${byPlace[1].answers}`;
+}
 const PHONE_SCREENS = ["home", "lobby", "picker", "results"];
 const PHONES = [{ w: 320, h: 568 }, { w: 390, h: 844 }];
 const LOOKS = ["everyday", "christmas"];
@@ -88,7 +96,7 @@ function pageChecks({ phone }) {
 const browser = await launchChromium();
 const results = [];
 let failures = 0;
-const fileUrl = (option, screen, look, variant) => `${pathToFileURL(joinPath(HERE, "mockups", `option-${option}.html`)).href}?screen=${screen}&look=${look}${variant ? `&variant=${variant}` : ""}`;
+const fileUrl = (option, screen, look, variant) => `${pathToFileURL(joinPath(HERE, "mockups", `option-${option}.html`)).href}?screen=${screen}&look=${look}${variant ? `&variant=${variant}` : ""}${CONTENT}`;
 async function visit(option, screen, look, variant, w, h, { phone }) {
   const ctx = await browser.newContext({ viewport: { width: w, height: h }, deviceScaleFactor: phone ? 2 : 1, ...(phone ? { isMobile: true, hasTouch: true } : {}) });
   const page = await ctx.newPage();
@@ -99,6 +107,19 @@ async function visit(option, screen, look, variant, w, h, { phone }) {
   await page.evaluate(() => document.fonts.ready);
   const fontsOk = await page.evaluate(() => document.fonts.check("700 16px Unbounded") && document.fonts.check("500 16px Figtree"));
   const c = await page.evaluate(pageChecks, { phone });
+  // The same measures capture-before.mjs takes of the current app (CSS px, first screen, nothing scrolled),
+  // read before the screenshot and the keyboard walk, which moves focus and can scroll the page.
+  const measures = phone && !variant ? await page.evaluate(() => {
+    const box = (k) => document.querySelector(`[data-screen]:not([hidden]) [data-measure="${k}"]`)?.getBoundingClientRect();
+    const out = { scrollY: Math.round(window.scrollY) };
+    const a = box("entry-start"), b = box("entry-end");
+    if (a && b) out.entryHeight = Math.round(b.bottom - a.top);
+    for (const k of ["featured", "dock"]) { const r = box(k); if (r) out[`${k}Height`] = Math.round(r.height); }
+    for (const k of ["setting", "explained"]) { const r = box(k); if (r) out[`${k}Top`] = Math.round(r.top); }
+    const games = [...document.querySelectorAll("[data-screen]:not([hidden]) [data-game]")];
+    if (games.length) out.gamesFullyVisible = games.filter((g) => { const r = g.getBoundingClientRect(); return r.top >= 0 && r.bottom <= window.innerHeight; }).length;
+    return out;
+  }) : undefined;
   // The screenshot first: the keyboard walk below moves focus and scrolls.
   const name = `${screen}-${w}-${look}${variant ? `-${variant}` : ""}`;
   if (keepShot(variant, look, w)) {
@@ -119,18 +140,6 @@ async function visit(option, screen, look, variant, w, h, { phone }) {
     keyboard = { want, got, inOrder: JSON.stringify(want) === JSON.stringify(got), noRing };
   }
   const scrollHeight = await page.evaluate(() => document.documentElement.scrollHeight);
-  // The same measures capture-before.mjs takes of the current app (CSS px, first screen, nothing scrolled).
-  const measures = phone && !variant ? await page.evaluate(() => {
-    const box = (k) => document.querySelector(`[data-screen]:not([hidden]) [data-measure="${k}"]`)?.getBoundingClientRect();
-    const out = {};
-    const a = box("entry-start"), b = box("entry-end");
-    if (a && b) out.entryHeight = Math.round(b.bottom - a.top);
-    for (const k of ["featured", "dock"]) { const r = box(k); if (r) out[`${k}Height`] = Math.round(r.height); }
-    for (const k of ["setting", "explained"]) { const r = box(k); if (r) out[`${k}Top`] = Math.round(r.top); }
-    const games = [...document.querySelectorAll("[data-screen]:not([hidden]) [data-game]")];
-    if (games.length) out.gamesFullyVisible = games.filter((g) => { const r = g.getBoundingClientRect(); return r.top >= 0 && r.bottom <= window.innerHeight; }).length;
-    return out;
-  }) : undefined;
   await ctx.close();
   const ok = !c.overflow && c.targets.length === 0 && c.contrast.length === 0 && errors.length === 0 && fontsOk && (!keyboard || (keyboard.inOrder && keyboard.noRing.length === 0));
   if (!ok) failures++;

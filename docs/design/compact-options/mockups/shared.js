@@ -1,6 +1,7 @@
 // Compact UI options (handoff 7060711859): which screen, look and variant a mockup page shows.
 //   ?screen=home|lobby|picker|results|desktop-lobby|desktop-results|tv-lobby|tv-results
 //   &look=everyday|christmas   &variant=long (long names) | help (error and help copy)
+//   &code=&p2=&p3=&ka= (optional): the captured room code, 2nd and 3rd place names and Keku's answers.
 // Static design artifacts only: no network, no storage, nothing from the app.
 (function () {
   const q = new URLSearchParams(location.search);
@@ -11,6 +12,19 @@
   document.documentElement.dataset.variant = variant;
   for (const s of document.querySelectorAll("[data-screen]")) s.hidden = s.dataset.screen !== screen;
   document.title = `${document.title} · ${screen} · ${look}${variant ? ` · ${variant}` : ""}`;
+
+  // Content (render.mjs --content): the room code and the order the captured match actually produced, so the
+  // options show exactly what the "before" screenshots show. Defaults: the content these mockups were drawn with.
+  const P = { code: q.get("code") || "3QC2UZ", p2: q.get("p2") || "Amina", p3: q.get("p3") || "Baraka", ka: q.get("ka") || "2" };
+  const COLOR = { Amina: "#7FE0CC", Baraka: "#FFD670" };
+  for (const el of document.querySelectorAll("[data-slot]")) {
+    const k = el.dataset.slot;
+    if (k === "code") el.textContent = P.code;
+    else if (k === "ka") el.textContent = `${P.ka} ${P.ka === "1" ? "answer" : "answers"}`;
+    else { el.textContent = el.textContent.replace(/Amina|Baraka/, P[k]); el.dataset.name = P[k]; }
+  }
+  for (const el of document.querySelectorAll("[data-avatar]")) { const n = P[el.dataset.avatar]; el.textContent = n[0]; if (COLOR[n]) el.style.background = COLOR[n]; }
+  for (const el of document.querySelectorAll("[data-aria-code]")) el.setAttribute("aria-label", el.getAttribute("aria-label").replace(/[A-Z0-9]{6}$/, P.code));
 
   // The circle-and-dots mark, drawn as the app draws it (CircleMark): eight seats, the first larger, in brand colour.
   const css = getComputedStyle(document.documentElement);

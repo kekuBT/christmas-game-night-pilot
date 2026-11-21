@@ -165,7 +165,7 @@
 <!-- ============================================================ LOBBY (host) -->
 <main class="phone" data-screen="lobby" aria-label="Lobby">
   <header class="bar">
-    <button class="code" type="button" aria-label="Share room code 3QC2UZ" data-tab="1">3QC2UZ <small>Invite</small></button>
+    <button class="code" type="button" aria-label="Share room code 3QC2UZ" data-aria-code data-tab="1"><span data-slot="code">3QC2UZ</span> <small>Invite</small></button>
     <span class="bar__title" data-room-name>Game night</span>
     <button class="icon-btn" type="button" aria-label="Room menu" data-tab="2"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
   </header>
@@ -216,7 +216,7 @@
 <!-- ============================================================ PICKER -->
 <main class="phone" data-screen="picker" aria-label="Pick a game">
   <div aria-hidden="true" style="opacity:.6">
-    <header class="bar"><span class="code">3QC2UZ <small>Invite</small></span><span class="bar__title">Game night</span></header>
+    <header class="bar"><span class="code"><span data-slot="code">3QC2UZ</span> <small>Invite</small></span><span class="bar__title">Game night</span></header>
     <div class="status"><span class="status__you">You're in, Keku.</span></div>
   </div>
   <div class="scrim" aria-hidden="true"></div>
@@ -247,7 +247,7 @@
 <!-- ============================================================ RESULTS (Keku) -->
 <main class="phone" data-screen="results" aria-label="Results">
   <header class="bar">
-    <span class="code" aria-hidden="true" style="cursor:default">3QC2UZ</span>
+    <span class="code" aria-hidden="true" style="cursor:default"><span data-slot="code">3QC2UZ</span></span>
     <span class="bar__title" data-room-name>Game night</span>
     <button class="icon-btn" type="button" aria-label="Room menu" data-tab="1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
   </header>
@@ -262,11 +262,11 @@
   <ol class="standings" aria-label="Standings" data-measure="explained">
     <li class="standing standing--you"><span class="standing__place">1</span><span class="standing__name" data-name="Keku">Keku (you)</span><span class="standing__pts">230</span>
       <span class="standing__line">Outlasted 2 players (200) + 3 whole cups (30) = 230</span>
-      <span class="standing__line standing__line--muted"><span class="cups" aria-label="3 of 3 cups whole"><i class="cup"></i><i class="cup"></i><i class="cup"></i></span> Kept the jebena · Played: 2 answers · 0 timeouts</span></li>
-    <li class="standing"><span class="standing__place">2</span><span class="standing__name" data-name="Amina">Amina</span><span class="standing__pts">100</span>
+      <span class="standing__line standing__line--muted"><span class="cups" aria-label="3 of 3 cups whole"><i class="cup"></i><i class="cup"></i><i class="cup"></i></span> Kept the jebena · Played: <span data-slot="ka">2 answers</span> · 0 timeouts</span></li>
+    <li class="standing"><span class="standing__place">2</span><span class="standing__name" data-slot="p2">Amina</span><span class="standing__pts">100</span>
       <span class="standing__line">Outlasted 1 player (100) + no whole cups (0) = 100</span>
       <span class="standing__line standing__line--muted">Out: every cup broken · Played: 0 answers · 3 timeouts</span></li>
-    <li class="standing"><span class="standing__place">3</span><span class="standing__name" data-name="Baraka">Baraka</span><span class="standing__pts">0</span>
+    <li class="standing"><span class="standing__place">3</span><span class="standing__name" data-slot="p3">Baraka</span><span class="standing__pts">0</span>
       <span class="standing__line">Outlasted nobody (0) + no whole cups (0) = 0</span>
       <span class="standing__line standing__line--muted">Out: every cup broken · Played: 0 answers · 3 timeouts</span></li>
   </ol>
@@ -286,7 +286,7 @@
   <div class="desk">
     <header class="bar desk__top">
       <span class="wordmark" style="font-size:20px;margin-right:16px"><i data-mark="30"></i><span>mchezo</span></span>
-      <button class="code" type="button" aria-label="Share room code 3QC2UZ">3QC2UZ <small>Invite</small></button>
+      <button class="code" type="button" aria-label="Share room code 3QC2UZ" data-aria-code><span data-slot="code">3QC2UZ</span> <small>Invite</small></button>
       <span class="bar__title" data-room-name>Game night</span>
       <button class="icon-btn" type="button" aria-label="Room menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
     </header>
@@ -310,7 +310,7 @@
 <!-- ============================================================ TV lobby (1920x1080) -->
 <main data-screen="tv-lobby" aria-label="TV lobby">
   <div class="tv">
-    <div class="tv__top"><span class="wordmark tv__brand"><i data-mark="52"></i><span>mchezo</span></span><span style="font-size:28px;color:var(--text-muted)" data-room-name>Game night</span><span class="tv__join">Join at mchezo on your phone<b>3QC2UZ</b></span></div>
+    <div class="tv__top"><span class="wordmark tv__brand"><i data-mark="52"></i><span>mchezo</span></span><span style="font-size:28px;color:var(--text-muted)" data-room-name>Game night</span><span class="tv__join">Join at mchezo on your phone<b><span data-slot="code">3QC2UZ</span></b></span></div>
     <div style="display:grid;grid-template-columns:1.2fr 1fr;gap:56px;align-content:center">
       <div><p class="kicker" style="font-size:22px">Up next</p><h1>Jebena Rush</h1><p style="margin:12px 0 0;color:var(--text-muted)">2–10 players · about 8 min · 3 cups each · Casual, just for fun</p></div>
       <div><p class="kicker" style="font-size:22px;margin-bottom:16px">In the room · all ready</p><div class="tv__players"><span class="tv__player"><span class="avatar" style="background:#FF8A6A">K</span>Keku</span><span class="tv__player"><span class="avatar" style="background:#7FE0CC">A</span>Amina</span><span class="tv__player"><span class="avatar" style="background:#FFD670">B</span>Baraka</span></div></div>
@@ -322,12 +322,12 @@
 <!-- ============================================================ TV results (1920x1080) -->
 <main data-screen="tv-results" aria-label="TV results">
   <div class="tv">
-    <div class="tv__top"><span class="wordmark tv__brand"><i data-mark="52"></i><span>mchezo</span></span><span style="font-size:28px;color:var(--text-muted)">Jebena Rush · final · Casual</span><span class="tv__join">Join<b>3QC2UZ</b></span></div>
+    <div class="tv__top"><span class="wordmark tv__brand"><i data-mark="52"></i><span>mchezo</span></span><span style="font-size:28px;color:var(--text-muted)">Jebena Rush · final · Casual</span><span class="tv__join">Join<b><span data-slot="code">3QC2UZ</span></b></span></div>
     <div><h1 style="margin-bottom:24px">Keku kept the jebena!</h1>
       <ol class="tv__list">
-        <li class="tv__row"><span class="tv__place">1</span><span class="tv__name">Keku</span><span class="tv__pts">230</span><span class="tv__why">Outlasted 2 players (200) + 3 whole cups (30) · Played: 2 answers · 0 timeouts</span></li>
-        <li class="tv__row"><span class="tv__place">2</span><span class="tv__name">Amina</span><span class="tv__pts">100</span><span class="tv__why">Outlasted 1 player (100) + no whole cups (0) · Played: 0 answers · 3 timeouts</span></li>
-        <li class="tv__row"><span class="tv__place">3</span><span class="tv__name">Baraka</span><span class="tv__pts">0</span><span class="tv__why">Outlasted nobody (0) + no whole cups (0) · Played: 0 answers · 3 timeouts</span></li>
+        <li class="tv__row"><span class="tv__place">1</span><span class="tv__name">Keku</span><span class="tv__pts">230</span><span class="tv__why">Outlasted 2 players (200) + 3 whole cups (30) · Played: <span data-slot="ka">2 answers</span> · 0 timeouts</span></li>
+        <li class="tv__row"><span class="tv__place">2</span><span class="tv__name" data-slot="p2">Amina</span><span class="tv__pts">100</span><span class="tv__why">Outlasted 1 player (100) + no whole cups (0) · Played: 0 answers · 3 timeouts</span></li>
+        <li class="tv__row"><span class="tv__place">3</span><span class="tv__name" data-slot="p3">Baraka</span><span class="tv__pts">0</span><span class="tv__why">Outlasted nobody (0) + no whole cups (0) · Played: 0 answers · 3 timeouts</span></li>
       </ol></div>
     <p class="tv__foot">100 points for each player you outlast, plus 10 for every cup still whole. Right answers keep you in; they don't add points.</p>
   </div>
