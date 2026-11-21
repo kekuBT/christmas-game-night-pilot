@@ -8,7 +8,11 @@
 export type JebenaVerdict = "accepted" | "used" | "not-in-bank" | "ambiguous" | "near-miss" | "empty";
 /** `hearts` is the server's name for whole cups left (D-S101-02); `at` is the server time it happened. */
 export interface JebenaLogEntry { seq: number; turn: number; kind: "accepted" | "timeout" | "out" | "category" | "sat-out"; reason?: "start" | "streak" | "timeout" | "used-up"; player?: string; answer?: string; via?: string; categoryId?: string; categoryName?: string; hearts?: number; at?: number }
-export interface JebenaStanding { id: string; place: number; hearts: number; out: boolean; satOut: boolean; answers: number; timeouts: number; points: number }
+/**
+ * `outlasted` (handoff 7059278886): players out before this one, from the server. With `hearts` (cups still whole, 0
+ * once out) it is how `points` were earned: outlasted × 100 + hearts × 10. Absent from an older server.
+ */
+export interface JebenaStanding { id: string; place: number; hearts: number; out: boolean; satOut: boolean; answers: number; timeouts: number; outlasted?: number; points: number }
 export interface JebenaAttemptView { turn: number; text: string; verdict: JebenaVerdict; reason?: string; answer?: string }
 export type JebenaEnd = null | "last-standing" | "banks-exhausted";
 
@@ -45,6 +49,30 @@ export function verdictLine(a: JebenaAttemptView, category: string): { tone: "go
     case "near-miss": return { tone: "warn", text: a.reason ? `“${typed}”: ${a.reason}` : `“${typed}” isn't quite it. Try another!` };
     case "empty": return { tone: "neutral", text: "Type an answer first." };
   }
+}
+
+/** The points rule the results explain (src/games/modules/jebena.ts JEBENA_POINTS): the server adds the total. */
+export const JEBENA_POINT_PARTS = { perOutlasted: 100, perCup: 10 } as const;
+
+/**
+ * Handoff 7059278886: how a results row's points were earned, from the server's standings, e.g.
+ * "Outlasted 1 player (100) + 2 whole cups (20) = 120". Answers earn no points, so they're not in it.
+ * Null when the row has no parts (an older server) or its parts don't make its total: then only the total shows,
+ * never an explanation that doesn't add up.
+ */
+export function pointsBreakdown(r: JebenaStanding): string | null {
+  if (typeof r.outlasted !== "number") return null;
+  const fromOut = r.outlasted * JEBENA_POINT_PARTS.perOutlasted;
+  const fromCups = r.hearts * JEBENA_POINT_PARTS.perCup;
+  if (fromOut + fromCups !== r.points) return null;
+  const out = r.outlasted === 0 ? "Outlasted nobody (0)" : `Outlasted ${r.outlasted} ${r.outlasted === 1 ? "player" : "players"} (${fromOut})`;
+  const cups = r.hearts === 0 ? "no whole cups (0)" : `${r.hearts} whole ${r.hearts === 1 ? "cup" : "cups"} (${fromCups})`;
+  return `${out} + ${cups} = ${r.points}`;
+}
+
+/** How a player played, apart from the points: accepted answers and timeouts. */
+export function playedLine(r: JebenaStanding): string {
+  return `Played: ${r.answers} ${r.answers === 1 ? "answer" : "answers"} · ${r.timeouts} ${r.timeouts === 1 ? "timeout" : "timeouts"}`;
 }
 
 /**

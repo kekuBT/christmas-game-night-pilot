@@ -1,0 +1,45 @@
+head 2c9394db709849679652e40efd00cca36638d031 dirty=0
+
+ RUN  v2.1.9 <scratch>/wtfs
+
+ ✓ tests/jebena-category-cadence.test.ts (16 tests) 128ms
+ ✓ tests/jebena-points-explained.test.ts (10 tests) 230ms
+ ✓ tests/stage91-jebena.test.ts (47 tests) 259ms
+ ✓ tests/stage101-cups.test.ts (27 tests) 24ms
+ ✓ tests/stage102-moments.test.ts (24 tests) 13ms
+stdout | tests/stage104-save-memory.test.ts > Stage 10.4: Save a memory from a result screen (over HTTP) > a retry after a restart is still recognized (keys are kept with the book)
+[restore] 1 room(s) restored, 0 not loaded (data: <tmp>
+
+stdout | tests/stage123-cup-party.test.ts > a Family Cup's Quick Party (HTTP) > saves a lineup with Official and Practice games; everyone sees each game's mode; a restart keeps it
+[restore] 1 room(s) restored, 0 not loaded (data: <tmp>
+
+ ✓ tests/stage104-save-memory.test.ts (12 tests) 851ms
+stdout | tests/stage123-cup-party.test.ts > a Family Cup's Quick Party (HTTP) > repeat-safe: the same press returns the same game; after a cancelled briefing it starts nothing (ATTEMPT_ENDED)
+[restore] 1 room(s) restored, 0 not loaded (data: <tmp>
+
+stderr | tests/stage123-cup-party.test.ts > a lineup across Make it a Family Cup and back (D-S123-04) > a saved Cup lineup whose modes are no longer valid is dropped on restore, never half-loaded
+[party] room room-mwq4o5be-549116: saved lineup dropped (Impostor is for 4–10 players, not 2.)
+
+ ✓ tests/stage123-cup-party.test.ts (9 tests) 470ms
+ ✓ tests/stage121-tv-medals.test.ts (17 tests) 28ms
+stdout | tests/stage91-jebena-sockets.test.ts > Jebena Rush over real sockets: a continuous clock (review 6808081378, 3) > a real server restart mid-match after a prolonged outage: the turns that ran out meanwhile are processed at their own instants; nothing is reset or replayed
+[restore] 1 room(s) restored, 0 not loaded (data: <tmp>
+
+ ✓ tests/stage91-jebena-sockets.test.ts (8 tests) 1281ms
+   ✓ Jebena Rush over real sockets, 10 players > a whole match: hearts from the lobby, one holder at a time, timeouts on the server clock, outs, the last one keeps the jebena 622ms
+ ✓ tests/stage91-jebena-endings.test.ts (7 tests) 18ms
+ ✓ tests/m3.test.ts (7 tests) 95ms
+ ✓ tests/jebena-briefing-rules.test.ts (4 tests) 31ms
+ ✓ tests/stage92-jebena-terminal.test.ts (7 tests) 21ms
+ ✓ tests/stage101-break-log.test.ts (7 tests) 6ms
+ ✓ apps/web/src/components/mchezo/JebenaPoints.test.tsx (7 tests) 42ms
+ ✓ apps/web/src/components/mchezo/TvFinal.test.tsx (6 tests) 40ms
+ ✓ tests/standings.test.ts (8 tests) 11ms
+ ✓ tests/stage91-bank-privacy.test.ts (1 test) 39ms
+ ✓ apps/web/src/components/mchezo/BriefingRules.test.tsx (3 tests) 33ms
+
+ Test Files  19 passed (19)
+      Tests  227 passed (227)
+   Start at  08:10:07
+   Duration  4.45s (transform 1.65s, setup 0ms, collect 4.84s, tests 3.62s, environment 3ms, prepare 1.08s)
+

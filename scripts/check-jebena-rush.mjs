@@ -30,6 +30,15 @@
 //      rest; the last one with a whole cup keeps the jebena; results on every
 //      phone equal the server's scores; every break on every page was a real
 //      lost life, once; reduced motion breaks without animating.
+//   P  handoff 7059278886: every results row (all three phones, the TV's final standings and its post-game review) explains its total
+//      from the server's standings ("Outlasted 2 players (200) + 2 whole cups (20) = 220"), the parts make the
+//      total and the room's score, and accepted answers show apart ("Played: 3 answers · 1 timeout"); Keku's
+//      results also at 320 px in Everyday, with no sideways scroll. An early exit (room Z's replay): the one who
+//      left has "Left the game" and 0, explained, and the one who stayed is explained from the server's standings.
+//   Q  handoff 7059278886, a room of its own (5 cups, through the API): the verified two-player 120–0, played
+//      turn by turn (the plan in tests/jebena-points-explained.test.ts). On the winner's phone (390 px Everyday),
+//      the loser's (320 px Christmas) and a TV (1440 px): 120 is "Outlasted 1 player (100) + 2 whole cups (20)",
+//      and the loser's 9 accepted answers show apart from a 0.
 //   G  Play again keeps the cups (its briefing says 3) and starts with
 //      whole cups; two players leave and nothing breaks; back to the lobby.
 //   R  review 6822605156: (R1) the timeout that decides the match breaks the
@@ -100,6 +109,28 @@ function expectedJebenaLine(st) {
   if (w.hearts === st.startHearts) return `All ${st.startHearts} cups still whole. Not a single crack.`;
   return null;
 }
+/**
+ * Handoff 7059278886: how a results row's points were earned and how the player played, worked out here from the
+ * server's standings with the driver's own copy of the rule (100 per player outlasted, 10 per whole cup).
+ */
+const why = (r) => {
+  const out = r.outlasted === 0 ? "Outlasted nobody (0)" : `Outlasted ${r.outlasted} ${r.outlasted === 1 ? "player" : "players"} (${r.outlasted * 100})`;
+  const cups = r.hearts === 0 ? "no whole cups (0)" : `${r.hearts} whole ${r.hearts === 1 ? "cup" : "cups"} (${r.hearts * 10})`;
+  return `${out} + ${cups} = ${r.points}`;
+};
+const played = (r) => `Played: ${r.answers} ${r.answers === 1 ? "answer" : "answers"} · ${r.timeouts} ${r.timeouts === 1 ? "timeout" : "timeouts"}`;
+/** Every results row in `scope` (phone or TV), as shown: points cell, breakdown, played line and the row's own text. */
+const rowsShown = (scope) => scope.locator('li[data-testid^="jr-row-"]').evaluateAll((els) => els.map((e) => ({
+  id: e.getAttribute("data-testid").replace("jr-row-", ""),
+  pts: (e.querySelector(".mz-jr-row__pts")?.textContent ?? "").trim(),
+  why: e.querySelector(".mz-jr-row__why")?.textContent?.trim() ?? null,
+  played: (e.querySelector(".mz-jr-row__played")?.textContent ?? "").trim(),
+  text: (e.textContent ?? "").replace(/\s+/g, " ").trim(),
+})));
+/** The rows a results list should show for `standings`, in order. */
+const rowsWanted = (standings) => standings.map((r) => ({ id: r.id, pts: String(r.points), why: why(r), played: played(r) }));
+const sameRows = (shown, standings) => JSON.stringify(shown.map(({ id, pts, why: w, played: p }) => ({ id, pts, why: w, played: p }))) === JSON.stringify(rowsWanted(standings));
+
 /** The line on a phone's results: exactly `want`, or none at all. */
 const momentOn = (page, want, who) => want === null
   ? soon(`10.2 ${who}: no moment line`, async () => (await page.getByTestId("jr-results").isVisible().catch(() => false)) && (await page.getByTestId("results-moment").count()) === 0, 20000)
@@ -301,6 +332,52 @@ try {
       await sleep(250);
     }
     return { roomC, survivor, other, gidC, tried, g, projC, hostId: wanjiru.playerId, hostToken: wanjiru.recoveryToken, names: { [wanjiru.playerId]: "Wanjiru", [otieno.playerId]: "Otieno" } };
+  })();
+
+  // ---------- Q (runs alongside): room Q, 5 cups, the verified two-player 120–0 (handoff 7059278886) ----------
+  // The first in the seat order plays A A T four times, then A T: 9 accepted answers and 5 timeouts, out. The other
+  // plays A A T three times, then A A A A: 10 answers, 3 timeouts, 2 of 5 cups left. Each answer is sent as soon as its
+  // turn starts; each T lets the room's own clock run the turn out.
+  const room120 = (async () => {
+    const roomQ = (await call("/rooms", { body: { name: "Room Q", kind: "casual" } })).body;
+    const nia = (await call(`/rooms/${roomQ.roomId}/join`, { body: { displayName: "Nia", asHost: true, hostClaimToken: roomQ.hostClaimToken } })).body;
+    const tumaini = (await call("/rooms/join-by-code", { body: { joinCode: roomQ.joinCode, displayName: "Tumaini" } })).body;
+    const projQ = async (tok) => (await call(`/rooms/${roomQ.roomId}/projection?audience=player`, { token: tok })).body;
+    await call(`/rooms/${roomQ.roomId}/game-settings`, { token: nia.recoveryToken, body: { gameId: "jebena-rush", settings: { hearts: 5 }, baseRevision: (await projQ(nia.recoveryToken)).session?.revision ?? 0 } });
+    const p0 = await projQ(nia.recoveryToken);
+    const startQ = await call(`/rooms/${roomQ.roomId}/games`, { token: nia.recoveryToken, body: { gameId: "jebena-rush", official: false, roster: p0.readiness?.wouldPlay, attempt: { id: randomUUID(), sessionRevision: p0.session?.revision ?? 0 }, season: p0.contentSeason, settings: { hearts: 5 } } });
+    if (startQ.status !== 201) return { error: `start ${startQ.status}` };
+    const gid = startQ.body.gameId;
+    const intentQ = (who, action, payload) => call(`/rooms/${roomQ.roomId}/intents`, { token: who.recoveryToken, body: { intent: { kind: "intent", schemaVersion: 1, clientEventId: randomUUID(), roomId: roomQ.roomId, gameInstanceId: gid, action, payload } } });
+    for (const who of [nia, tumaini]) await intentQ(who, "briefing-ready", { ready: true });
+    const gQ = async () => ((await projQ(nia.recoveryToken)).myGames ?? []).find((g) => g.id === gid);
+    let g = null;
+    for (let i = 0; i < 80 && g?.status !== "playing"; i++) { g = await gQ(); if (g?.status !== "playing") await sleep(250); }
+    if (g?.status !== "playing") return { error: "never played" };
+    const seats = { [nia.playerId]: nia, [tumaini.playerId]: tumaini };
+    const [first, second] = g.state.order.map((r) => r.id);
+    const plan = { [first]: "AATAATAATAATAT", [second]: "AATAATAATAAAA" };
+    const step = { [first]: 0, [second]: 0 };
+    const usedQ = new Set();
+    const misses = [];
+    let lastN = null;
+    const until = Date.now() + 240000; // 27 turns, 8 of them run out (10 s each)
+    while (Date.now() < until) {
+      g = await gQ();
+      if (!g || g.status === "finished") break;
+      const t = g.state.turn;
+      if (!t || t.n === lastN) { await sleep(150); continue; }
+      lastN = t.n;
+      for (const e of g.state.log ?? []) if (e.kind === "accepted") usedQ.add(e.answer);
+      const move = plan[t.player]?.[step[t.player]++];
+      if (move === "A") {
+        const ans = freshAnswer(g.state.category.id, usedQ);
+        const r = (await intentQ(seats[t.player], "jebena-answer", { turn: t.n, text: ans.typed })).body;
+        usedQ.add(ans.name);
+        if (r?.result?.verdict !== "accepted") misses.push({ n: t.n, typed: ans.typed, r: JSON.stringify(r).slice(0, 120) });
+      }
+    }
+    return { roomQ, gid, g, misses, steps: step, winner: seats[second], loser: seats[first] };
   })();
 
   // ---------- A. Lobby: pick Jebena Rush, choose cups ----------
@@ -705,6 +782,15 @@ try {
       const raw = fin.g.rawScores ?? {};
       check(`F ${who}'s results equal the server's scores`, rows.length === 3 && rows.every((r) => raw[r.id] === r.pts), JSON.stringify(rows));
     }
+    // P (handoff 7059278886): how each total was earned, and how each player played, on every phone.
+    check("P the server's parts make every total, and the room's score", stds.length === 3 && stds.every((r) => typeof r.outlasted === "number" && r.points === r.outlasted * 100 + r.hearts * 10 && r.points === (fin.g.rawScores ?? {})[r.id]), JSON.stringify(stds.map((r) => [r.outlasted, r.hearts, r.points])));
+    // Rows are read as they are (no waiting per element), so a build without the explanation fails at once.
+    const brief = (shown) => JSON.stringify(shown.map((x) => [x.pts, x.why, x.played]));
+    for (const [who, p] of [["Keku", K], ["Amina", A], ["Baraka", B]]) {
+      const shown = await rowsShown(p.getByTestId("jr-standings"));
+      check(`P ${who}'s results explain every total from the server's standings, with answers apart`, sameRows(shown, stds), brief(shown));
+    }
+    check("P the footer says right answers add no points", /Right answers keep you in the game; they don't add points\./.test(await K.getByTestId("jr-howscore").innerText()));
     check("F the winner's line says they kept the jebena", /Kept the jebena/.test(await K.getByTestId(`jr-row-${seat.K.playerId}`).innerText()));
     {
       const keeper = stds[0];
@@ -767,11 +853,28 @@ try {
     }
     await shot(K, "jr-results-390");
     await shot(A, "jr-results-320-christmas");
+    {
+      // P: Keku's results at 320 px in the Everyday look too (both looks at the narrowest width), then back to 390.
+      await K.setViewportSize({ width: 320, height: 760 });
+      await K.getByTestId("jr-standings").scrollIntoViewIfNeeded();
+      const k320 = await rowsShown(K.getByTestId("jr-standings"));
+      check("P at 320 px (Everyday) Keku's results still explain every total, with no sideways scroll", (await noSideScroll(K)) && sameRows(k320, stds), brief(k320));
+      await shot(K, "jr-results-320-everyday");
+      await K.setViewportSize({ width: 390, height: 760 });
+    }
     await soon("F the TV shows the final standings: Keku wins", async () => /Keku wins/.test(await TV.locator("body").innerText()), 20000);
     await tvMomentOn(TV, expectedJebenaLine(fin.st), "F the TV's final view");
+    {
+      const shown = await rowsShown(TV.getByTestId("tv-jr-final"));
+      check("P the TV's final standings explain every total from the server's standings, with answers apart", sameRows(shown, stds), brief(shown));
+    }
     await shot(TV, "jr-tv-final-1440");
     await TV.getByRole("button", { name: "Post-game review" }).click();
     await soon("F the TV's post-game review: Keku kept the jebena, with the places", async () => /Keku kept the jebena/.test(await TV.getByTestId("tv-jr-review").innerText()) && (await TV.getByTestId("tv-jr-review").locator("li").count()) === 3, 15000);
+    {
+      const shown = await rowsShown(TV.getByTestId("tv-jr-review"));
+      check("P the TV's post-game review explains every total the same way", sameRows(shown, stds), brief(shown));
+    }
     await shot(TV, "jr-tv-review-1440");
 
     // ---------- 10.4 S1 (Jebena). Save a memory from the main match's results (D-S104-01..04) ----------
@@ -1082,9 +1185,70 @@ try {
         check("10.2 Z the replay's facts call for no line (a win by the other leaving)", !!fin3 && expectedJebenaLine(fin3.state) === null, JSON.stringify(fin3?.state?.standings ?? null).slice(0, 200));
         await momentOn(W, null, "Z the replay's results, the phone of the one who left");
         await momentOn(O, null, "Z the replay's results, the phone of the one who stayed");
+        if (fin3) {
+          // P, an early exit: the one who left scores 0 and says so; the one who stayed is explained like any other row.
+          const st3 = fin3.state.standings;
+          const leaver = st3.find((r) => r.id === z.survivor.playerId);
+          check("P Z the replay's standings: the one who left sat out with 0, the parts make every total and the room's score", !!leaver && leaver.satOut && leaver.points === 0 && st3.every((r) => typeof r.outlasted === "number" && r.points === r.outlasted * 100 + r.hearts * 10 && r.points === (fin3.rawScores ?? {})[r.id]), JSON.stringify(st3.map((r) => [r.satOut, r.outlasted, r.hearts, r.points])));
+          for (const [who, p] of [["the phone of the one who left (Everyday, 390)", W], ["the phone of the one who stayed (Christmas, 320)", O]]) {
+            const shown = await rowsShown(p.getByTestId("jr-standings"));
+            check(`P Z the replay's results on ${who} explain both totals; the leaver's row says "Left the game"`, sameRows(shown, st3) && /Left the game/.test(shown.find((x) => x.id === z.survivor.playerId)?.text ?? ""), JSON.stringify(shown.map((x) => [x.pts, x.why, x.played])));
+          }
+          check("P Z the replay's results at 320 px: no sideways scroll", await noSideScroll(O));
+          await O.getByTestId("jr-standings").scrollIntoViewIfNeeded();
+          await shot(O, "jr-results-left-early-320-christmas");
+        }
         const otherName = z.names[z.other.playerId];
         await soon(`10.2 Z room C's TV: the replay's final (${otherName} wins), with no line carried over`, async () => (await ZT.getByTestId("tv-jr-final-winner").innerText().catch(() => "")).includes(otherName) && (await ZT.getByTestId("tv-results-moment").count()) === 0, 20000);
       }
+    }
+  }
+
+  // ---------- Q. The verified 120–0 on both phones and a TV (handoff 7059278886) ----------
+  {
+    const q = await room120;
+    const rows = q.g?.state?.standings ?? [];
+    const W = q.winner?.playerId;
+    const L = q.loser?.playerId;
+    const facts = rows.map((r) => [r.id, r.place, r.hearts, r.out, r.answers, r.timeouts, r.outlasted, r.points]);
+    const played120 = !q.error && q.g?.status === "finished" && JSON.stringify(facts) === JSON.stringify([[W, 1, 2, false, 10, 3, 1, 120], [L, 2, 0, true, 9, 5, 0, 0]]) && q.g.rawScores?.[W] === 120 && q.g.rawScores?.[L] === 0;
+    check("Q room Q played the verified 120–0: 10 answers and 3 timeouts (2 of 5 cups left) beat 9 answers and 5 timeouts (out), and the room scores 120 and 0", played120, JSON.stringify({ error: q.error, status: q.g?.status, misses: q.misses, steps: q.steps, facts, raw: q.g?.rawScores }).slice(0, 400));
+    if (q.g?.status === "finished") {
+      const want = [
+        { id: W, pts: "120", why: "Outlasted 1 player (100) + 2 whole cups (20) = 120", played: "Played: 10 answers · 3 timeouts" },
+        { id: L, pts: "0", why: "Outlasted nobody (0) + no whole cups (0) = 0", played: "Played: 9 answers · 5 timeouts" },
+      ];
+      const exact = (shown) => JSON.stringify(shown.map(({ id, pts, why: w, played: p }) => ({ id, pts, why: w, played: p }))) === JSON.stringify(want);
+      check("Q the driver's own copy of the rule gives the same two rows", JSON.stringify(rowsWanted(rows)) === JSON.stringify(want));
+      const openSeat = async (who, look, width) => {
+        const c = await phoneCtx(width, { look });
+        const p = await c.newPage();
+        await p.goto(`${BASE}/join`, { waitUntil: "domcontentloaded" });
+        await p.evaluate((x) => { sessionStorage.setItem("cgn_roomId", x.roomId); sessionStorage.setItem("cgn_playerId", x.playerId); sessionStorage.setItem("cgn_token", x.token); }, { roomId: q.roomQ.roomId, playerId: who.playerId, token: who.recoveryToken });
+        await p.goto(`${BASE}/room`, { waitUntil: "domcontentloaded" });
+        return p;
+      };
+      const QW = await openSeat(q.winner, "everyday", 390);
+      await soon("Q the winner's phone (Everyday, 390) shows the results", async () => QW.getByTestId("jr-standings").isVisible(), 20000);
+      const shownW = await rowsShown(QW.getByTestId("jr-standings"));
+      check("Q the winner's phone: 120 = 100 for outlasting one player + 20 for two whole cups; the loser's 0, with their 9 answers apart", exact(shownW), JSON.stringify(shownW.map((x) => [x.pts, x.why, x.played])));
+      await QW.getByTestId("jr-standings").scrollIntoViewIfNeeded();
+      await shot(QW, "jr-results-120-0-390");
+      const QL = await openSeat(q.loser, "christmas", 320);
+      await soon("Q the loser's phone (Christmas, 320) shows the results", async () => QL.getByTestId("jr-standings").isVisible(), 20000);
+      const shownL = await rowsShown(QL.getByTestId("jr-standings"));
+      check("Q the loser's phone: the same two rows; their own says every cup broke", exact(shownL) && /Out: every cup broken/.test(shownL.find((x) => x.id === L)?.text ?? ""), JSON.stringify(shownL.map((x) => [x.pts, x.why, x.played])));
+      check("Q the loser's phone at 320 px: no sideways scroll", await noSideScroll(QL));
+      await QL.getByTestId("jr-standings").scrollIntoViewIfNeeded();
+      await shot(QL, "jr-results-120-0-320-christmas");
+      const qTvCtx = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+      ctxs.push(qTvCtx);
+      const QT = await qTvCtx.newPage();
+      await spectate(QT, q.roomQ.joinCode);
+      await soon("Q room Q's TV shows its final standings", async () => QT.getByTestId("tv-jr-final").isVisible(), 20000);
+      const shownT = await rowsShown(QT.getByTestId("tv-jr-final"));
+      check("Q the TV's final standings: the same two rows", exact(shownT), JSON.stringify(shownT.map((x) => [x.pts, x.why, x.played])));
+      await shot(QT, "jr-tv-final-120-0-1440");
     }
   }
 } catch (e) {

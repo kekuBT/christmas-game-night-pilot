@@ -30,7 +30,7 @@ import { resultLine } from "../../ui/mchezo/lib/tvfeed.js";
 import { jebenaMoment } from "../../ui/mchezo/lib/moments.js";
 import type { PlayerGame, PublicGame, PublicPlayer } from "../../types.js";
 import {
-  jebenaEndLine, keptTheJebena, lastPlayLine, shownSeconds, turnLeftMs, URGENCY_LABEL, urgencyFor, verdictLine,
+  jebenaEndLine, keptTheJebena, lastPlayLine, playedLine, pointsBreakdown, shownSeconds, turnLeftMs, URGENCY_LABEL, urgencyFor, verdictLine,
   type JebenaAttemptView, type JebenaLogEntry, type JebenaStanding, type Urgency,
 } from "../../ui/mchezo/lib/jebena.js";
 
@@ -337,7 +337,7 @@ export function MchezoJebenaResults({ game, publicGame, players, playerId, title
       {/* Stage 10.4: Save a memory, under the result (What's next and its controls stay above). */}
       {save}
       <Standings st={st} nameOf={nameOf} meId={playerId} cups={{ gameId: game.id, surface: "result" }} />
-      <p className="mz-foot" data-testid="jr-howscore">100 points for each player you outlast, plus 10 for every cup still whole. {casual ? "Casual game: just for fun." : "Practice game: no Cup points."}</p>
+      <p className="mz-foot" data-testid="jr-howscore">100 points for each player you outlast, plus 10 for every cup still whole. Right answers keep you in the game; they don't add points. {casual ? "Casual game: just for fun." : "Practice game: no Cup points."}</p>
       <OutcomeSummary gameId="jebena-rush" outcome={game.outcome} official={publicGame?.official ?? game.official} youId={playerId} />
       <div className="mz-grow" />
       <Keycap block onClick={onBackToLobby} data-testid="show-back-to-lobby">Back to lobby</Keycap>
@@ -369,16 +369,18 @@ function Standings({ st, nameOf, meId, tv, cups }: { st: JebenaView; nameOf: (id
             <b>{r.id === meId ? `${nameOf(r.id)} (you)` : nameOf(r.id)}</b>
             <span className="mz-jr-row__line">
               {keptTheJebena(st.end, st.standings, r.id) ? "Kept the jebena · " : ""}
-              {r.satOut ? "Left the game · " : (
+              {r.satOut ? "Left the game" : (
                 <>
                   <span className="mz-jr-row__cups">
                     <CiniCups n={r.hearts} of={startHearts} compact decorative memoryKey={cups ? rowCupsKey(cups, r.id, meId) : undefined} lostAt={lastLossAt(st.log, r.id)} seat={r.id} surface={cups ? `${cups.surface}-row` : undefined} />
                   </span>
-                  {r.out ? "Out: every cup broken · " : `${r.hearts} of ${startHearts} cups whole · `}
+                  {r.out ? "Out: every cup broken" : `${r.hearts} of ${startHearts} cups whole`}
                 </>
               )}
-              {r.answers} {r.answers === 1 ? "answer" : "answers"} · {r.timeouts} {r.timeouts === 1 ? "timeout" : "timeouts"}
             </span>
+            {/* Handoff 7059278886: how the points were earned (from the server's standings), then how they played. */}
+            {(() => { const why = pointsBreakdown(r); return why ? <span className="mz-jr-row__why" data-testid={`jr-why-${r.id}`}>{why}</span> : null; })()}
+            <span className="mz-jr-row__played" data-testid={`jr-played-${r.id}`}>{playedLine(r)}</span>
           </span>
           <b className="mz-jr-row__pts">{r.points}</b>
         </li>

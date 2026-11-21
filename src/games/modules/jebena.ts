@@ -190,12 +190,17 @@ function passFrom(s: JebenaState, from: string): void {
   s.attempts = {};
 }
 
-/** Places: still in above out; among those in, more hearts higher (equal hearts share); out by when (later higher). */
-export function jebenaStandings(s: JebenaState): { id: string; place: number; hearts: number; out: boolean; satOut: boolean; answers: number; timeouts: number; points: number }[] {
+/**
+ * Places: still in above out; among those in, more hearts higher (equal hearts share); out by when (later higher).
+ * Handoff 7059278886: the standings also say how each total was earned. `outlasted` (players out before this one) and
+ * `hearts` (cups still whole, 0 once out) are the two parts of `points`: points = outlasted × 100 + hearts × 10.
+ * `answers` and `timeouts` show how a player played; they earn no points.
+ */
+export function jebenaStandings(s: JebenaState): { id: string; place: number; hearts: number; out: boolean; satOut: boolean; answers: number; timeouts: number; outlasted: number; points: number }[] {
   const pts = jebenaPoints(s);
   const rows = s.order.map((id) => {
     const p = s.per[id]!;
-    return { id, hearts: p.outOrder === null ? p.hearts : 0, out: p.outOrder !== null, outOrder: p.outOrder, satOut: !!p.satOut, answers: p.answers, timeouts: p.timeouts, points: pts[id] ?? 0 };
+    return { id, hearts: p.outOrder === null ? p.hearts : 0, out: p.outOrder !== null, outOrder: p.outOrder, satOut: !!p.satOut, answers: p.answers, timeouts: p.timeouts, outlasted: outlastedBy(s, id), points: pts[id] ?? 0 };
   });
   const key = (r: (typeof rows)[number]) => (r.out ? -1000 + (r.outOrder ?? 0) : r.hearts);
   rows.sort((x, y) => key(y) - key(x));
@@ -205,8 +210,14 @@ export function jebenaStandings(s: JebenaState): { id: string; place: number; he
     const k = key(r);
     if (prevKey === null || k !== prevKey) place = i + 1;
     prevKey = k;
-    return { id: r.id, place, hearts: r.hearts, out: r.out, satOut: r.satOut, answers: r.answers, timeouts: r.timeouts, points: r.points };
+    return { id: r.id, place, hearts: r.hearts, out: r.out, satOut: r.satOut, answers: r.answers, timeouts: r.timeouts, outlasted: r.outlasted, points: r.points };
   });
+}
+
+/** The players out before this one (all who are out, while this one is still in). Shared by the points and the standings. */
+function outlastedBy(s: JebenaState, id: string): number {
+  const p = s.per[id]!;
+  return s.order.filter((o) => o !== id && s.per[o]!.outOrder !== null && (p.outOrder === null || s.per[o]!.outOrder! < p.outOrder)).length;
 }
 
 /** Points (§3): 100 for each player you outlast, 10 for each heart you keep while still in. */
@@ -214,8 +225,7 @@ export function jebenaPoints(s: JebenaState): Record<string, number> {
   const out: Record<string, number> = {};
   for (const id of s.order) {
     const p = s.per[id]!;
-    const outlasted = s.order.filter((o) => o !== id && s.per[o]!.outOrder !== null && (p.outOrder === null || s.per[o]!.outOrder! < p.outOrder)).length;
-    out[id] = outlasted * JEBENA_POINTS.perOutlasted + (p.outOrder === null ? p.hearts * JEBENA_POINTS.perHeart : 0);
+    out[id] = outlastedBy(s, id) * JEBENA_POINTS.perOutlasted + (p.outOrder === null ? p.hearts * JEBENA_POINTS.perHeart : 0);
   }
   return out;
 }

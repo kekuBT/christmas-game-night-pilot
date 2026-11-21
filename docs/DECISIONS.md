@@ -2863,3 +2863,22 @@ The reported symptom: a nearly black **drawer** screen in an iPhone in-app brows
     1. Send a cadence flag (`streakChanges: true`) instead of the version. It is narrower now, but each later rules change would need another flag; the version already exists in the state.
     2. Migrate version 1 matches to version 2 on recovery. That changes the rules of a match in progress, against D-JR-01.
     3. Keep one copy that covers both ("a new category may start after a run of right answers"). It is vague for new matches and still wrong for old ones.
+- **D-JR-04 Jebena Rush results say how each total was earned, with answers shown apart** (handoff 7059278886; presentation only).
+  - **Why:**
+    - In the verified two-player example, 120–0 read as a rout: a bare total sat next to "9 answers".
+    - The points rule (D-S91-04, cups since D-S101-01; unchanged) rewards outlasting players and keeping cups. Accepted answers keep a player in the game but add no points.
+    - Nothing on the results said this.
+  - **What:**
+    - **The server's standings** give each row `outlasted`: the players out before this one. It comes from the same helper as the total, so with `hearts` it always makes `points` (outlasted × 100 + hearts × 10). It is a public fact, derived from what every audience already sees (places, outs, cups).
+    - **Every results surface** shows, under each row:
+      - the parts, such as "Outlasted 1 player (100) + 2 whole cups (20) = 120";
+      - apart from them, "Played: 9 answers · 5 timeouts".
+      - The surfaces are the phone results, the TV's final standings and the TV's post-game review, all one shared list.
+    - **The total stays the server's.** A row whose parts are missing (an older server) or don't add up shows only the total, never a wrong sum.
+    - **The footer** adds "Right answers keep you in the game; they don't add points." before the unchanged casual or practice label.
+    - **The TV** keeps two lines per row, so the standings still fit the stage.
+    - **Unchanged:** the rule, totals, places, `rawScores`, replay and the casual/practice wording.
+  - **Alternatives:**
+    1. Change the scoring so accepted answers earn points. That is a rules change, and it stays a separate owner decision. This only explains the current rule.
+    2. Work the parts out in the browser from places and cups. That repeats the server's rule in a second place, where it could drift. It also can't tell an early leaver from a player knocked out at the same time without more of the state.
+    3. Show only the footer's rule. Players would still have to do the sum, and the 120–0 would still read as unexplained.

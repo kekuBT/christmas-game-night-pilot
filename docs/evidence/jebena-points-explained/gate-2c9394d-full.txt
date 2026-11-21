@@ -1,0 +1,11 @@
+
+PASSED (exit 0) | full | run 20261121-081758-2c9394db-21096
+  121 passed, 0 failed, 0 timed out, 0 infrastructure, 0 invalid, 0 cancelled, 0 not run
+  timing   wall 45m 17s · step time 2h 13m (sum) · 3 workers, 98% busy · 2.94× the same steps run one after another
+           predicted 25–80m (about 39m 29s, low-confidence) → actual 45m 17s (+15%)
+           longest  e2e-chromium 8m 06s, check-f5 7m 34s, check-leaderboard 5m 14s · the longest step is 18% of the wall time
+           machine  CPU mean 29%, peak 99% · memory available ≥ 13098 MB · load peak 5.63 · backpressure 2 wait(s), 27s
+           contention ×1.132 (median step time vs its sequential median)
+           baseline sequential full gate: about 1h 17m (mean of recorded sequential passes)
+           retries  none (the gate never retries a step)
+  report <scratch>/gates-jrp/20261121-081758-2c9394db-21096/report.json
