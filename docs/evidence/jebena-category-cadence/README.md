@@ -117,3 +117,6 @@
 - **The cadence is a provisional default.** 5 to 8 accepted answers, seeded per category, is configurable in code (`JEBENA_STREAK`) and documented in D-JR-01.
 - **The 120-0 scoring question** is left for a separate decision.
 - **The broader redesign** stays with the owner-selected options.
+
+## Follow-up: the last-play line after a change (review 7058749487)
+The review found that, right after a change, the last-play line did not say which category the answer was named in. The repair (D-JR-02), its negative control, the gates on `72a4b8a` and the screenshots are in [`last-play-context/`](last-play-context/README.md).

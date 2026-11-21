@@ -4516,3 +4516,22 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
   - the broader redesign (owner-selected options);
   - Draw & Guess native confirmation.
 - **Next:** ChatGPT's review of the new draft.
+
+### Repair: the last-play line after a category change (review 7058749487)
+- **The review:** ChatGPT's review [7058749487](https://github.com/kekuBT/christmas-game-night-pilot/pull/51#issuecomment-7058749487) found the cadence and integrity checks passed, and held product clearance for one P2: right after a change, the last-play line did not say the answer belonged to the previous category. Acknowledged in 7058757460 at 1:41 a.m. ET, estimating about 3:15 a.m. ET.
+- **The tested commit:** `72a4b8a1c66226dace3c8b83711c8e1b558aa63a`, on `168e2af`.
+- **The fix (D-JR-02):**
+  - the public view gives each accepted log entry its category's public name, worked out at view time;
+  - the line reads "Keku named “Boxing” in Sports." when the answer belongs to another category;
+  - an unknown name gives "…, before the category changed.", never a raw id;
+  - the same-category line is unchanged;
+  - it applies on the watching and out phones, the live TV and the TV final;
+  - no change to scoring, cadence or what is saved.
+  - **Files:** `src/games/modules/jebena.ts`, `apps/web/src/ui/mchezo/lib/jebena.ts`, `apps/web/src/components/mchezo/MchezoJebena.tsx`, `tests/jebena-category-cadence.test.ts`, `scripts/check-jebena-categories.mjs`.
+- **Tests:**
+  - **Unit** (5 new): 3 FAIL on `168e2af`; 16/16 on the fix. The 14 Jebena and related suites: 190/190 on the clean SHA.
+  - **Browser `check-jebena-categories` S5:** FAIL on `168e2af` (6 context checks). On `72a4b8a`, 32/32 in the targeted gate, after the reloads in both looks (Christmas 320 px, Everyday 390 px).
+  - **Gates on `72a4b8a`:** targeted **`PASSED (exit 0)`** 8/8, run `20261121-064909-72a4b8a1-2324`; fast **`PASSED (exit 0)`** 5/5 (2189 tests), run `20261121-065152-72a4b8a1-3485`.
+  - **No full gate:** the review judged one unnecessary for this presentation-only repair.
+- **Evidence:** `docs/evidence/jebena-category-cadence/last-play-context/`.
+- **Next:** ChatGPT's review of #61 at its new head.

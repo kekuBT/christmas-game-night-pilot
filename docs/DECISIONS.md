@@ -2836,3 +2836,17 @@ The reported symptom: a nearly black **drawer** screen in an iPhone in-app brows
     3. A timer instead of a count. It would change the category mid-turn, against the turn boundary.
     4. A schedule computed at start and stored as a list. It is the same result with more state, and the per-round length is derived the same way.
   - **Scoring (no change):** the reported 120-0 is the existing rule (100 per player outlasted, 10 per cup kept while in). In two-player play the player who goes out always scores 0, however many answers they named. A change to the rule or its presentation is left for a separate decision.
+- **D-JR-02 After a category change, the last-play line names the category the answer was given in** (review 7058749487; presentation only).
+  - **Why:** right after a streak changed the category, "Keku named “Boxing”." sat under the new category's heading, so the answer seemed to belong to it.
+  - **What:**
+    - **The public view** gives each accepted log entry its own category's public name (`categoryName`). It is worked out when the view is built, so older saved matches get it too. Only played categories are in the log, so nothing of an unused bank is added. The saved state is unchanged.
+    - **`lastPlayLine`** takes the category on screen:
+      - the same category: the plain line, unchanged;
+      - another category: "Keku named “Boxing” in Sports.";
+      - another category whose name is unknown: "…, before the category changed.", never a raw id or a guessed label.
+    - **Surfaces:** the watching and out phone screens, the live TV and the TV final. The holder's turn screen has no last-play line, before and after.
+    - **No change** to scoring, the cadence or the turn clock.
+  - **Alternatives:**
+    1. Add the category to every line, also within a category. It is longer every turn, for a case that only follows a change.
+    2. Hide the last-play line for the first turn after a change. The answer that ended the streak would go unmentioned.
+    3. Name the category on the client from its own copy of the banks. The client would need the category list, and old or unknown ids would need a second fallback; the server already has the public names.
