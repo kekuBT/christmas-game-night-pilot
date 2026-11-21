@@ -63,6 +63,9 @@
 .mz-jr-row__who { display: flex; flex-direction: column; min-width: 0; overflow-wrap: anywhere; }
 .mz-jr-row__line { font-size: 13px; color: var(--mz-text-muted); }
 .mz-jr-row__pts { font-variant-numeric: tabular-nums; font-size: 18px; }
+/* Handoff 7059278886: how the points were earned, then (apart, quieter) how the player played. */
+.mz-jr-row__why { font-size: 13px; color: var(--mz-text); font-variant-numeric: tabular-nums; }
+.mz-jr-row__played { font-size: 12px; color: var(--mz-text-muted); }
 
 .mz-jr-heartschoice .mz-content-choice__note { text-align: left; }
 .mz-jr-heartsbadge { white-space: nowrap; }
@@ -76,6 +79,12 @@
 .mz-jr-tv .mz-jr-seat { font-size: 18px; }
 .mz-jr-tv .mz-jr-seat__tag { display: block; }
 .mz-jr-standings--tv { padding: 0; font-size: 20px; }
+/* The TV's stage doesn't scroll: each row keeps two lines, name and cups on the left, the points line and the
+   played line on the right, so the standings fit as before. */
+.mz-jr-standings--tv .mz-jr-row__who { display: grid; grid-auto-flow: column; grid-template-rows: auto auto; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); column-gap: 28px; align-items: baseline; }
+.mz-jr-standings--tv .mz-jr-row__why { font-size: 17px; }
+.mz-jr-standings--tv .mz-jr-row__played { font-size: 14px; }
+.mz-jr-standings--tv .mz-jr-row__pts { min-width: 4ch; text-align: right; }
 
 /* The jebena's motion: full motion only. Steam rises; the pot wobbles,
    gently while steaming and hard when boiling over. */

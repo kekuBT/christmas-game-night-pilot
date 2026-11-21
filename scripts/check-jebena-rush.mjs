@@ -30,6 +30,10 @@
 //      rest; the last one with a whole cup keeps the jebena; results on every
 //      phone equal the server's scores; every break on every page was a real
 //      lost life, once; reduced motion breaks without animating.
+//   P  handoff 7059278886: every results row (all three phones and the TV's final standings) explains its total
+//      from the server's standings ("Outlasted 2 players (200) + 2 whole cups (20) = 220"), the parts make the
+//      total and the room's score, and accepted answers show apart ("Played: 3 answers · 1 timeout"); Keku's
+//      results also at 320 px in Everyday, with no sideways scroll.
 //   G  Play again keeps the cups (its briefing says 3) and starts with
 //      whole cups; two players leave and nothing breaks; back to the lobby.
 //   R  review 6822605156: (R1) the timeout that decides the match breaks the
@@ -705,6 +709,24 @@ try {
       const raw = fin.g.rawScores ?? {};
       check(`F ${who}'s results equal the server's scores`, rows.length === 3 && rows.every((r) => raw[r.id] === r.pts), JSON.stringify(rows));
     }
+    // P (handoff 7059278886): how each total was earned, and how each player played, on every phone.
+    const why = (r) => {
+      const out = r.outlasted === 0 ? "Outlasted nobody (0)" : `Outlasted ${r.outlasted} ${r.outlasted === 1 ? "player" : "players"} (${r.outlasted * 100})`;
+      const cups = r.hearts === 0 ? "no whole cups (0)" : `${r.hearts} whole ${r.hearts === 1 ? "cup" : "cups"} (${r.hearts * 10})`;
+      return `${out} + ${cups} = ${r.points}`;
+    };
+    const played = (r) => `Played: ${r.answers} ${r.answers === 1 ? "answer" : "answers"} · ${r.timeouts} ${r.timeouts === 1 ? "timeout" : "timeouts"}`;
+    check("P the server's parts make every total, and the room's score", stds.length === 3 && stds.every((r) => typeof r.outlasted === "number" && r.points === r.outlasted * 100 + r.hearts * 10 && r.points === (fin.g.rawScores ?? {})[r.id]), JSON.stringify(stds.map((r) => [r.outlasted, r.hearts, r.points])));
+    const explained = async (p) => {
+      const shown = [];
+      for (const r of stds) shown.push({ id: r.id, why: ((await p.getByTestId(`jr-why-${r.id}`).first().textContent().catch(() => null)) ?? "").trim(), played: ((await p.getByTestId(`jr-played-${r.id}`).first().textContent().catch(() => null)) ?? "").trim() });
+      return shown;
+    };
+    for (const [who, p] of [["Keku", K], ["Amina", A], ["Baraka", B]]) {
+      const shown = await explained(p);
+      check(`P ${who}'s results explain every total from the server's standings, with answers apart`, shown.every((x, i) => x.why === why(stds[i]) && x.played === played(stds[i])), JSON.stringify(shown));
+    }
+    check("P the footer says right answers add no points", /Right answers keep you in the game; they don't add points\./.test(await K.getByTestId("jr-howscore").innerText()));
     check("F the winner's line says they kept the jebena", /Kept the jebena/.test(await K.getByTestId(`jr-row-${seat.K.playerId}`).innerText()));
     {
       const keeper = stds[0];
@@ -767,8 +789,21 @@ try {
     }
     await shot(K, "jr-results-390");
     await shot(A, "jr-results-320-christmas");
+    {
+      // P: Keku's results at 320 px in the Everyday look too (both looks at the narrowest width), then back to 390.
+      await K.setViewportSize({ width: 320, height: 760 });
+      await K.getByTestId("jr-standings").scrollIntoViewIfNeeded();
+      const k320 = await explained(K);
+      check("P at 320 px (Everyday) Keku's results still explain every total, with no sideways scroll", (await noSideScroll(K)) && k320.every((x, i) => x.why === why(stds[i])), JSON.stringify(k320.map((x) => x.why)));
+      await shot(K, "jr-results-320-everyday");
+      await K.setViewportSize({ width: 390, height: 760 });
+    }
     await soon("F the TV shows the final standings: Keku wins", async () => /Keku wins/.test(await TV.locator("body").innerText()), 20000);
     await tvMomentOn(TV, expectedJebenaLine(fin.st), "F the TV's final view");
+    {
+      const shown = await explained(TV.getByTestId("tv-jr-final"));
+      check("P the TV's final standings explain every total from the server's standings, with answers apart", shown.every((x, i) => x.why === why(stds[i]) && x.played === played(stds[i])), JSON.stringify(shown));
+    }
     await shot(TV, "jr-tv-final-1440");
     await TV.getByRole("button", { name: "Post-game review" }).click();
     await soon("F the TV's post-game review: Keku kept the jebena, with the places", async () => /Keku kept the jebena/.test(await TV.getByTestId("tv-jr-review").innerText()) && (await TV.getByTestId("tv-jr-review").locator("li").count()) === 3, 15000);
