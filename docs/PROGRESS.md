@@ -1,5 +1,5 @@
 # Muse local progress and resume checkpoint
-Updated: 2026-11-20 ~11:05 a.m. EST (draft #57: review 7042658020 (P2) found a later storage write failure let an older record hide a new Stay choice; repaired in b8ba545, full gate PASSED 117/117; awaiting review; not merged, not deployed)
+Updated: 2026-11-21 ~1:20 p.m. EST (compact UI mix, handoff 7065498313: draft stacked on #63; candidate 414e3d4, targeted 22/22 and full 122/122 PASSED; palette comparison shared, defaults unchanged; awaiting review and Keku's palette choice; not merged, not deployed)
 
 ## Current milestone
 M0–M5: COMPLETED as backend/engine checkpoints ONLY — see docs/FRONTEND_MILESTONES.md. They are NOT evidence the full product is finished.
@@ -4623,3 +4623,58 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
   - Native-device and private audits of whichever option is chosen.
   - Draw & Guess native iPhone confirmation.
 - **Next:** ChatGPT's review of the draft, and Keku's selection.
+
+## Post-beta: the owner-selected compact UI mix (handoff 7065498313)
+- **#63 cleared:** ChatGPT's review [7061462484](https://github.com/kekuBT/christmas-game-night-pilot/pull/51#issuecomment-7061462484) cleared the proposal at `c220279` (head `9992014`). It asked for one wording correction in the PR body, which was made; there was no commit.
+- **The handoff:** Keku selected a mix in [7065498313](https://github.com/kekuBT/christmas-game-night-pilot/pull/51#issuecomment-7065498313):
+  - Option A's Home;
+  - the current circle, then Option B's card, chips and sheet in the Lobby;
+  - Option B's podium results with More…;
+  - a colour exploration before any default changes.
+
+  It was acknowledged in [7065539536](https://github.com/kekuBT/christmas-game-night-pilot/pull/51#issuecomment-7065539536) at 11:17 a.m. ET, estimating about 9 p.m. ET.
+- **Branch:** `claude/compact-ui-mix`, stacked on the proposal head `9992014` (#63). Draft only: not for merge or deploy.
+- **Tested revision:** `414e3d4` (two commits on `9992014`):
+  - `7eddbd4`: the mix, tests, drivers, colour tools and D-UI-02.
+  - `414e3d4`: the chips' and dock's hidden text use the app's `mz-sr` class. The targeted gate on `7eddbd4` failed one check, described below.
+  - The docs commit above it adds the README, screenshots, palette results and these records.
+- **What (D-UI-02):**
+  - **Home:**
+    - Join and Host sit in the page with more room; they are no longer a pinned dock.
+    - Games are 64 px rows.
+  - **Lobby:**
+    - The circle is unchanged and is the only player display.
+    - Below it, one next-game card with chips: mode, cups, content and fit.
+    - The host's cups and content chips open one settings sheet; guests see labels.
+    - Other activities are grouped under "More for tonight".
+    - The Cup's Official/Practice choice and the Start dock are unchanged.
+  - **Jebena results:**
+    - A tighter result card.
+    - A podium of the server's standings: ties raise every 1st place; full names.
+    - The explained standings, unchanged.
+    - One dock: Play again (or Next game / Resume) plus More…; guests get Back to lobby.
+    - Other games keep the panel.
+  - **Join:** a refusal shows under Join the game and is scrolled into view. At 320 × 568 on `9992014` it was below the fold.
+- **Files:**
+  - App: `apps/web/src/components/mchezo/{Home,Lobby,MchezoJebena,WhatsNext}.tsx`, `apps/web/src/App.tsx`, `apps/web/src/ui/mchezo/styles/compact.css`.
+  - Tests: `apps/web/src/components/mchezo/CompactMix.test.tsx`, `scripts/check-compact-mix.mjs`.
+  - Updated drivers: `check-lobby-mode`, `check-one-path`, `check-casual`, `check-jebena-rush`, `check-themes-seasonal`, `check-warm-ivory`; also `scripts/lib/everyday-style-baseline.json` (Home, Lobby, guest Lobby and menu only).
+  - Colour tools: `docs/design/compact-mix/{palettes,capture-palettes,compare-palettes}.mjs`.
+- **Failure found and fixed:** `check-mobile-everyday` FAILED in the targeted gate on `7eddbd4` (run `20261121-165735-7eddbd4d-6501`, 21 of 22 steps passed). The chips' screen-reader suffix (", change", in `mz-sr-only`) read as clipped text.
+  - **Fix (`414e3d4`):** use `mz-sr`, which the layout checks already treat as hidden. The accessible names are unchanged.
+- **Gates on `414e3d4`:**
+  - targeted: PASSED (exit 0), 22/22, run `20261121-171745-414e3d40-12896`;
+  - full: PASSED (exit 0), 122/122, run `20261121-172822-414e3d40-17085`.
+- **Colour exploration:**
+  - Three palettes, compared on the same live room and layouts:
+    - Now;
+    - T1, warmer and lighter Everyday surfaces;
+    - T2, a different accent balance.
+  - **Token pairs:** 23 per look; all meet AA.
+  - **As rendered:** 48 shots with 0 text below AA, and 24 focus rings at 5.06:1 or more.
+  - **Recommended:** T1 for Everyday if it should change; keep Christmas; not T2. No default has changed.
+- **Open:**
+  - Keku's palette choice.
+  - Native-device checks of the mix (phones and TV).
+  - Draw & Guess native iPhone confirmation.
+- **Next:** ChatGPT's review of the draft, and Keku's palette choice.

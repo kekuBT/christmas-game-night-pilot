@@ -2951,7 +2951,8 @@ The reported symptom: a nearly black **drawer** screen in an iPhone in-app brows
       - `CompactMix.test.tsx`: podium order, ties and early exit; dock variants.
       - New `check-compact-mix` driver.
       - Updated drivers: `check-lobby-mode`, `check-one-path`, `check-casual`, `check-jebena-rush`, `check-themes-seasonal`.
-      - `check-warm-ivory` W8: the Everyday style baseline was re-recorded for this intended Everyday layout change. Only the Home and Lobby screens changed (diff in the PR); every other screen's recorded styles are byte-identical.
+      - `check-warm-ivory` W8: the Everyday style baseline was re-recorded for this intended Everyday layout change. Only the Home, Lobby, guest Lobby and menu-over-Lobby records were replaced (diff in the PR); every other screen's recorded styles are byte-identical to `d4dc408`.
+      - Hidden text (the chips' ", change" and the results dock's heading) uses `mz-sr`, the app's visually hidden class that the layout checks already recognise (`414e3d4`; the targeted gate on `7eddbd4` flagged `mz-sr-only` as clipped text).
   - **Alternatives:**
     1. Put the Cup mode (Official/Practice) behind a chip as well. Rejected: the game mode must stay easy to find, and it would churn about 12 drivers for no gain.
     2. Keep a pinned Join/Host dock on Home. Rejected: the owner selected Option A's in-page entry; a pinned dock took 131 of 568 px.
