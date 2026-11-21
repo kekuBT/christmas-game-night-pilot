@@ -2806,3 +2806,9 @@ The reported symptom: a nearly black **drawer** screen in an iPhone in-app brows
     - Matching candidate names to attempts, through the creation time in each name. This is fragile, and it would still leave E2 observing other attempts.
     - Turning off the app's `online` re-check or the browser's update checks in the test. That would test less than the product does.
     - Retrying the check. The gate never retries, and a retry would hide the cause.
+  - **Addendum (review 7057502077): the second-tab watch is bounded.**
+    - It has one 15 s deadline, removes its listeners on completion, timeout or cancel, and always ends with a named outcome.
+    - E1 cancels it when the driver's own update starts no attempt.
+    - Driver-side deadlines (`within()`) bound every in-page wait.
+    - Two fault modes (`MCHEZO_INSTALL_BUILDS_FAULT`, regression only) drive the new `scripts/check-install-builds-no-worker.mjs`. For each mode, the run must exit 1 by itself, fail E1 by name, reach its summary, leave no process behind and leave an empty temp directory.
+    - **Alternative:** a single overall time limit on the driver. It would end a hung run, but without naming what was missing and without reaching `finally`.

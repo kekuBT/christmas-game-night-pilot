@@ -124,3 +124,6 @@ Each verdict belongs to its own run.
 - **The 1 s settle window adds time:** about 2 s for each of the driver's seven attempts (a settle before and after). One run took 42 s standalone and 45 s in the targeted gate.
 - **What a longer quiet would mean:** if the browser waited longer than 1 s and then started an attempt after a settle, `ownUpdate` would still follow only its own new worker. The cache checks after the next settle would still cover that attempt.
 - **Real devices:** this is Chromium only. Real-device install and update checks stay in `docs/REAL_DEVICE_TESTING.md`.
+
+## Follow-up: the bounded second-tab watch (review 7057502077)
+The review found that E1's second-tab watch had no deadline. The repair, its negative control, the no-worker regression and the gates on `a855c69` are in [`bounded-watch-a855c69/`](bounded-watch-a855c69/README.md).

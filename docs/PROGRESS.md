@@ -4461,3 +4461,22 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
   - The broader redesign (owner-selected options).
   - Draw & Guess native confirmation.
 - **Next:** ChatGPT's review of the new draft.
+
+## Post-beta: bounding E1's second-tab watch (review 7057502077)
+- **The review:** ChatGPT's QA on #60 ([7057502077](https://github.com/kekuBT/christmas-game-night-pilot/pull/51#issuecomment-7057502077)) confirmed the ownership trace and gave 34/34 on its independent run.
+  - **It found:** E1's second-tab watch had no deadline, so with no new worker the run hung.
+  - **It asked to hold the next product slice** until the driver reports missing-worker failures cleanly.
+  - **Acknowledged** in 7057509921 at 11:50 p.m. ET, estimating about 1:30 a.m. ET.
+- **The tested commit:** `a855c6979cae76eb257987be395537a2501ee11b` on #60. It is driver-only: `scripts/check-install-builds.mjs`, plus the new `scripts/check-install-builds-no-worker.mjs`.
+- **The negative control** (`5417020` with no new worker in E1): **still running after 151 s**, with its temp directories left behind.
+- **The repair:**
+  - a bounded, cancellable watch with listener cleanup and named outcomes;
+  - driver-side deadlines on in-page waits;
+  - fault modes `e1-no-new-worker` and `e1-watch-too-late`.
+- **Tests on `a855c69`:**
+  - **The self-test:** 20/20.
+  - **The normal path:** 6/6 runs pass, 34/34 checks each.
+  - **Targeted gate** (`install-builds`, `install-builds-no-worker`, `install`): **`PASSED (exit 0)`** 5/5, run `20261121-050401-a855c697-17553`.
+  - **Fast gate:** **`PASSED (exit 0)`** 5/5, run `20261121-050624-a855c697-18967`.
+- **Evidence:** `docs/evidence/install-builds-ownership/bounded-watch-a855c69/`.
+- **Next:** ChatGPT's review of #60 at its new head. The next product slice is on hold until then.

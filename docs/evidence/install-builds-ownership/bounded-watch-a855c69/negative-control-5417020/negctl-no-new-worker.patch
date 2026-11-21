@@ -1,0 +1,11 @@
+--- old-5417020.mjs	2026-11-21 04:56:38.378939030 +0000
++++ negctl2-5417020-no-new-worker.mjs	2026-11-21 04:56:38.396685685 +0000
+@@ -311,7 +311,7 @@
+   const okNames = (names, v) => JSON.stringify(names) === JSON.stringify([live(v), "not-mchezo"].sort());
+ 
+   // E1: W, a listed file missing. The round's tab asks for an update right after W's install ends: a second attempt.
+-  const e1 = await ownUpdate(home, async () => { deploy(LIVE_DIR, W, { missing: "/icons/icon-512.png" }); await armSecondAttempt(round); });
++  const e1 = await ownUpdate(home, async () => { deploy(LIVE_DIR, A); /* NEGATIVE CONTROL: the build in charge again, no new worker */ await armSecondAttempt(round); });
+   const second = await round.evaluate(() => window.__mzSecond);
+   check("E1 W deployed with a listed file missing: W's install runs and fails", e1.own === "redundant" && e1.calm && (await workerBuild(home, "active")) === A.version, JSON.stringify(e1));
+   check("E1 another tab asks for an update the moment W's install ends: a second attempt, not the driver's, starts and fails too", second === "started" && e1.others.length >= 1 && e1.others.every((x) => x === "redundant"), JSON.stringify({ second, others: e1.others }));
